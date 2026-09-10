@@ -1,9 +1,18 @@
-# Cloudflare Workers Builds（GitHub連携）を使う場合、このワークフローは不要です。
-# API トークン方式で動かしたいときだけ有効にしてください。
-#   リポジトリ Settings → Secrets → Actions に CLOUDFLARE_API_TOKEN と CLOUDFLARE_ACCOUNT_ID を登録
+# main への push で Cloudflare Workers へデプロイする。
+#
+# Cloudflare の「Workers Builds」で GitHub 連携を済ませている場合、このワークフローは不要
+# （二重にデプロイされるだけ）。その場合はこのファイルを削除してよい。
+#
+# API トークン方式で使うには、リポジトリの
+#   Settings → Secrets and variables → Actions → New repository secret
+# に次の2つを登録する。登録するまでは何もせず成功扱いで終了する。
+#   CLOUDFLARE_API_TOKEN  … Workers Scripts:Edit 権限のトークン
+#   CLOUDFLARE_ACCOUNT_ID … f04e60458a99ec1d7dcd69240e6ff9dc
 name: Deploy to Cloudflare Workers
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -11,14 +20,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Build
+
+      - name: ビルド（src/ から public/index.html を再生成）
         run: python3 build.py
-      - name: Fail if public/index.html is stale
-        run: git diff --exit-code -- public/
-      - uses: cloudflare/wrangler-action@v3
+
+      - name: 生成物がコミット漏れしていないか検査
+        run: |
+          if ! git diff --quiet -- public/ artifact.html; then
+            echo "::error::public/index.html が src/ と食い違っています。ローカルで python3 build.py を実行してコミットしてください。"
+            git diff --stat -- public/ artifact.html
+            exit 1
+          fi
+
+      - name: デプロイの可否を判定
+        id: gate
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "CLOUDFLARE_API_TOKEN が未設定のためデプロイを飛ばします（ビルド検査のみ実行）。"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: デプロイ
+        if: steps.gate.outputs.skip == 'false'
+        uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
