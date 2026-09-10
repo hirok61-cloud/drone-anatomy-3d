@@ -43,24 +43,16 @@ python3 -m http.server 8941 --directory public
 npx wrangler@latest deploy
 ```
 
-### push自動デプロイの繋ぎ方
+### デプロイ
 
-どちらか一方でよい。**A を推奨**（このアカウントの他のWorkerと同じ方式）。
+`main` に push すると **Cloudflare Workers Builds** が自動でデプロイする（2026-09-11 接続済み）。
 
-**A. Cloudflare Workers Builds（推奨・シークレット管理が不要）**
+- ビルドコマンドは**空**。このリポジトリに `package.json` は無く、`public/index.html` は
+  コミット済みの生成物をそのまま配信する
+- デプロイコマンドは `npx wrangler deploy`、ルートディレクトリは `/`
+- 手動で上げたいときは `npx wrangler@latest deploy`
 
-1. https://github.com/settings/installations → **Cloudflare Workers and Pages** → Configure
-   （GitHubの2要素認証を求められる）
-2. Repository access に `drone-anatomy-3d` を追加して Save
-3. [Worker の設定 → ビルド → Git リポジトリ → 接続](https://dash.cloudflare.com/f04e60458a99ec1d7dcd69240e6ff9dc/workers/services/view/drone-anatomy-3d/production/settings)
-   で `hirok61-cloud/drone-anatomy-3d` / ブランチ `main` を選ぶ
-4. **ビルドコマンドは空にする**（このリポジトリに `npm run build` は無い）。
-   デプロイコマンドは既定の `npx wrangler deploy` のまま
-
-このとき `.github/workflows/deploy.yml` は不要なので削除してよい。
-
-**B. GitHub Actions（APIトークン方式）**
-
-Settings → Secrets and variables → Actions に `CLOUDFLARE_API_TOKEN`（Workers Scripts:Edit）と
-`CLOUDFLARE_ACCOUNT_ID` を登録する。ワークフローは登録済みで、トークンが無い間は
-ビルド検査だけして成功扱いで終わる。
+`src/` を直したのに `python3 build.py` を忘れると、**古い `public/index.html` がそのまま
+デプロイされてしまう**。これを防ぐため GitHub Actions（`.github/workflows/deploy.yml`）が
+push のたびに再ビルドして差分が無いか検査する。差分があれば赤バツで知らせる。
+このワークフローは検査専用で、デプロイはしない（`CLOUDFLARE_API_TOKEN` 未設定のため）。

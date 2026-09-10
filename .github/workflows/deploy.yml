@@ -1,14 +1,14 @@
-# main への push で Cloudflare Workers へデプロイする。
+# push のたびに src/ から再ビルドし、コミット済みの public/index.html と食い違わないか検査する。
 #
-# Cloudflare の「Workers Builds」で GitHub 連携を済ませている場合、このワークフローは不要
-# （二重にデプロイされるだけ）。その場合はこのファイルを削除してよい。
+# 実際のデプロイは Cloudflare Workers Builds（GitHub連携・2026-09-11 接続済み）が行うため、
+# このワークフローは通常デプロイしない。CLOUDFLARE_API_TOKEN が未設定の間は検査だけして終わる。
 #
-# API トークン方式で使うには、リポジトリの
-#   Settings → Secrets and variables → Actions → New repository secret
-# に次の2つを登録する。登録するまでは何もせず成功扱いで終了する。
-#   CLOUDFLARE_API_TOKEN  … Workers Scripts:Edit 権限のトークン
-#   CLOUDFLARE_ACCOUNT_ID … f04e60458a99ec1d7dcd69240e6ff9dc
-name: Deploy to Cloudflare Workers
+# Workers Builds をやめて Actions からデプロイしたくなったら、リポジトリの
+#   Settings → Secrets and variables → Actions
+# に CLOUDFLARE_API_TOKEN（Workers Scripts:Edit）と
+# CLOUDFLARE_ACCOUNT_ID（f04e60458a99ec1d7dcd69240e6ff9dc）を登録する。
+# その場合は Cloudflare 側の Git 接続を解除しないと二重にデプロイされる。
+name: Build check
 
 on:
   push:
