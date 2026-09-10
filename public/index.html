@@ -1,0 +1,1842 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="ドローン（550クラスのクアッドコプター）を部品ごとに分解・透視・断面表示できる3D教材。35種の部品それぞれに役割・構造・仕様例・点検ポイントの解説と、飛行の原理のアニメーションがついています。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ドローンの構造">
+<meta property="og:description" content="ドローン（550クラスのクアッドコプター）を部品ごとに分解・透視・断面表示できる3D教材。35種の部品それぞれに役割・構造・仕様例・点検ポイントの解説と、飛行の原理のアニメーションがついています。">
+<meta property="og:url" content="https://drone-anatomy-3d.hiro-k61.workers.dev/">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="https://drone-anatomy-3d.hiro-k61.workers.dev/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%B8%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<title>ドローンの構造</title>
+<!-- built 2026-09-10 from src/ (build.py) -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+:root {
+  --bg: #eef0f4; --bg-2: #e3e6eb;
+  --ink: #1b1f27; --ink-2: #4b5260; --ink-3: #7b8290;
+  --glass: rgba(255,255,255,0.68); --glass-strong: rgba(255,255,255,0.86); --glass-border: rgba(255,255,255,0.7);
+  --glass-shadow: 0 12px 40px rgba(20,26,40,0.12), 0 1px 2px rgba(20,26,40,0.08);
+  --accent: #ef6a2d; --accent-ink: #fff; --accent-soft: rgba(239,106,45,0.14);
+  --cw: #3b7df7; --ccw: #14b8a6; --ok: #16a34a; --warn: #d97706;
+  --hair: rgba(20,26,40,0.08); --hair-2: rgba(20,26,40,0.14); --row-hover: rgba(20,26,40,0.05); --seg-bg: rgba(20,26,40,0.07);
+  --radius: 16px; --radius-sm: 10px;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --dock-h: 84px; --insp-w: 344px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1116; --bg-2: #171b22;
+    --ink: #e8ebf0; --ink-2: #aab2c0; --ink-3: #78808f;
+    --glass: rgba(26,29,36,0.64); --glass-strong: rgba(30,33,41,0.9); --glass-border: rgba(255,255,255,0.09);
+    --glass-shadow: 0 12px 40px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.4);
+    --accent: #ff7a3d; --accent-soft: rgba(255,122,61,0.18);
+    --hair: rgba(255,255,255,0.08); --hair-2: rgba(255,255,255,0.14); --row-hover: rgba(255,255,255,0.06); --seg-bg: rgba(255,255,255,0.07);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1116; --bg-2: #171b22;
+  --ink: #e8ebf0; --ink-2: #aab2c0; --ink-3: #78808f;
+  --glass: rgba(26,29,36,0.64); --glass-strong: rgba(30,33,41,0.9); --glass-border: rgba(255,255,255,0.09);
+  --glass-shadow: 0 12px 40px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.4);
+  --accent: #ff7a3d; --accent-soft: rgba(255,122,61,0.18);
+  --hair: rgba(255,255,255,0.08); --hair-2: rgba(255,255,255,0.14); --row-hover: rgba(255,255,255,0.06); --seg-bg: rgba(255,255,255,0.07);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.5 var(--font); overflow: hidden; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+button:focus-visible, input:focus-visible, .row:focus-visible, .lbl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+h1, h2, h3, h4, p, ul, dl { margin: 0; }
+
+#stage { position: fixed; inset: 0; }
+#gl { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+#gl.pick { cursor: pointer; }
+#gl:active { cursor: grabbing; }
+#leaders, #labels { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+#leaders { width: 100%; height: 100%; }
+#leaders line { stroke: var(--ink-3); stroke-width: 1.2; opacity: .8; }
+#leaders circle { fill: var(--accent); }
+#leaders .dim { opacity: .3; }
+.lbl { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; letter-spacing: .01em; white-space: nowrap; background: var(--glass-strong); border: 1px solid var(--glass-border); box-shadow: 0 2px 10px rgba(20,26,40,.12); color: var(--ink); pointer-events: auto; cursor: pointer; will-change: transform; transition: opacity .25s, background .2s, color .2s; }
+.lbl.dim { opacity: .38; }
+.lbl.on { background: var(--accent); color: #fff; border-color: transparent; }
+.lbl:hover { background: var(--accent-soft); }
+.lbl.on:hover { background: var(--accent); }
+
+.glass { background: var(--glass); backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); border: 1px solid var(--glass-border); border-radius: var(--radius); box-shadow: var(--glass-shadow); }
+@media (prefers-reduced-transparency: reduce) { .glass { background: var(--glass-strong); backdrop-filter: none; -webkit-backdrop-filter: none; } }
+
+/* ---- top bar ---- */
+#topbar { position: fixed; top: 16px; left: 16px; z-index: 10; display: flex; align-items: center; gap: 16px; padding: 10px 12px 10px 18px; }
+.brand h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
+.brand p { font-size: 11.5px; color: var(--ink-3); margin-top: 2px; letter-spacing: .01em; }
+.seg { display: inline-flex; background: var(--seg-bg); border-radius: 10px; padding: 3px; gap: 2px; }
+.seg button { padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--ink-2); line-height: 1.3; transition: background .15s, color .15s, transform .1s; min-height: 30px; }
+.seg button:active { transform: scale(.97); }
+.seg button.on { background: var(--glass-strong); color: var(--ink); box-shadow: 0 1px 3px rgba(20,26,40,.15); }
+.seg.small button { padding: 5px 10px; font-size: 12.5px; min-height: 28px; }
+.icon-btn { width: 36px; height: 36px; display: inline-grid; place-items: center; border-radius: 10px; color: var(--ink-2); transition: background .15s, transform .1s; }
+.icon-btn:hover { background: var(--hair); color: var(--ink); }
+.icon-btn:active { transform: scale(.94); }
+.popover { position: absolute; top: calc(100% + 10px); right: 0; width: 300px; padding: 12px 14px; z-index: 20; }
+.pop-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 13px; }
+.pop-row > span { color: var(--ink-2); flex: none; }
+.pop-row input[type=range] { flex: 1; }
+.pop-foot { margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--hair); font-size: 11.5px; color: var(--ink-3); font-family: var(--mono); }
+
+/* ---- inspector ---- */
+#inspector { position: fixed; top: 16px; right: 16px; bottom: 16px; width: var(--insp-w); z-index: 10; display: flex; flex-direction: column; overflow: hidden; }
+.grabber { display: none; }
+.insp-head { display: flex; align-items: center; gap: 8px; padding: 14px 10px 10px 18px; border-bottom: 1px solid var(--hair); flex: none; }
+.insp-head h2 { font-size: 15px; font-weight: 700; letter-spacing: -0.005em; }
+.insp-head .count { font-size: 12px; color: var(--ink-3); font-family: var(--mono); flex: 1; }
+#inspClose { display: none; }
+#partList { overflow-y: auto; padding: 8px 8px 12px; overscroll-behavior: contain; }
+.grp { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); padding: 12px 10px 4px; display: flex; align-items: center; gap: 8px; }
+.grp i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); display: inline-block; }
+.row { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 8px; padding: 6px 6px 6px 12px; border-radius: 10px; cursor: pointer; min-height: 38px; transition: background .12s; }
+.row:hover { background: var(--row-hover); }
+.row.on { background: var(--accent-soft); }
+.row.on .nm { color: var(--accent); font-weight: 600; }
+.row .nm { font-size: 13.5px; }
+.row .cnt { font-size: 11.5px; color: var(--ink-3); font-family: var(--mono); }
+.row .eye { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; color: var(--ink-3); opacity: .55; }
+.row:hover .eye, .row.off .eye { opacity: 1; }
+.row .eye:hover { background: var(--hair); color: var(--ink); }
+.row.off .nm, .row.off .cnt { opacity: .4; }
+.row.sub { padding-left: 24px; }
+.row.sub .nm { font-size: 13px; }
+.row.sub .nm::before { content: ''; display: inline-block; width: 6px; height: 6px; border-left: 1.5px solid var(--hair-2); border-bottom: 1.5px solid var(--hair-2); margin-right: 8px; vertical-align: 2px; }
+
+#detail { overflow-y: auto; padding: 14px 18px 18px; border-bottom: 1px solid var(--hair); flex: none; max-height: 62%; overscroll-behavior: contain; }
+.d-group { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.d-group i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+#detail h3 { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; margin-top: 4px; line-height: 1.25; text-wrap: balance; }
+.d-en { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+.d-actions { display: flex; gap: 6px; margin: 12px 0 4px; flex-wrap: wrap; }
+.d-actions button { padding: 6px 11px; border-radius: 999px; font-size: 12.5px; font-weight: 600; background: var(--hair); color: var(--ink-2); transition: background .15s, transform .1s; min-height: 30px; }
+.d-actions button:hover { background: var(--hair-2); color: var(--ink); }
+.d-actions button:active { transform: scale(.97); }
+.d-actions button.primary { background: var(--accent); color: #fff; }
+.d-actions button.primary:hover { background: var(--accent); filter: brightness(1.06); }
+#detail section { margin-top: 14px; }
+#detail h4 { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 5px; }
+#detail p { font-size: 13.5px; line-height: 1.65; color: var(--ink); }
+#detail ul { padding-left: 0; list-style: none; }
+#detail li { font-size: 13px; line-height: 1.55; padding-left: 16px; position: relative; margin-top: 3px; color: var(--ink); }
+#detail li::before { content: ''; position: absolute; left: 3px; top: 9px; width: 5px; height: 5px; border-radius: 50%; background: var(--ink-3); }
+#detail .check li::before { background: none; width: 9px; height: 9px; left: 0; top: 6px; border: 1.6px solid var(--accent); border-radius: 3px; }
+.spec { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 12.5px; }
+.spec dt { color: var(--ink-3); white-space: nowrap; }
+.spec dd { margin: 0; font-variant-numeric: tabular-nums; }
+.tipbox { margin-top: 14px; padding: 10px 12px; border-radius: 10px; background: var(--accent-soft); font-size: 12.5px; line-height: 1.55; }
+.tipbox b { color: var(--accent); font-weight: 700; margin-right: 6px; }
+.mtab { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+.mtab div { text-align: center; font-size: 11.5px; padding: 6px 4px; border-radius: 8px; background: var(--hair); line-height: 1.35; }
+.mtab b { display: block; font-size: 12.5px; }
+.mtab .cw b { color: var(--cw); } .mtab .ccw b { color: var(--ccw); }
+
+/* ---- dock ---- */
+#dock { position: fixed; left: 16px; right: calc(var(--insp-w) + 32px); bottom: 16px; z-index: 10; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px 18px; padding: 10px 14px 12px 16px; max-width: 1040px; margin: 0 auto; }
+.dock-group { display: flex; flex-direction: column; gap: 4px; }
+.dock-group.grow { flex: 1 1 180px; min-width: 160px; }
+.dock-group > label { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.dock-group > label .mono { color: var(--ink-2); margin-left: 4px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+.chips { display: flex; gap: 5px; flex-wrap: wrap; }
+.chips button { padding: 5px 11px; border-radius: 999px; font-size: 12.5px; font-weight: 500; background: var(--seg-bg); color: var(--ink-2); min-height: 28px; transition: background .15s, color .15s, transform .1s; }
+.chips button:hover { background: var(--hair-2); color: var(--ink); }
+.chips button:active { transform: scale(.96); }
+.chips button.on { background: var(--accent); color: #fff; }
+.tgl { display: inline-flex; align-items: center; gap: 7px; }
+.tgl i { width: 8px; height: 8px; border-radius: 50%; background: var(--hair-2); transition: background .15s, box-shadow .15s; }
+.tgl.on { background: var(--accent-soft) !important; color: var(--accent) !important; }
+.tgl.on i { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+#dock > .icon-btn { align-self: flex-end; }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 28px; background: transparent; margin: 0; }
+input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: var(--hair-2); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 1px solid rgba(20,26,40,.15); box-shadow: 0 1px 4px rgba(20,26,40,.25); margin-top: -8px; transition: transform .1s; }
+input[type=range]:active::-webkit-slider-thumb { transform: scale(1.1); }
+input[type=range]::-moz-range-track { height: 4px; border-radius: 2px; background: var(--hair-2); }
+input[type=range]::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 1px solid rgba(20,26,40,.15); box-shadow: 0 1px 4px rgba(20,26,40,.25); }
+
+/* ---- floating notes ---- */
+#flightNote { position: fixed; left: 16px; bottom: calc(var(--dock-h) + 32px); z-index: 9; width: min(420px, calc(100vw - var(--insp-w) - 64px)); padding: 12px 14px 12px 16px; font-size: 13px; line-height: 1.6; }
+#flightNote h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.005em; }
+#flightNote .mtab { margin-top: 10px; }
+#flightNote .mtab div { background: var(--hair); }
+#flightNote .up b { color: var(--ok); } #flightNote .down b { color: var(--warn); }
+#hint { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--dock-h) + 34px); z-index: 9; padding: 7px 14px; font-size: 12.5px; color: var(--ink-2); border-radius: 999px; transition: opacity .6s; pointer-events: none; }
+#hint.gone { opacity: 0; }
+#hiddenBar { position: fixed; left: 50%; transform: translateX(-50%); top: 16px; z-index: 11; display: flex; gap: 10px; align-items: center; padding: 7px 8px 7px 14px; font-size: 12.5px; color: var(--ink-2); border-radius: 999px; }
+#hiddenBar button { padding: 4px 10px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 12px; font-weight: 600; }
+.fab { display: none; position: fixed; right: 16px; bottom: 16px; z-index: 12; padding: 10px 16px; font-weight: 600; font-size: 13.5px; border-radius: 999px; }
+
+/* ---- loading ---- */
+#loading { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: grid; place-content: center; justify-items: center; gap: 14px; transition: opacity .6s; }
+#loading.gone { opacity: 0; pointer-events: none; }
+#loading p { font-size: 13px; color: var(--ink-2); max-width: 32em; text-align: center; padding: 0 20px; }
+#loading p.err { color: #c2410c; }
+.spinner { width: 30px; height: 30px; border-radius: 50%; border: 3px solid var(--hair-2); border-top-color: var(--accent); animation: spin .9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- responsive ---- */
+@media (max-width: 1100px) {
+  :root { --insp-w: 0px; }
+  #inspector { top: auto; right: 0; left: 0; bottom: 0; width: auto; height: min(78vh, 640px); border-radius: 20px 20px 0 0; transform: translateY(102%); transition: transform .38s cubic-bezier(.32,.72,0,1); will-change: transform; }
+  #inspector.open { transform: translateY(0); }
+  #inspector.dragging { transition: none; }
+  .grabber { display: block; width: 40px; height: 5px; border-radius: 3px; background: var(--hair-2); margin: 8px auto 0; }
+  #inspClose { display: grid; }
+  .fab { display: block; }
+  #dock { right: 16px; margin: 0; padding-right: 110px; }
+  #flightNote { width: min(420px, calc(100vw - 32px)); }
+}
+@media (max-width: 760px) {
+  :root { --dock-h: 120px; }
+  #topbar { left: 10px; right: 10px; top: 10px; flex-wrap: wrap; gap: 8px 12px; padding: 8px 8px 8px 14px; }
+  .brand p { display: none; }
+  #topbar .seg { order: 3; width: 100%; justify-content: stretch; }
+  #topbar .seg button { flex: 1; }
+  .popover { width: calc(100vw - 20px); right: -8px; }
+  #dock { left: 10px; right: 10px; bottom: 10px; flex-wrap: nowrap; overflow-x: auto; align-items: flex-end; gap: 14px; padding: 8px 12px 10px; padding-right: 100px; scrollbar-width: none; }
+  #dock::-webkit-scrollbar { display: none; }
+  .dock-group { flex: none; }
+  .dock-group.grow { flex: none; width: 150px; }
+  .chips { flex-wrap: nowrap; }
+  #hint { display: none; }
+  .fab { bottom: calc(var(--dock-h) - 26px); right: 10px; }
+  #flightNote { left: 10px; bottom: calc(var(--dock-h) + 8px); font-size: 12.5px; }
+  .seg.small button { padding: 5px 9px; min-height: 32px; }
+  .chips button { min-height: 32px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation-duration: .01s !important; }
+}
+
+</style>
+
+<div id="stage">
+  <canvas id="gl" aria-label="ドローンの3Dモデル"></canvas>
+  <svg id="leaders" aria-hidden="true"></svg>
+  <div id="labels"></div>
+</div>
+
+<header id="topbar" class="glass">
+  <div class="brand">
+    <h1>ドローンの構造</h1>
+    <p>550クラス クアッドコプター · 部品をクリックで解説</p>
+  </div>
+  <div class="seg" id="modeSeg" role="tablist" aria-label="表示モード">
+    <button data-mode="normal" class="on" role="tab" aria-selected="true">通常</button>
+    <button data-mode="xray" role="tab">X線</button>
+    <button data-mode="wire" role="tab">線画</button>
+    <button data-mode="cut" role="tab">断面</button>
+  </div>
+  <button id="settingsBtn" class="icon-btn" aria-label="設定" title="設定">
+    <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.6"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/></svg>
+  </button>
+  <div id="settings" class="glass popover" hidden>
+    <div class="pop-row"><span>品質</span>
+      <div class="seg small" id="qualitySeg"><button data-q="auto" class="on">自動</button><button data-q="2">高</button><button data-q="1">標準</button><button data-q="0">軽量</button></div></div>
+    <div class="pop-row"><span>テーマ</span>
+      <div class="seg small" id="themeSeg"><button data-th="auto" class="on">システム</button><button data-th="light">ライト</button><button data-th="dark">ダーク</button></div></div>
+    <div class="pop-row"><span>環境光</span><input type="range" id="envSlider" min="30" max="160" value="100" aria-label="環境光の強さ"></div>
+    <div class="pop-row"><span>影</span><button class="tgl on" data-t="shadows" id="shadowTgl"><i></i>影を描く</button></div>
+    <p class="pop-foot" id="perfInfo">—</p>
+  </div>
+</header>
+
+<aside id="inspector" class="glass" aria-label="部品一覧と解説">
+  <div class="grabber" aria-hidden="true"></div>
+  <div class="insp-head">
+    <h2>部品</h2><span id="partCount" class="count"></span>
+    <button id="inspClose" class="icon-btn" aria-label="閉じる"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+  </div>
+  <div id="detail" hidden></div>
+  <div id="partList"></div>
+</aside>
+
+<div id="dock" class="glass" role="toolbar" aria-label="操作">
+  <div class="dock-group grow">
+    <label for="explode">分解 <span id="explodeVal" class="mono">0%</span></label>
+    <input type="range" id="explode" min="0" max="100" value="0">
+  </div>
+  <div class="dock-group">
+    <label>モーター</label>
+    <div class="seg small" id="powerSeg"><button data-p="0" class="on">停止</button><button data-p="0.2">低速</button><button data-p="0.5">ホバー</button><button data-p="1">全開</button></div>
+  </div>
+  <div class="dock-group">
+    <label>飛行の原理</label>
+    <div class="chips" id="flightChips"><button data-f="hover">ホバリング</button><button data-f="climb">上昇</button><button data-f="pitch">前進</button><button data-f="roll">右へ移動</button><button data-f="yaw">右旋回</button></div>
+  </div>
+  <div class="dock-group">
+    <label>表示</label>
+    <div class="chips"><button class="tgl on" data-t="labels"><i></i>ラベル</button><button class="tgl" data-t="arrows"><i></i>回転方向</button><button class="tgl on" data-t="autorotate"><i></i>自動回転</button></div>
+  </div>
+  <div class="dock-group">
+    <label>視点</label>
+    <div class="seg small" id="viewSeg"><button data-v="iso" class="on">斜め</button><button data-v="front">前</button><button data-v="top">上</button><button data-v="side">横</button><button data-v="inside">モーター</button></div>
+  </div>
+  <button id="fsBtn" class="icon-btn" aria-label="全画面" title="全画面">
+    <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8V3h5M12 3h5v5M17 12v5h-5M8 17H3v-5"/></svg>
+  </button>
+</div>
+
+<div id="flightNote" class="glass" hidden></div>
+<div id="hiddenBar" class="glass" hidden><span id="hiddenMsg"></span><button id="showAll">すべて表示</button></div>
+<div id="hint" class="glass">ドラッグで回転 · ホイールで拡大 · 部品をクリックで解説</div>
+<button id="inspToggle" class="glass fab" aria-label="部品一覧を開く">部品一覧</button>
+
+<div id="loading"><div class="spinner"></div><p id="loadMsg">3Dモデルを生成しています…</p></div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<script>
+window.__droneReady = false;
+window.__showErr = function (msg) { var m = document.getElementById('loadMsg'); if (m) { m.textContent = msg; m.classList.add('err'); } var sp = document.querySelector('#loading .spinner'); if (sp) sp.style.display = 'none'; };
+window.addEventListener('error', function (e) { if (!window.__droneReady) window.__showErr('読み込みエラー: ' + (e.message || e.type)); });
+setTimeout(function () { if (!window.__droneReady && !window.__droneStarted) window.__showErr('3Dライブラリの読み込みに時間がかかっています。ネットワーク接続を確認して再読み込みしてください。'); }, 25000);
+</script>
+<script type="module">
+window.__droneStarted = true;
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { OutlinePass } from 'three/addons/postprocessing/OutlinePass.js';
+import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+// ===== 部品データ（解説・仕様例・点検ポイント） =====
+// 数値は「550クラス産業用クアッドコプターの典型例」。実機に合わせて差し替え可。
+const GROUPS = [
+  { id: 'frame',   name: '機体構造',   color: '#8b939f' },
+  { id: 'prop',    name: '推進系',     color: '#ef6a2d' },
+  { id: 'elec',    name: '電装',       color: '#3b7df7' },
+  { id: 'nav',     name: '航法・通信', color: '#14b8a6' },
+  { id: 'payload', name: 'ペイロード', color: '#a06cf5' },
+  { id: 'gear',    name: '降着装置',   color: '#6b7280' },
+];
+
+const PARTS = {
+  frameTop: {
+    name: '上部プレート', en: 'Top plate', group: 'frame', count: 1,
+    role: '機体の骨格の上面。下部プレートとの間にアームクランプを挟み込んで固定し、GPSマストや送信機など上に載せる機器の取付面にもなる。',
+    structure: ['カーボン繊維強化樹脂(CFRP)の板。綾織(ツイル)の織り目が見える', '中央の切り欠きは配線の通し穴と軽量化のため', 'スタンドオフ(支柱)で下部プレートと結合'],
+    spec: [['材質', 'CFRP 綾織 2.0mm'], ['寸法', '150 × 150 mm'], ['質量', '約 45 g']],
+    check: ['ひび割れ・層間はく離(白く濁った部分)', 'ネジのゆるみ、脱落', 'アーム固定部のガタつき'],
+    tip: 'カーボンは軽く剛性が高い一方、導電性があるため基板やアンテナが直接触れないように絶縁する。',
+  },
+  frameBottom: {
+    name: '下部プレート', en: 'Bottom plate', group: 'frame', count: 1,
+    role: '骨格の底面。バッテリー、降着装置、ジンバルの取付面。着陸の衝撃を最初に受ける部材。',
+    structure: ['上部より厚い2.5mmで、荷重を受け持つ', 'バッテリーストラップを通すスロットがある', '前方に張り出してジンバルの取付面を確保'],
+    spec: [['材質', 'CFRP 綾織 2.5mm'], ['寸法', '150 × 170 mm'], ['質量', '約 70 g']],
+    check: ['着陸衝撃によるクラック(特に脚の取付部周辺)', 'ストラップ穴の摩耗', 'ジンバル取付ネジのゆるみ'],
+  },
+  arm: {
+    name: 'アーム', en: 'Arm (CFRP tube)', group: 'frame', count: 4,
+    role: 'モーターを機体中心から等距離・同一平面に保持する。アームの剛性が足りないと振動がIMUに乗り、姿勢制御が乱れる。',
+    structure: ['φ16mmのカーボン丸パイプ', '中心側はクランプで、先端側はモーターマウントで固定', '上面に沿ってESCとモーターの配線を這わせる'],
+    spec: [['材質', 'CFRP 丸パイプ φ16 × 1.0t'], ['長さ', '245 mm'], ['対角モーター間距離', '550 mm']],
+    check: ['曲がり・割れ、繊維のささくれ', 'クランプ部での回転ズレ(モーター面が水平か)', '配線が擦れて被覆が傷んでいないか'],
+    tip: 'モーター間隔(対角)がフレームの「クラス」名になる。550クラスなら対角550mm。',
+  },
+  armClamp: {
+    name: 'アームクランプ', en: 'Arm clamp', group: 'frame', count: 4,
+    role: 'アームを上下プレートの間で挟み込んで固定する部品。アームの角度と水平を決める基準。',
+    structure: ['アルミ削り出し(アルマイト処理)', '上下からM3ボルト各2本で締結'],
+    spec: [['材質', 'A6061 アルマイト'], ['締結', 'M3 × 4本']],
+    check: ['ボルトの締付トルク(ネジロック剤の有無)', 'クランプの割れ'],
+  },
+  motorMount: {
+    name: 'モーターマウント', en: 'Motor mount', group: 'frame', count: 4,
+    role: 'アーム先端でモーターを受ける座面。航法灯(LED)もここに組み込まれる。',
+    structure: ['アルミ製のクランプブロックと円形の座面', 'モーターはM3ボルト4本で固定'],
+    spec: [['材質', 'A6061 アルマイト'], ['ボルト', 'M3 × 4本 / モーター']],
+    check: ['モーター固定ボルトのゆるみ(振動で緩みやすい)', '座面の変形'],
+  },
+  standoff: {
+    name: 'スタンドオフ', en: 'Standoff', group: 'frame', count: 8,
+    role: '上下プレートの間隔を保ち、両者を結合する支柱。',
+    structure: ['六角のアルミ支柱。両端にM3ネジ穴'],
+    spec: [['長さ', '35 mm'], ['材質', 'アルミ アルマイト']],
+    check: ['ゆるみ(手でプレートをねじって動かないか)'],
+  },
+  screws: {
+    name: 'ネジ類', en: 'Fasteners', group: 'frame', count: 1,
+    role: '各部を締結するM3ボルト。振動環境なのでネジロック剤が必須。',
+    structure: ['六角穴付きボタンボルト(M3)', 'モーター固定用は長さに注意(長すぎると巻線に達して短絡する)'],
+    spec: [['サイズ', 'M3 × 6〜10 mm'], ['材質', 'ステンレス / スチール']],
+    check: ['ゆるみ・脱落', 'ネジ頭の舐め'],
+  },
+
+  motor: {
+    name: 'ブラシレスモーター', en: 'Brushless outrunner motor', group: 'prop', count: 4,
+    role: 'ESCから供給される三相交流で回転し、プロペラを回す。外側の缶(ローター)が回転し、内側のステーター(固定子)は動かない「アウターランナー」型。',
+    structure: ['ローター(ベル): 内周に永久磁石14個。上面に放熱スリット', 'ステーター: 12極の積層鉄心にエナメル銅線を巻いたコイル', 'シャフトは2個のベアリングで支持。摩耗部品はベアリングだけ'],
+    spec: [['サイズ', '2814 (ステーター径28mm・高さ14mm)'], ['KV値', '450 KV (1Vあたりの無負荷回転数)'], ['極数', '12N14P'], ['最大電流', '25 A'], ['質量', '約 95 g']],
+    check: ['指で回してゴリゴリ感・引っかかりがないか(ベアリング)', 'シャフトのガタ・曲がり', '砂・草・糸くずの噛み込み', 'コイルの変色(過熱の痕跡)'],
+    tip: '回転方向は3本の相線のうち2本を入れ替えるか、ESCの設定で反転できる。ブラシがないため火花が出ず、寿命が長い。',
+  },
+  bell: {
+    name: 'ローター(ベル)', en: 'Rotor bell', group: 'prop', count: 4,
+    role: 'モーターの回転する外殻。内周に貼られた永久磁石がステーターの磁界に引かれて回る。',
+    structure: ['アルミ削り出しの缶。側面と上面のスリットは冷却用', '中央のハブにシャフトを圧入'],
+    spec: [['外径', '35 mm'], ['磁石', 'ネオジム × 14']],
+    check: ['スリットからの異物混入', '磁石のはがれ・ひび(回すとコツコツ音)'],
+  },
+  stator: {
+    name: 'ステーター(固定子)', en: 'Stator', group: 'prop', count: 4,
+    role: 'コイルを巻いた12極の鉄心。ESCが順番に電流を流すと回転磁界ができ、ローターを引き回す。',
+    structure: ['0.2mm厚のケイ素鋼板を積層(渦電流損を減らす)', '各極の先端は「シュー」と呼ばれる広がりで磁束を集める'],
+    spec: [['極数', '12'], ['積層', 'ケイ素鋼板 0.2mm']],
+    check: ['絶縁被膜の傷(短絡の原因)'],
+  },
+  winding: {
+    name: '巻線(コイル)', en: 'Windings', group: 'prop', count: 4,
+    role: 'エナメル被覆の銅線。U・V・Wの3相に分けて巻かれ、順に通電されて回転磁界を作る。',
+    structure: ['3相 × 4極 = 12極。相ごとに結線(スター結線)', '線径が太いほど大電流に耐え、巻数が少ないほどKV値が上がる'],
+    spec: [['線材', 'エナメル銅線'], ['相数', '3相 (U/V/W)']],
+    check: ['焦げ・変色(過熱)', 'エナメルのはがれ'],
+    tip: 'モーターの発熱の大半はここ。長時間のホバリング後は触って温度を確かめる習慣を。',
+  },
+  magnet: {
+    name: '永久磁石', en: 'Permanent magnets', group: 'prop', count: 4,
+    role: 'ローター内周にN極・S極が交互になるよう14個並ぶ。ステーターの回転磁界と引き合い/反発してトルクを生む。',
+    structure: ['ネオジム磁石(強力だが熱に弱い)', '接着剤でベル内周に固定'],
+    spec: [['個数', '14 (N/S 交互)'], ['材質', 'ネオジム (NdFeB)']],
+    check: ['はがれ・欠け(異音の原因)', '高温での減磁(推力低下)'],
+  },
+  shaft: {
+    name: 'シャフト・ベアリング', en: 'Shaft & bearings', group: 'prop', count: 4,
+    role: 'ローターの回転をプロペラへ伝える軸。ベースの2つのボールベアリングで支えられる。',
+    structure: ['硬化鋼のシャフト φ4mm', '下端のCリングで抜け止め'],
+    spec: [['シャフト径', '4 mm'], ['ベアリング', '2 個']],
+    check: ['軸方向のガタ(上下に引いて動く)', '回転時の異音・振動'],
+  },
+  motorBase: {
+    name: 'モーターベース', en: 'Motor base', group: 'prop', count: 4,
+    role: 'ステーターとベアリングを保持し、モーターマウントに固定される土台。',
+    structure: ['アルミ削り出し。十字の腕に取付穴', '相線はここから引き出される'],
+    spec: [['取付', 'M3 × 4 (16/19mm ピッチ)']],
+    check: ['取付面の歪み', '相線の付け根の被覆'],
+  },
+  prop: {
+    name: 'プロペラ', en: 'Propeller', group: 'prop', count: 4,
+    role: '回転して空気を下向きに押し、その反作用として揚力(推力)を得る。翼にはねじれ(ピッチ)があり、根元ほど迎え角が大きい。',
+    structure: ['隣り合うモーターは逆回転。時計回り(CW)用と反時計回り(CCW)用が2枚ずつある', '表面の刻印「12×4.5」は直径12インチ・ピッチ4.5インチ', '翼断面は薄い翼型で、先端ほど薄く細い'],
+    spec: [['サイズ', '12 × 4.5 インチ (直径 305mm / ピッチ 114mm)'], ['翼数', '2'], ['材質', 'ガラス繊維強化ナイロン'], ['質量', '約 20 g']],
+    check: ['欠け・ひび・曲がり(小さな傷でも振動が増え、飛行中に破断することがある)', 'ナットの締付', '回転方向(CW/CCW)が正しいか、刻印が上を向いているか', '左右の重量バランス(振動)'],
+    tip: '取付を間違えると離陸直後に機体が反転する。飛行前点検で最重要の部品のひとつ。',
+  },
+  propNut: {
+    name: 'プロペラナット', en: 'Prop nut', group: 'prop', count: 4,
+    role: 'プロペラをモーターに固定するナット。回転で締まる方向のねじ(セルフタイトニング)が使われることが多い。',
+    structure: ['CW用とCCW用でねじの向きが逆(逆ねじ)の製品もある'],
+    spec: [['ねじ', 'M6 (自締式)']],
+    check: ['締付(工具で確実に)', 'ねじ山の摩耗'],
+  },
+  esc: {
+    name: 'ESC', en: 'Electronic Speed Controller', group: 'prop', count: 4,
+    role: 'フライトコントローラーからの指令(DShot等の信号)に応じて、バッテリーの直流を三相交流に変換しモーターへ流す。回転数を毎秒数万回のスイッチングで制御する。',
+    structure: ['基板上のMOSFET 6個が電流をスイッチング', '熱収縮チューブで絶縁', 'モーター側に3本、電源側に2本、信号線1本'],
+    spec: [['連続電流', '40 A'], ['対応電圧', '3〜6S'], ['ファームウェア', 'BLHeli_32'], ['プロトコル', 'DShot600']],
+    check: ['熱収縮チューブの破れ', 'はんだのクラック(相線の付け根)', '発熱・焦げ跡', '出力が1つだけ弱くないか(ホバリング時の傾き)'],
+    tip: 'ESCが1基故障するとクアッドコプターは制御を失い墜落する。ヘキサ(6発)以上なら1基喪失でも着陸できる場合がある。',
+  },
+
+  fc: {
+    name: 'フライトコントローラー', en: 'Flight controller', group: 'elec', count: 1,
+    role: '機体の頭脳。IMUで姿勢を毎秒数千回読み取り、操縦入力と比較して4つのモーターの回転数を計算しESCに指令する。',
+    structure: ['MCU(マイコン)が制御ループを実行', 'IMU(3軸ジャイロ+3軸加速度)は防振ゴムで振動から隔離', '気圧計で高度を推定。GPS・受信機・テレメトリはUART接続', 'フライトログ(ブラックボックス)をフラッシュメモリに記録'],
+    spec: [['MCU', 'STM32 F7 (216 MHz)'], ['IMU', '3軸ジャイロ + 3軸加速度'], ['気圧計', 'あり'], ['取付', '30.5 × 30.5 mm 穴ピッチ']],
+    check: ['防振グロメットの劣化・つぶれ', 'USBコネクタの割れ', 'ファームウェア更新後の設定(機体の向き・モーター順序)の再確認'],
+    tip: '基板上の矢印は機首方向。向きを間違えて取り付けると離陸直後にひっくり返る。',
+  },
+  pdb: {
+    name: '電源分配基板', en: 'Power distribution board', group: 'elec', count: 1,
+    role: 'バッテリーの電力を4つのESCと、5V/12Vに降圧してFC・受信機・カメラへ分配する。電流と電圧を測ってテレメトリに送る。',
+    structure: ['厚い銅箔のパッドに太い電源線をはんだ付け', 'BEC(降圧回路)と電流センサーを内蔵'],
+    spec: [['最大電流', '120 A'], ['BEC出力', '5V 3A / 12V 2A']],
+    check: ['はんだ部の変色・クラック', '電流センサーの校正(表示と実測のズレ)'],
+  },
+  capacitor: {
+    name: 'コンデンサ', en: 'Low-ESR capacitor', group: 'elec', count: 1,
+    role: 'ESCのスイッチングで発生する電圧のスパイクを吸収し、FCや映像のノイズを減らす。',
+    structure: ['低ESRの電解コンデンサを電源入力の直近に'],
+    spec: [['容量', '1000 µF / 35V']],
+    check: ['膨らみ・液漏れ'],
+  },
+  buzzer: {
+    name: 'ブザー', en: 'Buzzer', group: 'elec', count: 1,
+    role: '警告音(バッテリー低下・アーム状態)と、墜落時に機体を探すためのロストモデルアラーム。',
+    structure: ['圧電ブザー。FCから駆動'],
+    spec: [['音量', '約 100 dB']],
+    check: ['発音の確認(起動時)'],
+  },
+  battery: {
+    name: 'バッテリー(LiPo)', en: 'LiPo battery', group: 'elec', count: 1,
+    role: '全システムの電源。機体重量の3〜4割を占め、飛行時間を決める。',
+    structure: ['リチウムポリマー(LiPo)セルを6枚直列(6S)', '太い電源線(XT60コネクタ)と、セルごとの電圧を測るバランスコネクタ', '2本のストラップで下部プレートに固定'],
+    spec: [['構成', '6S (22.2V, 満充電 25.2V)'], ['容量', '5,000 mAh (111 Wh)'], ['放電レート', '25C (連続 125A)'], ['質量', '約 640 g']],
+    check: ['膨らみ(少しでもあれば使用中止)', '外装の傷・へこみ', 'コネクタの焼け・ゆるみ', 'セル間電圧差(0.05V以上で要注意)', '保管は 3.8V/セル前後で'],
+    tip: 'セル電圧が3.0Vを下回ると劣化が急速に進む。飛行中は3.5V/セルを目安に着陸する。',
+  },
+  cells: {
+    name: 'セル(内部)', en: 'Cells', group: 'elec', count: 1,
+    role: 'バッテリー内部のパウチ型セル。1セルの公称電圧3.7Vを6枚直列にして22.2Vを得る。',
+    structure: ['アルミラミネートの袋(パウチ)に電極を封入', 'セル同士はニッケルタブで直列接続'],
+    spec: [['セル電圧', '3.7V (3.0〜4.2V)'], ['枚数', '6']],
+    check: ['断面表示モードで内部構造を確認できる'],
+  },
+  xt60: {
+    name: 'XT60コネクタ', en: 'XT60 connector', group: 'elec', count: 1,
+    role: 'バッテリーと機体の電源を接続する大電流コネクタ。極性を間違えない形状。',
+    structure: ['黄色のナイロン筐体に金メッキ端子'],
+    spec: [['定格', '60 A 連続']],
+    check: ['端子の変色・焼け', '差し込みのゆるさ(発熱の原因)'],
+  },
+  balance: {
+    name: 'バランスコネクタ', en: 'Balance lead', group: 'elec', count: 1,
+    role: 'セルごとの電圧を測り、充電時に全セルを均等(バランス)に充電するための細い配線。',
+    structure: ['7本(6S用)の細線とJST-XHコネクタ'],
+    spec: [['コネクタ', 'JST-XH 7ピン']],
+    check: ['断線・被覆の傷(短絡すると発火の危険)'],
+  },
+  strap: {
+    name: 'バッテリーストラップ', en: 'Battery strap', group: 'elec', count: 2,
+    role: 'バッテリーを機体に固定するベルト。飛行中にバッテリーがずれると重心が動き、最悪落下する。',
+    structure: ['滑り止め付きの面ファスナーベルト'],
+    spec: [['幅', '20 mm']],
+    check: ['面ファスナーの劣化(保持力)', 'ゴムの滑り止めの摩耗'],
+  },
+  wiring: {
+    name: '配線', en: 'Wiring', group: 'elec', count: 1,
+    role: '電源線(バッテリー→PDB→ESC)、相線(ESC→モーター 3本)、信号線(FC→ESC/受信機/GPS)の3系統。',
+    structure: ['電源線は太い(12〜14AWG)シリコン被覆線', '相線は3本一組。振動で擦れないよう結束バンドで固定', '信号線は細く、電源線から離して引く(ノイズ対策)'],
+    spec: [['電源線', '12 AWG'], ['相線', '18 AWG'], ['信号線', '28 AWG']],
+    check: ['被覆の擦れ・切れ', 'コネクタの抜けかけ', '結束バンドのゆるみ'],
+  },
+
+  gps: {
+    name: 'GNSS / コンパス', en: 'GNSS & compass module', group: 'nav', count: 1,
+    role: '衛星測位で位置と速度を、地磁気センサーで機首方位を測る。位置保持(GPSモード)、自動帰還(RTH)、ウェイポイント飛行の要。',
+    structure: ['円盤の中にセラミックパッチアンテナと受信IC', 'モーターや電源線の磁界から離すためマストで持ち上げる', '筐体の矢印を機首方向に合わせて取り付ける'],
+    spec: [['衛星系', 'GPS / GLONASS / Galileo / BeiDou / みちびき(QZSS)'], ['更新レート', '10 Hz'], ['コンパス', '3軸 地磁気センサー']],
+    check: ['マストの固定・折れ', 'コンパスのキャリブレーション要否(場所を大きく変えたとき)', '離陸前の受信衛星数(目安 12以上)'],
+    tip: '衛星を失うと位置保持ができず、姿勢のみの制御(ATTIモード)になり風に流される。手動で戻せる技量が求められる理由。',
+  },
+  rx: {
+    name: '受信機とアンテナ', en: 'Receiver (RX)', group: 'nav', count: 1,
+    role: '送信機(プロポ)からの操縦信号を受け取り、FCへ渡す。電波が途絶えたときはフェイルセーフ(ホバリング/帰還/着陸)を発動させる。',
+    structure: ['2本のアンテナを90°に開く「ダイバーシティ」で電波の向きによる感度低下を防ぐ', 'アンテナ先端(裸の導体部分)をカーボンフレームから離す'],
+    spec: [['周波数', '2.4 GHz'], ['アンテナ', 'ダイバーシティ × 2'], ['通信', 'SBUS / CRSF']],
+    check: ['アンテナ被覆の破れ・折れ', 'フェイルセーフ設定の確認(送信機の電源を切って挙動を見る)'],
+    tip: 'カーボンは電波を遮る。アンテナが機体に隠れると通信距離が大きく落ちる。',
+  },
+  vtx: {
+    name: '映像送信機', en: 'Video transmitter (VTX)', group: 'nav', count: 1,
+    role: 'カメラの映像と機体データ(テレメトリ)を地上局へ送る。',
+    structure: ['きのこ型の円偏波アンテナ', '発熱が大きく、モーターの風が当たる位置に置く'],
+    spec: [['周波数', '5.8 GHz'], ['出力', '25 〜 600 mW']],
+    check: ['アンテナ未接続での送信(出力段が壊れる)', '発熱'],
+  },
+  led: {
+    name: '航法灯(LED)', en: 'Navigation lights', group: 'nav', count: 4,
+    role: '遠くからでも機首の向きと姿勢を判別するための灯火。',
+    structure: ['航空機の航法灯にならい、前方左を赤・右を緑、後方を白にした例', '市販機では「前赤・後緑」など配色がメーカーごとに違うので取扱説明書で確認'],
+    spec: [['前左', '赤'], ['前右', '緑'], ['後', '白 (点滅)']],
+    check: ['点灯・点滅の確認', '夜間飛行では機体の姿勢と方向が視認できる灯火が必要(承認基準)'],
+  },
+
+  damper: {
+    name: '防振ダンパー', en: 'Vibration dampers', group: 'payload', count: 4,
+    role: 'モーター振動がカメラに伝わるのを遮断するゴム球。映像の「こんにゃく現象」を防ぐ。',
+    structure: ['シリコンゴムのボール4個で吊り下げ板を支える'],
+    spec: [['硬度', 'ペイロード重量に合わせて選ぶ']],
+    check: ['ゴムの劣化・ひび', '伸びきり・外れ'],
+  },
+  gimbal: {
+    name: '3軸ジンバル', en: '3-axis gimbal', group: 'payload', count: 1,
+    role: '機体の揺れを3つのブラシレスモーター(ヨー/ロール/ピッチ)で瞬時に打ち消し、カメラを常に水平・狙った向きに保つ。',
+    structure: ['ジンバル自体にもIMUがあり、独立した制御ループで動く', 'ヨー軸(垂直) → ロール軸(前後) → ピッチ軸(左右)の順に腕がつながる'],
+    spec: [['軸', 'ヨー / ロール / ピッチ'], ['制御角', 'ピッチ -90°〜+30°']],
+    check: ['各軸を手で動かして引っかかりがないか', 'ケーブルの噛み込み', '起動時の水平出し'],
+  },
+  camera: {
+    name: 'カメラ', en: 'Camera', group: 'payload', count: 1,
+    role: '空撮・点検の目的そのもの。ジンバルに吊られ、地上の送信機からピッチとシャッターを操作する。',
+    structure: ['1インチセンサーと固定焦点レンズ', '映像は映像送信機を通じて地上へ'],
+    spec: [['センサー', '1 インチ 20 MP'], ['動画', '4K / 60fps'], ['質量', '約 250 g (ジンバル込み)']],
+    check: ['レンズの汚れ・傷', 'メモリーカードの残量', '固定ネジ'],
+  },
+
+  landingGear: {
+    name: '降着装置(スキッド)', en: 'Landing skids', group: 'gear', count: 2,
+    role: '離着陸時に機体を支え、ジンバルとカメラを地面から守る。',
+    structure: ['カーボンパイプの脚2本とスキッド(そり)1本で片側を構成', '先端にゴムキャップ。着陸の衝撃はここと下部プレートで受ける'],
+    spec: [['材質', 'CFRP φ10mm'], ['地上高', '150 mm']],
+    check: ['パイプの割れ', '取付部のゆるみ', 'ゴムキャップの脱落'],
+  },
+};
+
+// ===== 飛行の原理デモ =====
+// mult: モーター M1(前右) M2(後右) M3(後左) M4(前左) の回転数倍率
+const FLIGHT = {
+  hover: { name: 'ホバリング', mult: [1, 1, 1, 1],
+    note: '4つのモーターが同じ推力を出し、合計が機体重量と釣り合うと空中で静止する。隣同士が逆回転なので反トルクも打ち消し合う。' },
+  climb: { name: '上昇', mult: [1.25, 1.25, 1.25, 1.25],
+    note: '4つとも同時に増速。合計推力が重量を上回ると上昇し、減速すれば下降する。姿勢は変わらない。' },
+  pitch: { name: '前進', mult: [0.85, 1.15, 1.15, 0.85],
+    note: '後ろ2つ(M2・M3)を増速、前2つを減速すると機首が下がる。推力が前に傾き、その水平成分で前進する。' },
+  roll: { name: '右へ移動', mult: [0.85, 0.85, 1.15, 1.15],
+    note: '左2つ(M3・M4)を増速、右2つを減速すると機体が右に傾き、右へ移動する。前進と原理は同じで軸が違うだけ。' },
+  yaw: { name: '右旋回(ヨー)', mult: [1.15, 0.85, 1.15, 0.85],
+    note: '反時計回りのモーター(M1・M3)を増速し、時計回り(M2・M4)を減速。反トルクの釣り合いが崩れ、機体が時計回りに回る。推力の合計は変わらないので高度は保たれる。' },
+};
+
+const MOTOR_INFO = [
+  { id: 'M1', pos: '前右', dir: 'CCW' },
+  { id: 'M2', pos: '後右', dir: 'CW' },
+  { id: 'M3', pos: '後左', dir: 'CCW' },
+  { id: 'M4', pos: '前左', dir: 'CW' },
+];
+
+// ===== 手続き生成テクスチャと材質 =====
+function makeCanvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+function mulberry(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+function canvasTex(c, { repeat = [1, 1], srgb = true, aniso = 8, wrap = true } = {}) {
+  const t = new THREE.CanvasTexture(c);
+  if (wrap) { t.wrapS = t.wrapT = THREE.RepeatWrapping; } else { t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; }
+  t.repeat.set(repeat[0], repeat[1]);
+  if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = aniso;
+  t.needsUpdate = true;
+  return t;
+}
+
+// ---- カーボン綾織(2/2ツイル): カラー・法線・粗さマップ ----
+function carbonTextures() {
+  const S = 256, tow = 32;
+  const col = makeCanvas(S, S), nrm = makeCanvas(S, S), rgh = makeCanvas(S, S);
+  const cImg = col.getContext('2d').createImageData(S, S);
+  const rImg = rgh.getContext('2d').createImageData(S, S);
+  const H = new Float32Array(S * S);
+  const rnd = mulberry(7);
+  const strand = new Float32Array(S); for (let i = 0; i < S; i++) strand[i] = 0.92 + 0.08 * Math.sin(i * 1.9) * Math.sin(i * 0.37 + 1);
+  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+    const i = Math.floor(x / tow), j = Math.floor(y / tow);
+    const m = ((i - j) % 4 + 4) % 4;
+    const weftTop = m < 2; // 横糸が上
+    let across, along, shade;
+    if (weftTop) {
+      const yc = (j + 0.5) * tow; across = 1 - Math.pow((y - yc) / (tow / 2), 2);
+      const i0 = i - m; const u = (x - i0 * tow) / (2 * tow); along = Math.pow(Math.sin(Math.PI * u), 0.6);
+      shade = across * (0.55 + 0.45 * along) * strand[y % S];
+    } else {
+      const xc = (i + 0.5) * tow; across = 1 - Math.pow((x - xc) / (tow / 2), 2);
+      const mm = ((j - i) % 4 + 4) % 4; const j0 = j - (mm < 2 ? mm : mm - 2); // 縦糸の浮きの起点
+      const u = ((y - j0 * tow) / (2 * tow) % 1 + 1) % 1; along = Math.pow(Math.sin(Math.PI * u), 0.6);
+      shade = across * (0.45 + 0.45 * along) * strand[x % S];
+    }
+    shade = Math.max(0, Math.min(1, shade));
+    const idx = (y * S + x);
+    H[idx] = across * (0.4 + 0.6 * along);
+    const g = 18 + 70 * shade + 6 * rnd();
+    cImg.data[idx * 4] = g * 0.94; cImg.data[idx * 4 + 1] = g; cImg.data[idx * 4 + 2] = g * 1.06; cImg.data[idx * 4 + 3] = 255;
+    const r = 255 * (0.16 + 0.16 * (1 - shade));
+    rImg.data[idx * 4] = r; rImg.data[idx * 4 + 1] = r; rImg.data[idx * 4 + 2] = r; rImg.data[idx * 4 + 3] = 255;
+  }
+  col.getContext('2d').putImageData(cImg, 0, 0);
+  rgh.getContext('2d').putImageData(rImg, 0, 0);
+  const nImg = nrm.getContext('2d').createImageData(S, S);
+  const k = 2.2;
+  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+    const xl = (x - 1 + S) % S, xr = (x + 1) % S, yu = (y - 1 + S) % S, yd = (y + 1) % S;
+    const dx = (H[y * S + xr] - H[y * S + xl]) * k, dy = (H[yd * S + x] - H[yu * S + x]) * k;
+    const len = Math.hypot(dx, dy, 1);
+    const idx = (y * S + x) * 4;
+    nImg.data[idx] = (-dx / len * 0.5 + 0.5) * 255; nImg.data[idx + 1] = (dy / len * 0.5 + 0.5) * 255; nImg.data[idx + 2] = (1 / len * 0.5 + 0.5) * 255; nImg.data[idx + 3] = 255;
+  }
+  nrm.getContext('2d').putImageData(nImg, 0, 0);
+  return { col, nrm, rgh };
+}
+
+function pcbCanvas(w, h, title, seed) {
+  const c = makeCanvas(w, h), g = c.getContext('2d'), rnd = mulberry(seed);
+  g.fillStyle = '#101517'; g.fillRect(0, 0, w, h);
+  // 配線パターン
+  g.strokeStyle = '#1d2a2b'; g.lineWidth = 3; g.lineCap = 'round';
+  for (let n = 0; n < 60; n++) {
+    let x = rnd() * w, y = rnd() * h; g.beginPath(); g.moveTo(x, y);
+    for (let s = 0; s < 4; s++) { const d = [[1, 0], [0, 1], [-1, 0], [0, -1], [1, 1], [-1, 1], [1, -1], [-1, -1]][Math.floor(rnd() * 8)]; const L = 20 + rnd() * 90; x += d[0] * L; y += d[1] * L; g.lineTo(x, y); }
+    g.stroke();
+  }
+  // ビア/パッド
+  for (let n = 0; n < 120; n++) { const x = rnd() * w, y = rnd() * h; g.fillStyle = '#2a3436'; g.beginPath(); g.arc(x, y, 3.5, 0, 7); g.fill(); g.fillStyle = '#c9a54e'; g.beginPath(); g.arc(x, y, 2, 0, 7); g.fill(); }
+  // 取付穴(金メッキリング)
+  const m = 0.085 * w;
+  for (const [x, y] of [[m, m], [w - m, m], [m, h - m], [w - m, h - m]]) { g.fillStyle = '#c9a54e'; g.beginPath(); g.arc(x, y, w * 0.045, 0, 7); g.fill(); g.fillStyle = '#0b0d0e'; g.beginPath(); g.arc(x, y, w * 0.03, 0, 7); g.fill(); }
+  // シルク印刷
+  g.fillStyle = '#e8e9ea'; g.font = `bold ${w * 0.055}px -apple-system, Helvetica, sans-serif`; g.textAlign = 'center';
+  g.fillText(title, w / 2, h * 0.16);
+  g.font = `${w * 0.04}px -apple-system, Helvetica, sans-serif`;
+  const labels = ['M1', 'M2', 'M3', 'M4', 'UART1', 'UART2', 'GPS', 'RX', 'BAT', '5V', 'GND', 'LED'];
+  for (let i = 0; i < labels.length; i++) g.fillText(labels[i], w * (0.18 + 0.64 * ((i % 4) / 3)), h * (0.3 + 0.16 * Math.floor(i / 4)) + h * 0.45 * 0);
+  // 機首矢印
+  g.beginPath(); g.moveTo(w * 0.5, h * 0.20); g.lineTo(w * 0.46, h * 0.27); g.lineTo(w * 0.54, h * 0.27); g.closePath(); g.fill();
+  return c;
+}
+
+function batteryLabel() {
+  const w = 512, h = 192, c = makeCanvas(w, h), g = c.getContext('2d');
+  g.fillStyle = '#26282d'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#f3f4f6'; g.fillRect(0, 0, w, 44);
+  g.fillStyle = '#26282d'; g.font = 'bold 26px -apple-system, Helvetica, sans-serif'; g.textAlign = 'left';
+  g.fillText('LiPo  6S  22.2V', 16, 32);
+  g.fillStyle = '#f3f4f6'; g.font = 'bold 64px -apple-system, Helvetica, sans-serif'; g.fillText('5000', 16, 118); g.font = 'bold 30px -apple-system, Helvetica, sans-serif'; g.fillText('mAh', 190, 118);
+  g.font = 'bold 36px -apple-system, Helvetica, sans-serif'; g.fillText('25C', 300, 118);
+  g.fillStyle = '#9aa0a8'; g.font = '16px -apple-system, Helvetica, sans-serif'; g.fillText('111 Wh · 640 g · USE ONLY WITH A LiPo BALANCE CHARGER', 16, 160);
+  // 注意マーク
+  g.fillStyle = '#f5b400'; g.beginPath(); g.moveTo(440, 62); g.lineTo(470, 116); g.lineTo(410, 116); g.closePath(); g.fill();
+  g.fillStyle = '#26282d'; g.font = 'bold 34px -apple-system, Helvetica, sans-serif'; g.textAlign = 'center'; g.fillText('!', 440, 110);
+  return c;
+}
+
+function escLabel() {
+  const w = 256, h = 96, c = makeCanvas(w, h), g = c.getContext('2d');
+  g.fillStyle = '#17181b'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#e6e7ea'; g.font = 'bold 30px -apple-system, Helvetica, sans-serif'; g.textAlign = 'left';
+  g.fillText('ESC 40A', 14, 40); g.font = '18px -apple-system, Helvetica, sans-serif'; g.fillStyle = '#a4a8b0'; g.fillText('BLHeli_32 · 3-6S · DShot600', 14, 72);
+  return c;
+}
+
+function propLabel(dir) {
+  const S = 512, c = makeCanvas(S, S), g = c.getContext('2d');
+  g.fillStyle = '#17171a'; g.fillRect(0, 0, S, S);
+  if (dir < 0) { g.translate(S, 0); g.scale(-1, 1); }
+  g.save(); g.translate(120, 430); g.rotate(-Math.PI / 2);
+  g.fillStyle = '#8f9096'; g.font = 'bold 44px -apple-system, Helvetica, sans-serif'; g.textAlign = 'left';
+  g.fillText(`12×4.5  ${dir > 0 ? 'CCW' : 'CW'}`, 0, 0); g.restore();
+  return c;
+}
+
+function gpsTop() {
+  const S = 256, c = makeCanvas(S, S), g = c.getContext('2d');
+  g.fillStyle = '#e6e7ea'; g.fillRect(0, 0, S, S);
+  g.fillStyle = '#2b2e34'; g.beginPath(); g.moveTo(128, 34); g.lineTo(104, 78); g.lineTo(152, 78); g.closePath(); g.fill();
+  g.font = 'bold 30px -apple-system, Helvetica, sans-serif'; g.textAlign = 'center'; g.fillText('GNSS', 128, 150);
+  g.font = '18px -apple-system, Helvetica, sans-serif'; g.fillStyle = '#6b7079'; g.fillText('COMPASS', 128, 178);
+  return c;
+}
+
+function bellSlotAlpha() {
+  const w = 512, h = 64, c = makeCanvas(w, h), g = c.getContext('2d');
+  g.fillStyle = '#fff'; g.fillRect(0, 0, w, h); g.fillStyle = '#000';
+  const n = 9; for (let k = 0; k < n; k++) { const x = (k + 0.5) * w / n; g.beginPath(); g.roundRect(x - 7, 18, 14, 28, 7); g.fill(); }
+  return c;
+}
+function bellTopAlpha() {
+  const S = 256, c = makeCanvas(S, S), g = c.getContext('2d');
+  g.fillStyle = '#fff'; g.fillRect(0, 0, S, S); g.fillStyle = '#000';
+  for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3 + Math.PI / 6, hw = 0.19; g.beginPath(); g.arc(128, 128, 116, a - hw, a + hw); g.arc(128, 128, 70, a + hw, a - hw, true); g.closePath(); g.fill(); }
+  return c;
+}
+function propDisc() {
+  const S = 256, c = makeCanvas(S, S), g = c.getContext('2d');
+  const grd = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+  grd.addColorStop(0, 'rgba(20,20,24,0)'); grd.addColorStop(0.18, 'rgba(20,20,24,0.05)'); grd.addColorStop(0.55, 'rgba(20,20,24,0.28)'); grd.addColorStop(0.9, 'rgba(20,20,24,0.38)'); grd.addColorStop(1, 'rgba(20,20,24,0)');
+  g.fillStyle = grd; g.fillRect(0, 0, S, S);
+  return c;
+}
+function laminationCanvas() {
+  const S = 64, c = makeCanvas(S, S), g = c.getContext('2d');
+  for (let y = 0; y < S; y += 4) { g.fillStyle = (y / 4) % 2 ? '#3b3d42' : '#26282c'; g.fillRect(0, y, S, 4); }
+  return c;
+}
+function strapCanvas() {
+  const S = 64, c = makeCanvas(S, S), g = c.getContext('2d');
+  g.fillStyle = '#1e1f23'; g.fillRect(0, 0, S, S);
+  g.strokeStyle = '#2c2e33'; g.lineWidth = 1; for (let i = 0; i < S; i += 4) { g.beginPath(); g.moveTo(i, 0); g.lineTo(i, S); g.stroke(); g.beginPath(); g.moveTo(0, i); g.lineTo(S, i); g.stroke(); }
+  return c;
+}
+
+function glowCanvas() {
+  const S = 128, c = makeCanvas(S, S), g = c.getContext('2d');
+  const grd = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  grd.addColorStop(0, 'rgba(255,255,255,1)'); grd.addColorStop(0.18, 'rgba(255,255,255,0.55)'); grd.addColorStop(0.5, 'rgba(255,255,255,0.12)'); grd.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = grd; g.fillRect(0, 0, S, S);
+  return c;
+}
+function groundCanvas(dark) {
+  const S = 1024, c = makeCanvas(S, S), g = c.getContext('2d');
+  g.fillStyle = dark ? '#14171c' : '#e6e8ec'; g.fillRect(0, 0, S, S);
+  g.strokeStyle = dark ? 'rgba(255,255,255,0.055)' : 'rgba(20,26,40,0.075)'; g.lineWidth = 1.5;
+  for (let i = 0; i <= S; i += 64) { g.beginPath(); g.moveTo(i, 0); g.lineTo(i, S); g.stroke(); g.beginPath(); g.moveTo(0, i); g.lineTo(S, i); g.stroke(); }
+  const grd = g.createRadialGradient(S / 2, S / 2, S * 0.12, S / 2, S / 2, S * 0.5);
+  const bg = dark ? '20,23,28' : '230,232,236';
+  grd.addColorStop(0, `rgba(${bg},0)`); grd.addColorStop(1, `rgba(${bg},1)`);
+  g.fillStyle = grd; g.fillRect(0, 0, S, S);
+  return c;
+}
+function backdropCanvas(dark) {
+  const c = makeCanvas(4, 512), g = c.getContext('2d');
+  const grd = g.createLinearGradient(0, 0, 0, 512);
+  if (dark) { grd.addColorStop(0, '#242a33'); grd.addColorStop(0.5, '#151920'); grd.addColorStop(0.62, '#101318'); grd.addColorStop(1, '#0a0c10'); }
+  else { grd.addColorStop(0, '#fbfbfc'); grd.addColorStop(0.5, '#eceef2'); grd.addColorStop(0.62, '#dfe3e9'); grd.addColorStop(1, '#d3d8e0'); }
+  g.fillStyle = grd; g.fillRect(0, 0, 4, 512);
+  return c;
+}
+
+function makeMaterials(maxAniso) {
+  const A = Math.min(8, maxAniso || 8);
+  const cf = carbonTextures();
+  const carbonMap = () => canvasTex(cf.col, { aniso: A });
+  const carbonNrm = () => canvasTex(cf.nrm, { srgb: false, aniso: A });
+  const carbonRgh = () => canvasTex(cf.rgh, { srgb: false, aniso: A });
+  const carbonMat = (repeat, { clearcoat = 0.55, ccRough = 0.22 } = {}) => {
+    const m = new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: carbonMap(), normalMap: carbonNrm(), roughnessMap: carbonRgh(), roughness: 1, metalness: 0, clearcoat, clearcoatRoughness: ccRough, normalScale: new THREE.Vector2(0.5, 0.5) });
+    for (const t of [m.map, m.normalMap, m.roughnessMap]) t.repeat.set(repeat[0], repeat[1]);
+    return m;
+  };
+  const std = (o) => new THREE.MeshStandardMaterial(o);
+  const phy = (o) => new THREE.MeshPhysicalMaterial(o);
+  const M = {
+    carbonPlate: carbonMat([70, 70]),
+    carbonArm: carbonMat([3, 15], { clearcoat: 0.35, ccRough: 0.35 }),
+    carbonLeg: carbonMat([2, 11], { clearcoat: 0.35, ccRough: 0.35 }),
+    carbonMast: carbonMat([2, 6], { clearcoat: 0.35, ccRough: 0.35 }),
+    alu: std({ color: 0xc4c7cc, metalness: 1, roughness: 0.34 }),
+    aluDark: std({ color: 0x2e3034, metalness: 0.85, roughness: 0.42 }),
+    aluOrange: std({ color: 0xe8642a, metalness: 0.7, roughness: 0.36 }),
+    steel: std({ color: 0x9a9da3, metalness: 1, roughness: 0.28 }),
+    copper: std({ color: 0xd98c58, metalness: 1, roughness: 0.3 }),
+    magnet: std({ color: 0x33363b, metalness: 0.6, roughness: 0.5 }),
+    lamination: std({ map: canvasTex(laminationCanvas(), { repeat: [24, 3], aniso: A }), metalness: 0.7, roughness: 0.55 }),
+    plasticBlack: phy({ color: 0x1b1c1f, roughness: 0.5, metalness: 0, clearcoat: 0.35, clearcoatRoughness: 0.3 }),
+    plasticGray: phy({ color: 0xd8dade, roughness: 0.45, metalness: 0, clearcoat: 0.5, clearcoatRoughness: 0.25 }),
+    plasticWhite: std({ color: 0xf1f2f4, roughness: 0.6 }),
+    rubber: std({ color: 0x131315, roughness: 0.92, metalness: 0 }),
+    heatShrink: phy({ color: 0x121316, roughness: 0.38, clearcoat: 0.25, clearcoatRoughness: 0.35 }),
+    wireBlack: std({ color: 0x141416, roughness: 0.7 }),
+    wireRed: std({ color: 0xc2201e, roughness: 0.7 }),
+    wireWhite: std({ color: 0xe9e9ec, roughness: 0.7 }),
+    wireYellow: std({ color: 0xe0b000, roughness: 0.7 }),
+    xt60: phy({ color: 0xf2c200, roughness: 0.4, clearcoat: 0.4 }),
+    pcbFC: std({ map: canvasTex(pcbCanvas(512, 512, 'F7 FLIGHT CONTROLLER', 3), { aniso: A, wrap: false }), roughness: 0.55, metalness: 0.15 }),
+    pcbPDB: std({ map: canvasTex(pcbCanvas(512, 512, 'PDB  120A', 9), { aniso: A, wrap: false }), roughness: 0.55, metalness: 0.15 }),
+    pcbEdge: std({ color: 0x1d2325, roughness: 0.7 }),
+    chip: std({ color: 0x1a1b1e, roughness: 0.45, metalness: 0.1 }),
+    connector: std({ color: 0xe8e8ea, roughness: 0.6 }),
+    batteryShell: phy({ color: 0x2a2c31, roughness: 0.55, clearcoat: 0.2, clearcoatRoughness: 0.5, side: THREE.DoubleSide }),
+    batteryLabel: std({ map: canvasTex(batteryLabel(), { aniso: A, wrap: false }), roughness: 0.55 }),
+    cell: std({ color: 0xb9bcc3, metalness: 0.85, roughness: 0.35 }),
+    escLabel: std({ map: canvasTex(escLabel(), { aniso: A, wrap: false }), roughness: 0.4 }),
+    strap: std({ map: canvasTex(strapCanvas(), { repeat: [10, 10], aniso: A }), roughness: 0.9 }),
+    propCCW: phy({ map: canvasTex(propLabel(1), { aniso: A, wrap: false }), color: 0xffffff, roughness: 0.42, clearcoat: 0.5, clearcoatRoughness: 0.28, side: THREE.DoubleSide }),
+    propCW: phy({ map: canvasTex(propLabel(-1), { aniso: A, wrap: false }), color: 0xffffff, roughness: 0.42, clearcoat: 0.5, clearcoatRoughness: 0.28, side: THREE.DoubleSide }),
+    propHub: phy({ color: 0x17171a, roughness: 0.42, clearcoat: 0.5, clearcoatRoughness: 0.28 }),
+    propDisc: new THREE.MeshBasicMaterial({ map: canvasTex(propDisc(), { wrap: false }), transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }),
+    bellWall: std({ color: 0x2a2c30, metalness: 0.85, roughness: 0.4, alphaMap: canvasTex(bellSlotAlpha(), { srgb: false, aniso: A, wrap: false }), alphaTest: 0.5, side: THREE.DoubleSide }),
+    bellTop: std({ color: 0x2a2c30, metalness: 0.85, roughness: 0.4, alphaMap: canvasTex(bellTopAlpha(), { srgb: false, aniso: A, wrap: false }), alphaTest: 0.5, side: THREE.DoubleSide }),
+    bellSolid: std({ color: 0x2a2c30, metalness: 0.85, roughness: 0.4, side: THREE.DoubleSide }),
+    gpsBody: phy({ color: 0xe9eaed, roughness: 0.4, clearcoat: 0.6, clearcoatRoughness: 0.2 }),
+    gpsTop: std({ map: canvasTex(gpsTop(), { aniso: A, wrap: false }), roughness: 0.5 }),
+    lens: phy({ color: 0x0a0d14, metalness: 0.3, roughness: 0.05, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.6 }),
+    lensRing: std({ color: 0x2b2d33, metalness: 0.9, roughness: 0.3 }),
+    antennaWhite: std({ color: 0xf4f4f6, roughness: 0.5, transparent: true, opacity: 0.9 }),
+    ledRed: std({ color: 0xff8080, emissive: 0xff2a1a, emissiveIntensity: 2.5, roughness: 0.3 }),
+    ledGreen: std({ color: 0x9dffb0, emissive: 0x18ff4a, emissiveIntensity: 2.5, roughness: 0.3 }),
+    ledWhite: std({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 2.5, roughness: 0.3 }),
+    ledBlue: std({ color: 0x9ec4ff, emissive: 0x2a7bff, emissiveIntensity: 2.5, roughness: 0.3 }),
+    glow: (color) => new THREE.SpriteMaterial({ map: canvasTex(glowCanvas(), { wrap: false }), color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.9, toneMapped: false }),
+    ground: (dark) => std({ map: canvasTex(groundCanvas(dark), { aniso: A, wrap: false }), roughness: 0.96, metalness: 0 }),
+    backdrop: (dark) => new THREE.MeshBasicMaterial({ map: canvasTex(backdropCanvas(dark), { wrap: false }), side: THREE.BackSide, fog: false, toneMapped: false }),
+  };
+  return M;
+}
+
+// ===== ドローン本体の手続き生成 =====
+const V3 = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
+const UP = V3(0, 1, 0);
+const CW_COLOR = 0x3b7df7, CCW_COLOR = 0x14b8a6;
+
+function mesh(geo, mat, { cast = true, recv = true } = {}) { const m = new THREE.Mesh(geo, mat); m.castShadow = cast; m.receiveShadow = recv; return m; }
+const cylGeo = (rt, rb, h, seg = 32, open = false) => new THREE.CylinderGeometry(rt, rb, h, seg, 1, open);
+const rboxGeo = (w, h, d, r, seg = 3) => new RoundedBoxGeometry(w, h, d, seg, r);
+function tubeGeo(points, r, seg = 48, radial = 8) { return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0.5), seg, r, radial, false); }
+function tubeBetween(a, b, r, mat, seg = 20) { const d = V3().subVectors(b, a); const len = d.length(); const m = mesh(cylGeo(r, r, len, seg), mat); m.position.copy(a).addScaledVector(d, 0.5); m.quaternion.setFromUnitVectors(UP, d.normalize()); return m; }
+function at(obj, x, y, z) { obj.position.set(x, y, z); return obj; }
+function nonIndexed(g) { return g.index ? g.toNonIndexed() : g; }
+function merged(geos) { return mergeGeometries(geos.map(nonIndexed), false); }
+
+function roundedRectPath(P, w, h, r, cx = 0, cy = 0) {
+  const x = cx - w / 2, y = cy - h / 2;
+  P.moveTo(x + r, y); P.lineTo(x + w - r, y); P.quadraticCurveTo(x + w, y, x + w, y + r); P.lineTo(x + w, y + h - r);
+  P.quadraticCurveTo(x + w, y + h, x + w - r, y + h); P.lineTo(x + r, y + h); P.quadraticCurveTo(x, y + h, x, y + h - r);
+  P.lineTo(x, y + r); P.quadraticCurveTo(x, y, x + r, y); return P;
+}
+// 板: shape座標 (x, s) は world (x, -z) に対応。押し出しは +Y。
+function plateGeometry(w, h, r, holes, thickness, cy = 0) {
+  const s = roundedRectPath(new THREE.Shape(), w, h, r, 0, cy);
+  for (const ho of holes) {
+    const p = new THREE.Path();
+    if (ho.r) p.absarc(ho.x, ho.s, ho.r, 0, Math.PI * 2, false); else roundedRectPath(p, ho.w, ho.h, ho.rr || 0.002, ho.x, ho.s);
+    s.holes.push(p);
+  }
+  const g = new THREE.ExtrudeGeometry(s, { depth: thickness, bevelEnabled: true, bevelThickness: 0.0004, bevelSize: 0.0004, bevelSegments: 2, curveSegments: 14 });
+  g.rotateX(-Math.PI / 2);
+  return g;
+}
+function annularSector(rIn, rOut, angle, depth) {
+  const s = new THREE.Shape();
+  s.absarc(0, 0, rOut, -angle / 2, angle / 2, false);
+  s.absarc(0, 0, rIn, angle / 2, -angle / 2, true);
+  const g = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: false, curveSegments: 6 });
+  g.rotateX(-Math.PI / 2); g.translate(0, -depth / 2, 0);
+  return g;
+}
+
+// ---- プロペラ翼(翼型・ねじり・後退角付き) ----
+function propGeometry(dir) {
+  const R = 0.152, r0 = 0.0105, pitch = 0.114, cmax = 0.027, nSpan = 40, nHalf = 12;
+  const sec = [];
+  for (let k = 0; k <= nHalf; k++) sec.push({ s: 0.5 * (1 - Math.cos(Math.PI * k / nHalf)), side: 1 });
+  for (let k = nHalf - 1; k >= 1; k--) sec.push({ s: 0.5 * (1 - Math.cos(Math.PI * k / nHalf)), side: -1 });
+  const nLoop = sec.length;
+  const yt = s => 0.2969 * Math.sqrt(s) - 0.1260 * s - 0.3516 * s * s + 0.2843 * s ** 3 - 0.1015 * s ** 4;
+  const chord = tau => tau < 0.35 ? 0.5 + 0.5 * (tau / 0.35) : Math.max(0.1, Math.sqrt(Math.max(0, 1 - Math.pow((tau - 0.35) / 0.66, 2))));
+  const pos = [], uv = [], idx = [];
+  for (let b = 0; b < 2; b++) {
+    const rot = b * Math.PI, base = pos.length / 3;
+    for (let i = 0; i <= nSpan; i++) {
+      const tau = i / nSpan, r = r0 + (R - r0) * tau, c = cmax * chord(tau);
+      const beta = Math.min(0.9, Math.atan(pitch / (2 * Math.PI * r)));
+      const t = 0.15 - 0.10 * tau, m = 0.025 + 0.02 * tau;
+      const sweep = -0.30 * c * tau * tau, droop = -0.003 * tau ** 3;
+      const cb = Math.cos(beta), sb = Math.sin(beta);
+      for (let j = 0; j <= nLoop; j++) {
+        const p = sec[j % nLoop];
+        const th = 5 * t * yt(p.s), cam = m * 4 * p.s * (1 - p.s);
+        const xc = (p.s - 0.3) * c + sweep, yc = (p.side * th + cam) * c;
+        let z = xc * cb + yc * sb; const y = -xc * sb + yc * cb + droop;
+        if (dir < 0) z = -z;
+        const X = r * Math.cos(rot) + z * Math.sin(rot), Z = -r * Math.sin(rot) + z * Math.cos(rot);
+        pos.push(X, y, Z); uv.push(j / nLoop, tau);
+      }
+    }
+    const W = nLoop + 1;
+    for (let i = 0; i < nSpan; i++) for (let j = 0; j < nLoop; j++) {
+      const a = base + i * W + j, b2 = a + 1, c2 = a + W, d = c2 + 1;
+      if (dir > 0) idx.push(a, b2, c2, b2, d, c2); else idx.push(a, c2, b2, b2, c2, d);
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  g.setIndex(idx); g.computeVertexNormals();
+  return g;
+}
+
+// ---- モーター(アウターランナー) ローカル: 軸=+Y, 原点=ベース底面 ----
+function motorGeometries() {
+  const teeth = [], coils = [], magnets = [];
+  const tooth = new THREE.BoxGeometry(0.0055, 0.010, 0.0030).translate(0.01025, 0, 0);
+  const shoe = annularSector(0.0125, 0.0136, THREE.MathUtils.degToRad(26), 0.010);
+  // コイル: 歯の周りを回るスーパー楕円ヘリックス
+  const pts = []; const turns = 4.5, n = 150;
+  for (let i = 0; i <= n; i++) { const t = i / n, ph = 2 * Math.PI * turns * t; const sy = Math.sin(ph), cz = Math.cos(ph);
+    pts.push(V3(0.0083 + 0.0042 * t, 0.0059 * Math.sign(sy) * Math.pow(Math.abs(sy), 0.5), 0.0024 * Math.sign(cz) * Math.pow(Math.abs(cz), 0.5))); }
+  const coil = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 220, 0.00045, 6, false);
+  for (let k = 0; k < 12; k++) { const a = k * Math.PI / 6; teeth.push(tooth.clone().rotateY(a), shoe.clone().rotateY(a)); coils.push(coil.clone().rotateY(a)); }
+  const mag = annularSector(0.0138, 0.0157, THREE.MathUtils.degToRad(22.5), 0.011);
+  for (let k = 0; k < 14; k++) magnets.push(mag.clone().rotateY(k * Math.PI * 2 / 14));
+  return { teeth: merged(teeth), coils: merged(coils), magnets: merged(magnets), propCCW: propGeometry(1), propCW: propGeometry(-1),
+    hub: new THREE.LatheGeometry([[0.0052, -0.005], [0.011, -0.005], [0.012, -0.004], [0.012, 0.004], [0.011, 0.005], [0.0052, 0.005]].map(p => new THREE.Vector2(p[0], p[1])), 40) };
+}
+
+function buildMotor(M, G, dir, reg) {
+  const g = new THREE.Group(); g.name = 'motor';
+  // ベース
+  const base = new THREE.Group();
+  base.add(at(mesh(cylGeo(0.0105, 0.0105, 0.004), M.aluDark), 0, 0.002, 0));
+  for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + Math.PI / 4; const arm = mesh(rboxGeo(0.021, 0.0032, 0.008, 0.0014), M.aluDark); arm.rotation.y = -a; at(arm, Math.cos(a) * 0.0115, 0.0016, -Math.sin(a) * 0.0115); base.add(arm);
+    base.add(at(mesh(cylGeo(0.0016, 0.0016, 0.0004, 12), M.chip), Math.cos(a) * 0.0165, 0.0033, -Math.sin(a) * 0.0165)); }
+  base.add(at(mesh(cylGeo(0.0052, 0.0052, 0.018), M.aluDark), 0, 0.013, 0));
+  g.add(base); reg(base, 'motorBase', V3(0, 0, 0));
+  // ステーター
+  const stator = new THREE.Group();
+  stator.add(at(mesh(cylGeo(0.0079, 0.0079, 0.010, 48), M.lamination), 0, 0.012, 0));
+  stator.add(at(mesh(G.teeth, M.lamination), 0, 0.012, 0));
+  g.add(stator); reg(stator, 'stator', V3(0, 0.035, 0));
+  const coils = at(mesh(G.coils, M.copper), 0, 0.012, 0); g.add(coils); reg(coils, 'winding', V3(0, 0.035, 0));
+  // 磁石
+  const mags = at(mesh(G.magnets, M.magnet), 0, 0.012, 0); g.add(mags); reg(mags, 'magnet', V3(0, 0.07, 0));
+  // ベル
+  const bell = new THREE.Group();
+  bell.add(at(mesh(cylGeo(0.0175, 0.0175, 0.024, 64, true), M.bellWall), 0, 0.0175, 0));
+  const ring = (ri, ro, y, mat) => { const m = mesh(new THREE.RingGeometry(ri, ro, 64), mat); m.rotation.x = -Math.PI / 2; at(m, 0, y, 0); return m; };
+  bell.add(ring(0.0157, 0.0175, 0.0056, M.bellSolid));
+  bell.add(ring(0.0075, 0.0175, 0.0296, M.bellTop));
+  bell.add(ring(0.0075, 0.0175, 0.0276, M.bellTop));
+  bell.add(at(mesh(cylGeo(0.0065, 0.0075, 0.004), M.alu), 0, 0.0316, 0));
+  g.add(bell); reg(bell, 'bell', V3(0, 0.10, 0));
+  // シャフト
+  const shaft = new THREE.Group();
+  shaft.add(at(mesh(cylGeo(0.002, 0.002, 0.041, 16), M.steel), 0, 0.0165, 0));
+  shaft.add(at(mesh(new THREE.TorusGeometry(0.0027, 0.0005, 6, 24), M.steel).rotateX(Math.PI / 2), 0, -0.003, 0));
+  shaft.add(at(mesh(cylGeo(0.005, 0.005, 0.006, 24), M.alu), 0, 0.0365, 0));
+  g.add(shaft); reg(shaft, 'shaft', V3(0, 0.14, 0));
+  // プロペラ(回転グループ)
+  const propG = new THREE.Group(); propG.name = 'prop'; at(propG, 0, 0.0435, 0);
+  propG.add(mesh(dir > 0 ? G.propCCW : G.propCW, dir > 0 ? M.propCCW : M.propCW));
+  propG.add(mesh(G.hub, M.propHub));
+  const dirRing = mesh(new THREE.TorusGeometry(0.0108, 0.0008, 8, 48), new THREE.MeshStandardMaterial({ color: dir > 0 ? CCW_COLOR : CW_COLOR, roughness: 0.4 })); dirRing.rotation.x = Math.PI / 2; at(dirRing, 0, 0.0045, 0); propG.add(dirRing);
+  const nut = new THREE.Group(); at(nut, 0, 0.005, 0);
+  nut.add(at(mesh(cylGeo(0.0045, 0.0045, 0.0055, 6), M.aluOrange), 0, 0.00275, 0));
+  nut.add(at(mesh(cylGeo(0.0028, 0.0038, 0.0025, 24), M.aluOrange), 0, 0.0068, 0));
+  propG.add(nut); reg(nut, 'propNut', V3(0, 0.045, 0));
+  g.add(propG); reg(propG, 'prop', V3(0, 0.17, 0));
+  // 回転ブラーディスク
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(0.156, 64), M.propDisc.clone()); disc.rotation.x = -Math.PI / 2; at(disc, 0, 0.0435, 0); disc.renderOrder = 5; disc.userData.noPart = true; disc.userData.noPick = true; g.add(disc);
+  return { group: g, prop: propG, disc, bell, mags, dir };
+}
+
+// ---- 矢印ヘルパー ----
+function arrowMesh(color, len = 0.08, r = 0.0035) {
+  const mat = new THREE.MeshBasicMaterial({ color, toneMapped: false, transparent: true, opacity: 0.92 });
+  const g = new THREE.Group();
+  const shaft = new THREE.Mesh(cylGeo(r, r, 1, 12), mat); shaft.position.y = 0.5; g.add(shaft);
+  const head = new THREE.Mesh(new THREE.ConeGeometry(r * 2.6, r * 6, 16), mat); head.position.y = 1; g.add(head);
+  g.userData.setLength = (L) => { shaft.scale.set(1, L, 1); shaft.position.y = L / 2; head.position.y = L + r * 3; };
+  g.userData.setLength(len); g.userData.mat = mat;
+  return g;
+}
+function rotationArc(dir, radius = 0.056) {
+  const color = dir > 0 ? CCW_COLOR : CW_COLOR;
+  const mat = new THREE.MeshBasicMaterial({ color, toneMapped: false, transparent: true, opacity: 0.95 });
+  const g = new THREE.Group();
+  const arcLen = Math.PI * 1.6;
+  const torus = new THREE.Mesh(new THREE.TorusGeometry(radius, 0.0022, 8, 64, arcLen), mat); torus.rotation.x = -Math.PI / 2; g.add(torus);
+  const end = arcLen; const px = radius * Math.cos(end), pz = -radius * Math.sin(end);
+  const tangent = V3(-Math.sin(end), 0, -Math.cos(end)).normalize();
+  const cone = new THREE.Mesh(new THREE.ConeGeometry(0.0075, 0.018, 16), mat); cone.position.set(px, 0, pz); cone.quaternion.setFromUnitVectors(UP, tangent); g.add(cone);
+  if (dir < 0) g.scale.z = -1;
+  g.userData.mat = mat;
+  return g;
+}
+
+// ---- 全体組み立て ----
+function buildDrone(M) {
+  const root = new THREE.Group(); root.name = 'drone';
+  const parts = [], pick = [], wires = [], motors = [];
+  const G = motorGeometries();
+  const idxCount = {};
+  function reg(obj, key, explode, opts = {}) {
+    const idx = (idxCount[key] = (idxCount[key] || 0) + 1) - 1;
+    const p = { key, idx, obj, home: obj.position.clone(), explode: explode.clone(), meshes: [], coarse: !!opts.coarse, label: opts.label || null, hidden: false };
+    obj.userData.part = p;
+    obj.traverse(m => { if (m.isMesh && !m.userData.noPart) { p.meshes.push(m); if (!m.userData.fine) m.userData.fine = p; if (opts.coarse) m.userData.coarse = p; if (!m.userData.noPick) pick.push(m); } });
+    parts.push(p); return p;
+  }
+  const rw = (m) => { wires.push(m); m.userData.wire = true; return m; };
+
+  // --- プレート ---
+  const bottomHoles = [
+    { w: 0.024, h: 0.0045, rr: 0.002, x: 0.0255, s: 0.038 }, { w: 0.024, h: 0.0045, rr: 0.002, x: -0.0255, s: 0.038 },
+    { w: 0.024, h: 0.0045, rr: 0.002, x: 0.0255, s: -0.033 }, { w: 0.024, h: 0.0045, rr: 0.002, x: -0.0255, s: -0.033 },
+    { r: 0.0045, x: 0.016, s: 0.072 }, { r: 0.006, x: -0.05, s: 0.08 }, { r: 0.006, x: 0.05, s: 0.08 },
+  ];
+  const bottom = mesh(plateGeometry(0.150, 0.170, 0.018, bottomHoles, 0.0025, 0.010), M.carbonPlate);
+  root.add(bottom); reg(bottom, 'frameBottom', V3(0, -0.03, 0), { label: V3(-0.07, 0.0, -0.06) });
+  const topHoles = [{ w: 0.044, h: 0.044, rr: 0.006, x: 0, s: 0 }, { r: 0.0035, x: -0.03, s: -0.036 }, { r: 0.005, x: 0.052, s: 0.052 }, { r: 0.005, x: -0.052, s: 0.052 }, { r: 0.005, x: 0.052, s: -0.052 }, { r: 0.005, x: -0.052, s: -0.052 }];
+  const top = at(mesh(plateGeometry(0.150, 0.150, 0.018, topHoles, 0.002), M.carbonPlate), 0, 0.0375, 0);
+  root.add(top); reg(top, 'frameTop', V3(0, 0.10, 0), { label: V3(0.05, 0.004, -0.045) });
+  // スタンドオフ
+  const standoffs = new THREE.Group();
+  const soPos = [[0.062, 0.025], [-0.062, 0.025], [0.062, -0.025], [-0.062, -0.025], [0.030, 0.062], [-0.030, 0.062], [0.030, -0.062], [-0.030, -0.062]];
+  for (const [x, z] of soPos) standoffs.add(at(mesh(cylGeo(0.0028, 0.0028, 0.035, 6), M.aluOrange), x, 0.020, z));
+  root.add(standoffs); reg(standoffs, 'standoff', V3(0, 0.05, 0));
+
+  // --- アーム ×4 ---
+  const ARMS = [
+    { id: 'M1', u: V3(1, 0, -1).normalize(), dir: 1, led: M.ledGreen },
+    { id: 'M2', u: V3(1, 0, 1).normalize(), dir: -1, led: M.ledWhite },
+    { id: 'M3', u: V3(-1, 0, 1).normalize(), dir: 1, led: M.ledWhite },
+    { id: 'M4', u: V3(-1, 0, -1).normalize(), dir: -1, led: M.ledRed },
+  ];
+  const screwList = []; // {p: Vector3(world of root), flip: bool}
+  ARMS.forEach((A, k) => {
+    const ag = new THREE.Group(); ag.name = 'arm' + A.id; ag.rotation.y = Math.atan2(-A.u.z, A.u.x); root.add(ag);
+    const clamp = at(mesh(rboxGeo(0.030, 0.020, 0.022, 0.003), M.aluOrange), 0.055, 0.020, 0); ag.add(clamp); reg(clamp, 'armClamp', V3(0.06, 0, 0));
+    const tube = mesh(cylGeo(0.008, 0.008, 0.241, 40), M.carbonArm); tube.rotation.z = -Math.PI / 2; at(tube, 0.1655, 0.020, 0); ag.add(tube);
+    reg(tube, 'arm', V3(0.12, 0, 0), { label: k === 1 ? V3(0.0, 0.008, 0.0) : null });
+    // ESC
+    const esc = new THREE.Group(); at(esc, 0.105, 0.0311, 0);
+    esc.add(mesh(rboxGeo(0.032, 0.0062, 0.015, 0.002), M.heatShrink));
+    const lbl = mesh(new THREE.PlaneGeometry(0.027, 0.0105), M.escLabel, { cast: false }); lbl.rotation.x = -Math.PI / 2; lbl.rotation.z = 0; at(lbl, 0, 0.00325, 0); esc.add(lbl);
+    ag.add(esc); reg(esc, 'esc', V3(0.06, 0.05, 0), { label: k === 2 ? V3(0, 0.004, 0) : null });
+    // モーターマウント + LED
+    const mount = new THREE.Group(); at(mount, 0.275, 0, 0);
+    mount.add(at(mesh(rboxGeo(0.034, 0.022, 0.026, 0.003), M.aluDark), 0, 0.020, 0));
+    mount.add(at(mesh(cylGeo(0.017, 0.017, 0.003, 40), M.aluDark), 0, 0.0325, 0));
+    ag.add(mount); reg(mount, 'motorMount', V3(0.12, 0.02, 0));
+    const led = at(mesh(rboxGeo(0.006, 0.005, 0.012, 0.0015), A.led), 0.294, 0.014, 0); ag.add(led);
+    const glow = new THREE.Sprite(M.glow(A.led.emissive.getHex())); glow.scale.set(0.045, 0.045, 1); glow.position.set(0.004, 0, 0); glow.renderOrder = 6; led.add(glow);
+    reg(led, 'led', V3(0.14, 0.02, 0), { label: k === 0 ? V3(0.004, 0, 0) : null });
+    // モーター
+    const mo = buildMotor(M, G, A.dir, reg); mo.group.rotation.y = Math.PI / 4; at(mo.group, 0.275, 0.034, 0); ag.add(mo.group);
+    const mp = reg(mo.group, 'motor', V3(0.12, 0.075, 0), { coarse: true, label: k === 0 ? V3(0, 0.02, 0) : null });
+    mo.part = mp; mo.arm = ag; mo.id = A.id; mo.u = A.u; motors.push(mo);
+    // プロペラ用ラベルは M4 のディスク上の固定点
+    if (k === 3) { const anchor = new THREE.Object3D(); at(anchor, 0.10, 0.045, 0); mo.group.add(anchor); mp.propAnchor = anchor; }
+    // 配線: 相線 3本
+    const wg = new THREE.Group();
+    for (let i = -1; i <= 1; i++) { const z = i * 0.0028; wg.add(rw(mesh(tubeGeo([V3(0.121, 0.0322, z), V3(0.150, 0.0295, z), V3(0.200, 0.0293, z), V3(0.245, 0.0300, z), V3(0.262, 0.0350, z * 0.6)], 0.0012, 40), M.wireBlack))); }
+    // 電源線(赤/黒)と信号線
+    wg.add(rw(mesh(tubeGeo([V3(0.089, 0.0318, 0.0025), V3(0.070, 0.0300, 0.0025), V3(0.048, 0.0250, 0.0022), V3(0.031, 0.0140, 0.002), V3(0.022, 0.0088, 0.002)], 0.0017, 40), M.wireRed)));
+    wg.add(rw(mesh(tubeGeo([V3(0.089, 0.0318, -0.0025), V3(0.070, 0.0300, -0.0025), V3(0.048, 0.0250, -0.0022), V3(0.031, 0.0140, -0.002), V3(0.022, 0.0088, -0.002)], 0.0017, 40), M.wireBlack)));
+    wg.add(rw(mesh(tubeGeo([V3(0.089, 0.0330, 0), V3(0.060, 0.0300, 0), V3(0.036, 0.0240, 0), V3(0.026, 0.0205, 0)], 0.0007, 30), M.wireWhite)));
+    for (const x of [0.16, 0.235]) { const zt = mesh(new THREE.TorusGeometry(0.0093, 0.0006, 6, 32), M.plasticBlack); zt.rotation.y = Math.PI / 2; at(zt, x, 0.0205, 0); wg.add(zt); }
+    ag.add(wg); reg(wg, 'wiring', V3(0.06, 0.02, 0));
+    // ネジ位置(root座標): クランプ上下・モーターマウント
+    for (const d of [0.047, 0.063]) { screwList.push({ p: V3(A.u.x * d, 0.0395, A.u.z * d), flip: false }); screwList.push({ p: V3(A.u.x * d, -0.0005, A.u.z * d), flip: true }); }
+    for (let q = 0; q < 4; q++) { const a = q * Math.PI / 2 + Math.PI / 4 + ag.rotation.y + Math.PI / 4; screwList.push({ p: V3(A.u.x * 0.275 + Math.cos(a) * 0.0165, 0.034 + 0.0033, A.u.z * 0.275 - Math.sin(a) * 0.0165), flip: false }); }
+  });
+  for (const [x, z] of soPos) { screwList.push({ p: V3(x, 0.0395, z), flip: false }); screwList.push({ p: V3(x, -0.0005, z), flip: true }); }
+
+  // --- FCスタック ---
+  const pcbMats = (top) => [M.pcbEdge, M.pcbEdge, top, M.pcbEdge, M.pcbEdge, M.pcbEdge];
+  const pdb = new THREE.Group();
+  pdb.add(at(mesh(new THREE.BoxGeometry(0.036, 0.0016, 0.036), pcbMats(M.pcbPDB)), 0, 0.0073, 0));
+  for (const [x, z] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) pdb.add(at(mesh(cylGeo(0.0025, 0.0025, 0.004, 12), M.plasticBlack), x * 0.01525, 0.0045, z * 0.01525));
+  root.add(pdb); reg(pdb, 'pdb', V3(0, 0.025, 0));
+  const cap = new THREE.Group(); at(cap, 0.028, 0.0125, 0.0);
+  const capBody = mesh(cylGeo(0.005, 0.005, 0.016, 24), M.plasticBlack); capBody.rotation.z = Math.PI / 2; cap.add(capBody);
+  const capStripe = mesh(cylGeo(0.00505, 0.00505, 0.004, 24), M.plasticGray); capStripe.rotation.z = Math.PI / 2; at(capStripe, -0.005, 0, 0); cap.add(capStripe);
+  cap.add(rw(mesh(tubeGeo([V3(-0.008, 0, 0.002), V3(-0.012, -0.003, 0.002), V3(-0.014, -0.0055, 0.004)], 0.0008, 12), M.wireRed)));
+  cap.add(rw(mesh(tubeGeo([V3(-0.008, 0, -0.002), V3(-0.012, -0.003, -0.002), V3(-0.014, -0.0055, -0.004)], 0.0008, 12), M.wireBlack)));
+  root.add(cap); reg(cap, 'capacitor', V3(0.02, 0.025, 0));
+  const fc = new THREE.Group();
+  fc.add(at(mesh(new THREE.BoxGeometry(0.036, 0.0016, 0.036), pcbMats(M.pcbFC)), 0, 0.0189, 0));
+  for (const [x, z] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) { fc.add(at(mesh(cylGeo(0.0025, 0.0025, 0.010, 12), M.plasticBlack), x * 0.01525, 0.0131, z * 0.01525)); const gr = mesh(new THREE.TorusGeometry(0.0024, 0.0009, 8, 20), M.rubber); gr.rotation.x = Math.PI / 2; at(gr, x * 0.01525, 0.0192, z * 0.01525); fc.add(gr); }
+  fc.add(at(mesh(new THREE.BoxGeometry(0.010, 0.0012, 0.010), M.chip), 0.004, 0.0203, 0.003));
+  fc.add(at(mesh(new THREE.BoxGeometry(0.003, 0.0009, 0.003), M.chip), -0.008, 0.0202, -0.006));
+  fc.add(at(mesh(new THREE.BoxGeometry(0.002, 0.0008, 0.002), M.chip), -0.010, 0.0201, 0.006));
+  fc.add(at(mesh(rboxGeo(0.009, 0.0032, 0.007, 0.001), M.steel), 0.0155, 0.0213, 0.009));
+  for (const [x, z, ry] of [[-0.016, -0.004, Math.PI / 2], [-0.016, 0.006, Math.PI / 2], [0.004, -0.0165, 0], [-0.006, -0.0165, 0]]) { const c = mesh(new THREE.BoxGeometry(0.0075, 0.0035, 0.003), M.connector); c.rotation.y = ry; at(c, x, 0.0215, z); fc.add(c); }
+  fc.add(at(mesh(new THREE.BoxGeometry(0.0012, 0.0006, 0.0012), M.ledBlue), 0.012, 0.02, -0.013));
+  fc.add(at(mesh(new THREE.BoxGeometry(0.0012, 0.0006, 0.0012), M.ledGreen), 0.014, 0.02, -0.013));
+  root.add(fc); reg(fc, 'fc', V3(0, 0.055, 0), { label: V3(0, 0.02, 0) });
+  const buzzer = new THREE.Group(); at(buzzer, -0.011, 0.0227, 0.011);
+  buzzer.add(mesh(cylGeo(0.006, 0.006, 0.006, 24), M.plasticBlack)); buzzer.add(at(mesh(cylGeo(0.0015, 0.0015, 0.0004, 12), M.chip), 0, 0.003, 0));
+  root.add(buzzer); reg(buzzer, 'buzzer', V3(0, 0.075, 0));
+
+  // --- 受信機 ---
+  const rx = new THREE.Group();
+  rx.add(at(mesh(rboxGeo(0.030, 0.008, 0.018, 0.0015), M.heatShrink), 0, 0.010, 0.050));
+  for (const sx of [1, -1]) {
+    rx.add(rw(mesh(tubeGeo([V3(sx * 0.006, 0.010, 0.059), V3(sx * 0.010, 0.008, 0.070), V3(sx * 0.014, 0.006, 0.076)], 0.0012, 20), M.wireBlack)));
+    rx.add(tubeBetween(V3(sx * 0.014, 0.006, 0.076), V3(sx * 0.046, -0.022, 0.116), 0.0016, M.antennaWhite));
+  }
+  root.add(rx); reg(rx, 'rx', V3(0, 0, 0.08), { label: V3(0.04, -0.018, 0.11) });
+  // --- 映像送信機 ---
+  const vtx = new THREE.Group(); at(vtx, 0.040, 0.040, 0.046);
+  vtx.add(at(mesh(rboxGeo(0.024, 0.006, 0.024, 0.002), M.heatShrink), 0, 0.003, 0));
+  vtx.add(at(mesh(cylGeo(0.0032, 0.0032, 0.009, 16), M.alu), 0, 0.0105, 0));
+  vtx.add(at(mesh(cylGeo(0.0025, 0.0025, 0.040, 16), M.plasticBlack), 0, 0.034, 0));
+  const mush = mesh(new THREE.SphereGeometry(0.0085, 32, 20), M.plasticBlack); mush.scale.set(1, 0.62, 1); at(mush, 0, 0.056, 0); vtx.add(mush);
+  const mushRing = mesh(new THREE.TorusGeometry(0.0062, 0.0008, 8, 32), M.aluOrange); mushRing.rotation.x = Math.PI / 2; at(mushRing, 0, 0.0525, 0); vtx.add(mushRing);
+  root.add(vtx); reg(vtx, 'vtx', V3(0.03, 0.14, 0), { label: V3(0, 0.06, 0) });
+  // --- GNSS ---
+  const gps = new THREE.Group(); at(gps, -0.035, 0.040, 0.046);
+  gps.add(at(mesh(rboxGeo(0.016, 0.006, 0.016, 0.002), M.aluDark), 0, 0.003, 0));
+  gps.add(at(mesh(cylGeo(0.004, 0.004, 0.090, 24), M.carbonMast), 0, 0.051, 0));
+  const puck = mesh(new THREE.LatheGeometry([[0, 0], [0.028, 0], [0.030, 0.002], [0.030, 0.010], [0.028, 0.013], [0.020, 0.0155], [0, 0.016]].map(p => new THREE.Vector2(p[0], p[1])), 64), M.gpsBody); at(puck, 0, 0.096, 0); gps.add(puck);
+  const gtop = mesh(new THREE.CircleGeometry(0.019, 48), M.gpsTop, { cast: false }); gtop.rotation.x = -Math.PI / 2; at(gtop, 0, 0.1122, 0); gps.add(gtop);
+  root.add(gps); reg(gps, 'gps', V3(0, 0.16, 0), { label: V3(0, 0.105, 0) });
+  const gpsCable = rw(mesh(tubeGeo([V3(-0.030, 0.134, 0.046), V3(-0.030, 0.10, 0.046), V3(-0.030, 0.060, 0.045), V3(-0.030, 0.041, 0.036), V3(-0.024, 0.030, 0.026), V3(-0.018, 0.0215, 0.012)], 0.0014, 48), M.wireBlack));
+  root.add(gpsCable); reg(gpsCable, 'wiring', V3(0, 0.0, 0));
+
+  // --- バッテリー ---
+  const bat = new THREE.Group(); at(bat, 0, -0.0235, 0.005);
+  const shellMat = M.batteryShell.clone();
+  const shell = mesh(rboxGeo(0.048, 0.045, 0.135, 0.004), shellMat); bat.add(shell);
+  const lblTop = mesh(new THREE.PlaneGeometry(0.040, 0.100), M.batteryLabel, { cast: false }); lblTop.rotation.x = -Math.PI / 2; lblTop.rotation.z = Math.PI / 2; at(lblTop, 0, 0.02255, 0); bat.add(lblTop);
+  const lblSide = mesh(new THREE.PlaneGeometry(0.100, 0.036), M.batteryLabel, { cast: false }); lblSide.rotation.y = Math.PI / 2; at(lblSide, 0.02405, 0, 0); bat.add(lblSide);
+  const lblSide2 = mesh(new THREE.PlaneGeometry(0.100, 0.036), M.batteryLabel, { cast: false }); lblSide2.rotation.y = -Math.PI / 2; at(lblSide2, -0.02405, 0, 0); bat.add(lblSide2);
+  const cells = new THREE.Group();
+  for (let k = 0; k < 6; k++) cells.add(at(mesh(new THREE.BoxGeometry(0.0062, 0.040, 0.128), k % 2 ? M.cell : M.cell), -0.0175 + k * 0.007, 0, 0));
+  bat.add(cells);
+  root.add(bat);
+  reg(cells, 'cells', V3(0, 0, 0));
+  const batPart = reg(bat, 'battery', V3(0, -0.10, 0), { coarse: true, label: V3(0.024, 0.0, -0.05) }); batPart.shellMat = shellMat; batPart.shell = shell;
+  // ストラップ ×2
+  for (const z of [0.043, -0.033]) {
+    const s = roundedRectPath(new THREE.Shape(), 0.054, 0.0525, 0.006, 0, -0.0215);
+    s.holes.push(roundedRectPath(new THREE.Path(), 0.0505, 0.049, 0.0045, 0, -0.0215));
+    const strap = mesh(new THREE.ExtrudeGeometry(s, { depth: 0.020, bevelEnabled: false, curveSegments: 8 }), M.strap); at(strap, 0, 0, z - 0.010);
+    root.add(strap); reg(strap, 'strap', V3(0, -0.12, 0));
+  }
+  // XT60 + リード
+  const xt = new THREE.Group();
+  xt.add(at(mesh(rboxGeo(0.016, 0.009, 0.016, 0.001), M.xt60), 0.018, -0.016, -0.075));
+  xt.add(rw(mesh(tubeGeo([V3(0.0155, -0.028, -0.0625), V3(0.0155, -0.026, -0.068), V3(0.0155, -0.019, -0.070), V3(0.0155, -0.016, -0.067)], 0.0019, 24), M.wireRed)));
+  xt.add(rw(mesh(tubeGeo([V3(0.0205, -0.028, -0.0625), V3(0.0205, -0.026, -0.068), V3(0.0205, -0.019, -0.070), V3(0.0205, -0.016, -0.067)], 0.0019, 24), M.wireBlack)));
+  root.add(xt); reg(xt, 'xt60', V3(0, -0.10, -0.02));
+  const pig = new THREE.Group();
+  pig.add(rw(mesh(tubeGeo([V3(0.0155, -0.016, -0.083), V3(0.0155, -0.010, -0.086), V3(0.0155, 0.002, -0.080), V3(0.0155, 0.0075, -0.055), V3(0.0150, 0.009, -0.020)], 0.0019, 40), M.wireRed)));
+  pig.add(rw(mesh(tubeGeo([V3(0.0205, -0.016, -0.083), V3(0.0205, -0.010, -0.086), V3(0.0205, 0.002, -0.080), V3(0.0205, 0.0075, -0.055), V3(0.0110, 0.009, -0.018)], 0.0019, 40), M.wireBlack)));
+  root.add(pig); reg(pig, 'wiring', V3(0, 0, 0));
+  // バランスリード
+  const bal = new THREE.Group();
+  const balCols = [0x141416, 0x6b3a1e, 0xc2201e, 0xe8642a, 0xe0b000, 0x2a9d3a, 0x2a6be0];
+  balCols.forEach((c, i) => bal.add(rw(mesh(tubeGeo([V3(-0.013 + i * 0.0012, -0.031, -0.0625), V3(-0.013 + i * 0.0012, -0.034, -0.068), V3(-0.013 + i * 0.0012, -0.037, -0.072)], 0.0005, 12), new THREE.MeshStandardMaterial({ color: c, roughness: 0.7 })))));
+  bal.add(at(mesh(new THREE.BoxGeometry(0.011, 0.005, 0.006), M.connector), -0.0094, -0.037, -0.0755));
+  root.add(bal); reg(bal, 'balance', V3(0, -0.10, -0.01));
+
+  // --- ジンバル + カメラ ---
+  const gim = new THREE.Group(); at(gim, 0, 0, -0.085);
+  gim.add(at(mesh(rboxGeo(0.050, 0.002, 0.040, 0.002), M.carbonPlate), 0, -0.011, 0));
+  const yawM = mesh(cylGeo(0.014, 0.014, 0.016, 40), M.aluDark); at(yawM, 0, -0.021, 0); gim.add(yawM);
+  gim.add(at(mesh(new THREE.TorusGeometry(0.0138, 0.0008, 8, 48).rotateX(Math.PI / 2), M.alu), 0, -0.029, 0));
+  gim.add(at(mesh(rboxGeo(0.012, 0.005, 0.050, 0.0015), M.aluDark), 0, -0.0315, 0.024));
+  gim.add(at(mesh(rboxGeo(0.012, 0.056, 0.005, 0.0015), M.aluDark), 0, -0.057, 0.048));
+  const rollM = mesh(cylGeo(0.012, 0.012, 0.014, 40), M.aluDark); rollM.rotation.x = Math.PI / 2; at(rollM, 0, -0.085, 0.036); gim.add(rollM);
+  gim.add(at(mesh(rboxGeo(0.040, 0.012, 0.005, 0.0015), M.aluDark), 0.017, -0.085, 0.0265));
+  gim.add(at(mesh(rboxGeo(0.005, 0.012, 0.028, 0.0015), M.aluDark), 0.0345, -0.085, 0.010));
+  const pitchM = mesh(cylGeo(0.011, 0.011, 0.012, 40), M.aluDark); pitchM.rotation.z = Math.PI / 2; at(pitchM, 0.024, -0.085, 0); gim.add(pitchM);
+  gim.add(rw(mesh(tubeGeo([V3(0, -0.013, 0.012), V3(0.004, -0.02, 0.03), V3(0.004, -0.05, 0.044), V3(0.008, -0.075, 0.040), V3(0.030, -0.079, 0.026), V3(0.036, -0.079, 0.012)], 0.0012, 40), M.wireBlack)));
+  root.add(gim); reg(gim, 'gimbal', V3(0, -0.20, -0.06), { label: V3(0.02, -0.05, 0.04) });
+  const cam = new THREE.Group(); at(cam, 0, -0.085, -0.085);
+  cam.add(mesh(rboxGeo(0.036, 0.030, 0.034, 0.003), M.plasticBlack));
+  const lensRing = mesh(cylGeo(0.0105, 0.0105, 0.010, 40), M.lensRing); lensRing.rotation.x = Math.PI / 2; at(lensRing, 0, 0.001, -0.021); cam.add(lensRing);
+  const lensGlass = mesh(cylGeo(0.0088, 0.0088, 0.002, 40), M.lens); lensGlass.rotation.x = Math.PI / 2; at(lensGlass, 0, 0.001, -0.0255); cam.add(lensGlass);
+  cam.add(at(mesh(new THREE.SphereGeometry(0.0045, 24, 16), M.chip), 0, 0.001, -0.022));
+  cam.add(at(mesh(new THREE.BoxGeometry(0.0012, 0.0006, 0.0012), M.ledRed), 0.012, 0.0153, 0.008));
+  root.add(cam); reg(cam, 'camera', V3(0, -0.24, -0.10), { label: V3(0, -0.012, -0.02) });
+  const dampers = new THREE.Group();
+  for (const [x, z] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) dampers.add(at(mesh(new THREE.SphereGeometry(0.0055, 24, 16), M.rubber), x * 0.018, -0.005, -0.085 + z * 0.012));
+  root.add(dampers); reg(dampers, 'damper', V3(0, -0.10, -0.04));
+  for (const [x, z] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) screwList.push({ p: V3(x * 0.018, -0.0125, -0.085 + z * 0.012), flip: true });
+
+  // --- 降着装置 ---
+  for (const sx of [1, -1]) {
+    const lg = new THREE.Group();
+    for (const sz of [1, -1]) {
+      lg.add(at(mesh(rboxGeo(0.016, 0.010, 0.016, 0.002), M.aluDark), sx * 0.055, -0.006, sz * 0.045));
+      lg.add(tubeBetween(V3(sx * 0.055, -0.006, sz * 0.045), V3(sx * 0.112, -0.148, sz * 0.088), 0.005, M.carbonLeg));
+      lg.add(at(mesh(new THREE.SphereGeometry(0.0085, 24, 16), M.aluDark), sx * 0.112, -0.148, sz * 0.088));
+      for (const dz of [-0.005, 0.005]) screwList.push({ p: V3(sx * 0.055, -0.0115, sz * 0.045 + dz), flip: true });
+    }
+    const skid = mesh(cylGeo(0.006, 0.006, 0.27, 24), M.carbonLeg); skid.rotation.x = Math.PI / 2; at(skid, sx * 0.112, -0.150, 0); lg.add(skid);
+    for (const sz of [1, -1]) { const cap = mesh(new THREE.CapsuleGeometry(0.0068, 0.014, 6, 16), M.rubber); cap.rotation.x = Math.PI / 2; at(cap, sx * 0.112, -0.150, sz * 0.138); lg.add(cap); }
+    root.add(lg); reg(lg, 'landingGear', V3(sx * 0.08, -0.14, 0), { label: sx > 0 ? V3(0.112, -0.15, 0.10) : null });
+  }
+
+  // --- ネジ(インスタンス) ---
+  const headGeo = cylGeo(0.0017, 0.0017, 0.0015, 16); const sockGeo = cylGeo(0.0008, 0.0008, 0.0003, 6);
+  const heads = new THREE.InstancedMesh(headGeo, M.steel, screwList.length); const socks = new THREE.InstancedMesh(sockGeo, M.chip, screwList.length);
+  heads.castShadow = true; heads.receiveShadow = true;
+  const mtx = new THREE.Matrix4(), q = new THREE.Quaternion(), s1 = V3(1, 1, 1), tmp = V3();
+  screwList.forEach((sc, i) => {
+    q.setFromAxisAngle(V3(1, 0, 0), sc.flip ? Math.PI : 0);
+    tmp.copy(sc.p).y += sc.flip ? -0.00075 : 0.00075; mtx.compose(tmp, q, s1); heads.setMatrixAt(i, mtx);
+    tmp.y += sc.flip ? -0.0008 : 0.0008; mtx.compose(tmp, q, s1); socks.setMatrixAt(i, mtx);
+  });
+  socks.userData.noPick = true;
+  const screws = new THREE.Group(); screws.add(heads, socks); root.add(screws); reg(screws, 'screws', V3(0, 0, 0));
+
+  // --- 矢印(推力・回転方向) ---
+  const arrows = { thrust: [], rot: [], move: null, yaw: null };
+  motors.forEach(mo => {
+    const th = arrowMesh(0xffffff, 0.06, 0.0035); th.position.set(0, 0.05, 0); th.visible = false; mo.group.add(th); arrows.thrust.push(th);
+    const rot = rotationArc(mo.dir); rot.position.set(0, 0.058, 0); rot.visible = false; mo.group.add(rot); arrows.rot.push(rot);
+  });
+  const move = arrowMesh(0xef6a2d, 0.14, 0.005); move.visible = false; root.add(move); arrows.move = move;
+  const yaw = rotationArc(-1, 0.20); yaw.position.set(0, 0.16, 0); yaw.visible = false; root.add(yaw); arrows.yaw = yaw;
+
+  // 部品ラベル用アンカー(プロペラはM4ディスク上の点)
+  const propPart = parts.find(p => p.key === 'prop' && p.idx === 3);
+  if (propPart) propPart.labelObj = motors[3].part.propAnchor;
+
+  return { root, parts, pick, wires, motors, arrows, batPart };
+}
+
+// ===== アプリ本体: 描画・操作・UI =====
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const smoothstep = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const easeInOut = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const narrow = () => matchMedia('(max-width: 1100px)').matches;
+const svgNS = 'http://www.w3.org/2000/svg';
+const ICON = {
+  eye: '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-5.5 8-5.5 8 5.5 8 5.5-3 5.5-8 5.5S2 10 2 10z"/><circle cx="10" cy="10" r="2.4"/></svg>',
+  eyeOff: '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l14 14M8.6 8.7A2.4 2.4 0 0 0 11.3 11.4M6.2 6.3C3.6 7.9 2 10 2 10s3 5.5 8 5.5c1.5 0 2.8-.5 3.9-1.1M9 4.6C9.3 4.5 9.7 4.5 10 4.5c5 0 8 5.5 8 5.5s-.7 1.3-2 2.6"/></svg>',
+};
+const LIST_ORDER = ['frameTop', 'frameBottom', 'arm', 'armClamp', 'motorMount', 'standoff', 'screws', 'motor', 'bell', 'stator', 'winding', 'magnet', 'shaft', 'motorBase', 'prop', 'propNut', 'esc', 'fc', 'pdb', 'capacitor', 'buzzer', 'battery', 'cells', 'xt60', 'balance', 'strap', 'wiring', 'gps', 'rx', 'vtx', 'led', 'gimbal', 'camera', 'damper', 'landingGear'];
+const SUB = { bell: 'motor', stator: 'motor', winding: 'motor', magnet: 'motor', shaft: 'motor', motorBase: 'motor', cells: 'battery', propNut: 'prop' };
+const PER_MOTOR = new Set(['motor', 'prop', 'esc', 'arm', 'bell', 'stator', 'winding', 'magnet', 'shaft', 'motorBase', 'propNut', 'led', 'armClamp', 'motorMount']);
+
+const S = { mode: 'normal', explode: 0, explodeT: 0, power: 0, flight: null, flightT: 0, labels: true, arrows: false, autoRotate: !reduceMotion, shadows: true,
+  selected: null, selAll: false, hovered: null, isolated: null, quality: 'auto', qLevel: 2, lastInteract: performance.now(), tween: null, lastQChange: 0 };
+
+const T0 = performance.now(); const TL = {}; const mark = k => { TL[k] = Math.round(performance.now() - T0); };
+// ---------- レンダラー・シーン ----------
+const canvas = $('#gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance', stencil: false });
+let W = 1, H = 1, DPR = Math.min(window.devicePixelRatio || 1, 2);
+renderer.setPixelRatio(DPR);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.localClippingEnabled = true; renderer.info.autoReset = false;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 1, 0.01, 40);
+camera.position.set(0.78, 0.50, -0.82);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.08; controls.minDistance = 0.10; controls.maxDistance = 3.2;
+controls.maxPolarAngle = Math.PI * 0.68; controls.autoRotateSpeed = 0.45; controls.target.set(0, 0.0, 0);
+controls.addEventListener('start', () => { S.lastInteract = performance.now(); S.tween = null; controls.autoRotate = false; });
+
+mark('gl'); const M = makeMaterials(renderer.capabilities.getMaxAnisotropy()); mark('mat');
+const D = buildDrone(M); mark('geo');
+scene.add(D.root);
+$('#loadMsg').textContent = '照明と材質を準備しています…';
+
+// 環境光(スタジオ)
+function makeStudioEnv() {
+  const env = new THREE.Scene();
+  const emit = (i, c = 0xffffff) => { const m = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }); m.color.set(c).multiplyScalar(i); return m; };
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(20, 32, 16), new THREE.MeshBasicMaterial({ side: THREE.BackSide, vertexColors: true }));
+  { const g = dome.geometry, pos = g.attributes.position, col = []; for (let i = 0; i < pos.count; i++) { const t = clamp(pos.getY(i) / 20 * 0.5 + 0.5, 0, 1); const v = 0.10 + 0.32 * t * t; col.push(v, v * 1.02, v * 1.06); } g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); }
+  env.add(dome);
+  const panel = (w, h, i, c, pos, look) => { const p = new THREE.Mesh(new THREE.PlaneGeometry(w, h), emit(i, c)); p.position.copy(pos); p.lookAt(look || new THREE.Vector3()); env.add(p); };
+  panel(9, 9, 2.6, 0xffffff, new THREE.Vector3(0, 9, 0));                  // 天井ソフトボックス
+  panel(6, 3, 2.2, 0xfff1e0, new THREE.Vector3(7, 4, -6));                  // キー側(暖)
+  panel(5, 2.5, 1.5, 0xdde8ff, new THREE.Vector3(-8, 3, 7));                // リム側(寒)
+  panel(3, 6, 1.2, 0xffffff, new THREE.Vector3(-9, 1, -5));                 // 左の縦ストリップ
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), emit(0.12)); floor.rotation.x = -Math.PI / 2; floor.position.y = -1; env.add(floor);
+  return env;
+}
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(makeStudioEnv(), 0.04).texture; pmrem.dispose();
+scene.environmentIntensity = 1.0;
+const key = new THREE.DirectionalLight(0xfff3e4, 2.4); key.position.set(0.9, 1.5, -0.7); key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048); { const c = key.shadow.camera; c.left = c.bottom = -0.75; c.right = c.top = 0.75; c.near = 0.2; c.far = 5; }
+key.shadow.bias = -0.00012; key.shadow.normalBias = 0.0012; key.shadow.radius = 3;
+scene.add(key, key.target);
+const rim = new THREE.DirectionalLight(0xdbe6ff, 1.0); rim.position.set(-1.1, 0.7, 1.3); scene.add(rim);
+const hemi = new THREE.HemisphereLight(0xffffff, 0x8f96a3, 0.3); scene.add(hemi);
+
+const studio = new THREE.Group(); scene.add(studio);
+let ground = null, backdrop = null;
+function buildStudio(dark) {
+  for (const o of [ground, backdrop]) if (o) { studio.remove(o); o.material.map.dispose(); o.material.dispose(); o.geometry.dispose(); }
+  ground = new THREE.Mesh(new THREE.CircleGeometry(3.2, 96), M.ground(dark)); ground.rotation.x = -Math.PI / 2; ground.position.y = -0.158; ground.receiveShadow = true; studio.add(ground);
+  backdrop = new THREE.Mesh(new THREE.SphereGeometry(16, 48, 24), M.backdrop(dark)); studio.add(backdrop);
+  scene.fog = new THREE.Fog(dark ? 0x13161b : 0xe3e6eb, 2.0, 7.5);
+}
+
+// ---------- ポストプロセス ----------
+const rt = new THREE.WebGLRenderTarget(1, 1, { samples: 4, type: THREE.HalfFloatType });
+const composer = new EffectComposer(renderer, rt);
+const renderPass = new RenderPass(scene, camera);
+const gtao = new GTAOPass(scene, camera, 1, 1);
+gtao.output = GTAOPass.OUTPUT.Default;
+gtao.updateGtaoMaterial({ radius: 0.022, distanceExponent: 1, thickness: 0.008, scale: 1.0, samples: 12, distanceFallOff: 1, screenSpaceRadius: false });
+gtao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 4, radiusExponent: 1, rings: 2, samples: 12 });
+gtao.blendIntensity = 0.85;
+const outlineHov = new OutlinePass(new THREE.Vector2(1, 1), scene, camera);
+outlineHov.edgeStrength = 2.5; outlineHov.edgeGlow = 0; outlineHov.edgeThickness = 1; outlineHov.pulsePeriod = 0;
+const outlineSel = new OutlinePass(new THREE.Vector2(1, 1), scene, camera);
+outlineSel.edgeStrength = 5; outlineSel.edgeGlow = 0.45; outlineSel.edgeThickness = 1.6; outlineSel.pulsePeriod = 0;
+outlineSel.visibleEdgeColor.set('#ff7a3d'); outlineSel.hiddenEdgeColor.set('#7a3a1c');
+const outputPass = new OutputPass();
+for (const p of [renderPass, gtao, outlineHov, outlineSel, outputPass]) composer.addPass(p);
+
+// ---------- 表示モード用の材質 ----------
+const xrayMat = new THREE.ShaderMaterial({
+  uniforms: { color: { value: new THREE.Color('#20304a') }, opacity: { value: 0.85 }, power: { value: 2.2 }, base: { value: 0.05 } },
+  vertexShader: `#include <common>
+    varying vec3 vN; varying vec3 vV;
+    void main() {
+      #include <beginnormal_vertex>
+      #include <defaultnormal_vertex>
+      #include <begin_vertex>
+      #include <project_vertex>
+      vN = normalize(transformedNormal); vV = normalize(-mvPosition.xyz);
+    }`,
+  fragmentShader: `uniform vec3 color; uniform float opacity; uniform float power; uniform float base;
+    varying vec3 vN; varying vec3 vV;
+    void main() { float f = pow(1.0 - abs(dot(normalize(vN), normalize(vV))), power); gl_FragColor = vec4(color, clamp(base + f * opacity, 0.0, 1.0)); }`,
+  transparent: true, depthWrite: false, side: THREE.DoubleSide,
+});
+const wireMat = new THREE.MeshBasicMaterial({ color: 0x2b3442, wireframe: true, transparent: true, opacity: 0.75, depthWrite: false });
+const paperMat = new THREE.MeshBasicMaterial({ color: 0xf3f4f7, polygonOffset: true, polygonOffsetFactor: 1.5, polygonOffsetUnits: 2 });
+
+for (const p of D.parts) for (const m of p.meshes) { m.userData.origMat = m.material; m.userData.castShadow = m.castShadow; }
+const wireMats = new Set(D.wires.map(w => w.material));
+for (const m of wireMats) m.transparent = true;
+for (const pm of [M.propCCW, M.propCW, M.propHub]) pm.transparent = true;
+
+// 断面用: M1モーターのベル/磁石とバッテリー外装だけ材質を複製してクリップ
+const cut = { planeMotor: new THREE.Plane(), planeBat: new THREE.Plane(), list: [] };
+{
+  const mo = D.motors[0];
+  for (const grp of [mo.bell, mo.mags]) grp.traverse(m => { if (m.isMesh) { const c = m.material.clone(); c.side = THREE.DoubleSide; m.material = c; m.userData.origMat = c; cut.list.push({ mat: c, plane: cut.planeMotor }); } });
+  D.batPart.obj.traverse(m => { if (m.isMesh && m.userData.fine === D.batPart) { const c = m.material.clone(); c.side = THREE.DoubleSide; m.material = c; m.userData.origMat = c; cut.list.push({ mat: c, plane: cut.planeBat }); } });
+}
+
+// 線画用の重ねメッシュ(元メッシュの子として同じジオメトリを描く)
+for (const p of D.parts) for (const m of p.meshes) {
+  let wc;
+  if (m.isInstancedMesh) { wc = new THREE.InstancedMesh(m.geometry, wireMat, m.count); wc.instanceMatrix = m.instanceMatrix; }
+  else wc = new THREE.Mesh(m.geometry, wireMat);
+  wc.visible = false; wc.userData.noPick = true; wc.renderOrder = 2; m.add(wc); m.userData.wireClone = wc;
+}
+
+// ---------- ユーティリティ ----------
+const tmpV = new THREE.Vector3(), tmpV2 = new THREE.Vector3(), tmpQ = new THREE.Quaternion();
+function isAnc(a, b) { let o = b.parent; while (o) { if (o === a) return true; o = o.parent; } return false; }
+function effVisible(o) { while (o) { if (o.visible === false) return false; o = o.parent; } return true; }
+function partsOf(key) { return D.parts.filter(p => p.key === key); }
+function partVisible(p) {
+  if (p.hidden) return false;
+  if (S.isolated) { const iso = partsOf(S.isolated); if (!iso.some(ip => ip === p || isAnc(ip.obj, p.obj) || isAnc(p.obj, ip.obj))) return false; }
+  return true;
+}
+function applyVisibility() {
+  for (const p of D.parts) p.obj.visible = partVisible(p);
+  const hiddenKeys = [...new Set(D.parts.filter(p => p.hidden).map(p => p.key))];
+  const bar = $('#hiddenBar');
+  if (hiddenKeys.length || S.isolated) {
+    bar.hidden = false;
+    $('#hiddenMsg').textContent = S.isolated ? `${PARTS[S.isolated].name} を単独表示中` : `非表示: ${hiddenKeys.map(k => PARTS[k].name).join('・')}`;
+  } else bar.hidden = true;
+  for (const row of $$('#partList .row')) row.classList.toggle('off', partsOf(row.dataset.key).some(p => p.hidden));
+}
+function keepReal(m) {
+  const sel = S.selected; if (!sel) return false;
+  const f = m.userData.fine, c = m.userData.coarse;
+  if (S.selAll) { if (f.key === sel.key || (c && c.key === sel.key)) return true; return partsOf(sel.key).some(sp => isAnc(sp.obj, f.obj)); }
+  return f === sel || c === sel || isAnc(sel.obj, f.obj);
+}
+function applyMode() {
+  for (const p of D.parts) for (const m of p.meshes) {
+    const real = S.mode === 'normal' || S.mode === 'cut' || keepReal(m);
+    if (!real && S.mode === 'xray') { m.material = xrayMat; m.castShadow = false; }
+    else if (!real && S.mode === 'wire') { m.material = paperMat; m.castShadow = false; }
+    else { m.material = m.userData.origMat; m.castShadow = m.userData.castShadow && S.shadows; }
+    if (m.userData.wireClone) m.userData.wireClone.visible = !real && S.mode === 'wire';
+  }
+  const cutOn = S.mode === 'cut';
+  for (const c of cut.list) { c.mat.clippingPlanes = cutOn ? [c.plane] : null; c.mat.needsUpdate = true; }
+  renderer.shadowMap.enabled = key.castShadow = S.shadows && S.mode !== 'xray' && S.mode !== 'wire';
+}
+function updateCutPlanes() {
+  const mo = D.motors[0];
+  const u = tmpV.set(1, 0, 0).applyQuaternion(mo.arm.getWorldQuaternion(tmpQ)).normalize();
+  const c = mo.group.getWorldPosition(tmpV2);
+  cut.planeMotor.setFromNormalAndCoplanarPoint(u.multiplyScalar(-1), c);
+  const bx = tmpV.set(-1, 0, 0).applyQuaternion(D.root.getWorldQuaternion(tmpQ)).normalize();
+  const bc = D.batPart.obj.getWorldPosition(tmpV2).add(tmpV.clone().multiplyScalar(-0.004));
+  cut.planeBat.setFromNormalAndCoplanarPoint(bx, bc);
+}
+
+// ---------- 分解 ----------
+function applyExplode() {
+  const t = S.explodeT;
+  for (const p of D.parts) p.obj.position.copy(p.home).addScaledVector(p.explode, t);
+  const wo = 1 - smoothstep(0.03, 0.3, t);
+  for (const m of wireMats) m.opacity = wo;
+  for (const w of D.wires) w.visible = wo > 0.02;
+}
+
+// ---------- モーター・飛行デモ ----------
+const RPM_MAX = 9000, HOVER_RPM = RPM_MAX * 0.5;
+const body = { rx: 0, rz: 0, yaw: 0, px: 0, py: 0, pz: 0, v: new THREE.Vector3() };
+const ARROW_NEUTRAL = { light: 0x30343c, dark: 0xf2f4f8 };
+let arrowNeutral = ARROW_NEUTRAL.light;
+function updateMotors(dt) {
+  const f = S.flight ? FLIGHT[S.flight] : null;
+  const k = (S.flight === 'pitch' || S.flight === 'roll') ? Math.cos(S.flightT) : 1;
+  let sum = 0;
+  D.motors.forEach((mo, i) => {
+    const mult = f ? 1 + (f.mult[i] - 1) * k : 1;
+    const target = RPM_MAX * S.power * mult;
+    mo.rpm = (mo.rpm || 0) + (target - (mo.rpm || 0)) * (1 - Math.exp(-dt * 2.5));
+    mo.angle = ((mo.angle || 0) + mo.dir * mo.rpm / 60 * Math.PI * 2 * dt) % (Math.PI * 2);
+    mo.prop.rotation.y = mo.angle;
+    mo.disc.material.opacity = smoothstep(900, 3200, mo.rpm) * 0.85;
+    sum += mo.rpm;
+    const th = D.arrows.thrust[i];
+    th.visible = !!S.flight && partVisible(mo.part);
+    if (th.visible) { th.userData.setLength(0.02 + 0.11 * mo.rpm / RPM_MAX); const rel = mo.rpm / Math.max(1, S.power * RPM_MAX); th.userData.mat.color.set(rel > 1.03 ? 0x22c55e : rel < 0.97 ? 0xf59e0b : arrowNeutral); }
+    D.arrows.rot[i].visible = (S.arrows || S.flight === 'yaw') && partVisible(mo.part);
+  });
+  const po = 1 - smoothstep(1500, 3800, sum / 4) * 0.85;
+  for (const pm of [M.propCCW, M.propCW, M.propHub]) pm.opacity = po;
+}
+function updateFlight(dt) {
+  if (S.flight) S.flightT += dt;
+  const t = S.flightT, A = THREE.MathUtils.degToRad(10);
+  let rx = 0, rz = 0, px = 0, py = 0, pz = 0;
+  switch (S.flight) {
+    case 'hover': py = 0.003 * Math.sin(t * 1.4); break;
+    case 'climb': py = 0.06 * (0.5 - 0.5 * Math.cos(t * 1.1)); break;
+    case 'pitch': rx = -A * Math.cos(t); pz = -0.14 * (0.5 - 0.5 * Math.cos(t)); break;
+    case 'roll': rz = -A * Math.cos(t); px = 0.14 * (0.5 - 0.5 * Math.cos(t)); break;
+    case 'yaw': body.yaw -= THREE.MathUtils.degToRad(40) * dt; break;
+  }
+  if (S.flight !== 'yaw') { body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); body.yaw += (0 - body.yaw) * (1 - Math.exp(-dt * 3)); }
+  const k = 1 - Math.exp(-dt * 5);
+  body.rx += (rx - body.rx) * k; body.rz += (rz - body.rz) * k;
+  const ox = body.px, oy = body.py, oz = body.pz;
+  body.px += (px - body.px) * k; body.py += (py - body.py) * k; body.pz += (pz - body.pz) * k;
+  body.v.set(body.px - ox, body.py - oy, body.pz - oz).divideScalar(Math.max(dt, 1e-3));
+  D.root.rotation.set(body.rx, body.yaw, body.rz, 'YXZ');
+  D.root.position.set(body.px, body.py, body.pz);
+  // 移動方向の矢印
+  const mv = D.arrows.move, spd = body.v.length();
+  if (S.flight && S.flight !== 'yaw' && S.flight !== 'hover' && spd > 0.004) {
+    mv.visible = true;
+    const dir = body.v.clone().normalize();
+    const local = dir.clone().applyQuaternion(D.root.getWorldQuaternion(tmpQ).invert());
+    mv.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), local);
+    if (S.flight === 'climb') mv.position.set(0, 0.16, 0); else if (S.flight === 'pitch') mv.position.set(0, 0.05, -0.22 * Math.sign(-dir.z || 1)); else mv.position.set(0.22 * Math.sign(dir.x || 1), 0.05, 0);
+    mv.userData.setLength(0.03 + 1.3 * spd);
+  } else mv.visible = false;
+  D.arrows.yaw.visible = S.flight === 'yaw';
+}
+
+// ---------- 選択・ピック ----------
+const ray = new THREE.Raycaster(); const ptr = new THREE.Vector2();
+function pickAt(x, y) {
+  ptr.set((x / W) * 2 - 1, -(y / H) * 2 + 1); ray.setFromCamera(ptr, camera);
+  const hits = ray.intersectObjects(D.pick, false);
+  const detail = S.mode === 'cut' || S.explodeT > 0.25;
+  for (const h of hits) {
+    const m = h.object; if (!effVisible(m)) continue;
+    if (m.userData.wire && S.explodeT > 0.25) continue;
+    if (m.material === xrayMat && h.face && false) continue;
+    const fine = m.userData.fine; if (!fine) continue;
+    return detail ? fine : (m.userData.coarse || fine);
+  }
+  return null;
+}
+function select(p, all = false) {
+  S.selected = p; S.selAll = !!(p && all);
+  outlineSel.selectedObjects = p ? (all ? partsOf(p.key).map(x => x.obj) : [p.obj]) : [];
+  if (S.hovered === p) { S.hovered = null; outlineHov.selectedObjects = []; }
+  applyMode();
+  for (const row of $$('#partList .row')) row.classList.toggle('on', !!p && row.dataset.key === p.key);
+  renderDetail();
+  if (p && narrow()) $('#inspector').classList.add('open');
+}
+function focusOn(objs) {
+  const box = new THREE.Box3(); for (const o of objs) box.expandByObject(o, true);
+  if (box.isEmpty()) return;
+  const sph = box.getBoundingSphere(new THREE.Sphere());
+  const dist = clamp((sph.radius / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.25 + 0.02) * viewScale(), 0.12, 3.2);
+  const dir = camera.position.clone().sub(controls.target); if (dir.lengthSq() < 1e-6) dir.set(0.6, 0.4, -0.6); dir.normalize();
+  flyTo(sph.center.clone().addScaledVector(dir, dist), sph.center);
+}
+function flyTo(pos, target, dur = 900) {
+  controls.autoRotate = false;
+  if (reduceMotion) { camera.position.copy(pos); controls.target.copy(target); controls.update(); return; }
+  S.tween = { t0: performance.now(), dur, p0: camera.position.clone(), p1: pos.clone(), q0: controls.target.clone(), q1: target.clone() };
+}
+function viewScale() { const a = W / H; return a < 1 ? Math.min(2.0, Math.pow(1 / a, 0.9)) : 1; }
+const VIEWS = { iso: [[0.78, 0.50, -0.82], [0, 0, 0]], front: [[0, 0.18, -1.2], [0, 0, 0]], top: [[0.0, 1.3, -0.03], [0, 0, 0]], side: [[1.2, 0.14, 0.0], [0, 0, 0]] };
+function setView(v) {
+  if (v === 'inside') {
+    const mo = D.motors[0];
+    const c = mo.group.localToWorld(new THREE.Vector3(0, 0.02, 0));
+    const u = new THREE.Vector3(1, 0, 0).applyQuaternion(mo.arm.getWorldQuaternion(new THREE.Quaternion()));
+    const tan = new THREE.Vector3(u.z, 0, -u.x);
+    const vs = viewScale(); flyTo(c.clone().addScaledVector(u, 0.17 * vs).addScaledVector(tan, 0.11 * vs).add(new THREE.Vector3(0, 0.05 * vs, 0)), c);
+  } else { const [p, t] = VIEWS[v]; const tv = new THREE.Vector3(...t); const pv = new THREE.Vector3(...p).sub(tv).multiplyScalar(viewScale()).add(tv); flyTo(pv, tv); }
+}
+
+// ---------- ラベル ----------
+const labelEls = D.parts.filter(p => p.label || p.labelObj).map(p => {
+  const el = document.createElement('button'); el.className = 'lbl'; el.textContent = PARTS[p.key].name; el.type = 'button';
+  el.addEventListener('click', () => select(p, true)); $('#labels').appendChild(el);
+  const line = document.createElementNS(svgNS, 'line'), dot = document.createElementNS(svgNS, 'circle'); dot.setAttribute('r', '3');
+  $('#leaders').append(line, dot);
+  return { p, el, line, dot, w: 0, h: 0, x: 0, y: 0, ax: 0, ay: 0, show: false };
+});
+function updateLabels() {
+  const camDist = camera.position.distanceTo(controls.target);
+  for (const L of labelEls) {
+    const p = L.p; let show = S.labels && partVisible(p) && effVisible(p.obj);
+    if (show) {
+      const a = L.p.labelObj ? L.p.labelObj.getWorldPosition(tmpV) : L.p.obj.localToWorld(tmpV.copy(L.p.label));
+      const depth = a.distanceTo(camera.position) - camDist;
+      const pr = tmpV2.copy(a).project(camera);
+      if (pr.z > 1) show = false; else {
+        L.ax = (pr.x + 1) / 2 * W; L.ay = (1 - pr.y) / 2 * H;
+        let dx = L.ax - W / 2, dy = L.ay - H / 2; const len = Math.hypot(dx, dy);
+        if (len < 24) { dx = 0; dy = -1; } else { dx /= len; dy /= len; }
+        const off = 58 + 46 * Math.abs(dx);
+        const rightLim = narrow() ? W - 70 : W - 344 - 40 - 60;
+        L.x = clamp(L.ax + dx * off, 70, rightLim); L.y = clamp(L.ay + dy * off, 80, H - 120);
+        L.dim = depth > 0.07;
+        if (!L.w) { L.w = L.el.offsetWidth; L.h = L.el.offsetHeight; }
+      }
+    }
+    L.show = show;
+  }
+  // 重なりの簡易解消
+  const vis = labelEls.filter(L => L.show);
+  for (let it = 0; it < 3; it++) for (let i = 0; i < vis.length; i++) for (let j = i + 1; j < vis.length; j++) {
+    const a = vis[i], b = vis[j]; const ox = (a.w + b.w) / 2 + 8 - Math.abs(a.x - b.x), oy = (a.h + b.h) / 2 + 6 - Math.abs(a.y - b.y);
+    if (ox > 0 && oy > 0) { const s = a.y < b.y ? -1 : 1; a.y += s * oy / 2; b.y -= s * oy / 2; }
+  }
+  for (const L of labelEls) {
+    L.el.style.display = L.show ? '' : 'none'; L.line.style.display = L.dot.style.display = L.show ? '' : 'none';
+    if (!L.show) continue;
+    L.el.style.transform = `translate(${L.x.toFixed(1)}px, ${L.y.toFixed(1)}px) translate(-50%,-50%)`;
+    L.el.classList.toggle('dim', L.dim); L.el.classList.toggle('on', !!S.selected && S.selected.key === L.p.key);
+    let vx = L.ax - L.x, vy = L.ay - L.y; const vl = Math.hypot(vx, vy) || 1; vx /= vl; vy /= vl;
+    const t = Math.min(L.w / 2 / Math.max(1e-3, Math.abs(vx)), L.h / 2 / Math.max(1e-3, Math.abs(vy)));
+    L.line.setAttribute('x1', (L.x + vx * t).toFixed(1)); L.line.setAttribute('y1', (L.y + vy * t).toFixed(1));
+    L.line.setAttribute('x2', L.ax.toFixed(1)); L.line.setAttribute('y2', L.ay.toFixed(1));
+    L.dot.setAttribute('cx', L.ax.toFixed(1)); L.dot.setAttribute('cy', L.ay.toFixed(1));
+    L.line.classList.toggle('dim', L.dim); L.dot.classList.toggle('dim', L.dim);
+  }
+}
+
+// ---------- 部品一覧・解説カード ----------
+function motorTable(cls = '') {
+  return `<div class="mtab ${cls}">${MOTOR_INFO.map(m => `<div class="${m.dir.toLowerCase()}"><b>${m.id} ${m.dir}</b>${m.pos}</div>`).join('')}</div>`;
+}
+function buildList() {
+  const list = $('#partList'); let html = '';
+  for (const g of GROUPS) {
+    const keys = LIST_ORDER.filter(k => PARTS[k].group === g.id);
+    html += `<div class="grp" style="--c:${g.color}"><i></i>${g.name}</div>`;
+    for (const k of keys) { const d = PARTS[k]; html += `<div class="row${SUB[k] ? ' sub' : ''}" data-key="${k}" tabindex="0" role="button"><span class="nm">${d.name}</span><span class="cnt">${d.count > 1 ? '×' + d.count : ''}</span><button class="eye" aria-label="${d.name}の表示切替" title="表示/非表示">${ICON.eye}</button></div>`; }
+  }
+  list.innerHTML = html;
+  $('#partCount').textContent = `${LIST_ORDER.length} 種類`;
+  list.addEventListener('click', e => {
+    const row = e.target.closest('.row'); if (!row) return;
+    const key = row.dataset.key;
+    if (e.target.closest('.eye')) { toggleHidden(key); return; }
+    const ps = partsOf(key); select(ps[0], true);
+  });
+  list.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { const row = e.target.closest('.row'); if (row) { e.preventDefault(); select(partsOf(row.dataset.key)[0], true); } } });
+}
+function toggleHidden(key) {
+  const ps = partsOf(key); const h = !ps.some(p => p.hidden); for (const p of ps) p.hidden = h;
+  const row = $(`#partList .row[data-key="${key}"]`); if (row) row.querySelector('.eye').innerHTML = h ? ICON.eyeOff : ICON.eye;
+  applyVisibility(); renderDetail();
+}
+function renderDetail() {
+  const box = $('#detail'); const p = S.selected;
+  if (!p) { box.hidden = true; box.innerHTML = ''; return; }
+  const d = PARTS[p.key], g = GROUPS.find(x => x.id === d.group);
+  const inst = PER_MOTOR.has(p.key) && !S.selAll ? ` · ${MOTOR_INFO[p.idx].id}（${MOTOR_INFO[p.idx].pos}・${MOTOR_INFO[p.idx].dir}）` : '';
+  const hidden = partsOf(p.key).some(x => x.hidden);
+  let h = `<div class="d-group" style="--c:${g.color}"><i></i>${g.name}</div><h3>${d.name}</h3><p class="d-en">${d.en}${d.count > 1 ? ` · ×${d.count}` : ''}${inst}</p>`;
+  h += `<div class="d-actions"><button id="dFocus" class="primary">注目</button><button id="dIsolate">${S.isolated === p.key ? '単独表示を解除' : '単独表示'}</button><button id="dHide">${hidden ? '表示する' : '非表示'}</button><button id="dBack">閉じる</button></div>`;
+  h += `<section><h4>役割</h4><p>${d.role}</p></section>`;
+  if (p.key === 'motor' || p.key === 'prop' || p.key === 'esc') h += `<section><h4>配置と回転方向（上から見て）</h4>${motorTable()}</section>`;
+  if (d.structure) h += `<section><h4>構造</h4><ul>${d.structure.map(s => `<li>${s}</li>`).join('')}</ul></section>`;
+  if (d.spec) h += `<section><h4>仕様例</h4><dl class="spec">${d.spec.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl></section>`;
+  if (d.check) h += `<section class="check"><h4>点検ポイント</h4><ul>${d.check.map(s => `<li>${s}</li>`).join('')}</ul></section>`;
+  if (d.tip) h += `<div class="tipbox"><b>Note</b>${d.tip}</div>`;
+  box.innerHTML = h; box.hidden = false; box.scrollTop = 0;
+  $('#dFocus').onclick = () => focusOn(S.selAll ? partsOf(p.key).map(x => x.obj) : [p.obj]);
+  $('#dIsolate').onclick = () => { S.isolated = S.isolated === p.key ? null : p.key; applyVisibility(); renderDetail(); if (S.isolated) focusOn(partsOf(p.key).map(x => x.obj)); };
+  $('#dHide').onclick = () => toggleHidden(p.key);
+  $('#dBack').onclick = () => select(null);
+}
+let noteTimer = 0;
+function renderFlightNote(force) {
+  const box = $('#flightNote');
+  if (!S.flight) { box.hidden = true; return; }
+  const f = FLIGHT[S.flight];
+  const tab = D.motors.map((mo, i) => { const pct = Math.round(mo.rpm / HOVER_RPM * 100); const cls = pct > 103 ? 'up' : pct < 97 ? 'down' : ''; return `<div class="${cls}"><b>${MOTOR_INFO[i].id} ${pct}%</b>${MOTOR_INFO[i].pos} · ${MOTOR_INFO[i].dir}</div>`; }).join('');
+  if (force || box.hidden) { box.innerHTML = `<h3>${f.name}</h3><p>${f.note}</p><div class="mtab" id="fnTab">${tab}</div>`; box.hidden = false; }
+  else $('#fnTab').innerHTML = tab;
+}
+
+// ---------- UI配線 ----------
+function segSet(seg, attr, val) { for (const b of $$('button', seg)) { const on = b.dataset[attr] === String(val); b.classList.toggle('on', on); if (b.getAttribute('role') === 'tab') b.setAttribute('aria-selected', on); } }
+$('#modeSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; setMode(b.dataset.mode); });
+function setMode(m) { S.mode = m; segSet($('#modeSeg'), 'mode', m); applyMode(); if (m === 'cut') setView('inside'); }
+const explodeEl = $('#explode');
+explodeEl.addEventListener('input', () => { S.explode = explodeEl.value / 100; S.explodeT = S.explode; $('#explodeVal').textContent = explodeEl.value + '%'; explodePullBack(); });
+function explodePullBack() {
+  if (S.explode < 0.35 || S.explodedCam) return; S.explodedCam = true;
+  const dir = camera.position.clone().sub(controls.target); const d = dir.length(); if (d > 1.45) return;
+  flyTo(controls.target.clone().addScaledVector(dir.normalize(), 1.55), controls.target.clone(), 1100);
+}
+function setExplode(v) { S.explode = v; explodeEl.value = Math.round(v * 100); $('#explodeVal').textContent = Math.round(v * 100) + '%'; explodePullBack(); }
+$('#powerSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; setPower(parseFloat(b.dataset.p)); });
+function setPower(p) { S.power = p; segSet($('#powerSeg'), 'p', p); }
+$('#flightChips').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; setFlight(S.flight === b.dataset.f ? null : b.dataset.f); });
+function setFlight(f) {
+  S.flight = f; S.flightT = 0; for (const b of $$('#flightChips button')) b.classList.toggle('on', b.dataset.f === f);
+  if (f && S.power === 0) setPower(0.5);
+  if (f) { controls.autoRotate = false; }
+  renderFlightNote(true);
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('.tgl'); if (!b) return;
+  const t = b.dataset.t; b.classList.toggle('on');
+  const on = b.classList.contains('on');
+  if (t === 'labels') { S.labels = on; S.labelsTouched = true; } else if (t === 'arrows') S.arrows = on; else if (t === 'autorotate') { S.autoRotate = on; if (!on) controls.autoRotate = false; }
+  else if (t === 'shadows') { S.shadows = on; applyMode(); }
+});
+$('#viewSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; segSet($('#viewSeg'), 'v', b.dataset.v); setView(b.dataset.v); });
+$('#fsBtn').addEventListener('click', () => { const el = document.documentElement; if (document.fullscreenElement) document.exitFullscreen(); else if (el.requestFullscreen) el.requestFullscreen(); else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen(); });
+$('#settingsBtn').addEventListener('click', e => { e.stopPropagation(); $('#settings').hidden = !$('#settings').hidden; });
+document.addEventListener('click', e => { if (!e.target.closest('#settings') && !e.target.closest('#settingsBtn')) $('#settings').hidden = true; });
+$('#qualitySeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; segSet($('#qualitySeg'), 'q', b.dataset.q); S.quality = b.dataset.q; if (b.dataset.q !== 'auto') applyQuality(parseInt(b.dataset.q, 10)); });
+$('#themeSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; segSet($('#themeSeg'), 'th', b.dataset.th); if (b.dataset.th === 'auto') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = b.dataset.th; applyTheme(); });
+$('#envSlider').addEventListener('input', e => { scene.environmentIntensity = e.target.value / 100; });
+$('#showAll').addEventListener('click', () => { for (const p of D.parts) p.hidden = false; S.isolated = null; for (const b of $$('#partList .eye')) b.innerHTML = ICON.eye; applyVisibility(); renderDetail(); });
+$('#inspToggle').addEventListener('click', () => $('#inspector').classList.add('open'));
+$('#inspClose').addEventListener('click', () => $('#inspector').classList.remove('open'));
+// シート(モバイル)のドラッグ: 1:1追従 + 速度で確定
+{
+  const insp = $('#inspector'), grab = $('.grabber'); let drag = null;
+  grab.addEventListener('pointerdown', e => { drag = { y0: e.clientY, hist: [[e.clientY, performance.now()]] }; grab.setPointerCapture(e.pointerId); insp.classList.add('dragging'); });
+  grab.addEventListener('pointermove', e => { if (!drag) return; const dy = Math.max(0, e.clientY - drag.y0); insp.style.transform = `translateY(${dy}px)`; drag.hist.push([e.clientY, performance.now()]); if (drag.hist.length > 6) drag.hist.shift(); });
+  const end = e => { if (!drag) return; const dy = Math.max(0, e.clientY - drag.y0); const h0 = drag.hist[0], h1 = drag.hist[drag.hist.length - 1]; const v = (h1[0] - h0[0]) / Math.max(1, h1[1] - h0[1]);
+    insp.classList.remove('dragging'); insp.style.transform = ''; if (v > 0.5 || dy > insp.offsetHeight * 0.4) insp.classList.remove('open'); drag = null; };
+  grab.addEventListener('pointerup', end); grab.addEventListener('pointercancel', end);
+}
+// キーボード
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input, textarea, select')) return;
+  const k = e.key.toLowerCase();
+  if (k === '1') setMode('normal'); else if (k === '2') setMode('xray'); else if (k === '3') setMode('wire'); else if (k === '4') setMode('cut');
+  else if (k === 'e') setExplode(S.explode > 0.5 ? 0 : 1);
+  else if (k === 'l') { const b = $('.tgl[data-t=labels]'); b.click(); }
+  else if (k === 'a') { const b = $('.tgl[data-t=arrows]'); b.click(); }
+  else if (k === ' ') { e.preventDefault(); setPower(S.power === 0 ? 0.5 : 0); }
+  else if (k === 'r') { segSet($('#viewSeg'), 'v', 'iso'); setView('iso'); }
+  else if (k === 'f' && S.selected) focusOn(S.selAll ? partsOf(S.selected.key).map(x => x.obj) : [S.selected.obj]);
+  else if (k === 'h' && S.selected) toggleHidden(S.selected.key);
+  else if (k === 'escape') { if (S.flight) setFlight(null); else if (S.selected) select(null); else $('#inspector').classList.remove('open'); }
+});
+// ピック
+let pDown = null, hoverAt = null;
+canvas.addEventListener('pointerdown', e => { pDown = { x: e.clientX, y: e.clientY, t: performance.now() }; $('#hint').classList.add('gone'); });
+canvas.addEventListener('pointerup', e => {
+  if (!pDown) return; const moved = Math.hypot(e.clientX - pDown.x, e.clientY - pDown.y), dt = performance.now() - pDown.t; pDown = null;
+  if (moved < 6 && dt < 700) { const p = pickAt(e.clientX, e.clientY); if (p) select(p, false); else if (S.selected) select(null); }
+});
+canvas.addEventListener('dblclick', e => { const p = pickAt(e.clientX, e.clientY); if (p) focusOn([p.obj]); });
+canvas.addEventListener('pointermove', e => { if (e.pointerType === 'mouse') hoverAt = { x: e.clientX, y: e.clientY }; });
+canvas.addEventListener('pointerleave', () => { hoverAt = null; S.hovered = null; outlineHov.selectedObjects = []; canvas.classList.remove('pick'); });
+setTimeout(() => $('#hint').classList.add('gone'), 9000);
+
+// ---------- テーマ・品質・リサイズ ----------
+function isDark() { const cs = getComputedStyle(document.documentElement).colorScheme || ''; if (cs.includes('dark')) return true; if (cs.includes('light')) return false; return matchMedia('(prefers-color-scheme: dark)').matches; }
+function applyTheme() {
+  const dark = isDark(); buildStudio(dark);
+  xrayMat.uniforms.color.value.set(dark ? '#8fc9ff' : '#20304a'); xrayMat.uniforms.opacity.value = dark ? 0.75 : 0.85; xrayMat.uniforms.base.value = dark ? 0.02 : 0.05;
+  xrayMat.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending; xrayMat.needsUpdate = true;
+  wireMat.color.set(dark ? '#aab7cc' : '#2b3442'); paperMat.color.set(dark ? '#1c2027' : '#f3f4f7');
+  outlineHov.visibleEdgeColor.set(dark ? '#ffffff' : '#1b1f27'); outlineHov.hiddenEdgeColor.set(dark ? '#334' : '#99a');
+  arrowNeutral = dark ? ARROW_NEUTRAL.dark : ARROW_NEUTRAL.light;
+}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+function applyQuality(level) {
+  S.qLevel = level; S.lastQChange = performance.now();
+  gtao.enabled = level >= 2;
+  const dpr = Math.min(window.devicePixelRatio || 1, level >= 1 ? 2 : 1.25);
+  if (dpr !== DPR) { DPR = dpr; renderer.setPixelRatio(DPR); composer.setPixelRatio(DPR); resize(); }
+  const sm = level >= 1 ? 2048 : 1024;
+  if (key.shadow.mapSize.x !== sm) { key.shadow.mapSize.set(sm, sm); if (key.shadow.map) { key.shadow.map.dispose(); key.shadow.map = null; } }
+}
+function syncLabelsDefault() { if (S.labelsTouched) return; S.labels = !narrow(); $('.tgl[data-t=labels]').classList.toggle('on', S.labels); }
+function resize() {
+  W = canvas.clientWidth || 1; H = canvas.clientHeight || 1; syncLabelsDefault();
+  renderer.setSize(W, H, false); composer.setSize(W, H);
+  if (!narrow()) { const inspW = 344 + 40; camera.aspect = (W - inspW) / H; camera.setViewOffset(W - inspW, H, 0, 0, W, H); }
+  else { camera.clearViewOffset(); camera.aspect = W / H; }
+  camera.updateProjectionMatrix();
+  $('#leaders').setAttribute('viewBox', `0 0 ${W} ${H}`);
+  for (const L of labelEls) L.w = 0;
+}
+window.addEventListener('resize', resize);
+
+// ---------- メインループ ----------
+let last = performance.now(), ema = 16, perfT = 0, fpsAcc = 0, fpsN = 0;
+function frame(now) {
+  requestAnimationFrame(frame);
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  ema = ema * 0.9 + (dt * 1000) * 0.1; fpsAcc += dt; fpsN++;
+  if (S.tween) { const T = S.tween, k = easeInOut(Math.min(1, (now - T.t0) / T.dur)); camera.position.lerpVectors(T.p0, T.p1, k); controls.target.lerpVectors(T.q0, T.q1, k); if (k >= 1) S.tween = null; }
+  const idle = now - S.lastInteract > 5000;
+  controls.autoRotate = S.autoRotate && !S.tween && idle && !S.flight && !reduceMotion;
+  controls.update();
+  S.explodeT += (S.explode - S.explodeT) * (1 - Math.exp(-dt * 9)); if (Math.abs(S.explode - S.explodeT) < 0.0005) S.explodeT = S.explode;
+  if (S.explode < 0.05) S.explodedCam = false;
+  applyExplode(); updateMotors(dt); updateFlight(dt);
+  if (S.mode === 'cut') updateCutPlanes();
+  if (hoverAt) { const p = pickAt(hoverAt.x, hoverAt.y); hoverAt = null; if (p !== S.hovered) { S.hovered = p; outlineHov.selectedObjects = p && p !== S.selected ? [p.obj] : []; canvas.classList.toggle('pick', !!p); } }
+  renderer.info.reset(); composer.render();
+  updateLabels();
+  if (S.flight) { noteTimer += dt; if (noteTimer > 0.25) { noteTimer = 0; renderFlightNote(false); } }
+  perfT += dt;
+  if (perfT > 1.5) {
+    perfT = 0; const fps = fpsN / fpsAcc; fpsAcc = 0; fpsN = 0;
+    $('#perfInfo').textContent = `${fps.toFixed(0)} fps · ${renderer.info.render.calls} draw · ${(renderer.info.render.triangles / 1000).toFixed(0)}k tri · AO ${gtao.enabled ? 'on' : 'off'} · ${DPR}× · 起動 ${TL.first || '-'}ms`;
+    if (S.quality === 'auto' && now - S.lastQChange > 4000) {
+      if (ema > 30 && S.qLevel > 0) applyQuality(S.qLevel - 1);
+      else if (ema < 12 && S.qLevel < 2 && !S.steppedUp) { S.steppedUp = true; applyQuality(S.qLevel + 1); }
+    }
+  }
+}
+
+// ---------- 起動 ----------
+buildList(); applyTheme(); resize(); applyMode(); applyVisibility(); mark('setup');
+{ const vs = viewScale(); if (vs > 1) camera.position.multiplyScalar(vs); }
+$('#loadMsg').textContent = 'シェーダーをコンパイルしています…';
+const startLoop = () => { mark('compile');
+  let t = performance.now(); renderer.render(scene, camera); TL.r1 = Math.round(performance.now() - t);
+  t = performance.now(); gtao.enabled = false; composer.render(); TL.r2 = Math.round(performance.now() - t);
+  t = performance.now(); gtao.enabled = S.qLevel >= 2; composer.render(); TL.r3 = Math.round(performance.now() - t);
+  t = performance.now(); outlineSel.selectedObjects = [D.parts[0].obj]; composer.render(); outlineSel.selectedObjects = []; TL.r4 = Math.round(performance.now() - t);
+  requestAnimationFrame(frame); requestAnimationFrame(() => requestAnimationFrame(() => { mark('first'); $('#loading').classList.add('gone'); window.__droneReady = true; console.log('[drone3d] timeline ms', JSON.stringify(TL)); })); };
+if (renderer.compileAsync) renderer.compileAsync(scene, camera).then(startLoop, startLoop); else startLoop();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,24 @@
+# Cloudflare Workers Builds（GitHub連携）を使う場合、このワークフローは不要です。
+# API トークン方式で動かしたいときだけ有効にしてください。
+#   リポジトリ Settings → Secrets → Actions に CLOUDFLARE_API_TOKEN と CLOUDFLARE_ACCOUNT_ID を登録
+name: Deploy to Cloudflare Workers
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build
+        run: python3 build.py
+      - name: Fail if public/index.html is stale
+        run: git diff --exit-code -- public/
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

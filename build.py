@@ -1,0 +1,46 @@
+#!/usr/bin/env python3
+"""src/ を1枚のHTMLに束ねる。
+  public/index.html … 公開用（Cloudflare Workers が配信する完全なページ）
+  artifact.html     … Artifact 用の本文断片（<head>骨格はホスト側が付ける）
+"""
+import pathlib, datetime
+
+ROOT = pathlib.Path(__file__).parent
+SRC = ROOT / 'src'
+URL = 'https://drone-anatomy-3d.hiro-k61.workers.dev/'
+DESC = ('ドローン（550クラスのクアッドコプター）を部品ごとに分解・透視・断面表示できる3D教材。'
+        '35種の部品それぞれに役割・構造・仕様例・点検ポイントの解説と、飛行の原理のアニメーションがついています。')
+
+tpl = (SRC / 'index.html').read_text(encoding='utf-8')
+css = (SRC / 'style.css').read_text(encoding='utf-8')
+js = '\n'.join((SRC / f).read_text(encoding='utf-8')
+               for f in ['data.js', 'materials.js', 'drone.js', 'app.js'])
+stamp = datetime.date.today().isoformat()
+
+frag = tpl.replace('/*INLINE:style.css*/', css).replace('/*INLINE:scripts*/', js)
+frag = frag.replace('<title>ドローンの構造</title>',
+                    f'<title>ドローンの構造</title>\n<!-- built {stamp} from src/ (build.py) -->', 1)
+(ROOT / 'artifact.html').write_text(frag, encoding='utf-8')
+
+head = f'''<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="{DESC}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ドローンの構造">
+<meta property="og:description" content="{DESC}">
+<meta property="og:url" content="{URL}">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="{URL}">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%B8%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+'''
+(ROOT / 'public' / 'index.html').write_text(head + frag + '\n</body>\n</html>\n', encoding='utf-8')
+
+for p in [ROOT / 'public' / 'index.html', ROOT / 'artifact.html']:
+    print(f'{p.relative_to(ROOT)}  {p.stat().st_size // 1024} KB')
