@@ -270,4 +270,18 @@ body.theater #topbar, body.theater #viewCol { opacity: .35; pointer-events: none
 .trivia b { display: block; font-size: 10.5px; letter-spacing: .04em; color: var(--ink3); margin-bottom: 2px; }
 #photoPop img { width: 100%; border-radius: 10px; display: block; margin: 4px 0 8px; background: var(--seg-bg); }
 
+/* ---------- もしもの5場面 (パッケージ⑩) ---------- */
+.two-col { display: flex; gap: 14px; }
+.two-col > div { flex: 1; min-width: 0; }
+.two-col h4 { font-size: 11.5px; font-weight: 700; color: var(--ink3); letter-spacing: .02em; margin: 0 0 4px; }
+.two-col ul { margin: 0; padding-left: 1.1em; }
+.two-col li { font-size: 12.5px; line-height: 1.55; margin: 2px 0; }
+.caveat { margin: 8px 0 0; padding: 6px 9px; border-radius: 8px; background: var(--seg-bg); font-size: 11.5px; line-height: 1.5; color: var(--warn); }
+.caveat::before { content: '⚠ '; }
+ol.parts-seq { margin: 8px 0 0; padding-left: 1.3em; }
+ol.parts-seq li { font-size: 12.5px; line-height: 1.5; margin: 3px 0; color: var(--ink3); }
+ol.parts-seq li b { display: inline-block; margin-right: 6px; color: var(--ink2); }
+ol.parts-seq li.lit { color: var(--ink); } ol.parts-seq li.lit b { color: var(--accent-text); }
+@media (max-width: 760px) { .two-col { flex-direction: column; gap: 8px; } }
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation-duration: .01s !important; } }

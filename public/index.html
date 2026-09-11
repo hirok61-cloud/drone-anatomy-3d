@@ -293,6 +293,20 @@ body.theater #topbar, body.theater #viewCol { opacity: .35; pointer-events: none
 .trivia b { display: block; font-size: 10.5px; letter-spacing: .04em; color: var(--ink3); margin-bottom: 2px; }
 #photoPop img { width: 100%; border-radius: 10px; display: block; margin: 4px 0 8px; background: var(--seg-bg); }
 
+/* ---------- もしもの5場面 (パッケージ⑩) ---------- */
+.two-col { display: flex; gap: 14px; }
+.two-col > div { flex: 1; min-width: 0; }
+.two-col h4 { font-size: 11.5px; font-weight: 700; color: var(--ink3); letter-spacing: .02em; margin: 0 0 4px; }
+.two-col ul { margin: 0; padding-left: 1.1em; }
+.two-col li { font-size: 12.5px; line-height: 1.55; margin: 2px 0; }
+.caveat { margin: 8px 0 0; padding: 6px 9px; border-radius: 8px; background: var(--seg-bg); font-size: 11.5px; line-height: 1.5; color: var(--warn); }
+.caveat::before { content: '⚠ '; }
+ol.parts-seq { margin: 8px 0 0; padding-left: 1.3em; }
+ol.parts-seq li { font-size: 12.5px; line-height: 1.5; margin: 3px 0; color: var(--ink3); }
+ol.parts-seq li b { display: inline-block; margin-right: 6px; color: var(--ink2); }
+ol.parts-seq li.lit { color: var(--ink); } ol.parts-seq li.lit b { color: var(--accent-text); }
+@media (max-width: 760px) { .two-col { flex-direction: column; gap: 8px; } }
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation-duration: .01s !important; } }
 
 </style>
@@ -330,6 +344,7 @@ body.theater #topbar, body.theater #viewCol { opacity: .35; pointer-events: none
     </div>
     <div class="ctx-row" data-tab="mishap" hidden>
       <div class="dock-group grow"><label>もしも、まちがえたら</label><div class="cards" id="mishapCards"></div></div>
+      <div class="dock-group grow"><label>もしも、外でこうなったら</label><div class="cards" id="whatifCards"></div></div>
     </div>
     <div class="ctx-row" data-tab="theater" hidden>
       <button id="thQuit" class="pill-btn">✕ やめる</button>
@@ -998,6 +1013,51 @@ const TRIVIA = {
   telemetry: 'テレメトリーは機体から地上へ「電池が少ない」などを知らせる無線。',
   landingGear: '脚は「壊れて機体を守る」部品。曲がったら交換で正解。',
 };
+
+// ===== もしもの5場面 (パッケージ⑩): 外の状況。機体ができることと人がやることを対で =====
+const WHATIF_STAGES = ['状況', '機体の反応', '働く部品', 'できること・やること'];
+const WHATIF = [
+  { id: 'signal', name: '電波が切れた', icon: '📡',
+    intro: '送信機との電波が届かなくなった。操縦の指示が機体に届かない。',
+    reaction: '機体は「指示が来ない」ことを自分で検知し、あらかじめ決めた動き（多くの機種では、離陸した場所へ帰って降りる）に切り替える。',
+    motion: 'rth', parts: ['rx', 'fc', 'gps', 'motor'],
+    partNotes: { rx: '受信機が「電波が途切れた」と判断する', fc: '頭脳がフェイルセーフ動作に切り替える', gps: '離陸地点の座標を思い出す', motor: '帰る向きへ機体を進める' },
+    can: ['電波が切れたことを自分で検知する', '設定に従い、離陸地点へ戻る／その場で降りる', '電波が戻れば操縦を受け付ける'],
+    human: ['飛ばす前にフェイルセーフの設定を確認する', '目視で機体を追い続ける', '周囲の人に「戻ってきます」と声をかける', '帰還経路に人や障害物がないか見る'],
+    caveat: '帰還の動きは機種と設定で異なり、GPSが使えないと働かない。「設定と点検が前提」で、万能ではない。' },
+  { id: 'battery', name: '電池が少ない', icon: '🔋',
+    intro: '飛行中に電池の残りが減ってきた。',
+    reaction: '機体は電圧を常に測っていて、決めた値を下回ると警告し、さらに下がれば自動で降下を始める。',
+    motion: 'landSlow', parts: ['battery', 'pdb', 'fc', 'buzzer', 'telemetry'],
+    partNotes: { battery: '電圧が下がる', pdb: '電圧を測る回路が値を頭脳へ送る', fc: '警告と自動降下を判断する', buzzer: '音で知らせる', telemetry: '地上の送信機に残量を知らせる' },
+    can: ['電圧を常に測って残量を推定する', '決めた値で警告を出す', 'さらに下がれば自動で降下・着陸する'],
+    human: ['飛ばす前に満充電と電圧差を確認する', '警告が出たらすぐ戻す（粘らない）', '着陸できる場所を常に把握しておく'],
+    caveat: '寒い日や古い電池は残量表示より早く電圧が落ちる。自動降下は「安全な場所」を選んでくれるわけではない。' },
+  { id: 'gps', name: 'GPSを見失った', icon: '🛰️',
+    intro: '建物の陰や橋の下で、衛星の電波が届かなくなった。',
+    reaction: '位置は分からなくなるが、傾きは分かる。機体は水平を保ったまま、風に少しずつ流される。',
+    motion: 'driftHold', parts: ['gps', 'fc', 'motor'],
+    partNotes: { gps: '衛星が見えなくなる', fc: '位置の保持をあきらめ、姿勢の保持だけ続ける', motor: '傾きを直す動きは続く' },
+    can: ['姿勢（傾き）を保ち続ける', '位置が保てないことを画面に知らせる', 'GPSが戻れば位置の保持に復帰する'],
+    human: ['流される方向を見て、手で位置を直す', '建物・橋の近くでは最初から手動の練習をしておく', '無理をせず、開けた場所へ戻して降ろす'],
+    caveat: 'GPSなしでも飛べるかは機種と設定次第。屋内や高い建物の間では最初から「位置保持は効かない」前提で計画する。' },
+  { id: 'wind', name: '風が強い', icon: '🌬️',
+    intro: '急に風が強くなった。',
+    reaction: '機体は流されないように風上へ傾き、風上側のモーターを速く回して踏ん張る。その分、電池の減りが早くなる。',
+    motion: 'wind', parts: ['fc', 'motor', 'prop', 'battery'],
+    partNotes: { fc: '流されたぶんを検知して傾きを命じる', motor: '風上側が速く回る', prop: '傾けたぶんの推力で風に逆らう', battery: '踏ん張る分だけ消費が増える' },
+    can: ['ある程度の風なら位置を保つ', '風上側のモーターに余力を回す'],
+    human: ['飛ばす前に風速を確認し、機体の限界の6〜7割で判断する', '風が強まったら風下に人がいない場所へ移す', '早めに降ろす。粘ると電池が先に尽きる'],
+    caveat: '耐風性能は機種ごとに決まっていて、突風はその値を超えることがある。上空は地上より風が強い。' },
+  { id: 'person', name: '人が近づいた', icon: '🚶',
+    intro: '見物の人が機体のほうへ歩いてきた。',
+    reaction: '機体には人を避ける仕組みはない（あっても万能ではない）。できるのは、操縦者と補助者が止めること。',
+    motion: 'person', parts: ['led', 'buzzer', 'prop'],
+    partNotes: { led: '灯火で「動いている機体」だと知らせる', buzzer: '音で注意を引く', prop: '回っている間は触れてはいけない部分' },
+    can: ['灯火と音で「動いている」ことを知らせる', '操縦者の指示ですぐ離れる・降りる'],
+    human: ['補助者が近づく人を止める', '離着陸場所にロープや目印を置く', '人が来たら機体を離す、または降ろして止める', '回っているプロペラに近づかない'],
+    caveat: '人の上や近くを飛ばす場合は、機体の性能ではなく運用（補助者・区画・手順）で守る。' },
+];
 
 // ===== 手続き生成テクスチャと材質 (v2: 製品レンダリング品質) =====
 function makeCanvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
@@ -1833,7 +1893,7 @@ const S = {
   mode: 'normal', explode: 0, explodeT: 0, power: 0, flight: null, flightT: 0, depth: 'simple', tab: 'see',
   labels: true, arrows: false, air: false, autoRotate: !reduceMotion, shadows: true, slow: false, ts: 1, logTs: 0, tsTarget: 1,
   selected: null, selAll: false, hovered: null, isolated: null, quality: 'auto', qLevel: 3, lastInteract: performance.now(), lastSelect: -1e9,
-  camSpring: null, camInertia: null, sticks: false, tilt: false, theater: null, overlay: null, question: null, use: null, scale: false, price: false,
+  camSpring: null, camInertia: null, sticks: false, tilt: false, theater: null, overlay: null, question: null, use: null, scale: false, price: false, whatif: null, labelOnly: null, labelsSuppressed: false,
   aoDirty: true, shadowDirty: true, csDirty: true, envMul: 1, exposureMul: 1,
 };
 
@@ -2467,7 +2527,7 @@ function updateAirflow(dtSim, dtReal) {
   if (air.cols) air.cols.forEach((c, i) => { const mo = D.motors[i]; const k = on ? mo.rpm / RPM_MAX : 0; c.material.uniforms.uK.value = k; c.visible = on && vis && mo.rpm > 600; air.colT[i] += dtSim * (1 + 3 * k); c.material.uniforms.uT.value = air.colT[i]; });
   m.visible = on && vis;
   if (!m.visible) return;
-  const u = air.mat.uniforms; u.uPhase.value.set(air.phase[0], air.phase[1], air.phase[2], air.phase[3]); u.uWind.value.copy(body.v).negate(); u.uTime.value += dtSim;
+  const u = air.mat.uniforms; u.uPhase.value.set(air.phase[0], air.phase[1], air.phase[2], air.phase[3]); if (air.windOverride) u.uWind.value.copy(air.windOverride); else u.uWind.value.copy(body.v).negate(); u.uTime.value += dtSim;
   u.uCam.value.set(camera.near, camera.far); u.uRes.value.set(W * DPR, H * DPR);
 }
 function airflowTheme(dark) { if (air.cols) for (const c of air.cols) { c.material.uniforms.uColor.value.set(dark ? 0x8fc9ff : 0x2f6fe8); c.material.uniforms.uA.value = dark ? 1.3 : 1; c.material.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending; c.material.needsUpdate = true; }
@@ -2650,6 +2710,131 @@ function stepTheater(dtSim, dtReal) {
   if (theater.shake > 0) { theater.shake -= dtReal; theater.shakeOff = 0.004 * Math.sin(performance.now() / 1000 * 2 * Math.PI * 12) * Math.exp(-(1 - theater.shake) / 0.12); camera.position.y += theater.shakeOff; }
   S.shadowDirty = S.csDirty = S.aoDirty = true;
 }
+
+// ===== もしもの5場面 (パッケージ⑩) =====
+// ⑤が「組み立ての間違い」なのに対し、こちらは外の状況。機体ができることと人がやることを対で見せる。
+const whatif = {
+  active: false, def: null, phase: 0, t: 0, litIdx: -1, blink: 0,
+  saved: { air: false, personPos: null, personVis: false }, seq: [],
+};
+const D2R_W = (d) => THREE.MathUtils.degToRad(d);
+
+function whatifStageIndex() { return clamp(whatif.phase, 0, WHATIF_STAGES.length - 1); }
+
+function startWhatif(id) {
+  const def = WHATIF.find(w => w.id === id); if (!def) return;
+  stopTheater(true); stopWhatif(true);
+  whatif.active = true; whatif.def = def; whatif.phase = 0; whatif.t = 0; whatif.litIdx = -1; whatif.blink = 0; whatif.seq = [];
+  S.whatif = whatif; setBodyMode('theater');
+  body.px = body.pz = 0; body.py = free.hoverY; body.tx = body.tz = body.wx = body.wz = 0; body.yaw = 0; body.mult = [1, 1, 1, 1];
+  D.motors.forEach(mo => { mo.rpmTarget = null; mo.rpmRate = 3.5; });
+  S.power = 0.5;
+  whatif.saved.air = S.air; S.labelsSuppressed = true; S.labelOnly = null;
+  if (D.personGroup) { whatif.saved.personPos = D.personGroup.position.clone(); whatif.saved.personVis = D.personGroup.visible; }
+  theaterCamera(new THREE.Vector3(1.05 * viewScale(), 0.55 * viewScale(), -1.05 * viewScale()), new THREE.Vector3(0, 0.03, 0), 800);
+  if (typeof onWhatifChanged === 'function') onWhatifChanged();
+}
+
+function stopWhatif(silent) {
+  if (!whatif.active) { S.labelsSuppressed = false; S.labelOnly = null; return; }
+  for (const k of whatif.def.parts) for (const p of partsOf(k)) setTint(p, ACCENT, 0);
+  for (const p of partsOf('led')) setTint(p, RED, 0);
+  D.motors.forEach(mo => { mo.rpmTarget = null; mo.rpmRate = null; });
+  for (let i = 0; i < 4; i++) body.mult[i] = 1;
+  air.windOverride = null; S.air = whatif.saved.air;
+  if (D.personGroup) { if (whatif.saved.personPos) D.personGroup.position.copy(whatif.saved.personPos); D.personGroup.visible = whatif.saved.personVis; }
+  S.labelsSuppressed = false; S.labelOnly = null; buildLabels();
+  whatif.active = false; whatif.def = null; whatif.phase = 0; S.whatif = null;
+  S.power = 0; setBodyMode('idle');
+  S.shadowDirty = S.csDirty = S.aoDirty = true;
+  if (!silent && typeof onWhatifChanged === 'function') onWhatifChanged();
+}
+
+function whatifNext() {
+  if (!whatif.active) return;
+  if (whatif.phase === 0) { whatif.phase = 1; whatif.t = 0; }
+  else if (whatif.phase === 3) { return; }
+  if (typeof onWhatifChanged === 'function') onWhatifChanged();
+}
+function whatifRestart() { const id = whatif.def && whatif.def.id; if (id) { stopWhatif(true); startWhatif(id); } }
+
+// ---------- 機体の反応（すべて小さく: 姿勢±8°・移動0.25m以内） ----------
+const RM = () => (reduceMotion ? 1 / 3 : 1);
+const WHATIF_MOTION = {
+  // 電波が切れた → 向きを変えて帰り、降りる
+  rth(t, dt) {
+    if (t < 0.8) { body.py = free.hoverY; return false; }
+    if (t < 4.0) {
+      body.yaw = dl(body.yaw, Math.PI, dt, 3);
+      if (t >= 2.0) { const k = smoothstep(2.0, 3.6, t); body.pz = 0.20 * k; body.tz = D2R_W(6) * RM() * Math.sin(Math.PI * k); }
+      return false;
+    }
+    body.tz = dl(body.tz, 0, dt, 6);
+    const k = smoothstep(4.0, 5.4, t); body.py = free.hoverY * (1 - k);
+    if (t > 5.0) D.motors.forEach(mo => { mo.rpmTarget = 0; });
+    return t > 5.6;
+  },
+  // 電池が少ない → ゆっくり降りる
+  landSlow(t, dt) {
+    if (t < 1.0) { body.py = free.hoverY; return false; }
+    body.py = dl(body.py, 0, dt, 1.2);
+    if (t > 3.6) D.motors.forEach(mo => { mo.rpmTarget = 0; });
+    return t > 4.4;
+  },
+  // GPSを見失った → 位置は流されるが姿勢は保つ
+  driftHold(t, dt) {
+    body.py = free.hoverY;
+    if (t < 1.5) { body.px = dl(body.px, 0.06, dt, 1.5); body.tx = 0; return false; }
+    if (t < 2.2) { body.tx = dl(body.tx, -D2R_W(4) * RM(), dt, 5); return false; }
+    body.tx = dl(body.tx, 0, dt, 3); body.px = 0.06;   // 位置は戻さない
+    return t > 4.5;
+  },
+  // 風が強い → 風上へ傾いて踏ん張る
+  wind(t, dt) {
+    body.py = free.hoverY;
+    const k = smoothstep(0, 1.0, t);
+    body.tz = -D2R_W(7) * RM() * k;
+    body.px = 0.02 * k * Math.sin(2 * Math.PI * 0.4 * t);
+    air.windOverride = air.windOverride || new THREE.Vector3();
+    air.windOverride.set(0.4 * k, 0, 0);
+    const m = [1.15, 0.90, 0.90, 1.15];   // 風上側(M1/M4)が速く回る
+    for (let i = 0; i < 4; i++) body.mult[i] = 1 + (m[i] - 1) * k;
+    return t > 4.5;
+  },
+  // 人が近づいた → 機体は避けられない。灯火と音で知らせるだけ
+  person(t, dt) {
+    body.py = free.hoverY + 0.03 * smoothstep(1.0, 1.8, t);
+    const g = D.personGroup;
+    if (g) { g.visible = true; const k = smoothstep(1.0, 3.0, t); g.position.set(0, -0.158, -1.2 + 0.6 * k); }
+    if (t > 3.0) { const b = 0.5 + 0.5 * Math.sin((t - 3.0) * 2 * Math.PI / 0.5); for (const p of partsOf('led')) setTint(p, RED, 0.8 * b); }
+    return t > 4.4;
+  },
+};
+
+function stepWhatif(dtSim, dtReal) {
+  if (!whatif.active) return;
+  whatif.t += dtSim; const def = whatif.def;
+  if (whatif.phase === 1) {
+    const done = WHATIF_MOTION[def.motion](whatif.t, dtSim);
+    if (done) { whatif.phase = 2; whatif.t = 0; whatif.litIdx = -1; whatif.seq = []; S.labelsSuppressed = false; if (typeof onWhatifChanged === 'function') onWhatifChanged(); }
+  } else if (whatif.phase === 2) {
+    const idx = Math.min(def.parts.length - 1, Math.floor(whatif.t / 1.2));
+    if (idx !== whatif.litIdx) {
+      whatif.litIdx = idx; whatif.seq = def.parts.slice(0, idx + 1);
+      def.parts.forEach((k, i) => { for (const p of partsOf(k)) setTint(p, ACCENT, i === idx ? 1.0 : i < idx ? 0.35 : 0); });
+      S.labelOnly = new Set([def.parts[idx]]); buildLabels();   // 深さに関わらずその部品のラベルだけ出す
+      if (typeof onWhatifChanged === 'function') onWhatifChanged();
+    }
+    if (whatif.t > def.parts.length * 1.2) {
+      whatif.phase = 3; whatif.t = 0; S.labelOnly = null; buildLabels();
+      for (const k of def.parts) for (const p of partsOf(k)) setTint(p, ACCENT, 0.25);
+      if (typeof onWhatifChanged === 'function') onWhatifChanged();
+    }
+  }
+  S.shadowDirty = S.csDirty = S.aoDirty = true;
+}
+
+function initWhatif() { air.windOverride = null; }
 
 // ===== 重さ・お金・重心 (パッケージ⑥) =====
 // 機体の質量配分を積み上げバーで見せ、重心のずれが前後のモーター負担に効くことを体感させる。
@@ -2994,6 +3179,7 @@ $('#noteClose').addEventListener('click', () => { const c = $('#noteCard'); if (
 function setTab(tab) {
   $('#coach').hidden = true;
   if (theater.active && tab !== 'theater') { stopTheaterUI(); }
+  if (whatif.active && tab !== 'theater') { stopWhatifUI(); }
   S.tab = tab; segSet($('#tabs'), 'tab', tab);
   for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== tab;
   if (tab === 'fly') { if (S.explode > 0.02) { setExplode(0); showToast('分解をもどしました'); } if (S.mode === 'cut') setMode('normal'); }
@@ -3009,6 +3195,7 @@ $('#tabs').addEventListener('click', e => { const b = e.target.closest('button')
 function setDepth(d) {
   S.depth = d; store.set('depth', d); document.body.classList.toggle('full', d === 'full'); segSet($('#depthSeg'), 'd', d); $('#coach').hidden = true;
   buildList(); renderDetail(); buildLabels(); buildMishapCards(); if (S.scale) renderMassBar(S.selected && S.selected.key);
+  buildWhatifCards();
   if (d === 'full') showToast('くわしく: 部品40種の仕様例と点検ポイントも見られます'); 
 }
 $('#depthSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setDepth(b.dataset.d); });
@@ -3121,7 +3308,7 @@ let labelEls = [];
 function buildLabels() {
   $('#labels').innerHTML = ''; $('#leaders').innerHTML = '';
   const keys = S.depth === 'simple' ? new Set(SIMPLE_KEYS) : null;
-  labelEls = D.parts.filter(p => (p.label || p.labelObj) && (!keys || keys.has(p.key)) && (!S.price || PRICE[p.key])).map(p => {
+  labelEls = D.parts.filter(p => (p.label || p.labelObj) && (!keys || keys.has(p.key) || (S.labelOnly && S.labelOnly.has(p.key))) && (!S.price || PRICE[p.key])).map(p => {
     const el = document.createElement('button'); el.className = 'lbl'; el.textContent = S.price ? '¥' + PRICE[p.key].toLocaleString() : ((S.depth === 'simple' && SIMPLE_NAME[p.key]) || PARTS[p.key].name); el.type = 'button';
     el.tabIndex = -1; el.addEventListener('click', () => select(p, true)); $('#labels').appendChild(el);
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line'), dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); dot.setAttribute('r', '3'); $('#leaders').append(line, dot);
@@ -3130,11 +3317,14 @@ function buildLabels() {
 }
 const badgeEls = D.motors.map((mo, i) => { const el = document.createElement('div'); el.className = 'mbadge'; el.hidden = true; $('#badges').appendChild(el); return { mo, el, i }; });
 function updateLabels() {
-  const camDist = camera.position.distanceTo(controls.target); const live = body.mode !== 'idle';
+  const camDist = camera.position.distanceTo(controls.target);
+  const forced = !!S.labelOnly;                       // ⑩: 特定の部品だけを強制表示
+  const live = body.mode !== 'idle' && !forced;
   for (const L of labelEls) {
-    const p = L.p; let show = S.labels && !live && partVisible(p) && effVisible(p.obj) && S.explodeT < 0.02 || (S.labels && !live && S.explodeT >= 0.02 && partVisible(p) && effVisible(p.obj));
+    const p = L.p;
+    let show = (forced || (S.labels && !S.labelsSuppressed)) && !live && partVisible(p) && effVisible(p.obj) && (!S.labelOnly || S.labelOnly.has(p.key));
     if (show && camDist < 0.5 && !(S.selected && S.selected.key === p.key)) show = false;
-    if (show && S.depth === 'full' && camDist > 1.0 && !SIMPLE_KEYS.includes(p.key) && !(S.selected && S.selected.key === p.key)) show = false;   // 引きの画では主要8枚だけ
+    if (show && !forced && S.depth === 'full' && camDist > 1.0 && !SIMPLE_KEYS.includes(p.key) && !(S.selected && S.selected.key === p.key)) show = false;   // 引きの画では主要8枚だけ
     if (show) {
       const a = p.labelObj ? p.labelObj.getWorldPosition(tmpV) : p.obj.localToWorld(tmpV.copy(p.label));
       const depth = a.distanceTo(camera.position) - camDist; const pr = tmpV2.copy(a).project(camera);
@@ -3229,14 +3419,46 @@ function setUse(id) {
 // ---------- もしも(シアター) ----------
 function buildMishapCards() { const list = S.depth === 'simple' ? MISHAPS.filter(m => ['propReverse', 'drop', 'motorOut'].includes(m.id)) : MISHAPS; $('#mishapCards').innerHTML = list.map(m => `<button data-m="${m.id}"><b>${m.short}</b>${m.name}</button>`).join(''); }
 $('#mishapCards').addEventListener('click', e => { const b = e.target.closest('button'); if (b) startTheaterUI(b.dataset.m); });
+function buildWhatifCards() { $('#whatifCards').innerHTML = WHATIF.map(w => `<button data-w="${w.id}"><b>${w.icon} ${w.name}</b>${w.intro.slice(0, 22)}…</button>`).join(''); }
+$('#whatifCards').addEventListener('click', e => { const b = e.target.closest('button'); if (b) startWhatifUI(b.dataset.w); });
+function startWhatifUI(id) {
+  if (S.flight) setFlight(null); clearQuestion(); select(null); setSticks(false); if (S.explode > 0) setExplode(0); if (S.mode !== 'normal') setMode('normal'); if (S.scale) setScale(false); if (S.use) setUse(null);
+  $('#coach').hidden = true; startWhatif(id); document.body.classList.add('theater'); $('#inspector').inert = true; $('#topbar').inert = true; $('#inspector').classList.remove('open');
+  S.tab = 'theater'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'theater'; segSet($('#tabs'), 'tab', 'mishap');
+  for (const b of $$('#whatifCards button')) b.classList.toggle('on', b.dataset.w === id);
+}
+function stopWhatifUI() {
+  stopWhatif(true); document.body.classList.remove('theater'); $('#inspector').inert = false; $('#topbar').inert = false;
+  setPower(0, true); renderNote(null); S.tab = 'mishap'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'mishap';
+  for (const b of $$('#whatifCards button')) b.classList.remove('on'); syncBodyMode();
+}
+function onWhatifChanged() {
+  if (!whatif.active) return;
+  const d = whatif.def, si = whatifStageIndex();
+  $('#thStages').innerHTML = WHATIF_STAGES.map((n, i) => `<span class="${i < si ? 'done' : i === si ? 'on' : ''}">${n}</span>`).join('');
+  const nb = $('#thNext'); nb.hidden = !(whatif.phase === 0 || whatif.phase === 3);
+  nb.textContent = whatif.phase === 0 ? '機体の反応を見る ▶' : 'とじる';
+  $('#thSlow').hidden = true;
+  let html = '', actions = [];
+  if (whatif.phase === 0) html = `<p>${d.intro}</p>`;
+  else if (whatif.phase === 1) html = `<p>${d.reaction}</p>`;
+  else if (whatif.phase === 2) html = `<p>${d.reaction}</p><ol class="parts-seq">${whatif.seq.map((k, i) => `<li class="${i === whatif.seq.length - 1 ? 'lit' : ''}"><b>${PARTS[k].name}</b>${d.partNotes[k] || ''}</li>`).join('')}</ol>`;
+  else html = `<div class="two-col"><div><h4>機体ができること</h4><ul>${d.can.map(t => `<li>${t}</li>`).join('')}</ul></div><div><h4>人がやること</h4><ul>${d.human.map(t => `<li>${t}</li>`).join('')}</ul></div></div><p class="caveat">${d.caveat}</p>`;
+  if (whatif.phase === 3) actions = [{ label: 'もう一度', fn: () => whatifRestart() }];
+  renderNote({ kind: 'whatif', title: `${d.icon} ${d.name}`, badge: WHATIF_STAGES[si], html, actions });
+}
 function startTheaterUI(id) {
+  if (whatif.active) { stopWhatif(true); for (const b of $$('#whatifCards button')) b.classList.remove('on'); }
   if (S.flight) setFlight(null); clearQuestion(); select(null); setSticks(false); if (S.explode > 0) setExplode(0); if (S.mode === 'cut') setMode('normal');
   $('#coach').hidden = true; startTheater(id); document.body.classList.add('theater'); $('#inspector').inert = true; $('#topbar').inert = true; $('#inspector').classList.remove('open'); S.tab = 'theater'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'theater'; segSet($('#tabs'), 'tab', 'mishap');
   for (const b of $$('#mishapCards button')) b.classList.toggle('on', b.dataset.m === id);
 }
 function stopTheaterUI() { stopTheater(true); document.body.classList.remove('theater'); $('#inspector').inert = false; $('#topbar').inert = false; setPower(0, true); renderNote(null); S.tab = 'mishap'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'mishap'; for (const b of $$('#mishapCards button')) b.classList.remove('on'); syncBodyMode(); }
-$('#thQuit').addEventListener('click', stopTheaterUI);
-$('#thNext').addEventListener('click', () => { if (theater.done || !theater.active) { stopTheaterUI(); return; } theaterNext(); });
+$('#thQuit').addEventListener('click', () => { if (whatif.active) stopWhatifUI(); else stopTheaterUI(); });
+$('#thNext').addEventListener('click', () => {
+  if (whatif.active) { if (whatif.phase === 3) stopWhatifUI(); else whatifNext(); return; }
+  if (theater.done || !theater.active) { stopTheaterUI(); return; } theaterNext();
+});
 function onTheaterChanged() {
   if (!theater.active && !theater.done) return;
   const si = theaterStageIndex(); $('#thStages').innerHTML = TH_STAGES.map((n, i) => `<span class="${i < si ? 'done' : i === si ? 'on' : ''}">${n}</span>`).join('');
@@ -3378,7 +3600,7 @@ function onQualityChanged(level) { if (air.mesh && air.N !== Q.particles) rebuil
 function onResized() {
   if (S.scale) { if (D.personGroup) D.personGroup.visible = !compact(); renderMassBar(S.selected && S.selected.key); } for (const L of labelEls) L.w = 0; if (!S.labelsTouched) { S.labels = !narrow(); for (const x of $$('.tgl[data-t=labels]')) x.classList.toggle('on', S.labels); } }
 function initUI() {
-  buildUseChips(); buildAsk(); buildMishapCards(); labelSticks(); segSet($('#modeSeg2'), 'm', stickMode);
+  buildUseChips(); buildAsk(); buildMishapCards(); buildWhatifCards(); labelSticks(); segSet($('#modeSeg2'), 'm', stickMode);
   const d = store.get('depth') || 'simple'; setDepth(d);
   if (d === 'simple' && !store.get('coach')) setTimeout(() => showCoach(FIRST_QUESTION.q, FIRST_QUESTION.hint, () => { store.set('coach', '1'); askQuestion(FIRST_QUESTION.qid); }, () => store.set('coach', '1')), 1200);
 }
@@ -3407,7 +3629,7 @@ function tick(now) {
   if (S.scale) stepScale();
   if (S.explodeFrame && Math.abs(S.explode - S.explodeT) < 0.01 && performance.now() - (S.explodeAt || 0) > 350) { S.explodeFrame = false; D.root.updateWorldMatrix(true, true); focusOn(D.parts.filter(p => partVisible(p) && effVisible(p.obj)).map(p => p.obj), { pull: true }); }   // 分解が落ち着いたら全体をフレーミング
   // 機体
-  stepBody(dtSim, dt); if (theater.active) stepTheater(dtSim, dt); applyBody(dt);
+  stepBody(dtSim, dt); if (theater.active) stepTheater(dtSim, dt); if (whatif.active) stepWhatif(dtSim, dt); applyBody(dt);
   updateMotors(dtSim, dt); updateMoveArrow(); updateAirflow(dtSim, dt);
   if (S.mode === 'cut') updateCutPlanes();
   updateHover();
@@ -3436,14 +3658,14 @@ function tick(now) {
   }
 }
 // 検証用に最小限だけグローバルへ出す(モジュールスコープのままだとコンソールから触れないため)
-window.LIST_ORDER = LIST_ORDER; window.PARTS = PARTS;
-window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: scale, __codex: codex, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
+window.LIST_ORDER = LIST_ORDER; window.PARTS = PARTS; window.WHATIF = WHATIF;
+window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: scale, __codex: codex, __whatif: whatif, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
 // ---------- 起動 ----------
 (async () => {
   $('#loadMsg').textContent = '照明と材質を準備しています…';
   buildList(); applyTheme(); resize();
   applyQuality(isMobile ? (HF ? 1 : 0) : 3);
-  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex();
+  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif();
   { const vs = viewScale(); if (vs > 1) camera.position.multiplyScalar(vs); }
   renderer.setClearColor(0x000000, 1);
   $('#loadMsg').textContent = 'シェーダーをコンパイルしています…'; mark('setup');

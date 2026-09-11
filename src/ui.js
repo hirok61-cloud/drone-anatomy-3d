@@ -27,6 +27,7 @@ $('#noteClose').addEventListener('click', () => { const c = $('#noteCard'); if (
 function setTab(tab) {
   $('#coach').hidden = true;
   if (theater.active && tab !== 'theater') { stopTheaterUI(); }
+  if (whatif.active && tab !== 'theater') { stopWhatifUI(); }
   S.tab = tab; segSet($('#tabs'), 'tab', tab);
   for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== tab;
   if (tab === 'fly') { if (S.explode > 0.02) { setExplode(0); showToast('分解をもどしました'); } if (S.mode === 'cut') setMode('normal'); }
@@ -42,6 +43,7 @@ $('#tabs').addEventListener('click', e => { const b = e.target.closest('button')
 function setDepth(d) {
   S.depth = d; store.set('depth', d); document.body.classList.toggle('full', d === 'full'); segSet($('#depthSeg'), 'd', d); $('#coach').hidden = true;
   buildList(); renderDetail(); buildLabels(); buildMishapCards(); if (S.scale) renderMassBar(S.selected && S.selected.key);
+  buildWhatifCards();
   if (d === 'full') showToast('くわしく: 部品40種の仕様例と点検ポイントも見られます'); 
 }
 $('#depthSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setDepth(b.dataset.d); });
@@ -154,7 +156,7 @@ let labelEls = [];
 function buildLabels() {
   $('#labels').innerHTML = ''; $('#leaders').innerHTML = '';
   const keys = S.depth === 'simple' ? new Set(SIMPLE_KEYS) : null;
-  labelEls = D.parts.filter(p => (p.label || p.labelObj) && (!keys || keys.has(p.key)) && (!S.price || PRICE[p.key])).map(p => {
+  labelEls = D.parts.filter(p => (p.label || p.labelObj) && (!keys || keys.has(p.key) || (S.labelOnly && S.labelOnly.has(p.key))) && (!S.price || PRICE[p.key])).map(p => {
     const el = document.createElement('button'); el.className = 'lbl'; el.textContent = S.price ? '¥' + PRICE[p.key].toLocaleString() : ((S.depth === 'simple' && SIMPLE_NAME[p.key]) || PARTS[p.key].name); el.type = 'button';
     el.tabIndex = -1; el.addEventListener('click', () => select(p, true)); $('#labels').appendChild(el);
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line'), dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); dot.setAttribute('r', '3'); $('#leaders').append(line, dot);
@@ -163,11 +165,14 @@ function buildLabels() {
 }
 const badgeEls = D.motors.map((mo, i) => { const el = document.createElement('div'); el.className = 'mbadge'; el.hidden = true; $('#badges').appendChild(el); return { mo, el, i }; });
 function updateLabels() {
-  const camDist = camera.position.distanceTo(controls.target); const live = body.mode !== 'idle';
+  const camDist = camera.position.distanceTo(controls.target);
+  const forced = !!S.labelOnly;                       // ⑩: 特定の部品だけを強制表示
+  const live = body.mode !== 'idle' && !forced;
   for (const L of labelEls) {
-    const p = L.p; let show = S.labels && !live && partVisible(p) && effVisible(p.obj) && S.explodeT < 0.02 || (S.labels && !live && S.explodeT >= 0.02 && partVisible(p) && effVisible(p.obj));
+    const p = L.p;
+    let show = (forced || (S.labels && !S.labelsSuppressed)) && !live && partVisible(p) && effVisible(p.obj) && (!S.labelOnly || S.labelOnly.has(p.key));
     if (show && camDist < 0.5 && !(S.selected && S.selected.key === p.key)) show = false;
-    if (show && S.depth === 'full' && camDist > 1.0 && !SIMPLE_KEYS.includes(p.key) && !(S.selected && S.selected.key === p.key)) show = false;   // 引きの画では主要8枚だけ
+    if (show && !forced && S.depth === 'full' && camDist > 1.0 && !SIMPLE_KEYS.includes(p.key) && !(S.selected && S.selected.key === p.key)) show = false;   // 引きの画では主要8枚だけ
     if (show) {
       const a = p.labelObj ? p.labelObj.getWorldPosition(tmpV) : p.obj.localToWorld(tmpV.copy(p.label));
       const depth = a.distanceTo(camera.position) - camDist; const pr = tmpV2.copy(a).project(camera);
@@ -262,14 +267,46 @@ function setUse(id) {
 // ---------- もしも(シアター) ----------
 function buildMishapCards() { const list = S.depth === 'simple' ? MISHAPS.filter(m => ['propReverse', 'drop', 'motorOut'].includes(m.id)) : MISHAPS; $('#mishapCards').innerHTML = list.map(m => `<button data-m="${m.id}"><b>${m.short}</b>${m.name}</button>`).join(''); }
 $('#mishapCards').addEventListener('click', e => { const b = e.target.closest('button'); if (b) startTheaterUI(b.dataset.m); });
+function buildWhatifCards() { $('#whatifCards').innerHTML = WHATIF.map(w => `<button data-w="${w.id}"><b>${w.icon} ${w.name}</b>${w.intro.slice(0, 22)}…</button>`).join(''); }
+$('#whatifCards').addEventListener('click', e => { const b = e.target.closest('button'); if (b) startWhatifUI(b.dataset.w); });
+function startWhatifUI(id) {
+  if (S.flight) setFlight(null); clearQuestion(); select(null); setSticks(false); if (S.explode > 0) setExplode(0); if (S.mode !== 'normal') setMode('normal'); if (S.scale) setScale(false); if (S.use) setUse(null);
+  $('#coach').hidden = true; startWhatif(id); document.body.classList.add('theater'); $('#inspector').inert = true; $('#topbar').inert = true; $('#inspector').classList.remove('open');
+  S.tab = 'theater'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'theater'; segSet($('#tabs'), 'tab', 'mishap');
+  for (const b of $$('#whatifCards button')) b.classList.toggle('on', b.dataset.w === id);
+}
+function stopWhatifUI() {
+  stopWhatif(true); document.body.classList.remove('theater'); $('#inspector').inert = false; $('#topbar').inert = false;
+  setPower(0, true); renderNote(null); S.tab = 'mishap'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'mishap';
+  for (const b of $$('#whatifCards button')) b.classList.remove('on'); syncBodyMode();
+}
+function onWhatifChanged() {
+  if (!whatif.active) return;
+  const d = whatif.def, si = whatifStageIndex();
+  $('#thStages').innerHTML = WHATIF_STAGES.map((n, i) => `<span class="${i < si ? 'done' : i === si ? 'on' : ''}">${n}</span>`).join('');
+  const nb = $('#thNext'); nb.hidden = !(whatif.phase === 0 || whatif.phase === 3);
+  nb.textContent = whatif.phase === 0 ? '機体の反応を見る ▶' : 'とじる';
+  $('#thSlow').hidden = true;
+  let html = '', actions = [];
+  if (whatif.phase === 0) html = `<p>${d.intro}</p>`;
+  else if (whatif.phase === 1) html = `<p>${d.reaction}</p>`;
+  else if (whatif.phase === 2) html = `<p>${d.reaction}</p><ol class="parts-seq">${whatif.seq.map((k, i) => `<li class="${i === whatif.seq.length - 1 ? 'lit' : ''}"><b>${PARTS[k].name}</b>${d.partNotes[k] || ''}</li>`).join('')}</ol>`;
+  else html = `<div class="two-col"><div><h4>機体ができること</h4><ul>${d.can.map(t => `<li>${t}</li>`).join('')}</ul></div><div><h4>人がやること</h4><ul>${d.human.map(t => `<li>${t}</li>`).join('')}</ul></div></div><p class="caveat">${d.caveat}</p>`;
+  if (whatif.phase === 3) actions = [{ label: 'もう一度', fn: () => whatifRestart() }];
+  renderNote({ kind: 'whatif', title: `${d.icon} ${d.name}`, badge: WHATIF_STAGES[si], html, actions });
+}
 function startTheaterUI(id) {
+  if (whatif.active) { stopWhatif(true); for (const b of $$('#whatifCards button')) b.classList.remove('on'); }
   if (S.flight) setFlight(null); clearQuestion(); select(null); setSticks(false); if (S.explode > 0) setExplode(0); if (S.mode === 'cut') setMode('normal');
   $('#coach').hidden = true; startTheater(id); document.body.classList.add('theater'); $('#inspector').inert = true; $('#topbar').inert = true; $('#inspector').classList.remove('open'); S.tab = 'theater'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'theater'; segSet($('#tabs'), 'tab', 'mishap');
   for (const b of $$('#mishapCards button')) b.classList.toggle('on', b.dataset.m === id);
 }
 function stopTheaterUI() { stopTheater(true); document.body.classList.remove('theater'); $('#inspector').inert = false; $('#topbar').inert = false; setPower(0, true); renderNote(null); S.tab = 'mishap'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'mishap'; for (const b of $$('#mishapCards button')) b.classList.remove('on'); syncBodyMode(); }
-$('#thQuit').addEventListener('click', stopTheaterUI);
-$('#thNext').addEventListener('click', () => { if (theater.done || !theater.active) { stopTheaterUI(); return; } theaterNext(); });
+$('#thQuit').addEventListener('click', () => { if (whatif.active) stopWhatifUI(); else stopTheaterUI(); });
+$('#thNext').addEventListener('click', () => {
+  if (whatif.active) { if (whatif.phase === 3) stopWhatifUI(); else whatifNext(); return; }
+  if (theater.done || !theater.active) { stopTheaterUI(); return; } theaterNext();
+});
 function onTheaterChanged() {
   if (!theater.active && !theater.done) return;
   const si = theaterStageIndex(); $('#thStages').innerHTML = TH_STAGES.map((n, i) => `<span class="${i < si ? 'done' : i === si ? 'on' : ''}">${n}</span>`).join('');
@@ -411,7 +448,7 @@ function onQualityChanged(level) { if (air.mesh && air.N !== Q.particles) rebuil
 function onResized() {
   if (S.scale) { if (D.personGroup) D.personGroup.visible = !compact(); renderMassBar(S.selected && S.selected.key); } for (const L of labelEls) L.w = 0; if (!S.labelsTouched) { S.labels = !narrow(); for (const x of $$('.tgl[data-t=labels]')) x.classList.toggle('on', S.labels); } }
 function initUI() {
-  buildUseChips(); buildAsk(); buildMishapCards(); labelSticks(); segSet($('#modeSeg2'), 'm', stickMode);
+  buildUseChips(); buildAsk(); buildMishapCards(); buildWhatifCards(); labelSticks(); segSet($('#modeSeg2'), 'm', stickMode);
   const d = store.get('depth') || 'simple'; setDepth(d);
   if (d === 'simple' && !store.get('coach')) setTimeout(() => showCoach(FIRST_QUESTION.q, FIRST_QUESTION.hint, () => { store.set('coach', '1'); askQuestion(FIRST_QUESTION.qid); }, () => store.set('coach', '1')), 1200);
 }

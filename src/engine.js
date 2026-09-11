@@ -15,7 +15,7 @@ const S = {
   mode: 'normal', explode: 0, explodeT: 0, power: 0, flight: null, flightT: 0, depth: 'simple', tab: 'see',
   labels: true, arrows: false, air: false, autoRotate: !reduceMotion, shadows: true, slow: false, ts: 1, logTs: 0, tsTarget: 1,
   selected: null, selAll: false, hovered: null, isolated: null, quality: 'auto', qLevel: 3, lastInteract: performance.now(), lastSelect: -1e9,
-  camSpring: null, camInertia: null, sticks: false, tilt: false, theater: null, overlay: null, question: null, use: null, scale: false, price: false,
+  camSpring: null, camInertia: null, sticks: false, tilt: false, theater: null, overlay: null, question: null, use: null, scale: false, price: false, whatif: null, labelOnly: null, labelsSuppressed: false,
   aoDirty: true, shadowDirty: true, csDirty: true, envMul: 1, exposureMul: 1,
 };
 

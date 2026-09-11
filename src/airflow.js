@@ -77,7 +77,7 @@ function updateAirflow(dtSim, dtReal) {
   if (air.cols) air.cols.forEach((c, i) => { const mo = D.motors[i]; const k = on ? mo.rpm / RPM_MAX : 0; c.material.uniforms.uK.value = k; c.visible = on && vis && mo.rpm > 600; air.colT[i] += dtSim * (1 + 3 * k); c.material.uniforms.uT.value = air.colT[i]; });
   m.visible = on && vis;
   if (!m.visible) return;
-  const u = air.mat.uniforms; u.uPhase.value.set(air.phase[0], air.phase[1], air.phase[2], air.phase[3]); u.uWind.value.copy(body.v).negate(); u.uTime.value += dtSim;
+  const u = air.mat.uniforms; u.uPhase.value.set(air.phase[0], air.phase[1], air.phase[2], air.phase[3]); if (air.windOverride) u.uWind.value.copy(air.windOverride); else u.uWind.value.copy(body.v).negate(); u.uTime.value += dtSim;
   u.uCam.value.set(camera.near, camera.far); u.uRes.value.set(W * DPR, H * DPR);
 }
 function airflowTheme(dark) { if (air.cols) for (const c of air.cols) { c.material.uniforms.uColor.value.set(dark ? 0x8fc9ff : 0x2f6fe8); c.material.uniforms.uA.value = dark ? 1.3 : 1; c.material.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending; c.material.needsUpdate = true; }
