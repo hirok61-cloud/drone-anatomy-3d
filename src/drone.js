@@ -527,19 +527,47 @@ function buildDrone(M) {
 
 // ---- 大きさの目安になる人型 (パッケージ⑥。身長1.70m、機体の右 0.9m) ----
 function buildPerson() {
-  // 既定の斜め視点から見て機体と同じ奥行きに立たせる(遠近で大きさが狂わないように)
-  // 画面右(既定視点の右手)・機体と同じ奥行きに立つ。ピクトグラム寄りの簡易人型: 頭・首・胴・腕・脚・足(接地)
+  // 建築模型のスケールフィギュア: 身長1.70m・8頭身。頭→首→肩幅のある胴→テーパーした手足→関節球→足。
+  // 手足はピボット付きの子グループにして、歩行(walk)と機体の方を向く(face)ができる。
   const g = new THREE.Group(); g.visible = false; g.position.set(-0.50, -0.158, -0.48);
-  const mat = new THREE.MeshStandardMaterial({ color: 0x6f7784, roughness: 0.85, metalness: 0 });
-  const put = (geo, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; m.userData.noPick = m.userData.noAO = true; g.add(m); return m; };   // noPart は付けない(カメラの枠決めに人型を含めるため)
-  put(new THREE.SphereGeometry(0.105, 24, 16), 0, 1.595, 0);                 // 頭 top = 1.70
-  put(new THREE.CylinderGeometry(0.045, 0.05, 0.07, 12), 0, 1.50, 0);        // 首
-  put(new THREE.CapsuleGeometry(0.155, 0.40, 8, 16), 0, 1.13, 0);            // 胴
+  const mat = new THREE.MeshPhysicalMaterial({ color: 0x8e97a7, roughness: 0.52, metalness: 0, clearcoat: 0.35, clearcoatRoughness: 0.45, sheen: 0.4, sheenRoughness: 0.6, sheenColor: new THREE.Color(0xdde3ee) });
+  const V = (a) => new THREE.Vector3(a[0], a[1], a[2]);
+  const bone = (a, b, r1, r2, seg = 20) => { const A = V(a), B = V(b), len = A.distanceTo(B); const geo = new THREE.CylinderGeometry(r2, r1, len, seg, 1, false); geo.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), B.clone().sub(A).normalize())); const m = A.clone().add(B).multiplyScalar(0.5); geo.translate(m.x, m.y, m.z); return geo; };
+  const ball = (p, r, sx = 1, sy = 1, sz = 1) => { const geo = new THREE.SphereGeometry(r, 24, 16); geo.scale(sx, sy, sz); geo.translate(p[0], p[1], p[2]); return geo; };
+  const meshOf = (geos, pivot) => { const geo = mergeGeometries(geos.map(x => x.toNonIndexed()), false); if (pivot) geo.translate(-pivot[0], -pivot[1], -pivot[2]); /* 元の滑らかな法線を保つ(再計算するとフラットになる) */ const m = new THREE.Mesh(geo, mat); m.castShadow = true; m.receiveShadow = true; m.userData.noPick = true; return m; };
+  // 胴: 肩幅0.40・胸・腰のくびれ・骨盤。旋盤形を奥行き0.62に潰す
+  const torso = new THREE.LatheGeometry([[0.06, 0.80], [0.165, 0.86], [0.175, 0.96], [0.14, 1.06], [0.135, 1.16], [0.16, 1.27], [0.20, 1.37], [0.195, 1.42], [0.10, 1.455], [0.0, 1.46]].map(q => new THREE.Vector2(q[0], q[1])), 40);
+  torso.scale(1, 1, 0.62);
+  const bodyGeos = [torso,
+    bone([0, 1.44, 0], [0, 1.51, 0.012], 0.046, 0.040),                 // 首
+    ball([0, 1.59, 0.012], 0.096, 0.92, 1.12, 1.0),                    // 頭 (top ≒ 1.70)
+    ball([-0.185, 1.395, 0], 0.062, 1, 0.9, 0.8), ball([0.185, 1.395, 0], 0.062, 1, 0.9, 0.8),   // 肩
+    ball([-0.095, 0.845, 0], 0.078, 1, 0.9, 0.85), ball([0.095, 0.845, 0], 0.078, 1, 0.9, 0.85), // 骨盤
+  ];
+  g.add(meshOf(bodyGeos));
+  const limbs = {};
   for (const s of [-1, 1]) {
-    put(new THREE.CapsuleGeometry(0.075, 0.62, 6, 12), s * 0.09, 0.445, 0);  // 脚(底 0.06 → 足に乗る)
-    put(rboxGeo(0.10, 0.06, 0.25, 0.02), s * 0.09, 0.03, -0.04);            // 足(接地)
-    const arm = put(new THREE.CapsuleGeometry(0.045, 0.50, 6, 12), s * 0.205, 1.15, 0); arm.rotation.z = -s * 0.10;
+    // 腕: 肩→肘(やや後ろ・外)→手首(やや前)。肩をピボットに
+    const sh = [s * 0.205, 1.395, 0], el = [s * 0.245, 1.11, -0.025], wr = [s * 0.235, 0.855, 0.045];
+    const arm = meshOf([bone(sh, el, 0.052, 0.044), ball(el, 0.046), bone(el, wr, 0.044, 0.034), ball(wr, 0.036), ball([wr[0], wr[1] - 0.075, wr[2] + 0.01], 0.045, 0.7, 1.25, 0.5)], sh);
+    arm.position.set(sh[0], sh[1], sh[2]); g.add(arm); limbs[s < 0 ? 'armL' : 'armR'] = arm;
+    // 脚: 股→膝→足首、足は前(−z)へ
+    const hp = [s * 0.095, 0.845, 0], kn = [s * 0.10, 0.47, 0.01], an = [s * 0.10, 0.095, 0];
+    const foot = rboxGeo(0.095, 0.065, 0.25, 0.028); foot.translate(an[0], 0.033, an[2] - 0.06);
+    const leg = meshOf([bone(hp, kn, 0.088, 0.066), ball(kn, 0.066), bone(kn, an, 0.064, 0.046), ball(an, 0.046), foot], hp);
+    leg.position.set(hp[0], hp[1], hp[2]); g.add(leg); limbs[s < 0 ? 'legL' : 'legR'] = leg;
   }
+  // 立ち姿: 腕を少し外へ、頭は真っすぐ
+  limbs.armL.rotation.z = 0.08; limbs.armR.rotation.z = -0.08;
+  g.userData.limbs = limbs;
+  g.userData.walk = (t, amp = 1) => {   // 歩行: 脚±26°・腕は逆位相±16°、t は秒
+    const w = 2 * Math.PI * 1.6 * t, a = 0.45 * amp, b = 0.28 * amp;
+    limbs.legL.rotation.x = a * Math.sin(w); limbs.legR.rotation.x = -a * Math.sin(w);
+    limbs.armL.rotation.x = -b * Math.sin(w); limbs.armR.rotation.x = b * Math.sin(w);
+  };
+  g.userData.rest = () => { for (const k of ['legL', 'legR', 'armL', 'armR']) limbs[k].rotation.x = 0; };
+  g.userData.face = (x, z) => { g.rotation.y = Math.atan2(-(x - g.position.x), -(z - g.position.z)); };   // 足先(−z)を目標へ
+  g.userData.face(0, 0);
   return g;
 }
 

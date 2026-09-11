@@ -37,7 +37,7 @@ function stopWhatif(silent) {
   D.motors.forEach(mo => { mo.rpmTarget = null; mo.rpmRate = null; });
   for (let i = 0; i < 4; i++) body.mult[i] = 1;
   air.windOverride = null; S.air = whatif.saved.air; for (const x of $$('.tgl[data-t=air]')) x.classList.toggle('on', S.air);
-  if (D.personGroup) { if (whatif.saved.personPos) D.personGroup.position.copy(whatif.saved.personPos); D.personGroup.visible = whatif.saved.personVis; }
+  if (D.personGroup) { if (whatif.saved.personPos) D.personGroup.position.copy(whatif.saved.personPos); D.personGroup.visible = whatif.saved.personVis; if (D.personGroup.userData.rest) D.personGroup.userData.rest(); if (D.personGroup.userData.face) D.personGroup.userData.face(0, 0); }
   S.labelsSuppressed = false; S.labelOnly = null; buildLabels();
   whatif.active = false; whatif.def = null; whatif.phase = 0; S.whatif = null;
   S.power = 0; setBodyMode('idle');
@@ -101,9 +101,11 @@ const WHATIF_MOTION = {
   person(t, dt) {
     body.py = free.hoverY + 0.03 * smoothstep(1.0, 1.8, t);
     const g = D.personGroup;
-    if (g) {   // 機体の前左(画面右・同じ奥行き)から 2.4m → 1.0m に歩いて寄る。歩きの上下 12mm
-      g.visible = true; const k = smoothstep(1.0, 3.0, t), dd = 2.6 - 1.3 * k;
-      g.position.set(-0.707 * dd, -0.158 + (k < 1 ? 0.012 * Math.abs(Math.sin(2 * Math.PI * 1.6 * t)) : 0), -0.707 * dd);
+    if (g) {   // 機体の前左(画面右・同じ奥行き)から 2.6m → 1.3m に歩いて寄る。歩きの上下 12mm、脚と腕を振る
+      g.visible = true; const k = smoothstep(1.0, 3.0, t), dd = 2.6 - 1.3 * k, walking = t > 1.0 && k < 1;
+      g.position.set(-0.707 * dd, -0.158 + (walking ? 0.012 * Math.abs(Math.sin(2 * Math.PI * 1.6 * t)) : 0), -0.707 * dd);
+      if (g.userData.face) g.userData.face(0, 0);
+      if (g.userData.walk) { if (walking) g.userData.walk(t, 1); else g.userData.rest(); }
     }
     if (t > 3.0) { const b = 0.5 + 0.5 * Math.sin((t - 3.0) * 2 * Math.PI / 0.5); for (const p of partsOf('led')) { setTint(p, RED, 0.8 * b); const h = p.obj.userData.halo; if (h) { h.material.color.copy(RED); h.material.opacity = 0.06 + 0.5 * b; } } }
     return t > 4.4;

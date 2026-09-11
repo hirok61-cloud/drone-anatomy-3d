@@ -64,7 +64,7 @@ function setScale(on) {
     if (S.explode > 0.02) setExplode(0);
     if (S.mode === 'cut') setMode('normal');
     if (D.cgMarker) D.cgMarker.visible = true;
-    if (D.personGroup) D.personGroup.visible = !compact();
+    if (D.personGroup) { D.personGroup.visible = !compact(); if (D.personGroup.userData.face) D.personGroup.userData.face(0, 0); if (D.personGroup.userData.rest) D.personGroup.userData.rest(); }
     setPayload(scale.payload); renderMassBar(); setPower(0.5, true);
     // 機体を主役に枠を決め、人型は「物差し」として画面右の端に腰まで入れる
     focusOn([D.root], { pull: true, margin: 1.75 });
