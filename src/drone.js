@@ -13,6 +13,8 @@ function at(obj, x, y, z) { obj.position.set(x, y, z); return obj; }
 function nonIndexed(g) { return g.index ? g.toNonIndexed() : g; }
 function merged(geos) { return mergeGeometries(geos.map(nonIndexed), false); }
 function lathe(pts, seg = 48) { return new THREE.LatheGeometry(pts.map(p => new THREE.Vector2(p[0], p[1])), seg); }
+// 機械部品用: 断面の辺ごとに旋盤して結合 → 角が硬く、円周は滑らか(LatheGeometryの法線平均化を避ける)
+function hardLathe(pts, seg = 48) { const parts = []; for (let i = 0; i < pts.length - 1; i++) { const a = pts[i], b = pts[i + 1]; if (a[0] === b[0] && a[1] === b[1]) continue; parts.push(new THREE.LatheGeometry([new THREE.Vector2(a[0], a[1]), new THREE.Vector2(b[0], b[1])], seg).toNonIndexed()); } return mergeGeometries(parts, false); }
 
 function roundedRectPath(P, w, h, r, cx = 0, cy = 0) {
   const x = cx - w / 2, y = cy - h / 2;
@@ -97,20 +99,20 @@ function motorGeometries() {
   const mag = annularSector(0.0143, 0.0160, DEG(22.5), 0.015);
   for (let k = 0; k < 14; k++) magnets.push(mag.clone().rotateY(k * Math.PI * 2 / 14));
   // ベル: 肉厚のある缶 (壁1.5・天板は別・下端C0.5)
-  const bellWall = lathe([[0.0160, 0.0], [0.0170, 0.0], [0.0175, 0.0005], [0.0175, 0.0245], [0.0160, 0.0245], [0.0160, 0.0]], 64);
+  const bellWall = hardLathe([[0.0160, 0.0], [0.0170, 0.0], [0.0175, 0.0005], [0.0175, 0.0245], [0.0160, 0.0245], [0.0160, 0.0]], 64);
   // 天面: 環 (r 7.5〜17.5) に6つの窓
   const top = new THREE.Shape(); top.absarc(0, 0, 0.0175, 0, Math.PI * 2, false);
   const inner = new THREE.Path(); inner.absarc(0, 0, 0.0075, 0, Math.PI * 2, true); top.holes.push(inner);
   for (let k = 0; k < 6; k++) { const a = k * Math.PI / 3 + Math.PI / 6, hw = DEG(15); const w = new THREE.Path(); w.absarc(0, 0, 0.0155, a - hw, a + hw, false); w.absarc(0, 0, 0.0095, a + hw, a - hw, true); top.holes.push(w); }
   const bellTop = new THREE.ExtrudeGeometry(top, { depth: 0.002, bevelEnabled: false, curveSegments: 10 }); bellTop.rotateX(-Math.PI / 2);
   // ベアリング 684ZZ (4×9×4) とCクリップ
-  const bearing = lathe([[0.0021, 0], [0.0045, 0], [0.0045, 0.004], [0.0021, 0.004], [0.0021, 0]], 32);
+  const bearing = hardLathe([[0.0021, 0], [0.0045, 0], [0.0045, 0.004], [0.0021, 0.004], [0.0021, 0]], 32);
   const clip = annularSector(0.0016, 0.0032, DEG(300), 0.0006);
   // ハブ (内径6.4・二面幅)
-  const hub = lathe([[0.0032, -0.0045], [0.011, -0.0045], [0.0125, -0.003], [0.0125, 0.003], [0.011, 0.0045], [0.0032, 0.0045]], 40);
+  const hub = hardLathe([[0.0032, -0.0045], [0.011, -0.0045], [0.0125, -0.003], [0.0125, 0.003], [0.011, 0.0045], [0.0032, 0.0045]], 40);
   // ネジ頭 ISO7380 M3 ボタン (mm→m)
-  const screwHead = lathe([[0, 0], [0.0024, 0], [0.00285, 0.0006], [0.00285, 0.0012], [0.0024, 0.00165], [0.0011, 0.00165], [0.0011, 0.0007], [0, 0.0007]], 24);
-  const smallHead = lathe([[0, 0], [0.0018, 0], [0.0022, 0.0005], [0.0022, 0.001], [0.0018, 0.0013], [0.0008, 0.0013], [0.0008, 0.0005], [0, 0.0005]], 20);
+  const screwHead = hardLathe([[0, 0], [0.0024, 0], [0.00285, 0.0006], [0.00285, 0.0012], [0.0024, 0.00165], [0.0011, 0.00165], [0.0011, 0.0007], [0, 0.0007]], 24);
+  const smallHead = hardLathe([[0, 0], [0.0018, 0], [0.0022, 0.0005], [0.0022, 0.001], [0.0018, 0.0013], [0.0008, 0.0013], [0.0008, 0.0005], [0, 0.0005]], 20);
   return { teeth: merged(teeth), coils: merged(coils), magnets: merged(magnets), bellWall, bellTop, bearing, clip, hub, screwHead, smallHead,
     propCCW: propGeometry(1), propCW: propGeometry(-1), bladeCCW: propGeometry(1, [0]), bladeCW: propGeometry(-1, [0]) };
 }
@@ -121,7 +123,7 @@ function buildMotor(M, G, dir, reg) {
   const base = new THREE.Group();
   const baseParts = [cylGeo(0.0105, 0.0105, 0.004).translate(0, 0.002, 0)];
   for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2 + Math.PI / 4; baseParts.push(rboxGeo(0.021, 0.0032, 0.008, 0.0014).rotateY(-a).translate(Math.cos(a) * 0.0115, 0.0016, -Math.sin(a) * 0.0115)); }
-  baseParts.push(lathe([[0.0046, 0.004], [0.0052, 0.004], [0.0052, 0.022], [0.0046, 0.022], [0.0046, 0.004]], 32));
+  baseParts.push(hardLathe([[0.0046, 0.004], [0.0052, 0.004], [0.0052, 0.022], [0.0046, 0.022], [0.0046, 0.004]], 32));
   base.add(mesh(merged(baseParts), M.aluDark));
   g.add(base); reg(base, 'motorBase', V3(0, 0, 0));
   // ステーター (積層鉄心 + 歯 + シュー)
@@ -164,7 +166,7 @@ function buildMotor(M, G, dir, reg) {
   propG.add(nut); reg(nut, 'propNut', V3(0, 0.045, 0));
   reg(propG, 'prop', V3(0, 0.17, 0));
   // 回転ブラーディスク
-  const disc = new THREE.Mesh(new THREE.CircleGeometry(0.156, 64), (dir > 0 ? M.propDiscCCW : M.propDiscCW).clone()); disc.rotation.x = -Math.PI / 2; at(disc, 0, 0.043, 0);
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(0.156, 64), (dir > 0 ? M.propDiscCCW : M.propDiscCW).clone()); disc.rotation.x = -Math.PI / 2; disc.userData.noAO = true; at(disc, 0, 0.043, 0);
   disc.renderOrder = 5; disc.userData.noPart = true; disc.userData.noPick = true; g.add(disc);
   return { group: g, prop: propG, propMesh, ghosts, disc, bell, mags, shaft, adapter, dir, nutMat };
 }
@@ -225,7 +227,7 @@ function buildDrone(M) {
   const top = at(mesh(plateGeometry(0.150, 0.150, 0.018, topHoles, 0.002), [M.carbonPlate, M.carbonEdge]), 0, 0.0375, 0);
   root.add(top); reg(top, 'frameTop', V3(0, 0.10, 0), { label: V3(0.05, 0.004, -0.045) });
   // 登録記号ラベル (上板後方)
-  const regMark = at(decal(0.060, 0.012, M.regLabel), 0, 0.0398, 0.058); root.add(regMark); reg(regMark, 'regMark', V3(0, 0.10, 0));
+  const regMark = at(decal(0.060, 0.012, M.regLabel), 0, 0.0398, 0.058); regMark.rotateZ(Math.PI); root.add(regMark); reg(regMark, 'regMark', V3(0, 0.10, 0));
   // スタンドオフ (黒アルマイト)
   const standoffs = new THREE.Group();
   const soPos = [[0.062, 0.025], [-0.062, 0.025], [0.062, -0.025], [-0.062, -0.025], [0.030, 0.062], [-0.030, 0.062], [0.030, -0.062], [-0.030, -0.062]];
@@ -247,7 +249,7 @@ function buildDrone(M) {
   const clampGeo = new THREE.ExtrudeGeometry(clampShape, { depth: 0.050, bevelEnabled: true, bevelSize: 0.0005, bevelThickness: 0.0005, bevelSegments: 2, curveSegments: 16 }); clampGeo.rotateY(Math.PI / 2);
   // モーターマウント: 上下2ピース + プレート(中央穴) + 管端キャップ
   const mountLower = rboxGeo(0.034, 0.0108, 0.026, 0.002), mountUpper = rboxGeo(0.034, 0.0108, 0.026, 0.002);
-  const mountPlate = lathe([[0.006, 0], [0.019, 0], [0.019, 0.003], [0.006, 0.003], [0.006, 0]], 48);
+  const mountPlate = hardLathe([[0.006, 0], [0.019, 0], [0.019, 0.003], [0.006, 0.003], [0.006, 0]], 48);
   ARMS.forEach((A, k) => {
     const ag = new THREE.Group(); ag.name = 'arm' + A.id; ag.rotation.y = Math.atan2(-A.u.z, A.u.x); root.add(ag);
     const clamp = at(mesh(clampGeo, M.aluDark), 0.045, 0.0025, 0); ag.add(clamp); reg(clamp, 'armClamp', V3(0.06, 0, 0));
@@ -258,7 +260,7 @@ function buildDrone(M) {
     // ESC 48×21×7.5 + 放熱板 + 結束バンド2本
     const esc = new THREE.Group(); at(esc, 0.125, 0.0318, 0);
     esc.add(mesh(rboxGeo(0.048, 0.0075, 0.021, 0.0025), M.heatShrink));
-    esc.add(at(mesh(new THREE.BoxGeometry(0.030, 0.0008, 0.016), M.alu), 0.004, 0.0040, 0));
+    esc.add(at(mesh(new THREE.BoxGeometry(0.030, 0.0008, 0.016), M.aluBrushDark), 0.004, 0.0040, 0));
     esc.add(at(decal(0.026, 0.010, M.escLabel), -0.009, 0.0039, 0));
     for (const s of [-1, 1]) { const solder = mesh(new THREE.BoxGeometry(0.004, 0.0008, 0.012), M.solder); at(solder, s * 0.0235, 0.0005, 0); esc.add(solder); }
     ag.add(esc); reg(esc, 'esc', V3(0.06, 0.05, 0), { label: k === 2 ? V3(0, 0.004, 0) : null });
@@ -273,9 +275,9 @@ function buildDrone(M) {
     const led = new THREE.Group(); at(led, 0.2925, 0.0135, 0);
     led.add(at(mesh(new THREE.BoxGeometry(0.003, 0.010, 0.014), M.pcbEdge), 0.0015, 0, 0));
     led.add(at(mesh(new THREE.BoxGeometry(0.0012, 0.004, 0.004), A.led), 0.0036, 0, 0));
-    led.add(at(mesh(rboxGeo(0.0028, 0.0085, 0.012, 0.0012), M.ledCover), 0.0044, 0, 0));
-    const core = new THREE.Sprite(M.glowCore(A.glow)); core.scale.set(0.014, 0.014, 1); core.position.set(0.006, 0, 0); core.renderOrder = 6; led.add(core);
-    const halo = new THREE.Sprite(M.glowHalo(A.glow)); halo.scale.set(0.034, 0.034, 1); halo.position.set(0.009, 0, 0); halo.renderOrder = 6; led.add(halo);
+    { const cv = mesh(rboxGeo(0.0028, 0.0085, 0.012, 0.0012), M.ledCover); cv.userData.noAO = true; led.add(at(cv, 0.0044, 0, 0)); }
+    const core = new THREE.Sprite(M.glowCore(A.glow)); core.scale.set(0.009, 0.009, 1); core.position.set(0.006, 0, 0); core.renderOrder = 6; led.add(core);
+    const halo = new THREE.Sprite(M.glowHalo(A.glow)); halo.scale.set(0.022, 0.022, 1); halo.position.set(0.009, 0, 0); halo.renderOrder = 6; led.add(halo);
     ag.add(led); reg(led, 'led', V3(0.14, 0.02, 0), { label: k === 0 ? V3(0.004, 0, 0) : null });
     led.userData.halo = halo;
     // モーター
@@ -433,10 +435,10 @@ function buildDrone(M) {
   // 腕: コの字断面 (18×6, ポケット14×3.5) を押し出し
   const cShape = polyShape([[-0.009, 0], [0.009, 0], [0.009, 0.006], [0.007, 0.006], [0.007, 0.0025], [-0.007, 0.0025], [-0.007, 0.006], [-0.009, 0.006]]);
   const armGeo = (len) => { const g = new THREE.ExtrudeGeometry(cShape, { depth: len, bevelEnabled: true, bevelSize: 0.0004, bevelThickness: 0.0004, bevelSegments: 2 }); return g; };
-  const boss = (r) => lathe([[0, 0], [r + 0.0015, 0], [r + 0.0015, 0.004], [0, 0.004]], 32);
+  const boss = (r) => hardLathe([[0, 0], [r + 0.0015, 0], [r + 0.0015, 0.004], [0, 0.004]], 32);
   const yawM = mesh(cylGeo(0.014, 0.014, 0.016, 40), M.aluDark); at(yawM, 0, -0.021, 0); gim.add(yawM);
   gim.add(at(mesh(cylGeo(0.006, 0.006, 0.004, 24), M.plasticBlack), 0, -0.011, 0));
-  gim.add(at(mesh(boss(0.014).rotateX(Math.PI), 0, -0.029, 0), M.aluDark));
+  gim.add(at(mesh(boss(0.014).rotateX(Math.PI), M.aluDark), 0, -0.029, 0));
   const a1 = mesh(armGeo(0.050), M.aluDark); a1.rotation.x = -Math.PI / 2; a1.rotation.z = Math.PI; at(a1, 0, -0.030, -0.001); gim.add(a1);
   const a2 = mesh(armGeo(0.056), M.aluDark); a2.rotation.z = -Math.PI / 2; a2.rotation.y = Math.PI / 2; at(a2, 0.003, -0.029, 0.048); gim.add(a2);
   const rollM = mesh(cylGeo(0.012, 0.012, 0.014, 40), M.aluDark); rollM.rotation.x = Math.PI / 2; at(rollM, 0, -0.085, 0.036); gim.add(rollM);

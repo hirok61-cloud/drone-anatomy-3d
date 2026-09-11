@@ -25,6 +25,7 @@ $('#noteClose').addEventListener('click', () => { const c = $('#noteCard'); if (
 
 // ---------- タブ ----------
 function setTab(tab) {
+  $('#coach').hidden = true;
   if (theater.active && tab !== 'theater') { stopTheaterUI(); }
   S.tab = tab; segSet($('#tabs'), 'tab', tab);
   for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== tab;
@@ -38,21 +39,21 @@ $('#tabs').addEventListener('click', e => { const b = e.target.closest('button')
 
 // ---------- はじめて / くわしく ----------
 function setDepth(d) {
-  S.depth = d; store.set('depth', d); document.body.classList.toggle('full', d === 'full'); segSet($('#depthSeg'), 'd', d);
+  S.depth = d; store.set('depth', d); document.body.classList.toggle('full', d === 'full'); segSet($('#depthSeg'), 'd', d); $('#coach').hidden = true;
   buildList(); renderDetail(); buildLabels(); buildMishapCards();
-  if (d === 'full') showToast('くわしく: 40部品・仕様・点検が出ます'); 
+  if (d === 'full') showToast('くわしく: 部品40種の仕様例と点検ポイントも見られます'); 
 }
 $('#depthSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setDepth(b.dataset.d); });
 
 // ---------- モード / 分解 / モーター ----------
-function setMode(m) { const was = S.mode; S.mode = m; segSet($('#modeSeg'), 'mode', m); applyMode(); if (m === 'cut' && was !== 'cut') { setView('inside'); showToast('モーター1個とバッテリーを切って、中を見ています'); } }
+function setMode(m) { const was = S.mode; S.mode = m; segSet($('#modeSeg'), 'mode', m); applyMode(); if (m !== was) { if (m === 'cut') { setView('inside'); showToast('断面: モーター1つとバッテリーを半分に切った断面を見ています'); } else showToast({ normal: 'ふつうの見え方', xray: 'すけて見る: 外側を透かして中の部品が見えます', wire: '線だけ: 形の輪郭だけを見ます' }[m]); } }
 $('#modeSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.mode); });
 const explodeEl = $('#explode');
-explodeEl.addEventListener('input', () => { S.explode = explodeEl.value / 100; S.explodeT = S.explode; $('#explodeVal').textContent = explodeEl.value + '%'; explodePullBack(); S.shadowDirty = S.csDirty = true; });
-function explodePullBack() { if (S.explode < 0.35 || S.explodedCam) return; S.explodedCam = true; const dir = camera.position.clone().sub(controls.target); const d = dir.length(); if (d > 1.45) return; flyTo(controls.target.clone().addScaledVector(dir.normalize(), 1.55), controls.target.clone(), 1100, false); }
-function setExplode(v) { S.explode = v; explodeEl.value = Math.round(v * 100); $('#explodeVal').textContent = Math.round(v * 100) + '%'; explodePullBack(); }
-function setPower(p, silent) { S.power = p; segSet($('#powerSeg'), 'p', p); const b = $('#powerBtn'); b.textContent = p > 0 ? '■ 止める' : '▶ 回す'; b.classList.toggle('primary', p === 0); syncBodyMode();
-  if (p > 0 && !silent && !store.get('coachFlick') && S.tab === 'fly') setTimeout(() => { if (S.power > 0 && body.mode === 'free') showCoach('機体をはじいてみよう', '浮いている機体を指ではじくと、傾いたぶんを頭脳（FC）がモーターの速さで直します。', null, () => store.set('coachFlick', '1')); }, 2500); }
+explodeEl.addEventListener('input', () => { S.explodeAt = performance.now(); S.explode = explodeEl.value / 100; S.explodeT = S.explode; $('#explodeVal').textContent = explodeEl.value + '%'; explodePullBack(); S.shadowDirty = S.csDirty = true; });
+function explodePullBack() { if (S.explode < 0.35 || S.explodedCam) return; S.explodedCam = true; S.explodeFrame = true; }
+function setExplode(v) { S.explode = v; S.explodeAt = performance.now(); explodeEl.value = Math.round(v * 100); $('#explodeVal').textContent = Math.round(v * 100) + '%'; explodePullBack(); }
+function setPower(p, silent) { S.power = p; segSet($('#powerSeg'), 'p', p); const b = $('#powerBtn'); b.textContent = p > 0 ? '■ 止める' : '▶ プロペラを回す'; b.classList.toggle('primary', p === 0); syncBodyMode();
+  if (p > 0 && !silent && !store.get('coachFlick') && S.tab === 'fly') setTimeout(() => { if (S.power > 0 && body.mode === 'free') showCoach('機体をはじいてみよう', '浮いている機体を指やマウスでさっとはじくと、傾いたぶんを頭脳（FC）がモーターの速さで直します。', null, () => store.set('coachFlick', '1')); }, 2500); }
 $('#powerBtn').addEventListener('click', () => setPower(S.power > 0 ? 0 : (S.depth === 'full' ? (parseFloat($('#powerSeg .on')?.dataset.p) || 0.5) : 0.5)));
 $('#powerSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setPower(parseFloat(b.dataset.p)); });
 function syncBodyMode() {
@@ -70,12 +71,12 @@ function setFlight(f) {
   else if ($('#noteCard').dataset.kind === 'flight') renderNote(null);
 }
 $('#flightChips').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; setFlight(S.flight === b.dataset.f ? null : b.dataset.f); });
-function updateFlightTab() { const tab = $('#fnTab'); if (!tab) return; tab.innerHTML = D.motors.map((mo, i) => { const pct = Math.round(mo.pct); const cls = pct > 103 ? 'up' : pct < 97 ? 'down' : ''; return `<div class="${cls}"><b>${MOTOR_INFO[i].id} ${pct}%</b>${MOTOR_INFO[i].pos} · ${MOTOR_INFO[i].dir === 'CW' ? '↻' : '↺'}${MOTOR_INFO[i].dir}</div>`; }).join(''); }
+function updateFlightTab() { const tab = $('#fnTab'); if (!tab) return; const mean = Math.max(1, D.motors.reduce((a, m) => a + m.pct, 0) / 4); tab.innerHTML = D.motors.map((mo, i) => { const pct = Math.round(mo.pct); const cls = mo.pct > mean * 1.03 ? 'up' : mo.pct < mean * 0.97 ? 'down' : ''; return `<div class="${cls}"><b>${MOTOR_INFO[i].id} ${pct}%</b>${MOTOR_INFO[i].pos} · ${MOTOR_INFO[i].dir === 'CW' ? '↻' : '↺'}${MOTOR_INFO[i].dir}</div>`; }).join(''); }
 // トグル
 document.addEventListener('click', e => {
   const b = e.target.closest('.tgl'); if (!b) return;
   const t = b.dataset.t; const on = !b.classList.contains('on');
-  for (const x of $$(`.tgl[data-t="${t}"]`)) x.classList.toggle('on', on);
+  for (const x of $$(`.tgl[data-t="${t}"]`)) { x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); }
   if (t === 'labels') { S.labels = on; S.labelsTouched = true; }
   else if (t === 'arrows') { S.arrows = on; if (on) showLegend(); }
   else if (t === 'slow') { setTimeScale(on ? 1 / 50 : 1); if (on) { if (S.power === 0) setPower(0.5); showLegend(); } }
@@ -98,7 +99,7 @@ function buildList() {
   else {
     for (const g of GROUPS) { const keys = LIST_ORDER.filter(k => PARTS[k] && PARTS[k].group === g.id); html += `<div class="grp" style="--c:${g.color}"><i></i>${g.name}</div>`;
       for (const k of keys) { const d = PARTS[k]; const hid = partsOf(k).some(p => p.hidden); html += `<div class="row${SUB[k] ? ' sub' : ''}${hid ? ' off' : ''}" data-key="${k}" tabindex="0" role="button"><span class="nm">${d.name}</span><span class="cnt">${d.count > 1 ? '×' + d.count : ''}</span><button class="eye" aria-label="${d.name}の表示切替">${hid ? ICON.eyeOff : ICON.eye}</button></div>`; } }
-    $('#partCount').textContent = `${LIST_ORDER.length} 種類`;
+    $('#partCount').textContent = `${LIST_ORDER.length} 部品`;
   }
   list.innerHTML = html;
   for (const row of $$('#partList .row')) row.classList.toggle('on', !!S.selected && row.dataset.key === S.selected.key);
@@ -150,7 +151,7 @@ function buildLabels() {
   const keys = S.depth === 'simple' ? new Set(SIMPLE_KEYS) : null;
   labelEls = D.parts.filter(p => (p.label || p.labelObj) && (!keys || keys.has(p.key))).map(p => {
     const el = document.createElement('button'); el.className = 'lbl'; el.textContent = (S.depth === 'simple' && SIMPLE_NAME[p.key]) || PARTS[p.key].name; el.type = 'button';
-    el.addEventListener('click', () => select(p, true)); $('#labels').appendChild(el);
+    el.tabIndex = -1; el.addEventListener('click', () => select(p, true)); $('#labels').appendChild(el);
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line'), dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); dot.setAttribute('r', '3'); $('#leaders').append(line, dot);
     return { p, el, line, dot, w: 0, h: 0, x: 0, y: 0, ax: 0, ay: 0, show: false };
   });
@@ -161,13 +162,14 @@ function updateLabels() {
   for (const L of labelEls) {
     const p = L.p; let show = S.labels && !live && partVisible(p) && effVisible(p.obj) && S.explodeT < 0.02 || (S.labels && !live && S.explodeT >= 0.02 && partVisible(p) && effVisible(p.obj));
     if (show && camDist < 0.5 && !(S.selected && S.selected.key === p.key)) show = false;
+    if (show && S.depth === 'full' && camDist > 1.0 && !SIMPLE_KEYS.includes(p.key) && !(S.selected && S.selected.key === p.key)) show = false;   // 引きの画では主要8枚だけ
     if (show) {
       const a = p.labelObj ? p.labelObj.getWorldPosition(tmpV) : p.obj.localToWorld(tmpV.copy(p.label));
       const depth = a.distanceTo(camera.position) - camDist; const pr = tmpV2.copy(a).project(camera);
       if (pr.z > 1) show = false; else {
         L.ax = (pr.x + 1) / 2 * W; L.ay = (1 - pr.y) / 2 * H;
         let dx = L.ax - W / 2, dy = L.ay - H / 2; const len = Math.hypot(dx, dy); if (len < 24) { dx = 0; dy = -1; } else { dx /= len; dy /= len; }
-        const off = 58 + 46 * Math.abs(dx); const rightLim = narrow() ? W - 70 : W - 344 - 40 - 60;
+        const off = 70 + 90 * Math.abs(dx); const rightLim = narrow() ? W - 70 : W - 344 - 40 - 60;
         L.x = clamp(L.ax + dx * off, 70, rightLim); L.y = clamp(L.ay + dy * off, 90, H - 130); L.dim = depth > 0.07;
         if (!L.w) { L.w = L.el.offsetWidth; L.h = L.el.offsetHeight; }
       }
@@ -175,7 +177,7 @@ function updateLabels() {
     L.show = show;
   }
   const vis = labelEls.filter(L => L.show);
-  for (let it = 0; it < 3; it++) for (let i = 0; i < vis.length; i++) for (let j = i + 1; j < vis.length; j++) { const a = vis[i], b = vis[j]; const ox = (a.w + b.w) / 2 + 8 - Math.abs(a.x - b.x), oy = (a.h + b.h) / 2 + 6 - Math.abs(a.y - b.y); if (ox > 0 && oy > 0) { const s = a.y < b.y ? -1 : 1; a.y += s * oy / 2; b.y -= s * oy / 2; } }
+  for (let it = 0; it < 6; it++) for (let i = 0; i < vis.length; i++) for (let j = i + 1; j < vis.length; j++) { const a = vis[i], b = vis[j]; const ox = (a.w + b.w) / 2 + 8 - Math.abs(a.x - b.x), oy = (a.h + b.h) / 2 + 6 - Math.abs(a.y - b.y); if (ox > 0 && oy > 0) { const s = a.y < b.y ? -1 : 1; a.y += s * oy / 2; b.y -= s * oy / 2; } }
   for (const L of labelEls) {
     L.el.style.display = L.show ? '' : 'none'; L.line.style.display = L.dot.style.display = L.show ? '' : 'none'; if (!L.show) continue;
     L.el.style.transform = `translate(${L.x.toFixed(1)}px, ${L.y.toFixed(1)}px) translate(-50%,-50%)`; L.el.classList.toggle('dim', L.dim); L.el.classList.toggle('on', !!S.selected && S.selected.key === L.p.key);
@@ -189,7 +191,7 @@ function updateLabels() {
     B.el.hidden = !show; if (!show) continue;
     const a = B.mo.group.localToWorld(tmpV.set(0, 0.10, 0)); const pr = tmpV2.copy(a).project(camera); if (pr.z > 1) { B.el.hidden = true; continue; }
     const x = clamp((pr.x + 1) / 2 * W, 60, W - 60), y = clamp((1 - pr.y) / 2 * H, 40, H - 40); B.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%,-50%)`;
-    const pct = Math.round(B.mo.pct), up = pct > 103, dn = pct < 97; B.el.classList.toggle('up', up); B.el.classList.toggle('down', dn);
+    const pct = Math.round(B.mo.pct), mean = Math.max(1, D.motors.reduce((a, m) => a + m.pct, 0) / 4), up = B.mo.pct > mean * 1.03, dn = B.mo.pct < mean * 0.97; B.el.classList.toggle('up', up); B.el.classList.toggle('down', dn);
     B.el.innerHTML = S.depth === 'simple' ? (up ? 'はやい ▲' : dn ? 'おそい ▼' : 'ふつう') : `${MOTOR_INFO[B.i].id} ${pct}% ${up ? '▲' : dn ? '▼' : ''}<small>${MOTOR_INFO[B.i].pos} ${MOTOR_INFO[B.i].dir === 'CW' ? '↻' : '↺'}</small>`;
   }
 }
@@ -207,7 +209,7 @@ let qPulse = null;
 function clearQuestion() { if (!S.question) return; const q = S.question; S.question = null; if (qPulse) { clearInterval(qPulse); qPulse = null; } for (const k of q.parts) for (const p of partsOf(k)) setTint(p, ACCENT, 0); if (!S.selected) outlineSel.selectedObjects = []; if (q.act && q.act.flight && S.flight === q.act.flight) setFlight(null); }
 function askQuestion(id) {
   const q = QUESTIONS.find(x => x.id === id); if (!q) return;
-  clearQuestion(); S.question = q; if (theater.active) stopTheaterUI();
+  clearQuestion(); S.question = q; if (theater.active) stopTheaterUI(); if (q.act) setSticks(false);
   const objs = q.parts.flatMap(k => partsOf(k).map(p => p.obj)); if (!S.selected) outlineSel.selectedObjects = objs;
   let n = 0; qPulse = setInterval(() => { n++; const k = n % 2 ? 0.7 : 0; for (const key of q.parts) for (const p of partsOf(key)) setTint(p, ACCENT, k); if (n >= 4) { clearInterval(qPulse); qPulse = null; for (const key of q.parts) for (const p of partsOf(key)) setTint(p, ACCENT, 0.25); } }, 260);
   focusOn(objs, { pull: true });
@@ -256,10 +258,10 @@ function buildMishapCards() { const list = S.depth === 'simple' ? MISHAPS.filter
 $('#mishapCards').addEventListener('click', e => { const b = e.target.closest('button'); if (b) startTheaterUI(b.dataset.m); });
 function startTheaterUI(id) {
   if (S.flight) setFlight(null); clearQuestion(); select(null); setSticks(false); if (S.explode > 0) setExplode(0); if (S.mode === 'cut') setMode('normal');
-  startTheater(id); document.body.classList.add('theater'); S.tab = 'theater'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'theater'; segSet($('#tabs'), 'tab', 'mishap');
+  $('#coach').hidden = true; startTheater(id); document.body.classList.add('theater'); $('#inspector').inert = true; $('#topbar').inert = true; $('#inspector').classList.remove('open'); S.tab = 'theater'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'theater'; segSet($('#tabs'), 'tab', 'mishap');
   for (const b of $$('#mishapCards button')) b.classList.toggle('on', b.dataset.m === id);
 }
-function stopTheaterUI() { stopTheater(true); document.body.classList.remove('theater'); setPower(0, true); renderNote(null); S.tab = 'mishap'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'mishap'; for (const b of $$('#mishapCards button')) b.classList.remove('on'); syncBodyMode(); }
+function stopTheaterUI() { stopTheater(true); document.body.classList.remove('theater'); $('#inspector').inert = false; $('#topbar').inert = false; setPower(0, true); renderNote(null); S.tab = 'mishap'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'mishap'; for (const b of $$('#mishapCards button')) b.classList.remove('on'); syncBodyMode(); }
 $('#thQuit').addEventListener('click', stopTheaterUI);
 $('#thNext').addEventListener('click', () => { if (theater.done || !theater.active) { stopTheaterUI(); return; } theaterNext(); });
 function onTheaterChanged() {
@@ -294,16 +296,21 @@ const tiltF = { b0: 0, g0: 0, x: 0, y: 0, ready: false, samples: [] };
 if (window.DeviceOrientationEvent && isMobile) $('#tiltBtn').hidden = false;
 async function setTilt(on) {
   if (on) {
-    if (typeof DeviceOrientationEvent.requestPermission === 'function') { try { const r = await DeviceOrientationEvent.requestPermission(); if (r !== 'granted') { showToast('設定 › Safari › モーションと画面の向きのアクセス をオンにしてください', 4000); on = false; } } catch (e) { on = false; } }
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      if (!store.get('tiltExplained')) { for (const x of $$('.tgl[data-t=tilt]')) { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); } showCoach('スマホをかたむけて操縦します', '次に出る画面で「許可」を押してください。水平に持った位置が基準になります。', () => { store.set('tiltExplained', '1'); setTilt(true); }); return; }
+      try { const r = await DeviceOrientationEvent.requestPermission(); if (r !== 'granted') { showToast('iPhoneの「設定」›「アプリ」›「Safari」›「モーションと画面の向きのアクセス」をオンにして、もう一度押してください', 5000); on = false; } } catch (e) { on = false; } }
     if (on) { tiltF.ready = false; tiltF.samples = []; window.addEventListener('deviceorientation', onTiltEvent); if (S.power === 0) setPower(0.5, true); showToast('スマホをかたむけて操縦します。水平に持った位置が基準です。', 3200); }
   } else { window.removeEventListener('deviceorientation', onTiltEvent); body.tilt.active = false; body.tilt.x = body.tilt.y = 0; }
-  S.tilt = on; for (const x of $$('.tgl[data-t=tilt]')) x.classList.toggle('on', on);
+  S.tilt = on; for (const x of $$('.tgl[data-t=tilt]')) { x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); }
 }
 function onTiltEvent(e) {
   if (e.beta == null) return;
   if (!tiltF.ready) { tiltF.samples.push([e.beta, e.gamma]); if (tiltF.samples.length >= 15) { tiltF.b0 = tiltF.samples.reduce((a, s) => a + s[0], 0) / 15; tiltF.g0 = tiltF.samples.reduce((a, s) => a + s[1], 0) / 15; tiltF.ready = true; } return; }
-  const gx = clamp((e.gamma - tiltF.g0) / 25, -1, 1), gy = clamp(-(e.beta - tiltF.b0) / 25, -1, 1);
-  const k = 0.35; tiltF.x += (Math.abs(gx) < 0.12 ? 0 - tiltF.x : gx - tiltF.x) * k; tiltF.y += (Math.abs(gy) < 0.12 ? 0 - tiltF.y : gy - tiltF.y) * k;
+  const dz = v => Math.sign(v) * Math.max(0, (Math.abs(v) - 0.12) / 0.88);
+  const gx = dz(clamp((e.gamma - tiltF.g0) / 25, -1, 1)), gy = dz(clamp(-(e.beta - tiltF.b0) / 25, -1, 1));
+  const now = e.timeStamp || performance.now(); const dtE = Math.min(0.1, Math.max(0.001, (now - (tiltF.last || now)) / 1000)); tiltF.last = now;
+  const k = 1 - Math.exp(-dtE / 0.08), slew = 4.8 * dtE;
+  tiltF.x += clamp((gx - tiltF.x) * k, -slew, slew); tiltF.y += clamp((gy - tiltF.y) * k, -slew, slew);
   body.tilt.x = tiltF.x; body.tilt.y = tiltF.y; body.tilt.active = S.tilt;
 }
 document.addEventListener('visibilitychange', () => { if (document.hidden && S.tilt) setTilt(false); });
@@ -327,12 +334,12 @@ canvas.addEventListener('pointerdown', e => {
     push = { id: e.pointerId, x0: e.clientX, y0: e.clientY, w0: w.clone(), hist: [[w.clone(), performance.now()]], t0: performance.now() };
     canvas.classList.add('push'); return;
   }
-  pend = { x: e.clientX, y: e.clientY, t: performance.now(), hit };
+  pend = theater.active ? null : { x: e.clientX, y: e.clientY, t: performance.now(), hit };
 }, { capture: true });
 canvas.addEventListener('pointermove', e => {
   if (push && e.pointerId === push.id) {
     const w = new THREE.Vector3(); if (!screenToDronePlane(e.clientX, e.clientY, w)) return;
-    push.hist.push([w.clone(), performance.now()]); if (push.hist.length > 5) push.hist.shift();
+    push.hist.push([w.clone(), performance.now()]); while (push.hist.length > 2 && performance.now() - push.hist[0][1] > 80) push.hist.shift();
     const d = w.clone().sub(push.w0); d.y = 0; const px = Math.hypot(e.clientX - push.x0, e.clientY - push.y0); if (d.length() > 1e-4) holdBody(d.normalize(), px); return;
   }
   if (e.pointerType === 'mouse') hoverAt = { x: e.clientX, y: e.clientY };
@@ -341,13 +348,15 @@ const endPush = e => {
   if (!push || e.pointerId !== push.id) return;
   const h0 = push.hist[0], h1 = push.hist[push.hist.length - 1]; const dt = Math.max(1, h1[1] - h0[1]) / 1000; const v = h1[0].clone().sub(h0[0]).divideScalar(dt); v.y = 0;
   const age = performance.now() - push.t0;
-  body.hold = null; if (age < 350 && v.length() > 0.25) flickBody(v); else if (v.length() > 0.6) flickBody(v.multiplyScalar(0.5));
+  const hold = body.hold; body.hold = null;
+  if (hold && hold.th > 1e-4) { const k = 9.81 * Math.tan(hold.th) * 0.12; body.vx += hold.x / hold.th * k; body.vz += hold.z / hold.th * k; }  // 溜めの解放
+  if (age < 350 && v.length() > 0.25) flickBody(v); else if (v.length() > 0.6) flickBody(v.multiplyScalar(0.5));
   if (!store.get('flicked')) { store.set('flicked', '1'); showToast('押された側のモーターが速くなって、元の姿勢にもどりました。', 3200); }
   push = null; controls.enabled = true; canvas.classList.remove('push');
 };
 canvas.addEventListener('pointerup', e => { endPush(e); if (!pend) return; const moved = Math.hypot(e.clientX - pend.x, e.clientY - pend.y), dt = performance.now() - pend.t; const hit = pend.hit; pend = null; if (moved < 6 && dt < 700) { if (hit) select(hit, false); else if (S.selected) select(null); } });
 canvas.addEventListener('pointercancel', endPush);
-canvas.addEventListener('dblclick', e => { const p = pickAt(e.clientX, e.clientY); if (p) focusOn([p.obj]); });
+canvas.addEventListener('dblclick', e => { if (body.mode === 'free' || theater.active) return; const p = pickAt(e.clientX, e.clientY); if (p) focusOn([p.obj]); });
 canvas.addEventListener('pointerleave', () => { hoverAt = null; if (S.hovered) { setTint(S.hovered, HOVER_L, 0); S.hovered = null; } canvas.classList.remove('pick'); });
 function updateHover() {
   if (!hoverAt) return; const p = pickAt(hoverAt.x, hoverAt.y); hoverAt = null;
@@ -359,7 +368,9 @@ function updateHover() {
 }
 // キーボード
 document.addEventListener('keydown', e => {
-  if (e.target.matches('input, textarea, select')) return; const k = e.key.toLowerCase();
+  if (e.target.matches && e.target.matches('input, textarea, select')) return; const k = e.key.toLowerCase();
+  if (k === 'escape' && (!$('#askPop').hidden || !$('#settings').hidden)) { $('#askPop').hidden = true; $('#settings').hidden = true; return; }
+  if (e.key === '?') { const st = $('#settings'); st.hidden = false; $('#askPop').hidden = true; const dt = st.querySelector('details'); if (dt) dt.open = true; return; }
   if (k === '1') setMode('normal'); else if (k === '2') setMode('xray'); else if (k === '3') setMode('wire'); else if (k === '4') setMode('cut');
   else if (k === 'e') setExplode(S.explode > 0.5 ? 0 : 1);
   else if (k === 'l') $('#viewCol .tgl[data-t=labels]').click();

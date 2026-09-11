@@ -45,7 +45,7 @@ function carbonTextures() {
     aImg.data[idx * 4] = weftTop ? 255 : 128; aImg.data[idx * 4 + 1] = weftTop ? 128 : 255; aImg.data[idx * 4 + 2] = 255; aImg.data[idx * 4 + 3] = 255;
   }
   col.getContext('2d').putImageData(cImg, 0, 0); rgh.getContext('2d').putImageData(rImg, 0, 0); ani.getContext('2d').putImageData(aImg, 0, 0);
-  return { col, nrm: normalFromHeight(H, S, 2.2), rgh, ani };
+  return { col, nrm: normalFromHeight(H, S, 1.6), rgh, ani };
 }
 function noiseCanvas(S, lo, hi, seed = 3) {
   const c = makeCanvas(S, S), g = c.getContext('2d'), img = g.createImageData(S, S), rnd = mulberry(seed);
@@ -115,8 +115,8 @@ function propTexture(dir) {
   g.fillStyle = '#d5d8de'; g.fillRect(0, Math.round(H * 0.11), W / 2, Math.round(H * 0.06)); // 翼Aの先端寄りの薄い印(スロー観察用)
   const draw = (mirror) => {
     g.save(); if (mirror) { g.translate(W / 2, 0); g.scale(-1, 1); }
-    g.translate(140, 400); g.rotate(-Math.PI / 2);
-    g.fillStyle = '#9a9ba2'; g.font = 'bold 44px -apple-system, Helvetica, sans-serif'; g.textAlign = 'left';
+    g.translate(60, 400); g.rotate(-Math.PI / 2);
+    g.fillStyle = '#9a9ba2'; g.font = 'bold 36px -apple-system, Helvetica, sans-serif'; g.textAlign = 'left';
     g.fillText(`12×4.5  ${dir > 0 ? 'CCW' : 'CW'}`, 0, 0); g.restore();
   };
   draw(dir < 0);
@@ -175,7 +175,7 @@ function strapCanvas() { const S = 64, c = makeCanvas(S, S), g = c.getContext('2
 function glowCanvas(core) {
   const S = 128, c = makeCanvas(S, S), g = c.getContext('2d'), grd = g.createRadialGradient(64, 64, 0, 64, 64, 64);
   if (core) { grd.addColorStop(0, 'rgba(255,255,255,1)'); grd.addColorStop(0.35, 'rgba(255,255,255,0.6)'); grd.addColorStop(1, 'rgba(255,255,255,0)'); }
-  else { grd.addColorStop(0, 'rgba(255,255,255,0.7)'); grd.addColorStop(0.3, 'rgba(255,255,255,0.25)'); grd.addColorStop(1, 'rgba(255,255,255,0)'); }
+  else { grd.addColorStop(0, 'rgba(255,255,255,0.5)'); grd.addColorStop(0.3, 'rgba(255,255,255,0.15)'); grd.addColorStop(1, 'rgba(255,255,255,0)'); }
   g.fillStyle = grd; g.fillRect(0, 0, S, S); return c;
 }
 function groundAlpha() {
@@ -189,9 +189,9 @@ function makeMaterials(maxAniso) {
   MAX_ANISO = Math.min(16, maxAniso || 8);
   const cf = carbonTextures();
   const base = { col: canvasTex(cf.col), nrm: canvasTex(cf.nrm, { srgb: false }), rgh: canvasTex(cf.rgh, { srgb: false }), ani: canvasTex(cf.ani, { srgb: false }) };
-  const carbonMat = (repeat, { clearcoat = 1.0, ccRough = 0.10 } = {}) => {
+  const carbonMat = (repeat, { clearcoat = 1.0, ccRough = 0.10, normalScale = 0.7, envMul = 1.0 } = {}) => {
     const m = new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: base.col.clone(), normalMap: base.nrm.clone(), roughnessMap: base.rgh.clone(), anisotropyMap: base.ani.clone(),
-      roughness: 1, metalness: 0, anisotropy: 0.7, clearcoat, clearcoatRoughness: ccRough, normalScale: new THREE.Vector2(0.8, 0.8), specularIntensity: 0.6 });
+      roughness: 1, metalness: 0, anisotropy: 0.7, clearcoat, clearcoatRoughness: ccRough, normalScale: new THREE.Vector2(normalScale, normalScale), specularIntensity: 0.6, envMapIntensity: envMul });
     for (const t of [m.map, m.normalMap, m.roughnessMap, m.anisotropyMap]) { t.repeat.set(repeat[0], repeat[1]); t.needsUpdate = true; }
     return m;
   };
@@ -204,27 +204,28 @@ function makeMaterials(maxAniso) {
   const pcbMat = (t) => phy({ map: canvasTex(t.map, { wrap: false }), metalnessMap: canvasTex(t.met, { srgb: false, wrap: false }), roughnessMap: canvasTex(t.rgh, { srgb: false, wrap: false }), metalness: 1, roughness: 1, clearcoat: 0.5, clearcoatRoughness: 0.3 });
   const propMat = (dir) => phy({ map: canvasTex(propTexture(dir), { wrap: false, repeat: [0.5, 1] }), color: 0xffffff, roughness: 0.62, roughnessMap: noiseRgh, metalness: 0, specularIntensity: 0.55, sheen: 0.15, sheenRoughness: 0.8, sheenColor: new THREE.Color(0x5a5c62), clearcoat: 0.08, clearcoatRoughness: 0.6, side: THREE.DoubleSide });
   const M = {
-    carbonPlate: carbonMat([70, 70]),
-    carbonArm: carbonMat([3, 15], { clearcoat: 0.6, ccRough: 0.30 }),
-    carbonLeg: carbonMat([2, 11], { clearcoat: 0.6, ccRough: 0.30 }),
-    carbonMast: carbonMat([2, 6], { clearcoat: 0.6, ccRough: 0.30 }),
+    carbonPlate: carbonMat([70, 70], { envMul: 0.85 }),
+    carbonArm: carbonMat([3, 15], { clearcoat: 0.9, ccRough: 0.18, normalScale: 0.45 }),   // 樹脂層で織りが沈む巻き管
+    carbonLeg: carbonMat([2, 11], { clearcoat: 0.9, ccRough: 0.18, normalScale: 0.45 }),
+    carbonMast: carbonMat([2, 6], { clearcoat: 0.9, ccRough: 0.18, normalScale: 0.45 }),
     carbonEdge: std({ color: 0x141416, roughness: 0.75, metalness: 0 }),
     alu: phy({ color: 0xe8eaec, metalness: 1, roughness: 0.30, anisotropy: 0.55, anisotropyRotation: Math.PI / 2, normalMap: brush, normalScale: new THREE.Vector2(0.15, 0.15) }),
-    aluDark: phy({ color: 0x26282c, metalness: 0.55, roughness: 0.46, specularIntensity: 1.0, anisotropy: 0.35 }),
+    aluBrushDark: phy({ color: 0x9a9ea6, metalness: 1, roughness: 0.45, anisotropy: 0.5, anisotropyRotation: Math.PI / 2, normalMap: brush, normalScale: new THREE.Vector2(0.15, 0.15) }),
+    aluDark: phy({ color: 0x3a3d44, metalness: 0.6, roughness: 0.46, specularIntensity: 1.0, anisotropy: 0.35 }),
     aluOrange: phy({ color: 0xe0561f, metalness: 0.75, roughness: 0.40, anisotropy: 0.45 }),
     steel: phy({ color: 0xc7c9ca, metalness: 1, roughness: 0.15, anisotropy: 0.6 }),
     steelBlack: phy({ color: 0x3a3c40, metalness: 1, roughness: 0.38 }),
     copper: phy({ color: 0xf2b78f, metalness: 1, roughness: 0.28, clearcoat: 1.0, clearcoatRoughness: 0.12, normalMap: windNrm, normalScale: new THREE.Vector2(0.6, 0.6) }),
     magnet: std({ color: 0x2e3135, metalness: 0.9, roughness: 0.62 }),
     lamination: std({ map: canvasTex(laminationCanvas(), { repeat: [24, 4] }), metalness: 0.7, roughness: 0.55 }),
-    plasticBlack: phy({ color: 0x1b1c1f, roughness: 0.5, metalness: 0, clearcoat: 0.35, clearcoatRoughness: 0.3 }),
+    plasticBlack: phy({ color: 0x2b2d32, roughness: 0.5, metalness: 0, clearcoat: 0.35, clearcoatRoughness: 0.3 }),
     plasticGray: phy({ color: 0xd8dade, roughness: 0.45, metalness: 0, clearcoat: 0.5, clearcoatRoughness: 0.25 }),
     plasticWhite: std({ color: 0xf1f2f4, roughness: 0.6 }),
-    tpu: std({ color: 0x202226, roughness: 0.85 }),
-    rubber: std({ color: 0x131315, roughness: 0.92, metalness: 0 }),
+    tpu: std({ color: 0x2a2c31, roughness: 0.85 }),
+    rubber: std({ color: 0x1b1c1e, roughness: 0.92, metalness: 0 }),
     damper: phy({ color: 0xcfd4da, roughness: 0.5, metalness: 0, clearcoat: 0.6, clearcoatRoughness: 0.3, sheen: 0.4, sheenRoughness: 0.6, sheenColor: new THREE.Color(0xffffff) }),
-    heatShrink: phy({ color: 0x121316, roughness: 0.38, clearcoat: 0.25, clearcoatRoughness: 0.35 }),
-    wireBlack: phy({ color: 0x141416, roughness: 0.50, specularIntensity: 0.7 }),
+    heatShrink: phy({ color: 0x1f2124, roughness: 0.38, clearcoat: 0.25, clearcoatRoughness: 0.35 }),
+    wireBlack: phy({ color: 0x1e1f23, roughness: 0.50, specularIntensity: 0.7 }),
     wireRed: phy({ color: 0xc2201e, roughness: 0.50, specularIntensity: 0.7 }),
     wireWhite: phy({ color: 0xe9e9ec, roughness: 0.50, specularIntensity: 0.7 }),
     wireYellow: phy({ color: 0xe0b000, roughness: 0.50, specularIntensity: 0.7 }),
@@ -234,26 +235,26 @@ function makeMaterials(maxAniso) {
     pcbEdge: std({ color: 0x1d2325, roughness: 0.7 }),
     chip: std({ color: 0x1a1b1e, roughness: 0.45, metalness: 0.1 }),
     solder: phy({ color: 0xc9cbcf, metalness: 1, roughness: 0.25 }),
-    connector: std({ color: 0xe8e8ea, roughness: 0.6 }),
+    connector: std({ color: 0xcfd3d8, roughness: 0.7 }),
     batteryShell: phy({ color: 0x25272c, roughness: 0.35, clearcoat: 0.8, clearcoatRoughness: 0.22, bumpMap: noiseBump, bumpScale: 0.0004, side: THREE.DoubleSide }),
     batteryLabel: std({ map: canvasTex(batteryLabel(), { wrap: false }), roughness: 0.5, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }),
     cell: std({ color: 0xb9bcc3, metalness: 0.85, roughness: 0.35 }),
     escLabel: std({ map: canvasTex(escLabel(), { wrap: false }), roughness: 0.4, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }),
     strap: phy({ map: canvasTex(strapCanvas(), { repeat: [10, 10] }), roughness: 0.85, sheen: 0.6, sheenRoughness: 0.7, sheenColor: new THREE.Color(0x8a8d93) }),
     propCCW: propMat(1), propCW: propMat(-1),
-    propHub: phy({ color: 0x17171a, roughness: 0.55, roughnessMap: noiseRgh, clearcoat: 0.08, clearcoatRoughness: 0.6 }),
+    propHub: phy({ color: 0x24252a, roughness: 0.55, roughnessMap: noiseRgh, clearcoat: 0.08, clearcoatRoughness: 0.6 }),
     propDiscCCW: new THREE.MeshBasicMaterial({ map: canvasTex(propDisc(1), { wrap: false }), transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }),
     propDiscCW: new THREE.MeshBasicMaterial({ map: canvasTex(propDisc(-1), { wrap: false }), transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }),
-    bell: phy({ color: 0x2a2c30, metalness: 0.65, roughness: 0.42, anisotropy: 0.4, side: THREE.DoubleSide }),
-    bellTopCCW: phy({ map: canvasTex(bellTopCanvas(1), { wrap: false, repeat: [1 / 0.035, 1 / 0.035], offset: [0.5, 0.5] }), metalness: 0.65, roughness: 0.42, side: THREE.DoubleSide }),
-    bellTopCW: phy({ map: canvasTex(bellTopCanvas(-1), { wrap: false, repeat: [1 / 0.035, 1 / 0.035], offset: [0.5, 0.5] }), metalness: 0.65, roughness: 0.42, side: THREE.DoubleSide }),
+    bell: phy({ color: 0x34373d, metalness: 0.8, roughness: 0.34, anisotropy: 0.6, anisotropyRotation: Math.PI / 2, side: THREE.DoubleSide }),   // 旋盤目: ハイライトは軸方向に伸びる
+    bellTopCCW: phy({ map: canvasTex(bellTopCanvas(1), { wrap: false, repeat: [1 / 0.035, 1 / 0.035], offset: [0.5, 0.5] }), metalness: 0.8, roughness: 0.34, side: THREE.DoubleSide }),
+    bellTopCW: phy({ map: canvasTex(bellTopCanvas(-1), { wrap: false, repeat: [1 / 0.035, 1 / 0.035], offset: [0.5, 0.5] }), metalness: 0.8, roughness: 0.34, side: THREE.DoubleSide }),
     gpsBody: phy({ color: 0xe9eaed, roughness: 0.4, clearcoat: 0.6, clearcoatRoughness: 0.2 }),
     gpsTop: std({ map: canvasTex(gpsTop(), { wrap: false }), roughness: 0.5, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }),
     regLabel: std({ map: canvasTex(registrationLabel(), { wrap: false }), roughness: 0.5, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }),
     armNum: [1, 2, 3, 4].map(n => std({ map: canvasTex(armNumber(n), { wrap: false }), roughness: 0.5, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 })),
     lens: phy({ color: 0x06080d, metalness: 0, roughness: 0.06, ior: 1.5, clearcoat: 1, clearcoatRoughness: 0.04, iridescence: 0.9, iridescenceIOR: 1.35, iridescenceThicknessRange: [120, 380], envMapIntensity: 1.4 }),
     lensRing: phy({ color: 0x2b2d33, metalness: 0.9, roughness: 0.3, anisotropy: 0.5 }),
-    ledCover: phy({ color: 0xf0f2f4, roughness: 0.3, transparent: true, opacity: 0.55, clearcoat: 0.6 }),
+    ledCover: phy({ color: 0xd9dde3, roughness: 0.4, transparent: true, opacity: 0.35, clearcoat: 0.6 }),
     antennaWhite: phy({ color: 0xf2f2f4, roughness: 0.4, clearcoat: 0.5 }),
     ledRed: std({ color: 0xff7070, emissive: 0xff2a1a, emissiveIntensity: 4.0, roughness: 0.3 }),
     ledGreen: std({ color: 0x9dffb0, emissive: 0x18ff4a, emissiveIntensity: 3.5, roughness: 0.3 }),

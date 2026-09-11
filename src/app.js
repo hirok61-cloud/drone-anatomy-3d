@@ -8,14 +8,17 @@ function tick(now) {
   stepTimeScale(dt); const dtSim = dt * S.ts;
   // カメラ
   stepCamera(dt);
-  const idleFor = (now - S.lastInteract) / 1000, sinceSel = (now - S.lastSelect) / 1000;
-  const wantRot = S.autoRotate && !S.camSpring && !S.camInertia && idleFor > 5 && sinceSel > 12 && body.mode === 'idle' && !reduceMotion && $('#inspector').classList.contains('open') === false && !S.question;
-  controls.autoRotate = wantRot; controls.autoRotateSpeed = 0.45 * smoothstep(5, 7, idleFor);
-  if (body.mode === 'free' && Math.hypot(body.px, body.pz) > 0.15 && !S.camSpring) { const target = new THREE.Vector3(body.px, controls.target.y, body.pz); controls.target.lerp(target, 1 - Math.exp(-dt / 0.6)); }
+  if (!S.camSpring && S.springWas) S.rotFrom = now; S.springWas = !!S.camSpring;
+  const rotFor = (now - Math.max(S.lastInteract, S.rotFrom || 0, S.lastSelect + 7000)) / 1000;
+  const wantRot = S.autoRotate && !S.camSpring && !S.camInertia && rotFor > 5 && body.mode === 'idle' && !reduceMotion && $('#inspector').classList.contains('open') === false && !S.question;
+  controls.autoRotate = wantRot; controls.autoRotateSpeed = 0.45 * smoothstep(5, 7, rotFor);
+  if (body.mode === 'free' && !S.camSpring) { const r = Math.hypot(body.px, body.pz); const w = smoothstep(0.08, 0.20, r); if (w > 0) controls.target.lerp(new THREE.Vector3(body.px, controls.target.y, body.pz), w * (1 - Math.exp(-dt / 0.6))); }
   controls.update();
   // 分解
-  S.explodeT += (S.explode - S.explodeT) * (1 - Math.exp(-dt * 9)); if (Math.abs(S.explode - S.explodeT) < 0.0005) S.explodeT = S.explode; if (S.explode < 0.05) S.explodedCam = false;
+  S.explodeT += (S.explode - S.explodeT) * (1 - Math.exp(-dt * 9)); if (Math.abs(S.explode - S.explodeT) < 0.0005) S.explodeT = S.explode; if (S.explode < 0.05 && S.explodedCam) { S.explodedCam = false; S.explodeFrame = true; }   // 戻したら組み上がった機体を再フレーミング
+  { const fs = 0.5 + 0.45 * S.explodeT + 0.3 * Math.max(0, body.py); const c = key.shadow.camera; if (Math.abs(c.right - fs) > 0.01) { c.left = c.bottom = -fs; c.right = c.top = fs; c.updateProjectionMatrix(); S.shadowDirty = true; } const si = 1 - 0.55 * S.explodeT; if (Math.abs((key.shadow.intensity ?? 1) - si) > 0.01) { key.shadow.intensity = si; S.shadowDirty = true; } }
   applyExplode();
+  if (S.explodeFrame && Math.abs(S.explode - S.explodeT) < 0.01 && performance.now() - (S.explodeAt || 0) > 350) { S.explodeFrame = false; D.root.updateWorldMatrix(true, true); focusOn(D.parts.filter(p => partVisible(p) && effVisible(p.obj)).map(p => p.obj), { pull: true }); }   // 分解が落ち着いたら全体をフレーミング
   // 機体
   stepBody(dtSim, dt); if (theater.active) stepTheater(dtSim, dt); applyBody(dt);
   updateMotors(dtSim, dt); updateMoveArrow(); updateAirflow(dtSim, dt);

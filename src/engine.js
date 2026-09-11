@@ -37,7 +37,7 @@ camera.position.set(0.78, 0.50, -0.82);
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true; controls.dampingFactor = 0.08; controls.minDistance = 0.10; controls.maxDistance = 3.2; controls.zoomSpeed = 0.8;
 controls.maxPolarAngle = Math.PI * 0.68; controls.autoRotateSpeed = 0.45; controls.target.set(0, 0.0, 0);
-controls.addEventListener('start', () => { S.lastInteract = performance.now(); onCamInterrupt(); controls.autoRotate = false; });
+controls.addEventListener('start', () => { S.lastInteract = performance.now(); onCamInterrupt(); controls.autoRotate = false; if (typeof theater !== 'undefined' && theater.active) theater.cam = false; });
 controls.addEventListener('change', () => { S.aoDirty = true; });
 
 mark('gl');
@@ -61,10 +61,10 @@ function makeStudioEnv() {
   panel(3, 2, 4.0, 0xdfe9ff, new THREE.Vector3(-4.8, 4.2, 6.4));
   panel(7, 5, 0.015, 0xffffff, new THREE.Vector3(-8, 0.5, -2));
   const dome = new THREE.Mesh(new THREE.SphereGeometry(20, 32, 16), new THREE.MeshBasicMaterial({ side: THREE.BackSide, vertexColors: true }));
-  { const g = dome.geometry, pos = g.attributes.position, col = []; for (let i = 0; i < pos.count; i++) { const t = clamp(pos.getY(i) / 20, -1, 1); const v = t >= 0 ? lerp(0.12, 0.22, t) : lerp(0.12, 0.035, -t); col.push(v, v * 1.03, v * 1.08); } g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); }
+  { const g = dome.geometry, pos = g.attributes.position, col = []; for (let i = 0; i < pos.count; i++) { const t = clamp(pos.getY(i) / 20, -1, 1); const v = t >= 0 ? lerp(0.18, 0.30, t) : lerp(0.18, 0.06, -t); col.push(v, v * 1.03, v * 1.08); } g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); }
   env.add(dome);
   const floor = new THREE.Mesh(new THREE.CircleGeometry(8, 48), new THREE.MeshBasicMaterial({ vertexColors: true }));
-  { const g = floor.geometry, pos = g.attributes.position, col = []; for (let i = 0; i < pos.count; i++) { const r = Math.hypot(pos.getX(i), pos.getY(i)) / 8; const v = lerp(0.18, 0.05, r); col.push(v, v, v); } g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); }
+  { const g = floor.geometry, pos = g.attributes.position, col = []; for (let i = 0; i < pos.count; i++) { const r = Math.hypot(pos.getX(i), pos.getY(i)) / 8; const v = lerp(0.24, 0.07, r); col.push(v, v, v); } g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); }
   floor.rotation.x = -Math.PI / 2; floor.position.y = -1; env.add(floor);
   return env;
 }
@@ -108,7 +108,7 @@ const ground = new THREE.Mesh(new THREE.CircleGeometry(2.8, 96), groundMat); gro
 const CS = { size: 1.4, res: 512, height: 0.55 };
 const csRT = new THREE.WebGLRenderTarget(CS.res, CS.res), csRT2 = new THREE.WebGLRenderTarget(CS.res, CS.res);
 const csCam = new THREE.OrthographicCamera(-CS.size / 2, CS.size / 2, CS.size / 2, -CS.size / 2, 0, CS.height); csCam.rotation.x = Math.PI / 2; csCam.position.y = -0.158 + 0.0005;
-const csDepthMat = new THREE.MeshDepthMaterial({ depthPacking: THREE.BasicDepthPacking });
+const csDepthMat = new THREE.MeshDepthMaterial({ depthPacking: THREE.BasicDepthPacking, blending: THREE.NoBlending });
 csDepthMat.onBeforeCompile = sh => { sh.uniforms.darkness = { value: 1.6 }; sh.fragmentShader = 'uniform float darkness;\n' + sh.fragmentShader.replace('gl_FragColor = vec4( vec3( 1.0 - fragCoordZ ), opacity );', 'gl_FragColor = vec4( vec3( 0.0 ), ( 1.0 - fragCoordZ ) * darkness );'); };
 const csPlane = new THREE.Mesh(new THREE.PlaneGeometry(CS.size, CS.size), new THREE.MeshBasicMaterial({ map: csRT.texture, transparent: true, opacity: 0.55, depthWrite: false })); csPlane.rotation.x = -Math.PI / 2; csPlane.position.y = -0.157; csPlane.renderOrder = 0; scene.add(csPlane);
 const csBlurH = new THREE.ShaderMaterial(HorizontalBlurShader), csBlurV = new THREE.ShaderMaterial(VerticalBlurShader); csBlurH.depthTest = csBlurV.depthTest = false;
@@ -116,11 +116,12 @@ const csQuad = new FullScreenQuad(csBlurH);
 function renderContactShadow() {
   const hidden = []; scene.traverse(o => { if ((o.isSprite || o.isPoints || o === ground || o === backdrop || o === csPlane || o.userData.noShadow) && o.visible) { o.visible = false; hidden.push(o); } });
   const oldBg = scene.background; scene.background = null; scene.overrideMaterial = csDepthMat;
-  renderer.setRenderTarget(csRT); renderer.setClearColor(0xffffff, 1); renderer.clear(); renderer.render(scene, csCam);
+  const prevC = renderer.getClearColor(new THREE.Color()), prevA = renderer.getClearAlpha();
+  renderer.setRenderTarget(csRT); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(scene, csCam);   // 透明クリア: 影の無い所は床がそのまま見える
   scene.overrideMaterial = null; scene.background = oldBg; for (const o of hidden) o.visible = true;
   const blur = (amt) => { csBlurH.uniforms.tDiffuse.value = csRT.texture; csBlurH.uniforms.h.value = amt / CS.res; csQuad.material = csBlurH; renderer.setRenderTarget(csRT2); csQuad.render(renderer);
     csBlurV.uniforms.tDiffuse.value = csRT2.texture; csBlurV.uniforms.v.value = amt / CS.res; csQuad.material = csBlurV; renderer.setRenderTarget(csRT); csQuad.render(renderer); };
-  blur(3.5); blur(1.2); renderer.setRenderTarget(null);
+  blur(3.5); blur(1.2); renderer.setRenderTarget(null); renderer.setClearColor(prevC, prevA);
 }
 
 // ---------- ポスト処理 ----------
@@ -141,6 +142,7 @@ class ScenePass extends Pass {
 const scenePass = new ScenePass();
 class GtaoLite extends GTAOPass {
   constructor(...a) { super(...a); this.needsSwap = false; this.every = 2; this._n = 0; this.ok = true; }
+  overrideVisibility() { const cache = this._visibilityCache; this.scene.traverse(o => { cache.set(o, o.visible); if (o.isPoints || o.isLine || o.isSprite || o.userData.noAO) o.visible = false; }); }   // スプライト・ブラー円盤・LEDカバーはAOに入れない
   render(renderer, writeBuffer, readBuffer) {
     const fresh = S.aoDirty || (++this._n % this.every === 0);
     try {
@@ -206,7 +208,7 @@ function setTint(part, color, k) {
   for (const m of part.meshes) {
     const o = m.userData.origMat; if (Array.isArray(o) || !o.isMeshStandardMaterial) continue;
     if (k <= 0) { m.userData.tint = null; if (m.material === m.userData.tintMat) m.material = o; continue; }
-    const t = tintMat(m, o); t.color.copy(o.color).lerp(color, 0.5 * k); t.emissive.copy(color); t.emissiveIntensity = 0.9 * k; m.userData.tint = t;
+    const t = tintMat(m, o); t.color.copy(o.color).lerp(color, 0.65 * k); t.emissive.copy(color); t.emissiveIntensity = 0.28 * k; if (o.map && 'emissiveMap' in t) t.emissiveMap = o.map; m.userData.tint = t;
     if (m.material === o) m.material = t;
   }
 }
@@ -271,9 +273,9 @@ function applyExplode() {
 }
 
 // ---------- 時間伸縮 ----------
-function setTimeScale(ts) { S.tsTarget = ts; S.slow = ts < 0.99; }
+function setTimeScale(ts, tauIn) { S.tsTarget = ts; S.slow = ts < 0.99; S.tsTauIn = tauIn != null ? tauIn : 0.40; }
 function stepTimeScale(dt) {
-  const target = Math.log(S.tsTarget), tau = S.tsTarget < S.ts ? 0.40 : 0.30;
+  const target = Math.log(S.tsTarget), tau = S.tsTarget < S.ts ? (S.tsTauIn || 0.40) : 0.40;
   S.logTs += (target - S.logTs) * (1 - Math.exp(-dt / tau)); if (Math.abs(target - S.logTs) < 0.002) S.logTs = target; S.ts = Math.exp(S.logTs);
 }
 
@@ -308,10 +310,15 @@ function stepCamera(dt) {
 function onCamInterrupt() { if (S.camSpring) { S.camSpring = null; S.camInertia = { v: cam.v.clone().clampLength(0, 2), t: 0.3 }; cam.v.set(0, 0, 0); cam.tv.set(0, 0, 0); } }
 function viewScale() { const a = W / H; return a < 1 ? Math.min(2.0, Math.pow(1 / a, 0.9)) : 1; }
 function focusOn(objs, opts = {}) {
-  const box = new THREE.Box3(); for (const o of objs) box.expandByObject(o, true); if (box.isEmpty()) return;
+  const box = new THREE.Box3(), tb = new THREE.Box3(), pts = [];   // 本体メッシュだけで枠を決める(気流・ゴースト・スプライトは除外)。各メッシュの8隅を集めて実投影で距離を決める
+  for (const o of objs) { o.updateWorldMatrix(true, true); o.traverseVisible(c => { if (!c.isMesh || c.userData.noPart || !c.geometry) return; if (!c.geometry.boundingBox) c.geometry.computeBoundingBox(); const b = c.geometry.boundingBox; if (c.isInstancedMesh) { if (!c.boundingBox) c.computeBoundingBox(); tb.copy(c.boundingBox).applyMatrix4(c.matrixWorld); } else tb.copy(b).applyMatrix4(c.matrixWorld); box.union(tb); for (let i = 0; i < 8; i++) pts.push(new THREE.Vector3(i & 1 ? tb.max.x : tb.min.x, i & 2 ? tb.max.y : tb.min.y, i & 4 ? tb.max.z : tb.min.z)); }); } if (box.isEmpty()) return;
   const sph = box.getBoundingSphere(new THREE.Sphere());
-  const dist = clamp((sph.radius / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.25 + 0.02) * viewScale(), 0.12, 3.2);
   const dir = camera.position.clone().sub(controls.target); if (dir.lengthSq() < 1e-6) dir.set(0.6, 0.4, -0.6); dir.normalize();
+  // 箱の8隅を視野に収める距離(球ではなく実際の投影で決める)
+  const fwd = dir.clone().negate(), right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize(), up = new THREE.Vector3().crossVectors(right, fwd).normalize();
+  const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), tanH = tanV * Math.max(0.6, camera.aspect); let need = 0.05; const rel = new THREE.Vector3();
+  for (const q of pts) { rel.copy(q).sub(sph.center); const t = rel.dot(dir); need = Math.max(need, Math.abs(rel.dot(right)) / tanH + t, Math.abs(rel.dot(up)) / tanV + t); }
+  const dist = clamp((need * (opts.margin || 1.18) + 0.02) * viewScale(), 0.12, 3.2);
   const dur = 600 + 500 * clamp((camera.position.distanceTo(sph.center.clone().addScaledVector(dir, dist)) + controls.target.distanceTo(sph.center)) / 0.6, 0, 1);
   flyTo(sph.center.clone().addScaledVector(dir, dist), sph.center, dur, opts.pull !== false);
 }
@@ -326,8 +333,8 @@ function setView(v) {
 
 // ---------- テーマ ----------
 const THEME = {
-  light: { exposure: 1.0, key: [0xfff6ea, 3.2], rim: [0xe4ecff, 1.2], kick: [0xdde8ff, 0.5], env: 1.0, ground: 0xe4e6ea, gcc: 0.25, halo: 0.10, bg: ['#f7f8fa', '#eef0f3', '#d9dde3', '#cfd4db'], vig: 0.20, cs: 0.55, xray: '#182238', wire: '#2b3442', paper: '#f3f4f7', grid: 0x30343c, hoverTint: 0x1b1f27 },
-  dark: { exposure: 1.15, key: [0xfff8f2, 2.8], rim: [0xd6e4ff, 2.2], kick: [0xdde8ff, 0.9], env: 0.8, ground: 0x171a1f, gcc: 0.45, halo: 0.22, bg: ['#1c2129', '#262c36', '#0f1216', '#07080b'], vig: 0.28, cs: 0.70, xray: '#8fc9ff', wire: '#aab7cc', paper: '#1c2027', grid: 0xaab4c4, hoverTint: 0xffffff },
+  light: { exposure: 1.0, key: [0xfff6ea, 3.2], rim: [0xe4ecff, 1.2], kick: [0xdde8ff, 0.5], env: 1.0, ground: 0xe4e6ea, gcc: 0.25, halo: 0.05, bg: ['#f7f8fa', '#eef0f3', '#d9dde3', '#cfd4db'], vig: 0.20, cs: 0.40, xray: '#182238', wire: '#2b3442', paper: '#f3f4f7', grid: 0x30343c, hoverTint: 0x1b1f27 },
+  dark: { exposure: 1.15, key: [0xfff8f2, 2.8], rim: [0xd6e4ff, 2.2], kick: [0xdde8ff, 0.9], env: 0.8, ground: 0x171a1f, gcc: 0.45, halo: 0.12, bg: ['#1c2129', '#262c36', '#0f1216', '#07080b'], vig: 0.28, cs: 0.70, xray: '#8fc9ff', wire: '#aab7cc', paper: '#1c2027', grid: 0xaab4c4, hoverTint: 0xffffff },
 };
 let themeDark = false, arrowNeutral = 0x30343c;
 function isDark() { const cs = getComputedStyle(document.documentElement).colorScheme || ''; if (cs.includes('dark')) return true; if (cs.includes('light')) return false; return matchMedia('(prefers-color-scheme: dark)').matches; }

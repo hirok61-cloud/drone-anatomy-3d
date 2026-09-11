@@ -9,7 +9,7 @@ ROOT = pathlib.Path(__file__).parent
 SRC = ROOT / 'src'
 URL = 'https://drone-anatomy-3d.hiro-k61.workers.dev/'
 DESC = ('ドローン（550クラスのクアッドコプター）を部品ごとに分解・透視・断面表示できる3D教材。'
-        '35種の部品それぞれに役割・構造・仕様例・点検ポイントの解説と、飛行の原理のアニメーションがついています。')
+        '40種の部品それぞれに役割・構造・仕様例・点検ポイントの解説と、飛行の原理のアニメーションがついています。')
 
 tpl = (SRC / 'index.html').read_text(encoding='utf-8')
 css = (SRC / 'style.css').read_text(encoding='utf-8')
