@@ -1,0 +1,741 @@
+<meta charset="utf-8">
+<title>改修⑥〜⑩ 実行書</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root { --bg:#f3f5f8; --paper:#ffffff; --ink:#172033; --ink2:#4b5568; --mute:#7a8394; --rule:#dde2ea; --code:#eef1f6; --accent:#2f5fd0; --accent-soft:#e5ecfb; --warn:#b7791f; --warn-soft:#fbf3e3; --shadow:0 1px 2px rgba(23,32,51,.06), 0 10px 30px rgba(23,32,51,.06); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#0f1319; --paper:#161b23; --ink:#e6eaf0; --ink2:#b3bccb; --mute:#8791a3; --rule:#2a3140; --code:#1d232e; --accent:#7fa6ff; --accent-soft:#1c2740; --warn:#e0a94a; --warn-soft:#2b2417; --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35); } }
+:root[data-theme="dark"] { --bg:#0f1319; --paper:#161b23; --ink:#e6eaf0; --ink2:#b3bccb; --mute:#8791a3; --rule:#2a3140; --code:#1d232e; --accent:#7fa6ff; --accent-soft:#1c2740; --warn:#e0a94a; --warn-soft:#2b2417; --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35); }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font: 15px/1.75 "Noto Sans JP", -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", sans-serif; -webkit-font-smoothing:antialiased; }
+header.hero { border-bottom:1px solid var(--rule); background:var(--paper); }
+.hero-in { max-width:1180px; margin:0 auto; padding:34px 28px 24px; display:grid; grid-template-columns: 1fr auto; gap:20px; align-items:end; }
+.eyebrow { font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--mute); font-weight:500; }
+h1.title { font-size:30px; line-height:1.25; letter-spacing:-.01em; margin:6px 0 8px; text-wrap:balance; }
+.meta { color:var(--ink2); font-size:13.5px; display:flex; flex-wrap:wrap; gap:6px 18px; }
+.meta code { font-size:12.5px; }
+.order { display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+.order span { display:inline-flex; align-items:center; gap:8px; padding:7px 12px; border:1px solid var(--rule); border-radius:999px; background:var(--bg); font-size:13px; font-weight:500; white-space:nowrap; }
+.order span b { display:inline-grid; place-items:center; width:22px; height:22px; border-radius:50%; background:var(--accent); color:#fff; font-size:12px; font-weight:700; }
+.order i { color:var(--mute); font-style:normal; }
+.wrap { max-width:1180px; margin:0 auto; padding:26px 28px 80px; display:grid; grid-template-columns: 250px minmax(0,1fr); gap:36px; }
+nav.toc { position:sticky; top:16px; align-self:start; max-height:calc(100vh - 32px); overflow:auto; font-size:13px; padding-right:6px; }
+nav.toc .h { font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); margin:0 0 8px 10px; font-weight:500; }
+nav.toc a { display:block; color:var(--ink2); text-decoration:none; padding:5px 10px; border-left:2px solid transparent; border-radius:0 6px 6px 0; line-height:1.45; }
+nav.toc a.l3 { padding-left:22px; font-size:12.5px; color:var(--mute); }
+nav.toc a:hover { background:var(--accent-soft); color:var(--ink); }
+nav.toc a.on { border-left-color:var(--accent); color:var(--accent); font-weight:600; }
+article { min-width:0; overflow-wrap:anywhere; }
+article :not(pre) > code { overflow-wrap:anywhere; word-break:break-all; }
+article > h1 { display:none; }
+article h2 { font-size:22px; letter-spacing:-.01em; margin:44px 0 12px; padding-top:18px; border-top:1px solid var(--rule); text-wrap:balance; }
+article h2:first-of-type { border-top:0; margin-top:0; padding-top:0; }
+article h3 { font-size:16px; margin:26px 0 8px; color:var(--ink); }
+article h3::before { content:""; display:inline-block; width:8px; height:8px; border-radius:2px; background:var(--accent); margin-right:9px; vertical-align:2px; }
+article p { max-width:76ch; margin:0 0 12px; }
+article ul, article ol { max-width:80ch; padding-left:1.4em; margin:0 0 12px; }
+article li { margin:3px 0; }
+article li > ul, article li > ol { margin-top:3px; }
+article strong { font-weight:700; }
+article code { font-family:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; font-size:.86em; background:var(--code); padding:1px 5px; border-radius:4px; }
+article pre { background:var(--code); border:1px solid var(--rule); border-radius:10px; padding:14px 16px; overflow-x:auto; margin:8px 0 16px; font-size:12.5px; line-height:1.6; }
+article pre code { background:none; padding:0; font-size:inherit; }
+.tbl { overflow-x:auto; margin:10px 0 18px; border:1px solid var(--rule); border-radius:10px; background:var(--paper); }
+article table { border-collapse:collapse; width:100%; font-size:13.5px; min-width:640px; }
+article th, article td { text-align:left; vertical-align:top; padding:9px 12px; border-bottom:1px solid var(--rule); }
+article th { background:var(--bg); font-weight:600; color:var(--ink2); font-size:12.5px; letter-spacing:.02em; white-space:nowrap; }
+article tr:last-child td { border-bottom:0; }
+article td:first-child { white-space:nowrap; font-variant-numeric:tabular-nums; }
+article hr { border:0; height:0; margin:8px 0; }
+article blockquote { margin:0 0 12px; padding:8px 14px; border-left:3px solid var(--warn); background:var(--warn-soft); color:var(--ink2); }
+.pkg-tag { display:inline-block; font-size:11.5px; letter-spacing:.08em; color:var(--accent); font-weight:600; margin-bottom:-6px; }
+@media (max-width: 900px) { .wrap { grid-template-columns: 1fr; gap:18px; } nav.toc { position:static; max-height:none; border:1px solid var(--rule); border-radius:10px; padding:10px 6px; background:var(--paper); } .hero-in { grid-template-columns:1fr; } .order { justify-content:flex-start; } h1.title { font-size:24px; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } }
+html { scroll-behavior:smooth; }
+</style>
+<header class="hero"><div class="hero-in">
+  <div>
+    <div class="eyebrow">ドローンの構造 3D · 改修計画</div>
+    <h1 class="title">改修パッケージ⑥〜⑩ 実行書・作業計画書</h1>
+    <div class="meta"><span>2026-09-11</span><span>リポジトリ <code>hirok61-cloud/drone-anatomy-3d</code></span><span>正本 <code>docs/plans/2026-09-11-packages-6-10.md</code></span><span>読者: 実装を担当するモデル（Sonnet / Opus）</span></div>
+  </div>
+  <div class="order" aria-label="実装順"><span><b>1</b>⑥ 重さ・お金・重心</span><i>→</i><span><b>2</b>⑦ 図鑑とカード</span><i>→</i><span><b>3</b>⑩ もしもの5場面</span><i>→</i><span><b>4</b>⑧ 生きている機体</span><i>→</i><span><b>5</b>⑨ 授業・説明会</span></div>
+</div></header>
+<div class="wrap">
+  <nav class="toc" aria-label="目次"><div class="h">目次</div><div id="toc"></div></nav>
+  <article id="doc"></article>
+</div>
+<script type="text/markdown" id="src">
+# 改修パッケージ⑥〜⑩ 実行書・作業計画書
+
+作成: 2026-09-11 / 対象リポジトリ: `hirok61-cloud/drone-anatomy-3d`（ローカル `~/Desktop/ドローン関連/ドローン構造3D/`）
+読者: これから実装を担当するモデル（Sonnet / Opus）。**この文書だけで作業が完結する**ように、設計判断・数値・文章はすべてここで確定させてある。迷ったら「決定事項」に従い、判断が要る所は「実装者の裁量」と明記した所だけ自分で決めること。
+
+---
+
+## 0. 全体方針（先に読む）
+
+### 0.1 何を作るか
+改修メニュー（`docs/proposals/2026-09-11-improvement-menu.html`）の第6〜10位。
+
+| # | 名前 | 一言 | 重さ | 主に触るファイル |
+|---|---|---|---|---|
+| ⑥ | 重さ・お金・重心 | 重さの積み上げバー、参考価格タグ、バッテリーをずらすと前後のモーター%が変わる、人型スケール | M | data.js, drone.js, physics.js, 新規 `scale.js`, ui.js, index.html, style.css |
+| ⑦ | 図鑑とカード | 見た部品に「発見済み」、右上に 12/40、今日の一部品が光る、全部見たら設計図モード、記念写真 | S | data.js, 新規 `codex.js`, ui.js, index.html, style.css |
+| ⑧ | 生きている機体と、みんなの土台 | 開いた瞬間からホバー、ポインタの方へ数度向く、「大きく」帯、日本語／やさしい日本語／English、読み上げ | S〜M | data.js, physics.js, 新規 `live.js`, ui.js, index.html, style.css |
+| ⑨ | 授業・説明会モード | 45分授業・10分説明会の台本が右に固定、段落ごとに視点と表示が切替、部品めぐり、ふたりクイズ、印刷ワークシート | M | data.js, 新規 `lesson.js`, ui.js, index.html, style.css, build.py |
+| ⑩ | もしもの5場面 | 電波切れ・電池少・GPS喪失・強風・人が近づいた → 機体が小さく反応し、働く部品が順に光る。最後に「機体ができること／人がやること」 | M | data.js, 新規 `whatif.js`, physics.js, ui.js, index.html, style.css |
+
+### 0.2 実装順（決定）
+1. **⑥ 重さ・お金・重心** — データ追加が中心、既存の `setTint`/`renderNote`/ラベル機構を流用。まずここで「新規モジュールを足す作法」を確立する。
+2. **⑦ 図鑑とカード** — `select()` に1行フックするだけで動く。写真機能でキャンバス取得の作法を確立する。
+3. **⑩ もしもの5場面** — ⑤シアターの隣に置く。`body` を書く小さなタイムラインエンジンを作る（⑧⑨が再利用）。
+4. **⑧ 生きている機体と土台** — 起動時ホバーは全画面に影響するので、⑥⑦⑩が安定してから。言語・大きく・読み上げは⑨の前提。
+5. **⑨ 授業・説明会モード** — ①〜⑩の機能を台本から呼ぶ統合パッケージ。最後。
+
+各パッケージは **1コミット以上・単独でデプロイ可能** な単位で進める。前のパッケージが未マージでも壊れないよう、機能の入口（ボタン・チップ）は該当データが無ければ描画しない。
+
+### 0.3 変えてはいけないもの
+- 既存の①〜⑤の挙動と、`docs/design/*.md` の設計（特に `2026-09-11-ui-spec.md` の「排他ルール」と「はじめて／くわしく」）。
+- `src/` を直して `python3 build.py` を回す運用。**`public/index.html` と `artifact.html` を直接編集しない。**
+- ビルド出力の決定性（日付・乱数をHTMLに埋めない）。CI「Build check」は `python3 build.py` 後に差分が無いことを検査する。
+- 品質段階 `applyQuality(0〜3)`（engine.js）と自動降格。新規の3D要素は **オフ時に draw call を増やさない**（`visible=false` か `scene` から外す）。
+- レンダリング経路（ScenePass→GTAO→Outline→Output→finish）。ポスト処理を足さない。
+- `[hidden]{display:none!important}` 前提の hidden 属性運用、`body.full` / `[data-full]` による深さ切替、`--dock-h` の実測。
+
+### 0.4 コードの現状（実装者向け早見表）
+- **ビルド**: `build.py` の `SOURCES = ['data.js','materials.js','drone.js','engine.js','physics.js','airflow.js','theater.js','ui.js','app.js']` の順で1本の `<script type="module">` に連結される。**新規ファイルは `theater.js` の後・`ui.js` の前** に入れる（`renderNote` 等の関数宣言は巻き上がるので前後どちらからでも呼べるが、`const` は定義行が実行されるまで使えない。新規モジュール内では **トップレベルで ui.js の const（`store`, `ACCENT` など）を参照しない**。関数の中からなら可）。
+- **起動**: `app.js` 末尾の即時関数。`initUI()` の直後に新モジュールの `initXxx()` を呼ぶ。
+- **毎フレーム**: `app.js` の `tick(now)`。順序 = `stepTimeScale → stepCamera → 分解 → applyExplode → stepBody/stepTheater/applyBody → updateMotors/updateMoveArrow/updateAirflow → updateHover → 影 → render → updateLabels`。新モジュールの `stepXxx(dtSim, dtReal)` は **`stepBody` の直後・`applyBody` の前** に入れる（`body` を書くものはここ）。DOMだけ更新するものは `updateLabels()` の後。
+- **状態**: `S`（engine.js）。新規のフラグは `S` に追加してよい（例 `S.scale`, `S.lang`, `S.lesson`）。永続化は `store.get/set('キー')`（`localStorage` の `drone3d.` 接頭辞、try/catch 済み）。
+- **機体**: `D = buildDrone(M)` → `{ root, parts, pick, wires, motors, legs, arrows, batPart, G }`。`D.parts[i] = { key, idx, obj, home, homeQuat, explode, meshes, coarse, label, hidden, anim }`。`partsOf(key)` で同名部品の配列（モーターは4本）。`D.motors[i] = { group, prop, propMesh, ghosts, disc, bell, dir, rpm, rpmTarget, rpmRate, pct, part, ... }`。M1前右CCW / M2後右CW / M3後左CCW / M4前左CW、機首は −Z。
+- **機体の動き**: `body`（physics.js）= `{px,py,pz, vx,vy,vz, tx,tz, wx,wz, yaw, home, mode:'idle'|'demo'|'free'|'theater', mult:[4], hold, stick, tilt}`。`setBodyMode(mode)`。`applyBody()` が `D.root` に姿勢を書く。`body.mult[i]` はモーターiのRPM倍率（`updateMotors` が `RPM_MAX * S.power * body.mult[i]` を目標にする）。`free.hoverY = 0.06` がホバー基準高さ。
+- **色付け**: `setTint(part, THREE.Color, k)`（engine.js）。k=0 で解除。材質は遅延クローンされるので何度呼んでもよい。強調の既定色は `ACCENT`（ui.js, 0xef6a2d）。
+- **カード**: `renderNote({ kind, title, badge, html, actions:[{label, fn, primary}], onClose })`（ui.js）。画面に1枚だけ。`kind` は排他制御に使う（既存: flight / question / use / theater / legend）。
+- **トースト**: `showToast(msg, ms)`。1レーンのみ。
+- **コーチ**: `showCoach(text, sub, go, later)`。
+- **選択**: `select(part, all, opts)`, `renderDetail()`, `focusOn(objs, {pull})`, `flyTo(pos, target, dur, pull)`, `setView('iso'|'front'|'top'|'side'|'inside')`。
+- **ラベル**: `buildLabels()` が `labelEls` を作り `updateLabels()` が毎フレーム位置決め。`S.labels` で表示、`live`（機体が動いている）中は非表示。
+- **タブ**: `setTab('see'|'fly'|'use'|'mishap')`。`#ctx .ctx-row[data-tab]` が文脈行、`#tabs` がタブバー。`theater` 行は再生中だけ出る。
+- **深さ**: `S.depth = 'simple'|'full'`、`setDepth()`。`SIMPLE_KEYS`（8部品）、`LIST_ORDER`（40部品、外側→内側の順）。
+- **デバッグ**: `window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, camera, controls, step(sec,fps) }`。**ブラウザペインが非表示だと rAF が止まる**（`document.hidden`）。検証は `__d.step(秒)` で同期的に進め、UI操作は `document.querySelector(...).click()` で行う。`performance.now()` ベースの待ちは `step` 内では進まないので、実時間の `await new Promise(r=>setTimeout(r,400))` を挟む。
+- **画面取得**: ペイン非表示時はスクリーンショット不可。`document.querySelector('canvas').toDataURL('image/jpeg', .9)` は **`__d.step(1/60)` 直後の同フレーム内なら取れる**（`preserveDrawingBuffer` は不要）。保存が要る場合は scratchpad に `savesrv.py`（127.0.0.1:8943 に POST、`docs/review/<name>.jpg` に保存）を立てて使う。`docs/review/*.jpg` は gitignore 済み。
+- **既知の落とし穴**: `at(mesh(geo, x, y, z), mat)` のように引数順を誤ると `position.x` にオブジェクトが入り行列が NaN になって `focusOn` が動かなくなる（正: `at(mesh(geo, mat), x, y, z)`）。`.popover` を `backdrop-filter` 付きの親に置かない。ID セレクタ（`#viewCol button`）は属性セレクタに勝つ。
+
+### 0.5 共通の受け入れ基準（全パッケージ）
+1. `python3 build.py` 後、`git status` で `public/index.html` と `artifact.html` が更新され、CI「Build check」が通る。
+2. コンソールエラー 0（`read_console_messages` で `?v=N` の新規ログを確認）。
+3. デスクトップ 1280×720 とスマホ 375×812（`resize_window mobile`）の両方で、新しいUIが画面内に収まり、`#topbar` の `scrollWidth <= clientWidth`。
+4. 機能オフ時に `renderer.info.render.calls` が実装前と同じ（±2以内）。オン時も +40 以内。
+5. ダーク／ライト両テーマで文字と図が読める（新しい色は `:root` のトークンで定義し、ダーク側でも再定義）。
+6. `prefers-reduced-motion: reduce` で新しい動きが止まるか短いフェードに落ちる。
+7. `はじめて` と `くわしく` の両方で破綻しない（はじめてでは情報量を減らす）。
+8. 各パッケージの「検証スクリプト」が最後まで例外なく走る。
+9. 文言は本書の確定文を使う。**法令の断定を書かない**（「原則」「設定と点検が前提」などの限定を落とさない）。
+
+### 0.6 納品手順（各パッケージ共通）
+1. `src/` を編集 → `python3 build.py`。
+2. ブラウザペイン `http://localhost:8941/public/index.html?v=<連番>`（launch.json の `drone-3d`）で検証スクリプトを実行。
+3. `git add -A && git commit -m "⑥ 重さ・お金・重心: …"`（本文に「何を・なぜ」）。`git push origin main` で Workers Builds が約1〜2分で公開。`curl -s https://drone-anatomy-3d.hiro-k61.workers.dev/ | shasum` が `shasum public/index.html` と一致したら完了。
+4. Artifact 版（`https://claude.ai/code/artifact/ae54a205-6aa5-44fd-80e1-dcff4d95c9f5`）は `artifact.html` を `url` 指定で再 publish。
+5. `~/.claude/projects/-Users-kameda-hirofumi-Desktop/memory/drone-anatomy-3d.md` に実装済みパッケージと新しい落とし穴を追記。
+
+---
+
+## ⑥ 重さ・お金・重心
+
+### 目的
+大人が「性能」ではなく「重さと金」で構造を掴めるようにする。狙う瞬間: 「電池がいちばん重くて、いちばん高い」「電池をずらすと前のモーターが忙しくなる」。
+
+### 決定事項（UX）
+- 入口: **「つかう」タブの文脈行の右端** に `重さ・お金` チップを1つ追加（`#scaleBtn`、トグル）。オンで **重さモード** `S.scale = true`。用途チップ（`#useChips`）と排他（重さモードに入ると `setUse(null)`、用途を選ぶと重さモードを抜ける）。
+- 重さモード中の画面:
+  1. **積み上げバー**（DOM、`#massBar`）: 画面右（デスクトップは `#inspector` の左側、スマホは `#noteCard` の上）に縦 220px の細い縦バー。上から重い順にグループ色（`GROUPS[].color`）で積み上げ、各区分に部品名と g を右添え。合計 `2.42 kg` とペットボトル換算 `≒ 500ml ペットボトル 4.8本` をバー下に表示。部品をクリック／ホバーするとその区分が明るくなり、他は薄くなる。区分をクリックすると `select(partsOf(key)[0], true)`。**はじめて** では区分を `SIMPLE_KEYS` の8つ＋「その他」に丸める。
+  2. **¥ボタン**（`#priceBtn`、バーの上）: オンでラベルの文字を部品名から参考価格に切替（`labelEls` の `textContent` を差し替える。`buildLabels()` を `S.price` で分岐）。バー下に注記 **「参考価格（2026年時点・国内通販の目安）。機種・時期で大きく変わります」** を必ず表示。合計金額をバー下に出す。
+  3. **重心マーカー**: 機体の重心位置に直径 14mm の白黒4分割の球（`cgMarker`、`MeshBasicMaterial`×2 で作る簡易版で可）を `D.root` に置く。重さモード中のみ `visible`。位置は下記の計算式で毎フレーム更新。
+  4. **バッテリーのドラッグ**: 重さモード中は `pointerdown` でバッテリー（`D.batPart`）にヒットしたら `controls.enabled=false` にして、**機体の前後方向（ローカル z）にのみ** −0.045〜+0.045 m の範囲で動かす（`screenToDronePlane` で拾ったワールド座標を `D.root.worldToLocal` して z 成分だけ使う）。動かした量 `scale.batDz` は `body` ではなく `scale` 状態に持ち、`applyExplode()` の後で `batPart.obj.position.z = home.z + batDz` を書く（`p.anim` は使わない。シアターと競合するため）。離しても戻さない。「もどす」で 0。
+  5. **モーター%への反映**: `body.mult` を書く。式は下記。とばすタブと同じ `#badges`（`updateLabels` 内の `mbadge`）を重さモード中も表示する（現在は `live` 時だけなので、`S.scale` でも出す）。
+  6. **偏りすぎ**: 後述の `thrustShare` が **1.35 を超えた側** のバッジを赤（`.mbadge.over`）にし、バー下に「後ろのモーターに余裕がありません。前に進む・風に逆らう余力が減ります」を出す。
+  7. **荷物**: バーの上に `荷物: なし / カメラ+250g / 荷物 1kg` のセグメント。`カメラ` は既存 camera 部品の質量を含めるかどうかの切替ではなく「追加ペイロード」として扱う（ゴースト無し、重心計算のみ）。`荷物 1kg` は既存 `buildGhost` で `{shape:'box', size:[0.12,0.08,0.10], pos:[0,-0.13,0.02]}` を `useMat` で描き、重心計算に加える。荷物の前後位置も同じドラッグで動かせる（ヒットしたゴーストを対象にする）。
+  8. **人型スケール**: 重さモード中、機体の右横 0.9 m（ワールド +x）に身長 1.70 m の人型を置く（`scene` 直下 `personGroup`）。頭 `SphereGeometry(0.11)`、胴 `CapsuleGeometry(0.16, 0.55)`、脚 `CapsuleGeometry(0.07, 0.75)`×2、腕 `CapsuleGeometry(0.045, 0.55)`×2。材質 `MeshStandardMaterial({color:0x9aa3b0, roughness:.9})`、影を落とす（`castShadow=true`、**影錐台 `key.shadow.camera` は分解と同じロジックで `fs` を 1.2 以上に広げる**）。`userData.noPart = noPick = noAO = true`。重さモードに入ったとき `focusOn([D.root, personGroup])` で両方を収める。**スマホでは人型を置かない**（画面が狭くなる）。代わりにバー下に「身長170cmの人の手のひら〜肘くらいの大きさ」。
+- 重さモードを抜けると: マーカー・人型・荷物ゴースト非表示、`batDz = 0`、`body.mult = [1,1,1,1]`、ラベルを名前に戻す。
+
+### 決定事項（計算）
+- 質量表 `MASS`（g、**1個あたり**。`count` を掛けて合計）。内部部品（`SUB` に載る bell/stator/… と cells）はバーに出さず、親（motor / battery）に含める。
+
+```js
+// キーは ui.js の SUB（bell/stator/winding/magnet/shaft/motorBase→motor, cells→battery, propNut/propAdapter→prop）に載らない「親」だけ。
+// motor 95g は内部6種込み、prop 29g はナット3g＋アダプター6g込み。
+const MASS = { frameTop: 45, frameBottom: 70, arm: 32, armClamp: 12, motorMount: 14, standoff: 3, screws: 30,
+  motor: 95, prop: 29, esc: 26, fc: 30, pdb: 25, capacitor: 8, buzzer: 4,
+  battery: 640, xt60: 10, balance: 4, strap: 12, wiring: 60, gps: 45, rx: 18, vtx: 30, led: 4, damper: 5,
+  gimbal: 150, camera: 100, batteryTray: 40, remoteId: 25, regMark: 1, telemetry: 30, landingGear: 70 };
+// PARTS[key].count を掛けた合計 ≒ 2,421 g。バッテリーが 26% で最大。
+```
+- 参考価格 `PRICE`（円、1個あたり、2026年時点の国内通販の目安。**例示であり出典は「複数通販サイトの中央値」と表記**）。
+
+```js
+const PRICE = { frameTop: 6000, frameBottom: 8000, arm: 3200, armClamp: 900, motorMount: 1200, standoff: 150, screws: 1500,
+  motor: 4500, prop: 900, propNut: 150, propAdapter: 400, esc: 3000, fc: 9000, pdb: 3500, capacitor: 300, buzzer: 400,
+  battery: 16000, xt60: 300, balance: 200, strap: 400, wiring: 2500, gps: 7000, rx: 6000, vtx: 5000, led: 800, damper: 250,
+  gimbal: 40000, camera: 20000, batteryTray: 2500, remoteId: 12000, regMark: 300, telemetry: 8000, landingGear: 2000 };
+// 合計 ≒ 25万円前後。「ジンバル+カメラで6万円」「電池1.6万円」を読み取らせる。
+```
+- 重心（機体ローカル座標、y は無視して x,z のみ）。各部品の位置 = `partsOf(key)` の各 `obj` のワールド位置を `D.root.worldToLocal` した値（`updateWorldMatrix(true,true)` 後）。バッテリーは `batDz` を足す。荷物は上記 `pos` に `dz` を足す。
+  `cg = Σ(m_i · p_i) / Σ m_i`。
+- 前後のモーターへの配分。モーターはアーム方向 0.275 m（`drone.js` L284 `at(mo.group, 0.275, 0.034, 0)`）、アームは 45° なので前後距離 `L = 0.275 · cos45° ≒ 0.194 m`。
+  `share_rear = 1 + cg.z / L`, `share_front = 1 − cg.z / L`（z は機体後方が +）。左右も同様に `share_right = 1 + cg.x / L`。
+  各モーター `thrustShare_i = share_frontOrRear × share_leftOrRight`（M1前右, M2後右, M3後左, M4前左）。
+  `body.mult[i] = sqrt(thrustShare_i)`（推力∝RPM²）。バッジの % は `updateMotors` の既存式（`rpm / HOVER_RPM`）で自動的に 110% / 89% になる。
+  例: `batDz = +0.04` → cg.z ≒ +0.011 → 後ろ 105.5% / 前 94%。`荷物1kg` を +0.05 に置くと cg.z ≒ +0.03 → 後ろ 108% / 前 92%。
+- 「余裕なし」判定: `max(thrustShare_i) > 1.35`。
+
+### データ追加（data.js）
+- `MASS`, `PRICE`（上記）。
+- `SCALE_TEXT = { bottle: '500mlペットボトル', bottleG: 500, person: '身長170cmの人の手のひら〜肘くらい', priceNote: '参考価格（2026年時点・国内通販の目安）。機種・時期で大きく変わります', overNote: '後ろのモーターに余裕がありません。前に進む・風に逆らう余力が減ります' }`。
+- `PAYLOADS = [{ id:'none', name:'なし', g:0 }, { id:'cam', name:'カメラ +250g', g:250, pos:[0,-0.12,-0.06] }, { id:'box', name:'荷物 1kg', g:1000, pos:[0,-0.13,0.02], ghost:{ shape:'box', size:[0.12,0.08,0.10] } }]`。
+
+### 変更ファイルと手順
+1. `data.js`: 上記3定数を `MISHAPS` の後に追加。
+2. `drone.js`: `buildDrone` の戻り値に `cgMarker`（球、初期 `visible=false`）と `personGroup`（`scene` ではなく戻り値で返し、`engine.js` 側で `scene.add`）を追加。人型は関数 `buildPerson()` として同ファイルに置く。
+3. `physics.js`: 変更不要（`body.mult` を外から書く）。ただし `stepIdle` が `body.mult` を 1 に戻すので、重さモード中は **`stepIdle` の mult 復帰をスキップ**（`if (!S.scale)`）。
+4. 新規 `src/scale.js`（`build.py` の SOURCES に `'scale.js'` を `theater.js` の後に追加）:
+   - `const scale = { on:false, batDz:0, payload:'none', payDz:0, price:false, cg:new THREE.Vector3(), total:0 }`
+   - `setScale(on)`, `setPrice(on)`, `setPayload(id)`, `computeMass()`（区分配列 `[{key,name,g,color,pct}]` を返す）, `computeCG()`, `applyScaleToBody()`（`body.mult` を書く）, `stepScale()`（毎フレーム: マーカー位置、バッテリー位置、バッジ赤）, `renderMassBar(active)`（DOM）, `initScale()`。
+   - ドラッグ: `ui.js` の `pointerdown` ハンドラの先頭で `if (S.scale && scaleTryDrag(e)) return;` を呼ぶ形にする（`scaleTryDrag` は `scale.js` に置く。バッテリー／荷物ゴーストにヒットしたら `setPointerCapture` して true）。
+5. `ui.js`: つかうタブ行に `#scaleBtn` と `#priceBtn`（`data-full` は付けない。はじめてでも使える）。`setUse()` の先頭で `if (S.scale) setScale(false)`。`setTab()` で `use` を離れるとき `setScale(false)`。`select()` の末尾で `if (S.scale) renderMassBar(p && p.key)`。`updateLabels()` の `mbadge` 表示条件に `|| S.scale` を追加。`buildLabels()` で `S.price` のとき `textContent = '¥' + PRICE[key].toLocaleString()`（`PRICE` に無い部品は非表示）。
+6. `index.html`: `#massBar`（`.glass`）、`#scaleBtn`、`#priceBtn`、`#payloadSeg`。
+7. `style.css`: `#massBar`（幅 180px、`position:fixed; right: calc(var(--insp-w) + 28px); top: 50%; transform: translateY(-50%)`。≤1100px では `right:14px`、≤760px では `bottom: calc(var(--dock-h) + 8px); top:auto; transform:none; left:10px; right:auto; height:auto; flex-direction:row`＝横バーにする）。区分は `.seg-i` に `--c` と `--h`（%）。`.mbadge.over { background: var(--red); color: #fff }`。
+8. `app.js`: `tick` の `applyExplode()` 直後に `if (S.scale) stepScale();`、boot で `initScale()`。
+9. `docs/design/2026-09-11-ui-spec.md` の末尾に「B6 重さ・お金・重心」節を追記（本書の決定事項を要約）。
+
+### 受け入れ基準
+- 重さモードに入ると 1 秒以内にバー・重心球・（デスクトップでは）人型が出て、カメラが両方を収める。抜けると全て消え、draw call が元に戻る。
+- バーの合計が `2.42 kg`、電池の区分が最大で 26%（±1%）。
+- バッテリーを後ろへ 4cm ずらすと M2/M3 のバッジが 105〜106%、M1/M4 が 94%（±1）。荷物1kgを後端に置くと「余裕なし」文言が出て後ろ2基が赤。
+- ¥ を押すとラベルが価格になり注記が出る。合計が 20〜30 万円の範囲。
+- はじめてでは区分が 9 本以下。
+
+### 検証スクリプト（ブラウザペイン、`?v=N` で開いてから）
+```js
+const d = window.__d; d.step(1, 60);
+document.querySelector('#tabs [data-tab=use]').click(); document.getElementById('scaleBtn').click(); d.step(1.5, 60);
+const segs = [...document.querySelectorAll('#massBar .seg-i')]; const total = +document.querySelector('#massTotal').textContent.replace(/[^\d.]/g, '');
+const bat = segs.find(s => s.dataset.key === 'battery');
+console.assert(Math.abs(total - 2.42) < 0.02, 'total', total); console.assert(bat && +bat.style.getPropertyValue('--h').replace('%','') > 25, 'battery share');
+d.__scale.batDz = 0.04; d.step(1.0, 60); const pct = d.D.motors.map(m => Math.round(m.pct));
+console.assert(pct[1] >= 104 && pct[1] <= 107 && pct[0] >= 93 && pct[0] <= 95, 'pct', pct);
+document.querySelector('#payloadSeg [data-p=box]').click(); d.__scale.payDz = 0.05; d.step(1.0, 60);
+console.assert(document.querySelector('.mbadge.over'), 'over badge'); console.assert(document.querySelector('#massBar').textContent.includes('余裕'), 'over note');
+document.getElementById('priceBtn').click(); d.step(0.2, 60);
+console.assert([...document.querySelectorAll('#labels .lbl')].some(l => l.textContent.startsWith('¥')), 'price labels');
+document.getElementById('scaleBtn').click(); d.step(0.5, 60);
+console.assert(!d.D.cgMarker.visible && d.body.mult.every(m => Math.abs(m - 1) < 0.02), 'reset');
+'⑥ OK';
+```
+（`window.__d.__scale` として `scale` オブジェクトを公開すること。）
+
+### やらないこと
+- 天秤アニメ、価格の自動更新、部品ごとの出典リンク（注記1行で十分）。
+- 左右方向のバッテリー移動（前後だけ）。
+
+---
+
+## ⑦ 図鑑とカード
+
+### 目的
+説明を読まない人が「未達成の数字」に引かれて全部触る。孫に見せたい人が1タップで画像を持ち帰れる。**バッジ・称号・ランキングは作らない**。数字1つと控えめな光だけ。
+
+### 決定事項（UX）
+- **発見の定義**: `select(p)` で部品が選ばれ、その `detail` が 1.5 秒以上表示された（＝読んだ）とき、その `key` を発見済みにする。ラベルクリック・一覧クリック・3Dタップ・質問・シアター経由すべて対象。内部部品（`SUB` の子）も個別に数える。母数は **くわしく 40**（はじめてでも母数は 40 のまま。数字が増える余地を見せる）。
+- **表示**: `#inspector` の見出し右の `#partCount` の隣に小さく `12/40`（`#codexCount`、`.count` と同じ体裁、色は `--ink3`）。増えた瞬間だけ 600ms 拡大（`transform: scale(1.15)`）して戻る。トーストは出さない。
+- **今日の一部品**: 日付文字列 `YYYY-MM-DD` の簡易ハッシュ（各文字コード和 mod 40）で `LIST_ORDER[n]` を選ぶ。未発見ならその部品を **0.15 → 0.30 の振幅で 2.4 秒周期の呼吸** で `setTint(p, ACCENT, k)`（`stepCodex(dtReal)`）。選択されたら光は止め、`detail` の先頭に **「今日の一部品」バッジ＋豆知識1行**（`TRIVIA[key]`）を出す。発見済みでも豆知識は `detail` に常に出す（見出し「豆知識」、`--ink2`、1行）。
+- **全部集まると**: `#codexCount` が `40/40` になった瞬間、`showCoach('全部の部品を見ました', '設計図モードが使えるようになりました。見え方の「設計図」で開けます', go)`。見え方セグメントに 5 つ目 **「設計図」**（`data-mode="blueprint"`、`data-unlock`。未解放時は非表示）を追加。設計図モード＝線画モードの色替え: `paperMat.color = #1d3a6e`、`wireMat.color = #dfe9ff`、背景 `bg` を `['#20416f','#1b365e','#12284a','#0c1c36']`（`applyTheme` 経由でなく `setMode('blueprint')` 内で一時的に上書きし、他モードに戻す時に元に戻す）。解放状態は `store.set('codexDone','1')`。
+- **記念写真**: 視点列 `#viewCol` の末尾に 📷（`#photoBtn`）。押すと現在のフレームを撮り、2Dキャンバスで **ポスター**（下記）を作り、`navigator.share({files:[File]})` が使えれば共有シート（LINEにそのまま送れる）、使えなければ `#photoPop`（`.popover`）に画像を表示して「長押しで保存」の案内＋「閉じる」。**ダウンロードリンクは作らない**（Artifact 版では無効）。
+  - ポスター: 1600×1200。上 1600×1100 に 3D フレーム（`canvas.toDataURL('image/jpeg', 0.92)` を `drawImage` で cover）。下 100px の帯（`--glass-strong` 相当の白か、ダークなら `#171b22`）に左 `ドローンの構造`（太字 36px）、中央に **選択中の部品名**（無ければ `550クラス クアッドコプター`）、右に日付 `2026.09.11` と `12/40`。フォントは `-apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif`。
+  - 撮る前に `S.labels` を一時 true にしない（今見えている通りを撮る）。`#labels` の DOM ラベルは写らないので、部品名は帯に入れる。
+  - 撮影は `renderer` の描画直後に同期で行う: `tick(performance.now())` を1回呼んでから `toDataURL`（`app.js` に `window.renderOnce = () => tick(performance.now())` を追加して呼ぶ）。
+- **控えめさのルール**: 光は `k ≤ 0.30`、音無し、連続日数・ストリークは持たない。未発見の部品名を一覧で先に見せない（一覧は今まで通り）。
+
+### データ追加（data.js）
+`TRIVIA`（40部品・各1文・60字以内・断定できる事実のみ）。**この文言を使うこと**:
+
+```js
+const TRIVIA = {
+  frameTop: '上と下の板で挟むから、アームは1本ずつ外して交換できる。',
+  frameBottom: '下の板は上より厚い。バッテリーと脚の荷重を受けるのはこちら。',
+  arm: '中空の管は同じ重さの棒より曲がりにくい。だから中は空っぽ。',
+  armClamp: '締めすぎるとカーボン管が割れる。トルクは「手で回して止まる少し先」。',
+  motorMount: '2ピースの下側にネジ穴がある。長すぎるネジは巻線に届いて短絡する。',
+  standoff: '支柱の長さが、上下の板の間に入る基板の高さを決める。',
+  screws: '振動でゆるむのでネジ止め剤か、緩み止め付きナットを使う。',
+  motor: '外側が回る「アウトランナー」。だから缶に触ってはいけない。',
+  bell: '缶の内側に磁石が貼ってある。回っているのは磁石のほう。',
+  stator: '固定子は動かない。回っているように見えたら軸受が壊れている。',
+  winding: '巻線は3本の線に分かれている。2本を入れ替えると回転方向が逆になる。',
+  magnet: '落として缶をぶつけると磁石が欠ける。欠けると振動が出る。',
+  shaft: 'ベアリングを指で回して「ザラッ」としたら交換のサイン。',
+  motorBase: 'ベースの穴の間隔（16×19mm など）が、載せられるアームを決める。',
+  prop: '翼端の色帯は「回転方向」の目印。CCW と CW を混ぜて付けると飛ばない。',
+  propNut: 'CCW 側は逆ネジ。回転で締まる向きに切ってある。',
+  propAdapter: 'アダプターの穴径とプロペラの穴径は合っていないと芯がずれて振動する。',
+  esc: 'ESC は「速さ」を命じるのではなく、電流を毎秒数万回オンオフしている。',
+  fc: '毎秒数千回、傾きを測って直す。人が手で同じことをするのは不可能。',
+  pdb: '1枚の基板で太い電流を4本の ESC に分ける。ここが焼けると全部止まる。',
+  capacitor: 'モーターが作る電圧の波を吸収する。無いと FC が誤作動することがある。',
+  buzzer: '草むらに落ちた機体を探すのは、この小さな音。',
+  battery: '重さの4分の1が電池。飛行時間を伸ばす一番の近道は「軽くする」。',
+  cells: '6枚のセルの電圧が 0.05V 以上ずれていたら休ませる。',
+  xt60: '黄色いコネクタは 60A 用。焼けて茶色くなっていたら交換。',
+  balance: '細い線はセルを1枚ずつ測るため。充電器はこれで各セルを揃える。',
+  strap: '面ファスナーのストラップ2本で 640g を支える。1本だと飛行中にずれる。',
+  wiring: '3本のモーター線をねじるのは、電気のノイズを外に出さないため。',
+  gps: '衛星からの電波は上からくる。だから一番高い所に載せる。',
+  rx: '受信機のアンテナは2本を 90° に開く。どちらかが必ず送信機を向くように。',
+  vtx: '映像送信機は熱くなる。風が当たる場所に置くのはそのため。',
+  led: '前が赤と緑、後ろが白。遠くからでも向きがわかる決まり。',
+  damper: 'ゴムのダンパーがモーターの細かい振動をカメラに伝えない。',
+  gimbal: '3つのモーターが機体の傾きを打ち消す。だから映像が水平のまま。',
+  camera: 'カメラは機体の中で一番揺れに弱い部品。だから一番下に、ゴムの上に載る。',
+  batteryTray: 'トレイの前後どこに電池を置くかで重心が決まる。',
+  remoteId: 'リモートIDは機体の「ナンバープレート」を電波で出す装置。',
+  regMark: '登録記号は外から読める場所に、消えない方法で表示する。',
+  telemetry: 'テレメトリーは機体から地上へ「電池が少ない」などを知らせる無線。',
+  landingGear: '脚は「壊れて機体を守る」部品。曲がったら交換で正解。',
+};
+```
+（TRIVIA は事実として妥当な範囲で書いてある。実装者は改変せず、誤りを見つけたら **削って空文字** にし、報告する。）
+
+### 変更ファイルと手順
+1. `data.js`: `TRIVIA` 追加。
+2. 新規 `src/codex.js`（SOURCES に追加）:
+   - `const codex = { seen:new Set(JSON.parse(store.get('codex')||'[]')), today:null, pending:null, done:false }` — **`store` は ui.js の const なので `initCodex()` の中で読む**（トップレベルで参照しない）。
+   - `codexMark(key)`: 追加→保存→`renderCodexCount()`→40 到達で解放処理。
+   - `codexOnSelect(p)`: 選択時に `pending = {key, at: performance.now()}` を置き、`stepCodex` で 1.5 秒経過したら `codexMark`。選択解除で `pending=null`。
+   - `codexToday()`: 日付ハッシュ。
+   - `stepCodex(dtReal)`: 今日の一部品の呼吸。`reduceMotion` なら定数 0.2。
+   - `codexPoster()` / `photoShare()`。
+   - `initCodex()`: `#codexCount` を作る、今日の一部品を決める、解放済みなら設計図ボタンを表示。
+3. `ui.js`: `select()` の末尾に `codexOnSelect(p)`。`renderDetail()` の先頭に「今日の一部品」バッジ＋「豆知識」行を差し込む（`TRIVIA[key]` がある時だけ）。`setMode()` に `blueprint` を追加（線画の色替え、他モードへ戻る時に復元）。`#viewCol` に `#photoBtn`。
+4. `engine.js`: `wireMat`/`paperMat` の色を切り替える `setBlueprint(on)` を追加（背景 `bg` の一時上書きは `applyTheme` の `T.bg` 相当を保持しておき復元）。
+5. `index.html`/`style.css`: `#codexCount`、`#photoBtn`、`#photoPop`（`.popover` と同じ置き方＝ `header` の外）、`.today-badge`、`.trivia`。
+6. `app.js`: `tick` の `updateLabels()` の後に `stepCodex(dt)`；boot で `initCodex()`；`window.renderOnce` を追加。
+
+### 受け入れ基準
+- 部品を選んで 1.5 秒経つとカウントが 1 増え、リロード後も保持される。
+- 今日の一部品が未発見のとき機体上でうっすら呼吸し、選ぶと止まって豆知識が出る。
+- 40 個目で設計図モードが見え方に現れ、選ぶと紺地に白線で描かれる。他のモードに戻すと背景が戻る。
+- 📷 でポスターが生成され（1600×1200、帯に部品名と日付と 12/40）、共有シートか画像ポップが出る。ポップの画像は長押し保存できる `<img>`。
+- ランキング・称号・音を追加していない。
+
+### 検証スクリプト
+```js
+const d = window.__d; d.step(1, 60); localStorage.removeItem('drone3d.codex'); location.reload();
+```
+（リロード後に続けて）
+```js
+const d = window.__d; d.step(1, 60);
+const row = document.querySelector('#partList .row'); row.click(); d.step(0.2, 60);
+await new Promise(r => setTimeout(r, 1700)); d.step(0.2, 60);
+console.assert(document.getElementById('codexCount').textContent.trim() === '1/40', 'count', document.getElementById('codexCount').textContent);
+console.assert(JSON.parse(localStorage.getItem('drone3d.codex')).length === 1, 'persist');
+console.assert(document.querySelector('#detail .trivia'), 'trivia row');
+// 全解放の疑似
+localStorage.setItem('drone3d.codex', JSON.stringify(LIST_ORDER)); location.reload();
+```
+（再リロード後）
+```js
+const d = window.__d; d.step(1, 60);
+console.assert(document.querySelector('#modeSeg [data-mode=blueprint]') && !document.querySelector('#modeSeg [data-mode=blueprint]').hidden, 'blueprint unlocked');
+document.querySelector('#modeSeg [data-mode=blueprint]').click(); d.step(0.5, 60); console.assert(d.S.mode === 'blueprint');
+document.querySelector('#modeSeg [data-mode=normal]').click(); d.step(0.5, 60);
+window.__poster = await codexPoster(); console.assert(__poster.width === 1600 && __poster.height === 1200, 'poster size');
+'⑦ OK';
+```
+（`codexPoster()` は `HTMLCanvasElement` を返す Promise にし、グローバルから呼べるようにする。）
+
+### やらないこと
+- 称号・バッジ・ストリーク・共有ランキング。図鑑一覧ページ（既存の部品一覧が兼ねる）。
+
+---
+
+## ⑩ もしもの5場面（⑧より先に実装）
+
+### 目的
+住民や家族の「危なくないの？」に、「落ちない」ではなく **「落ちにくくする仕組み」と「人の備え」を対で** 答える材料。⑤が機体の故障なのに対し、こちらは **外の状況** に限る。
+
+### 決定事項（UX）
+- 入口: **「もしも」タブ** の文脈行を2段にする。上段 = 既存 `もしも、まちがえたら`（`#mishapCards`）、下段 = **`もしも、外でこうなったら`**（`#whatifCards`、5枚）。スマホは横スクロールのまま2行。**はじめて** では 5 枚全部出す（短い話なので減らさない）。
+- 再生中は ⑤ と同じく `body.theater` クラスを付け、右パネル inert、他タブ押下で終了。`#ctx` は `theater` 行を流用し、段階名だけ差し替える（`TH_STAGES` の代わりに `WHATIF_STAGES = ['状況', '機体の反応', '働く部品', 'できること・やること']`）。「つぎへ」で段階送り、`ゆっくり` は無効（小さな動きなので不要。ボタンは隠す）。
+- 各場面の流れ（`whatif.js` の小さなタイムライン。`body.mode = 'theater'` を流用し `stepWhatif(dtSim, dtReal)` が `body` を書く）:
+  1. **状況**（待ち）: 機体はホバー（`py = free.hoverY`、モーター回転、気流は出さない）。カードに `intro`。ラベル非表示。
+  2. **機体の反応**（自動 3〜6 秒）: 下記 `motion` を再生。カードに `reaction` 文。
+  3. **働く部品**（自動、部品ごとに 1.2 秒）: `parts` を順に `setTint(p, ACCENT, 1.0)` で点灯し、カードの箇条書きに「1 → 2 → 3」と番号付きで追記していく（点灯済みは 0.35 に落とし、最新だけ 1.0）。同時に `focusOn` はしない（画面が忙しくなる）。代わりに 3D ラベルをその部品だけ表示（`S.labels` を一時 true、`labelEls` を該当 key のみに絞る `S.labelOnly = Set`）。
+  4. **できること・やること**（待ち）: カードを 2 欄に（`.two-col`）。左「機体ができること」`can[]`、右「人がやること」`human[]`。最下段に常に **`caveat`**（「設定と点検が前提。万能ではありません」系の限定）。「もう一度」「やめる」。
+- 動きの定義（`motion`。値は `body` への書き込み。すべて「小さく」。姿勢は ±8° 以内、移動は 0.25 m 以内。`reduceMotion` なら姿勢変化を 1/3 にする）:
+  - `rth`（帰る）: 0〜0.8s ホバー静止 → 0.8〜2.0s `yaw` を +180° へ回頭（`dl` で ω=3）→ 2.0〜4.0s 機首側（回頭後の −z 方向＝元の +z）へ `tx` 6° 傾けて 0.20 m 進む → 4.0〜5.5s `py` を `hoverY` から 0.0 へゆっくり降ろす（着陸）。最後にモーター停止 `M_UPTO(0)`（theater.js の関数を再利用）。
+  - `landSlow`（ゆっくり降りる）: 0〜1.0s 静止 → 1.0〜4.0s `py` を 0 へ（`dl` ω=1.2）→ 着地後 0.5s でモーター停止。
+  - `driftHold`（GPS 喪失）: 0〜1.5s `px` が +0.06 m 流れる（`dl` ω=1.5）→ 1.5〜2.0s `tx` −4°（止めようとする）→ 2.0〜4.5s `px` を 0.06 に **保持**（戻さない。「位置は保てないが姿勢は保てる」を見せる）→ 高度は一定。
+  - `wind`（強風）: 0〜4.5s `tz` を −7°（風上へ傾く）で保持、`px` は ±0.02 の低周波揺れ（0.4 Hz）。`air.mat.uniforms.uWind` を `(0.4, 0, 0)` にして気流を流す（気流を一時 on: `S.air=true` → 終了時に元へ）。モーターは風上側 M1/M4 を `mult 1.15`、風下 M2/M3 を `0.9`。
+  - `person`（人が近づいた）: 機体は **動かない**。0〜1.0s 静止 → 1.0s で `py` を +0.03 上げる（少し離れる）→ 以降静止。代わりに **人型**（⑥の `buildPerson` を再利用。⑥未実装なら `CapsuleGeometry` の簡易版を `whatif.js` に置く）を機体の前 1.2 m に置き、1.0〜3.0s で 0.6 m まで近づける。3.0s で機体の LED を全点滅（`led` 部品を `setTint(RED, 0.8)` 0.5 秒周期）。
+- 文言（**確定。data.js に入れる**）:
+
+```js
+const WHATIF_STAGES = ['状況', '機体の反応', '働く部品', 'できること・やること'];
+const WHATIF = [
+  { id: 'signal', name: '電波が切れた', icon: '📡',
+    intro: '送信機との電波が届かなくなった。操縦の指示が機体に届かない。',
+    reaction: '機体は「指示が来ない」ことを自分で検知し、あらかじめ決めた動き（多くの機種では、離陸した場所へ帰って降りる）に切り替える。',
+    motion: 'rth', parts: ['rx', 'fc', 'gps', 'motor'],
+    partNotes: { rx: '受信機が「電波が途切れた」と判断する', fc: '頭脳がフェイルセーフ動作に切り替える', gps: '離陸地点の座標を思い出す', motor: '帰る向きへ機体を進める' },
+    can: ['電波が切れたことを自分で検知する', '設定に従い、離陸地点へ戻る／その場で降りる', '電波が戻れば操縦を受け付ける'],
+    human: ['飛ばす前にフェイルセーフの設定を確認する', '目視で機体を追い続ける', '周囲の人に「戻ってきます」と声をかける', '帰還経路に人や障害物がないか見る'],
+    caveat: '帰還の動きは機種と設定で異なり、GPSが使えないと働かない。「設定と点検が前提」で、万能ではない。' },
+  { id: 'battery', name: '電池が少ない', icon: '🔋',
+    intro: '飛行中に電池の残りが減ってきた。',
+    reaction: '機体は電圧を常に測っていて、決めた値を下回ると警告し、さらに下がれば自動で降下を始める。',
+    motion: 'landSlow', parts: ['battery', 'pdb', 'fc', 'buzzer', 'telemetry'],
+    partNotes: { battery: '電圧が下がる', pdb: '電圧を測る回路が値を頭脳へ送る', fc: '警告と自動降下を判断する', buzzer: '音で知らせる', telemetry: '地上の送信機に残量を知らせる' },
+    can: ['電圧を常に測って残量を推定する', '決めた値で警告を出す', 'さらに下がれば自動で降下・着陸する'],
+    human: ['飛ばす前に満充電と電圧差を確認する', '警告が出たらすぐ戻す（粘らない）', '着陸できる場所を常に把握しておく'],
+    caveat: '寒い日や古い電池は残量表示より早く電圧が落ちる。自動降下は「安全な場所」を選んでくれるわけではない。' },
+  { id: 'gps', name: 'GPSを見失った', icon: '🛰️',
+    intro: '建物の陰や橋の下で、衛星の電波が届かなくなった。',
+    reaction: '位置は分からなくなるが、傾きは分かる。機体は水平を保ったまま、風に少しずつ流される。',
+    motion: 'driftHold', parts: ['gps', 'fc', 'motor'],
+    partNotes: { gps: '衛星が見えなくなる', fc: '位置の保持をあきらめ、姿勢の保持だけ続ける', motor: '傾きを直す動きは続く' },
+    can: ['姿勢（傾き）を保ち続ける', '位置が保てないことを画面に知らせる', 'GPSが戻れば位置の保持に復帰する'],
+    human: ['流される方向を見て、手で位置を直す', '建物・橋の近くでは最初から手動の練習をしておく', '無理をせず、開けた場所へ戻して降ろす'],
+    caveat: 'GPSなしでも飛べるかは機種と設定次第。屋内や高い建物の間では最初から「位置保持は効かない」前提で計画する。' },
+  { id: 'wind', name: '風が強い', icon: '🌬️',
+    intro: '急に風が強くなった。',
+    reaction: '機体は流されないように風上へ傾き、風上側のモーターを速く回して踏ん張る。その分、電池の減りが早くなる。',
+    motion: 'wind', parts: ['fc', 'motor', 'prop', 'battery'],
+    partNotes: { fc: '流されたぶんを検知して傾きを命じる', motor: '風上側が速く回る', prop: '傾けたぶんの推力で風に逆らう', battery: '踏ん張る分だけ消費が増える' },
+    can: ['ある程度の風なら位置を保つ', '風上側のモーターに余力を回す'],
+    human: ['飛ばす前に風速を確認し、機体の限界の6〜7割で判断する', '風が強まったら風下に人がいない場所へ移す', '早めに降ろす。粘ると電池が先に尽きる'],
+    caveat: '耐風性能は機種ごとに決まっていて、突風はその値を超えることがある。上空は地上より風が強い。' },
+  { id: 'person', name: '人が近づいた', icon: '🚶',
+    intro: '見物の人が機体のほうへ歩いてきた。',
+    reaction: '機体には人を避ける仕組みはない（あっても万能ではない）。できるのは、操縦者と補助者が止めること。',
+    motion: 'person', parts: ['led', 'buzzer', 'prop'],
+    partNotes: { led: '灯火で「動いている機体」だと知らせる', buzzer: '音で注意を引く', prop: '回っている間は触れてはいけない部分' },
+    can: ['灯火と音で「動いている」ことを知らせる', '操縦者の指示ですぐ離れる・降りる'],
+    human: ['補助者が近づく人を止める', '離着陸場所にロープや目印を置く', '人が来たら機体を離す、または降ろして止める', '回っているプロペラに近づかない'],
+    caveat: '人の上や近くを飛ばす場合は、機体の性能ではなく運用（補助者・区画・手順）で守る。' },
+];
+```
+
+### 変更ファイルと手順
+1. `data.js`: `WHATIF_STAGES`, `WHATIF` 追加。
+2. 新規 `src/whatif.js`（SOURCES に `theater.js` の後、`scale.js`/`codex.js` と同列）:
+   - `const whatif = { active:false, def:null, phase:0, t:0, litIdx:-1, person:null, saved:{air:false, wind:null} }`
+   - `startWhatif(id)`, `stopWhatif(silent)`, `whatifNext()`, `stepWhatif(dtSim, dtReal)`（`phase` 1 の motion と 2 の点灯進行）, `whatifStageIndex()`, `renderWhatifNote()`。
+   - `stopTheater(true)` を最初に呼び、⑤と同時に動かない。`stopWhatif` でも `stopTheater` 側の `theater.active` を触らない。
+   - `motion` は `WHATIF_MOTION = { rth(t, dt){...}, landSlow, driftHold, wind, person }` の関数表。戻り値 `true` で反応終了→次段階へ自動遷移。
+3. `ui.js`: `#whatifCards` の生成 `buildWhatifCards()`、クリックで `startWhatifUI(id)`（`startTheaterUI` と同じ副作用: `setFlight(null)`, `clearQuestion()`, `select(null)`, `setSticks(false)`, `setExplode(0)`, `setMode('normal')`, `body.theater` クラス, inert）。`onWhatifChanged()` が `#thStages` を `WHATIF_STAGES` で描き直し、`#thSlow` を隠す。`setTab()` の先頭で `if (whatif.active && tab !== 'theater') stopWhatifUI()`。`thNext`/`thQuit` のハンドラは `theater.active ? … : whatif.active ? … : …` に分岐。
+4. `index.html`: もしも行に `<div class="dock-group grow"><label>もしも、外でこうなったら</label><div class="cards" id="whatifCards"></div></div>` を追加（行を `flex-wrap: wrap` にする。スマホは2行の横スクロール）。
+5. `style.css`: `.two-col`（2欄、≤760px では縦積み）、`.caveat`（`--warn` 色の細字、先頭に ⚠）、`.parts-seq li.lit`。
+6. `app.js`: `tick` で `if (whatif.active) stepWhatif(dtSim, dt);` を `stepTheater` の隣に。boot で `initWhatif()`（`buildWhatifCards`）。
+7. `physics.js`: `updateAirflow` は `body.v` から風を作っているので、`wind` motion 中だけ `air.mat.uniforms.uWind` を上書きする分岐を `airflow.js` に足す（`air.windOverride` が非 null ならそれを使う）。
+
+### 受け入れ基準
+- 5 場面すべてが `状況 → 機体の反応 → 働く部品 → できること・やること` を通り、最後のカードに 2 欄と caveat が出る。
+- 姿勢の最大値が 8° 以内（`Math.hypot(body.tx, body.tz) ≤ 0.14 rad`）、移動が 0.25 m 以内。
+- 「働く部品」で部品が 1.2 秒ごとに順に点灯し、カードの番号付きリストが同期して増える。
+- `signal` で機体が回頭して 0.2 m 進み着陸、`battery` で着陸、`gps` で 6cm 流れて止まる、`wind` で風上へ傾き気流が斜めに流れる、`person` で人型が近づき LED が点滅。
+- 終了後 `body.mult` が 1、`S.air` と `uWind` が元に戻る、人型・点灯が消える。⑤のシアターと同時には動かない。
+
+### 検証スクリプト
+```js
+const d = window.__d; d.step(1, 60); const w = window.__whatif;
+document.querySelector('#tabs [data-tab=mishap]').click(); d.step(0.2, 60);
+for (const id of ['signal', 'battery', 'gps', 'wind', 'person']) {
+  document.querySelector(`#whatifCards button[data-w=${id}]`).click(); d.step(0.5, 60);
+  console.assert(w.active && w.phase === 0, id + ' start');
+  document.getElementById('thNext').click(); let maxTilt = 0, maxMove = 0;
+  for (let i = 0; i < 120 && w.phase < 3; i++) { d.step(0.1, 60); maxTilt = Math.max(maxTilt, Math.hypot(d.body.tx, d.body.tz)); maxMove = Math.max(maxMove, Math.hypot(d.body.px, d.body.pz)); }
+  console.assert(w.phase === 3, id + ' reached final', w.phase); console.assert(maxTilt <= 0.14 && maxMove <= 0.26, id + ' small motion', maxTilt, maxMove);
+  console.assert(document.querySelector('#noteCard .two-col') && document.querySelector('#noteCard .caveat'), id + ' final card');
+  console.assert(document.querySelectorAll('#noteCard .parts-seq li').length === WHATIF.find(x => x.id === id).parts.length, id + ' parts list');
+  document.getElementById('thQuit').click(); d.step(0.5, 60);
+  console.assert(!w.active && d.body.mult.every(m => Math.abs(m - 1) < 0.02) && !d.S.air, id + ' cleanup');
+}
+'⑩ OK';
+```
+（`window.__whatif = whatif` を公開する。）
+
+### やらないこと
+- 実際の RTH 経路計画、障害物回避の再現、機種別の設定画面。数値の断定（「10秒で戻る」等）。
+
+---
+
+## ⑧ 生きている機体と、みんなの土台
+
+### 目的
+展示の鉄則「動いていないものは見られない」。大きな字・やさしい日本語・読み上げは「配慮」ではなく、教室の後ろの席・投影・外国の受講者を同じ体験に乗せる土台。
+
+### 決定事項（A: 生きている機体）
+- `S.alive`（既定 true、`store('alive')` で永続、設定ポップオーバーに「機体を浮かせておく」トグル）。
+- **生きている条件**（毎フレーム評価 `aliveWanted()`）: `S.alive && S.tab === 'see' && !S.selected && S.explode < 0.02 && S.mode === 'normal' && !S.question && !theater.active && !whatif.active && !S.lesson && !S.scale && !S.use && !document.hidden`。
+- 条件が真になって **0.8 秒** 続いたら `setPower(0.5, true)` + `setBodyMode('free')`（トーストは出さない）。偽になったら **即** `setPower(0, true)`（着陸は既存の idle 遷移に任せる。`stepIdle` が 0.25 秒程度で降ろす）。
+- **ラベル**: 生きている間もラベルを出す。`updateLabels()` の `live` 判定を `const live = body.mode !== 'idle' && !(S.alive && body.mode === 'free' && !body.hold && !body.stick.active)` に変える（フリック中・スティック中は今まで通り消える）。ラベルは機体に追従するので位置更新は既存のまま。
+- **ポインタの方を向く**: `stepFree` の末尾（physics.js）で `if (S.alive && body.mode === 'free' && !body.hold && !st.active && !ti.active && body.lookYaw != null) body.yaw = dl(body.yaw, body.lookYaw, dt, 2)`。`body.lookYaw` は ui.js の `pointermove`（マウスのみ、`e.pointerType === 'mouse'`）で計算: `screenToDronePlane` のワールド点 `w` から `ang = atan2(w.x − body.px, −(w.z − body.pz))`（機首 −z 基準）、**±4° にクランプ**（`clamp(ang, −0.07, 0.07)`）、ポインタが機体から 0.6 m 以上離れているときは 0 へ。ポインタがキャンバス外に出たら 0。**傾けない**（yaw のみ）。`reduceMotion` なら 0 固定。
+- **10 秒放置で回る**: 既存の `autoRotate` は `body.mode === 'idle'` 条件なので、`alive` 中も回るように条件を `(body.mode === 'idle' || (S.alive && body.mode === 'free'))` に緩める。触れば止まる（既存の `controls 'start'` で止まる）。
+- **タブ「とばす」との関係**: とばすタブでは既存の挙動（ボタンで回す）。みるタブに戻ると 0.8 秒後にまた浮く。**はじめて／くわしく** 共通。
+- **性能**: alive 中は毎フレーム影を更新するため負荷が上がる。`applyQuality` レベル 0〜1 では `S.alive` を強制 false（設定トグルは無効表示にし、注記「軽量画質では止まっています」）。
+
+### 決定事項（B: 大きく読む）
+- `S.big`（トグル、設定ポップと `#viewCol` の末尾に `大` ボタン `#bigBtn`。永続）。
+- オン: `document.documentElement.style.setProperty('--fs', '1.18')`（既存の文字サイズ「大」と同じ）、`S.labels = false`（3D ラベルを消す）、画面下・ドックの上に **帯 `#bigBand`**（`.glass`、高さ 64px、中央揃え、`font-size: 28px; font-weight: 700; letter-spacing: .02em`）を出し、**今見ている部品名を1つだけ** 表示: 優先順 = 選択中 > ホバー中 > （何もなければ）空で帯は隠す。名前は `partName(p)`（言語対応、下記）。帯の右端に 🔊（`#bigSpeak`）。
+- オフ: 元に戻す（ラベルは `S.labelsTouched` を尊重）。
+- スマホ（≤760px）: 帯は `#noteCard` の上、`font-size: 22px`。
+
+### 決定事項（C: 言語）
+- `S.lang ∈ 'ja' | 'easy' | 'en'`（既定 `ja`、`store('lang')`）。設定ポップの先頭に `言語` セグメント（`日本語 / やさしい日本語 / English`）。トップバーには置かない（幅が無い）。
+- 対象範囲（**段階1、本パッケージの範囲**）: ①タブ名・主要ボタン・視点列の文字、②`SIMPLE` の 8 部品の名前と役割・たとえ、③ `QUESTIONS` の質問文（12）、④ `#noteCard` の見出し語（「まわる向き」「凡例」等）。**40 部品の解説・仕様・点検・MISHAPS・WHATIF・LESSON は日本語のまま**（英語で表示するときは日本語本文の上に `— 日本語のみ / Japanese only —` の小さな注記）。
+- 実装: `data.js` に `I18N` を追加。`t(key)` = `I18N[S.lang][key] ?? I18N.ja[key] ?? key`。`partName(p)` = `S.depth==='simple' ? (I18N[S.lang].parts[key]?.name ?? SIMPLE_NAME[key] ?? PARTS[key].name) : (S.lang==='en' ? PARTS[key].en : PARTS[key].name)`。`partRole(key)` は SIMPLE の役割用。`applyLang()` が `[data-i18n]` 属性を持つ DOM の `textContent` を差し替え、`buildList/buildLabels/buildAsk/renderDetail` を再実行。
+- **やさしい日本語** の書き方: 1文を短く、漢字にはひらがなを併記しない（ルビは実装しない）、外来語はそのまま、数字は算用数字。**English** は平易な語彙。以下を確定文とする（8 部品・タブ・ボタン・12 質問）。
+
+```js
+const I18N = {
+  ja: { tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを回す', stop: '■ 止める', views: { iso: '斜', front: '前', top: '上', side: '横', inside: '内', labels: '名' }, big: '大きく', speak: '読み上げ', parts: {} , questions: {} },
+  easy: { tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを 回す', stop: '■ とめる', views: { iso: 'ななめ', front: 'まえ', top: 'うえ', side: 'よこ', inside: 'なか', labels: 'なまえ' }, big: 'おおきく', speak: 'よみあげ',
+    parts: {
+      prop: { name: 'プロペラ', role: 'まわって、空気を 下に おします。それで きたいが うきます。', analogy: 'せんぷうきの はねを 下に むけて、じぶんが うくような もの' },
+      motor: { name: 'モーター', role: 'プロペラを まわす 力の もとです。1分に 何千回も まわります。', analogy: 'おもちゃの モーターを、もっと つよく しずかに したもの' },
+      arm: { name: 'アーム（うで）', role: 'モーターを、きたいの まん中から おなじ きょりに ささえる ぼうです。', analogy: 'てんびんの うで。左右が おなじ 長さだから つりあう' },
+      frameTop: { name: 'フレーム（ほね）', role: 'きたいの ほねぐみ。ぜんぶの ぶひんは ここに つきます。', analogy: '人の せぼねと ろっこつ' },
+      battery: { name: 'バッテリー（でんち）', role: 'ぜんぶの 電気の もと。きたいで いちばん おもくて、いちばん 高い ぶひんです。', analogy: 'スマホの でんちを 30こ あつめた くらい' },
+      fc: { name: 'あたま（FC）', role: 'きたいの あたま。かたむきを 1秒に 何千回も はかって、4つの モーターの はやさを きめます。', analogy: 'じてんしゃに のるときの「からだの バランス」。たおれそうに なると かってに なおす' },
+      landingGear: { name: 'あし', role: 'ちゃくりくの とき、きたいと カメラを 地面から まもる あしです。', analogy: 'ひこうきの タイヤ。でも ころがらずに、そりで すべる' },
+      camera: { name: 'カメラ', role: '上から しゃしんや ビデオを とります。ゆれない ように、ゴムの 上に のっています。', analogy: 'スマホの カメラを、ゆれない だいに のせたもの' },
+    },
+    questions: { lift: 'どうして うくの？', fwd: 'どうして 前に すすむの？', ccw: 'どうして 4まい ぜんぶ おなじ 向きに まわさないの？', time: '何分 とべるの？', rain: '雨の日は とべるの？', radio: '電波が きれたら どうなるの？', where: 'どうやって 自分の ばしょを 知るの？', weight: 'どのくらい おもいの？', crash: 'おちたら どこが こわれるの？', oneout: 'モーターが 1つ とまったら？', shake: 'カメラは どうして ゆれないの？', night: 'よるも とべるの？' } },
+  en: { tabs: { see: 'Look', fly: 'Fly', use: 'Use', mishap: 'What if' }, depth: { simple: 'Basic', full: 'Detail' }, ask: 'Ask', power: '▶ Spin props', stop: '■ Stop', views: { iso: 'Iso', front: 'Front', top: 'Top', side: 'Side', inside: 'Inside', labels: 'Names' }, big: 'Large', speak: 'Speak',
+    parts: {
+      prop: { name: 'Propeller', role: 'It spins and pushes air down. The push-back lifts the drone.', analogy: 'Like pointing a fan downward until you float.' },
+      motor: { name: 'Motor', role: 'It turns the propeller. Thousands of turns every minute.', analogy: 'A toy motor made stronger and quieter.' },
+      arm: { name: 'Arm', role: 'It holds each motor at the same distance from the center.', analogy: 'The arms of a balance scale: equal length, so it balances.' },
+      frameTop: { name: 'Frame', role: 'The skeleton. Every part is attached to it.', analogy: 'Your spine and ribs.' },
+      battery: { name: 'Battery', role: 'The source of all power. The heaviest and most expensive part.', analogy: 'About 30 phone batteries in one pack.' },
+      fc: { name: 'Brain (FC)', role: 'It measures tilt thousands of times a second and sets the speed of the 4 motors.', analogy: 'Your sense of balance on a bicycle: it corrects before you fall.' },
+      landingGear: { name: 'Legs', role: 'They protect the body and camera when landing.', analogy: 'Airplane wheels, but skids instead of rolling.' },
+      camera: { name: 'Camera', role: 'It takes photos and video from above. It sits on rubber so it does not shake.', analogy: 'A phone camera on a steady mount.' },
+    },
+    questions: { lift: 'Why does it float?', fwd: 'How does it move forward?', ccw: 'Why not spin all 4 the same way?', time: 'How many minutes can it fly?', rain: 'Can it fly in the rain?', radio: 'What if the radio link is lost?', where: 'How does it know where it is?', weight: 'How heavy is it?', crash: 'What breaks in a crash?', oneout: 'What if one motor stops?', shake: 'Why does the camera not shake?', night: 'Can it fly at night?' } },
+};
+```
+（`questions` のキーは `QUESTIONS[].id`（lift, fwd, ccw, time, rain, radio, where, weight, crash, oneout, shake, night）に合わせてある。`ja.parts`/`ja.questions` は空でよい＝既存データにフォールバック。）
+
+### 決定事項（D: 読み上げ）
+- `speak(text, lang)`: `window.speechSynthesis` が無ければボタン自体を隠す。`SpeechSynthesisUtterance` で `lang = { ja:'ja-JP', easy:'ja-JP', en:'en-US' }[S.lang]`、`rate = S.lang==='easy' ? 0.85 : 1.0`。新しい読み上げ前に `cancel()`。**iOS はユーザー操作の中でしか鳴らない** ので、ボタンの click ハンドラ内で直接呼ぶ（`setTimeout` を挟まない）。
+- 読み上げる内容 = **部品名 + 役割 1 文**（`partName` + `partRole`。くわしく では `PARTS[key].role` の最初の1文＝「。」で切る）。
+- ボタン位置: `#detail` の見出し右（`#detailSpeak`）、`#bigBand` の右端、`#noteCard` の質問回答（`kind==='question'`）のアクション列。
+- 設定に「自動で読み上げる」トグル（既定オフ）。オンなら部品選択時に自動読み上げ（これはユーザー操作の延長なので iOS でも鳴る）。
+
+### 変更ファイルと手順
+1. `data.js`: `I18N` 追加。
+2. `physics.js`: `body.lookYaw = null` をフィールドに追加、`stepFree` 末尾に look 処理。`stepIdle` は変更なし。
+3. 新規 `src/live.js`（SOURCES）: `aliveWanted()`, `stepAlive(dtReal)`（0.8 秒のヒステリシス、`setPower` 呼び出し）, `setAlive(on)`, `setBig(on)`, `updateBigBand()`（ホバー/選択の変化時と `updateHover` から呼ぶ）, `t()`, `partName()`, `partRole()`, `applyLang()`, `setLang()`, `speak()`, `initLive()`。
+4. `ui.js`: `pointermove` で `body.lookYaw` を更新、`pointerleave` で null。`updateLabels()` の `live` 判定変更。`buildLabels()` の名前を `partName(p)` に。`renderDetail()` の見出しに `#detailSpeak`。設定ポップに言語セグメント・「機体を浮かせておく」・「自動で読み上げる」。`setTab()` などは変更不要（`aliveWanted` が条件で見る）。`data-i18n` 属性を `index.html` の対象要素に付ける。
+5. `app.js`: `tick` の `stepBody` 前に `stepAlive(dt)`；`autoRotate` 条件の緩和；boot で `initLive()`（`applyLang()` を `initUI()` の後に）。
+6. `engine.js`: `applyQuality()` の末尾で `if (level <= 1 && S.alive) { S.aliveForcedOff = true }`（`aliveWanted` が見る）。
+7. `index.html`/`style.css`: `#bigBand`, `#bigBtn`, `#langSeg`, `#detailSpeak`, `[data-i18n]`。
+
+### 受け入れ基準
+- 起動 2 秒後、みるタブで機体が `py ≈ 0.06` でホバーし、ラベルが機体に付いて出ている。部品を選ぶと 0.5 秒以内に降下を始め、選択解除 0.8 秒後に再びホバー。
+- マウスを機体の右側に置くと `body.yaw` が −4°〜+4° の範囲で変わり、離すと 0 へ戻る。
+- 10 秒放置で自動回転が始まり、ドラッグで止まる。
+- 「大きく」で帯が出て、ホバーした部品名が 28px で表示され、3D ラベルが消える。オフで戻る。
+- 言語を English にするとタブ・ボタン・8 部品名・12 質問が英語になり、40 部品の解説には「Japanese only」注記が付く。やさしい日本語では 8 部品の役割が分かち書きになる。リロード後も言語が保持される。
+- 🔊 で読み上げが始まり、別の部品を押すと前の読み上げが止まる（`speechSynthesis.speaking` で確認）。
+- 画質 0〜1 では浮かない。`prefers-reduced-motion` では look が 0。
+
+### 検証スクリプト
+```js
+const d = window.__d; d.step(0.5, 60); await new Promise(r => setTimeout(r, 900)); d.step(2, 60);
+console.assert(d.body.mode === 'free' && Math.abs(d.body.py - 0.06) < 0.01, 'alive hover', d.body.mode, d.body.py);
+console.assert([...document.querySelectorAll('#labels .lbl')].some(l => getComputedStyle(l).display !== 'none'), 'labels while alive');
+d.body.lookYaw = 0.07; d.step(2, 60); console.assert(d.body.yaw > 0.05 && d.body.yaw <= 0.071, 'look yaw', d.body.yaw); d.body.lookYaw = 0; d.step(2, 60); console.assert(Math.abs(d.body.yaw) < 0.01, 'look back');
+document.querySelector('#partList .row').click(); d.step(0.6, 60); console.assert(d.S.power === 0, 'lands on select');
+document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await new Promise(r => setTimeout(r, 900)); d.step(1.5, 60); console.assert(d.body.mode === 'free', 'alive again');
+document.getElementById('bigBtn').click(); d.step(0.2, 60); d.S.hovered = d.D.parts.find(p => p.key === 'battery'); updateBigBand(); console.assert(!document.getElementById('bigBand').hidden && document.getElementById('bigBand').textContent.includes('バッテリー'), 'big band');
+document.getElementById('bigBtn').click();
+document.querySelector('#langSeg [data-lang=en]').click(); d.step(0.2, 60);
+console.assert(document.querySelector('#tabs [data-tab=fly] span').textContent === 'Fly', 'tab en'); console.assert([...document.querySelectorAll('#labels .lbl')].some(l => l.textContent === 'Battery'), 'label en');
+document.querySelector('#langSeg [data-lang=easy]').click(); d.step(0.2, 60); console.assert(document.querySelector('#partList .row[data-key=fc] .nm').textContent.includes('あたま'), 'easy name');
+document.querySelector('#langSeg [data-lang=ja]').click();
+console.assert(!('speechSynthesis' in window) || typeof speak === 'function', 'speak exists');
+'⑧ OK';
+```
+
+### やらないこと
+- 40 部品の全文翻訳、ルビ、ピクトグラムのみモード、音声認識。傾けて向く（yaw のみ）。
+
+---
+
+## ⑨ 授業・説明会モード
+
+### 目的
+先生は「開いて 3 秒で授業になるもの」しか使わない。学びは画面ではなく **隣の人との会話** で起こるので、**答えを画面が出さない** 設計にする。前回提案の「プレゼンモード」「URL共有」はここに吸収。
+
+### 決定事項（UX）
+- 入口: 設定ポップの最上段に **「授業・説明会」** ボタン（`#lessonBtn`）。押すと `#lessonPop`（`.popover`）にコース 2 枚: `45分授業（中学・高校・初心者）` / `10分住民説明会`。URL `?lesson=class45` / `?lesson=town10` で直接開始（`&step=N` で途中から）。**授業モード中は URL を `history.replaceState` で同期**（`?lesson=class45&step=3`）。これが URL 共有。
+- 授業モード `S.lesson = { id, step, startedAt }`:
+  - 右パネル `#inspector` を **台本パネル `#lesson`** に差し替える（同じ幅・同じ位置、`aside.glass`。`#inspector` は `hidden`）。スマホでは同じくボトムシート（`#inspector` と同じ `.open` / grabber の仕組みを流用。**実装者の裁量**: 共通の `sheet` クラスに切り出すか、`#lesson` に同じ CSS をコピーするか）。
+  - パネル構成: 上 = コース名・`経過 12:30 / 45:00`（`startedAt` から実時間。開始前は `--:--`）・`◀ ▶`。中 = 段落リスト（現在の段落をハイライト、上下スクロール）。各段落 = **見出し・目安時間・講師の言葉（`say`）・問いかけ（`ask`）・想定回答（`expect`、折りたたみ `details`、既定閉）**。下 = `ふたりクイズ` `印刷` `終了` の 3 ボタン。
+  - 段落を選ぶ／▶ で進むと **その段落の `act` を実行**（下記）。`act` は `askQuestion`/`setFlight`/`startTheaterUI`/`startWhatifUI`/`setUse`/`setScale`/`setExplode`/`setMode`/`setView`/`select`/`setPower`/`setDepth` の組合せ。`act` の前に必ず `resetStage()`（`stopTheaterUI()`, `stopWhatifUI()`, `clearQuestion()`, `setFlight(null)`, `setUse(null)`, `setScale(false)`, `setExplode(0)`, `setMode('normal')`, `select(null)`, `setPower(0,true)`）。
+  - キーボード: `→`/`Space` 次、`←` 前、`Tab`/`Shift+Tab` = **部品めぐり**（下記）、`Q` = ふたりクイズ、`Esc` = 終了確認。スマホ: パネル上で左右スワイプ（既存の grabber 判定と同じ速度・距離条件）。
+  - 授業中は `S.alive` を止める（`aliveWanted` の条件に `!S.lesson`）。深さは台本の `depth` に従い、終了時に元へ戻す。
+- **部品めぐり**（Tab 順送り）: `LIST_ORDER` を **外→内** に並べた `TOUR_ORDER`（下記）を `Tab` で順に `select(p, true)` + `focusOn`。`Shift+Tab` で戻る。ラベルは選択中の 1 枚だけ表示。授業モード外でも `Tab` で使えるようにしてよい（既存のキーボード到達順と衝突するので **授業モード中のみ** が決定）。
+  `TOUR_ORDER = ['prop','propNut','propAdapter','motor','bell','magnet','winding','stator','shaft','motorBase','motorMount','arm','armClamp','frameTop','standoff','frameBottom','screws','esc','pdb','capacitor','xt60','battery','cells','balance','strap','batteryTray','wiring','fc','buzzer','gps','rx','vtx','telemetry','remoteId','led','regMark','damper','gimbal','camera','landingGear']`（40）。
+- **ふたりクイズ**（`quiz.js` ではなく `lesson.js` 内）: 開始でラベル全消し、`#noteCard` を「ここ、なんだと思う？」（`kind:'quiz'`）にし、出題部品を **1.2 秒周期の呼吸（k 0.3〜0.9、`ACCENT`）** で光らせ `focusOn`。母数は `S.depth==='simple' ? SIMPLE_KEYS : TOUR_ORDER`、直前 5 問と重複しない。カードのボタンは **`答えを見る`（押すと名前と役割を表示。正誤判定は無い）** と `つぎの問題` と `おわる` のみ。**得点・タイマー・正解音は作らない**。授業モード外からも `設定 > ふたりクイズ` で単独起動できる。
+- **印刷**: `印刷` ボタン → `#printSheet`（通常時 `hidden`。`@media print` で `body > *:not(#printSheet)` を `display:none`、`#printSheet` を表示）。内容:
+  1. 表紙行: `ドローンの構造 — ワークシート` / コース名 / 日付欄 `____年__月__日` / 名前欄。
+  2. **穴埋め図**: 現在の視点で **線画モード** を 1600×1200 で撮った画像（`setMode('wire')` → `renderOnce()` → `toDataURL` → 元のモードへ）。その上に **番号付きの引き出し線** を SVG で重ねる（`labelEls` の位置と同じ計算を `1600×1200` にスケールして描く。番号は `SIMPLE_KEYS` の順、はじめてで 8、くわしくで 16 の `label` 付き部品）。下に `① ______ ② ______ …` の記入欄。
+  3. **ふりかえりカード**（3 問、コースごとに固定文。下記 `LESSONS[].review`）。
+  4. 印刷 CSS: A4 縦、余白 12mm、図は幅 100%、フォント 11pt、色は黒のみ（線画画像はそのまま）。
+  `window.print()` を呼ぶ。印刷後 `#printSheet` は残す（再印刷用）が `hidden`。
+- **台本の文言ルール**: 教材で示せる範囲に留める。法令は「原則」「〜が必要とされています」。正誤を画面が判定しない。
+
+### データ（data.js に追加。**確定文**）
+
+```js
+const LESSONS = [
+  { id: 'class45', name: '45分授業', audience: '中学・高校・初心者', total: 45, depth: 'simple',
+    review: ['ドローンが浮く理由を、ひとことで書いてみよう。', '隣どうしのプロペラが逆に回るのはなぜ？', '飛ばす前に、自分ならどこを点検する？（2つ）'],
+    steps: [
+      { t: 0, title: '眺める', min: 5, view: 'iso', act: { alive: true },
+        say: '今日はドローンの中身を見ます。まず 1 分、何も説明せずに眺めてください。気づいたことを隣の人と 1 つずつ言い合ってください。',
+        ask: '「これは何のためにあると思う？」と指をさして聞いてみよう。', expect: 'プロペラ・電池・カメラなど。答えが違っていてもここでは正さない。' },
+      { t: 5, title: '4枚のプロペラ', min: 6, view: 'top', act: { question: 'ccw' },
+        say: '上から見ます。プロペラは 4 枚。となり同士は逆向きに回っています。機体に「なぜ？」を演じてもらいます。',
+        ask: '全部同じ向きに回したら、機体はどうなる？', expect: '機体そのものが逆向きに回ってしまう（反トルク）。だから 2 枚ずつ逆にして打ち消す。' },
+      { t: 11, title: 'なぜ浮くのか', min: 6, view: 'front', act: { power: 0.5, air: true, flight: 'hover' },
+        say: 'プロペラが空気を下に押しています。青い流れが空気です。押した分だけ、機体は上に押し返されます。',
+        ask: '4 枚の押す力の合計が、機体の重さより小さかったら？', expect: '浮かない。ちょうど同じで空中に止まる。大きいと上がる。' },
+      { t: 17, title: '頭脳が直す', min: 7, view: 'iso', act: { power: 0.5, sticks: false, coach: '機体を指ではじいてみよう' },
+        say: '機体を指ではじいてください。傾いた分を、頭脳（FC）がモーターの速さを変えて直します。人間には速すぎてできません。',
+        ask: 'どのモーターが速くなった？ %の表示を見て。', expect: '押されて下がった側のモーターが速くなる（110% など）。' },
+      { t: 24, title: '中を開ける', min: 7, view: 'iso', act: { explode: 1 },
+        say: 'ここからは分解します。上から順に、プロペラ・モーター・アーム・フレーム・基板・電池。',
+        ask: '一番重い部品はどれだと思う？', expect: '電池。全体の 4 分の 1 くらい。だから飛べる時間が短い。（⑥があれば重さモードで見せる）' },
+      { t: 31, title: 'やってしまった', min: 7, view: 'iso', act: { theater: 'propReverse' },
+        say: 'プロペラを 1 枚、逆向き用に付けてしまいました。離陸するとどうなるか、見てください。',
+        ask: 'どの点検をしていれば防げた？', expect: 'プロペラの向き（CW/CCW）と刻印が上を向いているか。飛行前点検で見つかる。' },
+      { t: 38, title: 'ふたりクイズとふりかえり', min: 7, view: 'iso', act: { quiz: true },
+        say: '最後に隣の人とクイズ。画面は答えを出しません。光った部品の名前と役割を、相手に説明してください。',
+        ask: '（ふりかえりカードの 3 問）', expect: 'カードは印刷して配る。答えは書かせて回収しない（自分のメモにする）。' },
+    ] },
+  { id: 'town10', name: '10分住民説明会', audience: '地域の方・保護者', total: 10, depth: 'simple',
+    review: ['ドローンが「落ちにくい」ための仕組みを 1 つ挙げてください。', '飛行中に電波が切れたとき、機体は何をするように設定されていますか。', '私たちが安全のためにお願いしたいことは何でしたか。'],
+    steps: [
+      { t: 0, title: 'これが飛ぶ機体です', min: 2, view: 'iso', act: { alive: true },
+        say: 'この地域で飛ばす機体と同じ型です。重さは約 2.4 kg、500ml のペットボトル 5 本分です。',
+        ask: '（問いかけなし。眺めてもらう）', expect: '' },
+      { t: 2, title: 'なぜ落ちにくいのか', min: 3, view: 'iso', act: { power: 0.5, coach: '機体を指ではじいてみよう' },
+        say: '傾いても、頭脳がモーターの速さを変えて自分で直します。指ではじいても戻ります。',
+        ask: '「風が吹いたら？」と聞かれたら、次の場面で答えます。', expect: '' },
+      { t: 5, title: 'もしも電波が切れたら', min: 3, view: 'iso', act: { whatif: 'signal' },
+        say: '操縦の電波が切れると、機体は自分で気づいて、あらかじめ決めた動き（離陸地点へ戻る）をします。これは設定と点検が前提で、万能ではありません。',
+        ask: '私たちがお願いしたいことは、飛行中に機体へ近づかないこと、補助者の指示に従うことです。', expect: '' },
+      { t: 8, title: '飛ばす前に必ずすること', min: 2, view: 'iso', act: { select: 'prop' },
+        say: 'プロペラの向き・電池・ネジ・脚を毎回点検します。壊れる前に見つけるのが仕事です。',
+        ask: '質問があればどうぞ。この機体の画面は、どなたでも同じ URL で開けます。', expect: '' },
+    ] },
+];
+```
+`act` のキー: `alive`（⑧の起動時ホバーを使う。無ければ `power:0.5`）, `question`（`askQuestion(id)`）, `power`, `air`, `flight`, `sticks`, `coach`（`showCoach(text)`）, `explode`, `theater`（`startTheaterUI(id)`）, `whatif`（`startWhatifUI(id)`）, `use`, `scale`（⑥）, `select`（`key`）, `quiz`。未実装の機能を指す `act` は **無視して次に進む**（例外にしない）。
+
+### 変更ファイルと手順
+1. `data.js`: `LESSONS`, `TOUR_ORDER`。
+2. 新規 `src/lesson.js`（SOURCES、`live.js` の後）: `startLesson(id, step)`, `stopLesson()`, `gotoStep(n)`, `runAct(act)`, `resetStage()`, `renderLessonPanel()`, `tickLessonClock()`（1 秒ごとに DOM）, `tourNext(dir)`, `quizStart()`, `quizNext()`, `quizReveal()`, `quizStop()`, `stepQuiz(dtReal)`（呼吸）, `buildPrintSheet()`, `printSheet()`, `initLesson()`（URL パラメータ処理）。
+3. `ui.js`: 設定ポップに `#lessonBtn`、`#lessonPop`。キーボードハンドラの先頭で `if (S.lesson && lessonKey(e)) return;`。`select()` は変更なし。`updateLabels()` に `S.labelOnly`（⑩で導入）を尊重。
+4. `index.html`: `#lesson`（aside）, `#lessonPop`, `#printSheet`。
+5. `style.css`: `#lesson`（`#inspector` と同じ配置）, `.step`, `.step.on`, `.step details`, `#lessonClock`（`font-variant-numeric: tabular-nums`）, `@media print`。
+6. `app.js`: `tick` の末尾に `if (S.lesson) tickLessonClock(dt); if (quiz.active) stepQuiz(dt);`、boot で `initLesson()`（`initUI` の後）。
+7. `build.py`: 変更なし（SOURCES に追加するだけ）。README に「授業モード: `?lesson=class45`」を 1 行追記。
+
+### 受け入れ基準
+- `?lesson=class45` で開くと台本パネルが右（スマホは下）に出て、段落 1 の `act` が実行され、URL が `&step=0` を含む。
+- ▶ で段落 2 に進むと視点が上面になり、質問「ccw」が再生される。段落 6 でシアター `propReverse` が始まり、段落 7 でクイズが始まる。各遷移で前の状態（気流・シアター・質問）が残らない。
+- 経過時間が実時間で進み、`45:00` を超えても止まらず赤字にならない（叱らない）。
+- `Tab` で部品めぐりが `TOUR_ORDER` の順に進み、`Shift+Tab` で戻る。
+- ふたりクイズで画面に正誤・得点が出ない。「答えを見る」で名前と役割だけ出る。
+- 印刷プレビュー（`window.print` の代わりに `document.body.classList.add('print-preview')` で確認できる開発用クラスを用意）で、線画の穴埋め図（番号 8 個、はじめて時）とふりかえり 3 問が A4 1〜2 枚に収まる。
+- 終了で `#inspector` が戻り、深さ・言語・alive が元に戻る。
+
+### 検証スクリプト
+```js
+// http://localhost:8941/public/index.html?v=N&lesson=class45 で開いてから
+const d = window.__d; d.step(1, 60); const L = window.__lesson;
+console.assert(d.S.lesson && d.S.lesson.id === 'class45' && !document.getElementById('lesson').hidden, 'lesson open');
+console.assert(location.search.includes('lesson=class45'), 'url');
+document.getElementById('lessonNext').click(); d.step(1.5, 60); console.assert(d.S.lesson.step === 1 && d.S.question && d.S.question.id === 'ccw', 'step1 question');
+for (let i = 0; i < 4; i++) { document.getElementById('lessonNext').click(); d.step(1.0, 60); }
+console.assert(d.S.lesson.step === 5 && d.theater.active, 'step5 theater'); console.assert(!d.S.question && !d.S.air, 'previous state cleared');
+document.getElementById('lessonNext').click(); d.step(1.0, 60); console.assert(window.__quiz.active && !d.theater.active, 'quiz started');
+console.assert(!document.querySelector('#noteCard').textContent.match(/正解|点/), 'no scoring');
+document.querySelector('#noteActions button').click(); d.step(0.2, 60); // 答えを見る
+console.assert(document.querySelector('#noteCard').textContent.length > 10, 'reveal');
+L.quizStop(); L.gotoStep(0); d.step(0.5, 60);
+document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true })); d.step(0.5, 60); console.assert(d.S.selected && d.S.selected.key === 'prop', 'tour first');
+document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true })); d.step(0.5, 60); console.assert(d.S.selected.key === 'propNut', 'tour second');
+await L.buildPrintSheet(); console.assert(document.querySelectorAll('#printSheet .fill-num').length === 8, 'fill numbers');
+L.stopLesson(); d.step(0.5, 60); console.assert(!d.S.lesson && !document.getElementById('inspector').hidden, 'closed');
+'⑨ OK';
+```
+（`window.__lesson`, `window.__quiz` を公開する。）
+
+### やらないこと
+- 採点、タイマーの警告音、生徒端末との同期、台本の編集 UI（台本は `data.js` を直す）。
+
+---
+
+## 11. 横断の注意（レビュー観点）
+
+1. **排他**: 同時に 1 つしか動かないもの = 質問 / 飛行デモ / 用途 / 重さモード / シアター / もしも外 / クイズ / 授業の act。新しい入口を作ったら、既存の `setTab`, `startTheaterUI`, `askQuestion`, `setUse`, `setFlight` の先頭にある「他を止める」行に **自分を止める行を足す**（双方向）。`docs/design/2026-09-11-ui-spec.md` の「排他ルール」表を更新する。
+2. **カードは 1 枚**: `renderNote` の `kind` を新設し、閉じたときの `onClose` で自分の状態を戻す。
+3. **ラベルの扱い**: `S.labels`（ユーザー設定）を **上書きしない**。一時的に消す・絞るときは `S.labelOnly`（Set、null で無効）と `S.labelsSuppressed`（bool）を使い、終了時に null/false に戻す。
+4. **draw call**: `renderer.info.render.calls` をオン／オフで比べる。新規メッシュは `visible=false` で待機。
+5. **スマホ**: 文脈行が長くなるものは `mask-image` の横スクロールに乗せる。新しいパネル（`#massBar`, `#bigBand`, `#lesson`）は `--dock-h` を使って逃がす。
+6. **文言**: 本書の確定文をそのまま使う。追加が必要なら「やさしい／断定しない／恐怖をあおらない」を守る。
+7. **性能の劣化**: alive（⑧）は影更新が毎フレームになる。画質 0〜1 では無効。p90 が 16.6ms×1.3 を超えたら自動降格するので、降格後に alive が止まることを確認。
+8. **テスト**: 各検証スクリプトを `docs/tests/<package>.js` に保存し、README の「検証」節から参照する。
+
+## 12. 実装者への報告テンプレート（各パッケージ終了時）
+```
+## ⑥ 重さ・お金・重心 — 完了報告
+- コミット: <hash> / 本番: <shasum 12桁が一致>
+- 追加/変更ファイル: …
+- 受け入れ基準: 1〜5 すべて通過（検証スクリプト '⑥ OK'）
+- 本書からの逸脱: （無ければ「なし」。あれば理由）
+- 見つかった既存バグ/懸念: …
+- スクリーンショット: docs/review/p6-*.jpg（gitignore、必要なら別途共有）
+```
+
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script>
+(function(){
+  const src = document.getElementById('src').textContent;
+  marked.setOptions({ gfm:true, breaks:false, headerIds:false, mangle:false });
+  const html = marked.parse(src);
+  const doc = document.getElementById('doc'); doc.innerHTML = html;
+  // tables → scroll containers
+  doc.querySelectorAll('table').forEach(t => { const w = document.createElement('div'); w.className = 'tbl'; t.parentNode.insertBefore(w, t); w.appendChild(t); });
+  // headings → ids + toc
+  const toc = document.getElementById('toc'); const heads = [...doc.querySelectorAll('h2, h3')]; const used = new Set();
+  heads.forEach((h, i) => {
+    let id = h.textContent.trim().replace(/\s+/g, '-').replace(/["#%&'()*+,./:;<=>?@\[\\\]^`{|}~]/g, '').slice(0, 40) || ('s' + i);
+    while (used.has(id)) id += '-'; used.add(id); h.id = id;
+    if (h.tagName === 'H3' && !/^(目的|決定事項|データ|変更ファイル|受け入れ基準|検証スクリプト|やらないこと)/.test(h.textContent)) return;
+    if (h.tagName === 'H3' && !/^(受け入れ基準|検証スクリプト)/.test(h.textContent)) return;
+    const a = document.createElement('a'); a.href = '#' + id; a.textContent = h.textContent; if (h.tagName === 'H3') a.className = 'l3'; toc.appendChild(a);
+  });
+  const links = [...toc.querySelectorAll('a')];
+  const io = new IntersectionObserver(es => { es.forEach(e => { if (e.isIntersecting) { links.forEach(l => l.classList.toggle('on', l.getAttribute('href') === '#' + e.target.id)); } }); }, { rootMargin: '-10% 0px -80% 0px' });
+  heads.forEach(h => io.observe(h));
+})();
+</script>
