@@ -71,7 +71,8 @@ function applyLang() {
   buildList(); buildLabels(); buildAsk(); renderDetail(); updateBigBand();
   if (S.question && $('#noteCard').dataset.kind === 'question') $('#noteTitle').textContent = qText(S.question);
 }
-function setLang(l) { if (!I18N[l]) l = 'ja'; S.lang = l; store.set('lang', l); if (hasSpeech) speechSynthesis.cancel(); applyLang(); }
+function setLang(l) { if (!I18N[l]) l = 'ja'; const was = S.lang; S.lang = l; store.set('lang', l); if (hasSpeech) speechSynthesis.cancel(); applyLang();
+  if (l === 'en' && was !== 'en') showToast('English: 部品の解説文は日本語のままです（Japanese only）', 3200); }
 
 // ---------- B. 大きく読む ----------
 function setBig(on) {
@@ -80,10 +81,10 @@ function setBig(on) {
   const bb = $('#bigBtn'); if (bb) { bb.classList.toggle('on', on); bb.setAttribute('aria-pressed', String(on)); }
   if (on) {
     alive.prevLabels = S.labels; alive.prevFs = document.documentElement.style.getPropertyValue('--fs') || '';
-    document.documentElement.style.setProperty('--fs', '1.18'); S.labels = false;
+    document.documentElement.style.setProperty('--fs', '1.18'); S.labels = false; segSet($('#fontSeg'), 'f', '1.18');
     for (const x of $$('.tgl[data-t=labels]')) { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); }
   } else {
-    document.documentElement.style.setProperty('--fs', alive.prevFs || (($('#fontSeg .on') || {}).dataset || {}).f || '1');
+    const fs = alive.prevFs || '1'; document.documentElement.style.setProperty('--fs', fs); segSet($('#fontSeg'), 'f', fs === '1.18' ? '1.18' : '1');
     if (alive.prevLabels != null) { S.labels = alive.prevLabels; for (const x of $$('.tgl[data-t=labels]')) { x.classList.toggle('on', S.labels); x.setAttribute('aria-pressed', String(S.labels)); } }
   }
   document.body.classList.toggle('big', on);
@@ -92,7 +93,7 @@ function setBig(on) {
 function updateBigBand() {
   const band = $('#bigBand'); if (!band) return;
   const p = S.selected || S.hovered;
-  if (!alive.big || !p) { band.hidden = true; return; }
+  if (!alive.big || !p || theater.active || whatif.active) { band.hidden = true; return; }
   $('#bigText').textContent = partName(p); band.hidden = false;
   $('#bigSpeak').hidden = !hasSpeech;
 }

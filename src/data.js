@@ -489,10 +489,10 @@ const PRICE = { frameTop: 6000, frameBottom: 8000, arm: 3200, armClamp: 900, mot
   motor: 4500, prop: 900, propNut: 150, propAdapter: 400, esc: 3000, fc: 9000, pdb: 3500, capacitor: 300, buzzer: 400,
   battery: 16000, xt60: 300, balance: 200, strap: 400, wiring: 2500, gps: 7000, rx: 6000, vtx: 5000, led: 800, damper: 250,
   gimbal: 40000, camera: 20000, batteryTray: 2500, remoteId: 12000, regMark: 300, telemetry: 8000, landingGear: 2000 };
-const SCALE_TEXT = { bottle: '500mlペットボトル', bottleG: 500, person: '身長170cmの人が両手を広げた幅の半分くらい（約85cm）',
+const SCALE_TEXT = { bottle: '500mlペットボトル', bottleG: 500, person: '幅は、大人が両手を広げた半分くらい（約85cm）',
   priceNote: '参考価格（2026年時点・国内通販の目安）。機種・時期で大きく変わります',
   overNote: 'モーターに余裕がありません。前に進む・風に逆らう余力が減ります',
-  energyNote: '電池1本 ＝ スマホ約8台分の電気。それを約20分で使い切る',
+  energyNote: '電池1本 ≒ スマホ約8台分の電気。飛べば約20分でなくなる',
   perMotor: (g) => `モーター1つが約 ${g} g（ペットボトル${(g / 500).toFixed(1)}本分）を持ち上げている` };
 const PAYLOADS = [
   { id: 'none', name: 'なし', g: 0, pos: [0, 0, 0] },
@@ -547,7 +547,7 @@ const TRIVIA = {
 // ===== もしもの5場面 (パッケージ⑩): 外の状況。機体ができることと人がやることを対で =====
 const WHATIF_STAGES = ['状況', '機体の反応', '働く部品', 'できること・やること'];
 const WHATIF = [
-  { id: 'signal', name: '電波が切れた', icon: '📡',
+  { id: 'signal', name: '電波が切れた', icon: '📡', short: '操縦の指示が届かない',
     intro: '送信機との電波が届かなくなった。操縦の指示が機体に届かない。',
     reaction: '機体は「指示が来ない」ことを自分で検知し、あらかじめ決めた動き（多くの機種では、離陸した場所へ帰って降りる）に切り替える。',
     motion: 'rth', parts: ['rx', 'fc', 'gps', 'motor'],
@@ -555,7 +555,7 @@ const WHATIF = [
     can: ['電波が切れたことを自分で検知する', '設定に従い、離陸地点へ戻る／その場で降りる', '電波が戻れば操縦を受け付ける'],
     human: ['飛ばす前にフェイルセーフの設定を確認する', '目視で機体を追い続ける', '周囲の人に「戻ってきます」と声をかける', '帰還経路に人や障害物がないか見る'],
     caveat: '帰還の動きは機種と設定で異なり、GPSが使えないと働かない。「設定と点検が前提」で、万能ではない。' },
-  { id: 'battery', name: '電池が少ない', icon: '🔋',
+  { id: 'battery', name: '電池が少ない', icon: '🔋', short: '残量が減ってきた',
     intro: '飛行中に電池の残りが減ってきた。',
     reaction: '機体は電圧を常に測っていて、決めた値を下回ると警告する。多くの機種では、さらに下がると自動で降下を始める。',
     motion: 'landSlow', parts: ['battery', 'pdb', 'fc', 'buzzer', 'telemetry'],
@@ -563,7 +563,7 @@ const WHATIF = [
     can: ['電圧を常に測って残量を推定する', '決めた値で警告を出す', 'さらに下がれば自動で降下・着陸する'],
     human: ['飛ばす前に満充電と電圧差を確認する', '警告が出たらすぐ戻す（粘らない）。目安は残量 30% で着陸', '着陸できる場所を常に把握しておく'],
     caveat: '寒い日にスマホが急に切れるのと同じで、寒い日や古い電池は残量表示より早く落ちる。自動降下は「安全な場所」を選んでくれるわけではない。' },
-  { id: 'gps', name: 'GPSを見失った', icon: '🛰️',
+  { id: 'gps', name: 'GPSを見失った', icon: '🛰️', short: '衛星が見えない場所で',
     intro: '建物の陰や橋の下で、衛星の電波が届かなくなった。',
     reaction: '位置は分からなくなるが、傾きは分かる。機体は水平を保ったまま、風に少しずつ流される。',
     motion: 'driftHold', parts: ['gps', 'fc', 'motor'],
@@ -571,7 +571,7 @@ const WHATIF = [
     can: ['姿勢（傾き）を保ち続ける', '位置が保てないことを画面に知らせる', 'GPSが戻れば位置の保持に復帰する'],
     human: ['流される方向を見て、手で位置を直す', '建物・橋の近くでは最初から手動の練習をしておく', '無理をせず、開けた場所へ戻して降ろす'],
     caveat: 'GPSなしでも飛べるかは機種と設定次第。屋内や高い建物の間では最初から「位置保持は効かない」前提で計画する。' },
-  { id: 'wind', name: '風が強い', icon: '🌬️',
+  { id: 'wind', name: '風が強い', icon: '🌬️', short: '急に風が強くなった',
     intro: '急に風が強くなった。',
     reaction: '機体は流されないように風上へ傾いて踏ん張る。傾きを作る一瞬は風下側を強く回し、傾いたままの間は4つ全部が少しずつ余分に働く。その分、電池の減りが早くなる。',
     motion: 'wind', parts: ['fc', 'motor', 'prop', 'battery'],
@@ -579,7 +579,7 @@ const WHATIF = [
     can: ['ある程度の風なら位置を保つ', '傾いて踏ん張る（合計の力を増やす）'],
     human: ['飛ばす前に風速を確認し、機体の限界の6〜7割で判断する', '風が強まったら風下に人がいない場所へ移す', '早めに降ろす。粘ると電池が先に尽きる'],
     caveat: '耐風性能は機種ごとに決まっていて、突風はその値を超えることがある。上空は地上より風が強い。' },
-  { id: 'person', name: '人が近づいた', icon: '🚶',
+  { id: 'person', name: '人が近づいた', icon: '🚶', short: '見物の人が歩いてくる',
     intro: '見物の人が機体のほうへ歩いてきた。',
     reaction: '機体には人を避ける仕組みはない（あっても万能ではない）。できるのは、操縦者と補助者が止めること。',
     motion: 'person', parts: ['led', 'buzzer', 'prop'],
@@ -591,8 +591,10 @@ const WHATIF = [
 
 // ===== 言語 (パッケージ⑧): やさしい日本語 / English。段階1 = タブ・主要ボタン・8部品・12質問 =====
 const I18N = {
-  ja: { tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを回す', stop: '■ 止める', views: { iso: '斜', front: '前', top: '上', side: '横', inside: '内', labels: '名' }, big: '大きく', speak: '読み上げ', parts: {} , questions: {} },
+  ja: { tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを回す', stop: '■ 止める', views: { iso: '斜', front: '前', top: '上', side: '横', inside: '内', labels: '名' }, big: '大', speak: '読み上げ',
+    ui: { parts: '部品一覧', script: '台本', focus: '注目', more: 'くわしく見る', explode: '分解', look: '見え方', normal: 'ふつう', xray: 'すけて見る', wire: '線だけ', cut: '切って見る' }, sec: { structure: '構造', trivia: '豆知識', role: '役割', analogy: 'たとえるなら' }, parts: {}, questions: {} },
   easy: { tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを 回す', stop: '■ とめる', views: { iso: 'ななめ', front: 'まえ', top: 'うえ', side: 'よこ', inside: 'なか', labels: 'なまえ' }, big: 'おおきく', speak: 'よみあげ',
+    ui: { parts: 'ぶひんの リスト', script: 'だいほん', focus: 'ちゅうもく', more: 'くわしく みる', explode: 'ばらばら', look: 'みえかた', normal: 'ふつう', xray: 'すけて みる', wire: 'せんだけ', cut: 'きって みる' }, sec: { structure: 'つくり', trivia: 'まめちしき', role: 'やくわり', analogy: 'たとえると' },
     parts: {
       prop:        { name: 'プロペラ',           role: 'まわって、空気を 下に おします。おした ぶんだけ、ドローンは 上に おされて うきます。', analogy: 'せんぷうきを 下に むけて、じぶんが ふわっと うくような もの' },
       motor:       { name: 'モーター',           role: 'プロペラを まわす 力の もとです。1分に 何千回も まわります。', analogy: 'おもちゃの モーターを、もっと つよく、もっと しずかに したもの' },
@@ -604,7 +606,8 @@ const I18N = {
       camera:      { name: 'カメラ',             role: '上から しゃしんや ビデオを とります。ゆれない ように、ゴムに ぶらさがって います。', analogy: 'スマホの カメラを、ゆれない だいに のせた もの' },
     },
     questions: { lift: 'どうして うくの？', fwd: 'どうして 前に すすむの？', ccw: 'どうして 4まい ぜんぶ おなじ むきに まわさないの？', time: '何分 とべるの？', rain: '雨の日は とべるの？', radio: 'でんぱが きれたら どうなるの？', where: 'どうやって じぶんの ばしょを 知るの？', weight: 'どのくらい おもいの？', crash: 'おちたら どこが こわれるの？', oneout: 'モーターが 1つ とまったら？', shake: 'カメラは どうして ゆれないの？', night: 'よるも とべるの？' } },
-  en: { tabs: { see: 'Look', fly: 'Fly', use: 'Use', mishap: 'What if' }, depth: { simple: 'Basic', full: 'Details' }, ask: 'Ask', power: '▶ Spin props', stop: '■ Stop', views: { iso: '3D', front: 'Front', top: 'Top', side: 'Side', inside: 'Inside', labels: 'Names' }, big: 'Big text', speak: 'Read aloud',
+  en: { tabs: { see: 'Look', fly: 'Fly', use: 'Use', mishap: 'What if' }, depth: { simple: 'Basic', full: 'Details' }, ask: 'Ask', power: '▶ Spin props', stop: '■ Stop', views: { iso: '3D', front: 'Front', top: 'Top', side: 'Side', inside: 'Inside', labels: 'Name' }, big: 'Big', speak: 'Read aloud',
+    ui: { parts: 'Parts', script: 'Script', focus: 'Focus', more: 'More details', explode: 'Explode', look: 'View', normal: 'Normal', xray: 'X-ray', wire: 'Lines', cut: 'Cut' }, sec: { structure: 'Structure (Japanese)', trivia: 'Fun fact (Japanese)', role: 'Role', analogy: 'Like…' },
     parts: {
       prop:        { name: 'Propeller', role: 'It spins and pushes air down. The air pushes back, and that lifts the drone.', analogy: 'Like pointing a fan at the floor until you float.' },
       motor:       { name: 'Motor',     role: 'It spins the propeller — thousands of turns every minute.', analogy: 'A toy motor, but stronger and quieter.' },

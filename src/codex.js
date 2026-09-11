@@ -27,7 +27,7 @@ function codexOnSelect(p) { codex.pending = p && PARTS[p.key] && !codex.seen.has
 function renderCodexCount(pulse) {
   const el = $('#codexCount'); if (!el) return;
   el.textContent = `${codex.seen.size}/${codex.total}`;
-  el.title = `見た部品 ${codex.seen.size} / ${codex.total}`;
+  el.title = `見た部品 ${codex.seen.size} / ${codex.total}`; el.setAttribute('aria-label', `見た部品 ${codex.seen.size} / ${codex.total}`);
   if (pulse && !reduceMotion) { el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
 }
 
@@ -59,7 +59,7 @@ function stepCodex(dtReal) {
 
 // 解説カードに差し込む断片
 function codexHead(key) { return codex.today === key ? '<div class="today-badge">今日の一部品</div>' : ''; }
-function codexTriviaRow(key) { if (!TRIVIA[key]) return ''; const act = typeof TRIVIA_ACT !== 'undefined' && TRIVIA_ACT[key]; return `<div class="trivia"><b>豆知識</b>${TRIVIA[key]}${act ? '<button id="triviaGo" class="trivia-go">確かめる ›</button>' : ''}</div>`; }
+function codexTriviaRow(key) { if (!TRIVIA[key]) return ''; const act = typeof TRIVIA_ACT !== 'undefined' && TRIVIA_ACT[key]; return `<div class="trivia"><b>${t('sec.trivia')}</b>${TRIVIA[key]}${act ? '<button id="triviaGo" class="trivia-go">確かめる ›</button>' : ''}</div>`; }
 // 豆知識の内容を機体に演じさせる
 function triviaAct(key) {
   const a = TRIVIA_ACT && TRIVIA_ACT[key]; if (!a) return;

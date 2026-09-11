@@ -55,7 +55,8 @@ function computeShare() {
 
 function setScale(on) {
   on = !!on; if (on === scale.on) return;
-  scale.on = on; S.scale = on;
+  scale.on = on; S.scale = on; document.body.classList.toggle('scale', on);
+  if (on && typeof stopOthers === 'function') stopOthers('scale');
   const btn = $('#scaleBtn'); if (btn) { btn.classList.toggle('on', on); btn.setAttribute('aria-pressed', String(on)); }
   $('#massBar').hidden = !on;
   if (on) {
@@ -113,16 +114,17 @@ function stepScale() {
   computeCG(); computeShare();
   if (scale.over !== scale.overShown) {   // 「余裕なし」の注記はドラッグ中も毎フレーム追従させる
     scale.overShown = scale.over; const n = $('#massNote');
-    if (n) { n.textContent = scale.over ? SCALE_TEXT.overNote + scaleOverWhy() : ''; n.hidden = !scale.over; }
+    if (n) { n.textContent = scale.over ? scaleOverText() : ''; n.hidden = !scale.over; }
   }
   if (D.cgMarker) { D.cgMarker.position.copy(scale.cg); D.cgMarker.visible = true; const pl = D.cgMarker.userData.plumb; if (pl) { const len = Math.max(0.001, scale.cg.y + 0.158 + body.py); pl.scale.y = len; pl.position.y = -len / 2; } }
   for (let i = 0; i < 4; i++) body.mult[i] = scale.share[i];
 }
 
-function scaleOverWhy() {
+function scaleOverText() {   // 原因 → 結果 の順で1文に
   const sh = scale.share, rear = sh[1] + sh[2], front = sh[0] + sh[3], ratio = scale.total / Math.max(1, scale.base);
-  if (Math.abs(rear - front) < 0.12) return ratio > 1.2 ? '（荷物が重すぎます）' : '';
-  return rear > front ? '（重心が後ろに寄っています）' : '（重心が前に寄っています）';
+  const tail = '前に進む・風に逆らう力が残りません';
+  if (Math.abs(rear - front) < 0.12) return (ratio > 1.2 ? '荷物が重く、' : '') + 'モーターに余裕がありません。' + tail;
+  return rear > front ? `重心が後ろに寄り、後ろのモーターに余裕がありません。${tail}` : `重心が前に寄り、前のモーターに余裕がありません。${tail}`;
 }
 // ---------- 積み上げバー ----------
 function massRows() {

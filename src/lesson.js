@@ -17,7 +17,8 @@ function startLesson(id, step = 0) {
   $('#inspector').hidden = true; $('#inspector').classList.remove('open');
   const panel = $('#lesson'); panel.hidden = false; if (narrow()) panel.classList.add('open');
   $('#lessonName').textContent = def.name; $('#lessonAud').textContent = def.audience || '';
-  $('#lessonSteps').innerHTML = def.steps.map((st, i) => `<button class="step" data-i="${i}"><div class="st-head"><span class="st-t">${fmtClock(st.t * 60)}</span><b>${st.title}</b><span class="st-min">${st.min}分</span></div><p class="say">${st.say}</p>${st.ask ? `<p class="ask">${st.ask}</p>` : ''}${st.expect ? `<details><summary>想定回答</summary><p>${st.expect}</p></details>` : ''}</button>`).join('');
+  $('#inspToggle').textContent = t('ui.script');
+  $('#lessonSteps').innerHTML = def.steps.map((st, i) => `<div class="step" role="button" tabindex="0" data-i="${i}"><div class="st-head"><span class="st-t">${fmtClock(st.t * 60)}</span><b>${st.title}</b><span class="st-min">${st.min}分</span></div><p class="say">${st.say}</p>${st.ask ? `<p class="ask">${st.ask}</p>` : ''}${st.expect ? `<details><summary>想定回答</summary><p>${st.expect}</p></details>` : ''}</div>`).join('');
   gotoStep(clamp(step | 0, 0, def.steps.length - 1));
 }
 function stopLesson(silent) {
@@ -25,7 +26,7 @@ function stopLesson(silent) {
   resetStage(); S.labelOnly = null; buildLabels();
   const saved = lesson.saved; S.lesson = null; lesson.def = null; lesson.hover = false;
   document.body.classList.remove('lesson');
-  $('#lesson').hidden = true; $('#lesson').classList.remove('open'); $('#inspector').hidden = false;
+  $('#lesson').hidden = true; $('#lesson').classList.remove('open'); $('#inspector').hidden = false; $('#inspToggle').textContent = t('ui.parts');
   $('#lessonSel').hidden = true;
   if (saved && saved.depth !== S.depth) setDepth(saved.depth);
   setTab('see');
@@ -55,7 +56,7 @@ function resetStage() {
 function gotoStep(n) {
   if (!S.lesson || !lesson.def) return;
   const steps = lesson.def.steps; n = clamp(n, 0, steps.length - 1);
-  S.lesson.step = n; const st = steps[n];
+  S.lesson.step = n; S.lesson.stepAt = performance.now(); const st = steps[n];
   resetStage();
   if (st.view) { segSet($('#viewCol'), 'v', st.view); setView(st.view); }
   runAct(st.act || {});
@@ -83,7 +84,7 @@ function runAct(a) {
 function renderLessonPanel() {
   if (!S.lesson) return;
   const n = S.lesson.step, steps = lesson.def.steps;
-  for (const el of $$('#lessonSteps .step')) el.classList.toggle('on', +el.dataset.i === n);
+  for (const el of $$('#lessonSteps .step')) { const on = +el.dataset.i === n; el.classList.toggle('on', on); if (on) el.setAttribute('aria-current', 'step'); else el.removeAttribute('aria-current'); }
   const cur = $(`#lessonSteps .step[data-i="${n}"]`); if (cur) cur.scrollIntoView({ block: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });
   $('#lessonPrev').disabled = n === 0; $('#lessonNext').disabled = n >= steps.length - 1;
   $('#lessonPos').textContent = `${n + 1} / ${steps.length}`;
@@ -93,8 +94,9 @@ function tickLessonClock(dt, force) {
   if (!S.lesson) return;
   lesson.clockAcc += dt; if (!force && lesson.clockAcc < 1) return; lesson.clockAcc = 0;
   const el = $('#lessonClock'); if (!el) return;
-  const sec = (performance.now() - S.lesson.startedAt) / 1000;
-  el.textContent = `${fmtClock(sec)} / ${fmtClock(lesson.def.total * 60)}`;   // 超過しても赤くしない（叱らない）
+  const sec = (performance.now() - S.lesson.startedAt) / 1000, st = lessonStep();
+  const remain = st ? st.min * 60 - (performance.now() - (S.lesson.stepAt || S.lesson.startedAt)) / 1000 : 0;
+  el.innerHTML = `<b>${remain >= 0 ? '残り ' + fmtClock(remain) : '超過 ' + fmtClock(-remain)}</b><span>${fmtClock(sec)} / ${fmtClock(lesson.def.total * 60)}</span>`;   // 超過しても赤くしない（叱らない）
 }
 // 選んだ部品の名前を台本パネルの上に1行（右パネルが台本に差し替わっているため）
 function renderLessonSel() {
@@ -119,6 +121,7 @@ function tourNext(dir) {
 // ---------- ふたりクイズ（答えは画面が出さない） ----------
 function quizStart() {
   if (quiz.active) return;
+  if (typeof stopOthers === 'function') stopOthers('quiz');
   quiz.active = true; quiz.recent = []; quiz.t = 0; S.labelsSuppressed = true; S.labelOnly = null; buildLabels();
   if (S.selected) select(null);
   quizNext();
@@ -166,27 +169,29 @@ async function buildPrintSheet() {
   if (typeof renderOnce === 'function') renderOnce();
   const url = renderer.domElement.toDataURL('image/jpeg', 0.92);
   // ラベル位置（updateLabels と同じ計算）
+  const cw = renderer.domElement.width, ch = renderer.domElement.height, sc = cw / 1600;   // 撮った画像の実寸に合わせる
   const keys = (S.depth === 'simple' ? SIMPLE_KEYS : LIST_ORDER).filter(k => D.parts.some(p => p.key === k && (p.label || p.labelObj)));
   const pts = [];
   for (const k of keys) {
     const p = D.parts.find(x => x.key === k && (x.label || x.labelObj)); if (!p) continue;
     const a = p.labelObj ? p.labelObj.getWorldPosition(new THREE.Vector3()) : p.obj.localToWorld(new THREE.Vector3().copy(p.label));
-    const pr = a.project(camera); if (pr.z > 1) continue;
-    pts.push({ key: k, x: (pr.x + 1) / 2 * 1600, y: (1 - pr.y) / 2 * 1200 });
+    const pr = a.project(camera); if (pr.z > 1 || Math.abs(pr.x) > 0.95 || Math.abs(pr.y) > 0.95) continue;   // 画面外の部品には線を引かない
+    pts.push({ key: k, x: (pr.x + 1) / 2 * cw, y: (1 - pr.y) / 2 * ch });
   }
   if (wasMode !== 'wire') { S.mode = wasMode; applyMode(); applyBlueprint(); }
   S.labels = wasLabels;
   // 番号バッジは左右の余白に縦に並べ、引き出し線でつなぐ
-  const left = pts.filter(p => p.x < 800).sort((a, b) => a.y - b.y), right = pts.filter(p => p.x >= 800).sort((a, b) => a.y - b.y);
-  const place = (arr, x) => { const n = arr.length, gap = Math.min(150, 1000 / Math.max(1, n)); const y0 = 600 - gap * (n - 1) / 2; arr.forEach((p, i) => { p.bx = x; p.by = y0 + gap * i; }); };
-  place(left, 70); place(right, 1530);
+  const left = pts.filter(p => p.x < cw / 2).sort((a, b) => a.y - b.y), right = pts.filter(p => p.x >= cw / 2).sort((a, b) => a.y - b.y);
+  const place = (arr, x) => { const n = arr.length, gap = Math.min(ch / 8, ch * 0.83 / Math.max(1, n)); const y0 = ch / 2 - gap * (n - 1) / 2; arr.forEach((p, i) => { p.bx = x; p.by = y0 + gap * i; }); };
+  place(left, cw * 0.045); place(right, cw * 0.955);
   const ordered = [...left, ...right]; ordered.forEach((p, i) => { p.n = i + 1; });
-  const svg = ordered.map(p => `<line x1="${p.bx}" y1="${p.by}" x2="${p.x.toFixed(0)}" y2="${p.y.toFixed(0)}" stroke="#000" stroke-width="2.5"/><circle cx="${p.x.toFixed(0)}" cy="${p.y.toFixed(0)}" r="6" fill="#000"/><circle cx="${p.bx}" cy="${p.by}" r="28" fill="#fff" stroke="#000" stroke-width="3"/><text x="${p.bx}" y="${p.by + 12}" text-anchor="middle" font-size="34" font-weight="700" fill="#000">${p.n}</text>`).join('');
+  const f = (v) => (v * sc).toFixed(1);
+  const svg = ordered.map(p => `<line x1="${p.bx.toFixed(0)}" y1="${p.by.toFixed(0)}" x2="${p.x.toFixed(0)}" y2="${p.y.toFixed(0)}" stroke="#000" stroke-width="${f(2.5)}"/><circle cx="${p.x.toFixed(0)}" cy="${p.y.toFixed(0)}" r="${f(6)}" fill="#000"/><circle cx="${p.bx.toFixed(0)}" cy="${p.by.toFixed(0)}" r="${f(28)}" fill="#fff" stroke="#000" stroke-width="${f(3)}"/><text x="${p.bx.toFixed(0)}" y="${(p.by + 12 * sc).toFixed(0)}" text-anchor="middle" font-size="${f(34)}" font-weight="700" fill="#000">${p.n}</text>`).join('');
   const blanks = ordered.map(p => `<li><span class="fill-num">${p.n}</span><span class="fill-line"></span></li>`).join('');
   const review = [...(def.review || []), '今日いちばん「おっ」と思ったこと'].map((q, i) => `<li><p>${q}</p><div class="rv-box"></div></li>`).join('');
   sheet.innerHTML = `
     <header class="ps-head"><h1>ドローンの構造 — ワークシート</h1><div class="ps-meta"><span>${def.name}</span><span>____年__月__日</span><span>名前 ______________</span></div></header>
-    <section class="ps-fig"><div class="ps-figwrap"><img src="${url}" alt="機体の線画"><svg viewBox="0 0 1600 1200" aria-hidden="true">${svg}</svg></div>
+    <section class="ps-fig"><div class="ps-figwrap"><img src="${url}" alt="機体の線画"><svg viewBox="0 0 ${cw} ${ch}" aria-hidden="true">${svg}</svg></div>
       <p class="ps-cap">番号の部品の名前を書こう。</p><ol class="ps-fill">${blanks}</ol></section>
     <section class="ps-review"><h2>ふりかえり</h2><ol>${review}</ol></section>
     <footer class="ps-foot">${location.origin + location.pathname}${def ? `?lesson=${def.id}` : ''}</footer>`;
@@ -205,10 +210,11 @@ function lessonKey(e) {
   if (k === 'Escape') {
     if (quiz.active) { quizStop(); return true; }
     if (theater.active || whatif.active || S.question || S.selected) return false;   // まずは中の物を閉じる
-    if (confirm('授業モードを終了しますか？')) stopLesson(); return true;
+    lessonEndAsk(); return true;
   }
   return false;
 }
+function lessonEndAsk() { showCoach('授業モードを終了しますか', '台本を閉じて、ふつうの画面に戻ります', () => stopLesson(), null); $('#coachGo').textContent = '終了する'; }
 function bindLessonSheet() {
   const el = $('#lesson'), grab = el.querySelector('.grabber'); let drag = null;
   grab.addEventListener('pointerdown', e => { drag = { y0: e.clientY, hist: [[e.clientY, performance.now()]] }; grab.setPointerCapture(e.pointerId); el.classList.add('dragging'); });
@@ -222,18 +228,20 @@ function bindLessonSheet() {
 }
 
 function initLesson() {
-  $('#lessonPop').innerHTML = `<h3>授業・説明会</h3>${LESSONS.map(l => `<button class="course" data-l="${l.id}"><b>${l.name}</b><span>${l.audience} · 約${l.total}分 · ${l.steps.length}段落</span></button>`).join('')}<p class="pop-foot">台本が右に出て、段落ごとに視点と表示が切り替わります。URL を共有すると同じ段落から開きます。</p>`;
-  $('#lessonBtn').addEventListener('click', e => { e.stopPropagation(); $('#settings').hidden = true; $('#askPop').hidden = true; $('#lessonPop').hidden = !$('#lessonPop').hidden; });
+  $('#lessonPop').innerHTML = `<h3>授業・説明会</h3>${LESSONS.map(l => `<button class="course" data-l="${l.id}"><b>${l.name}</b><span>${l.audience} · 約${l.total}分 · ${l.steps.length}段落</span></button>`).join('')}<button class="course quiz" id="quizBtn"><b>ふたりクイズだけ</b><span>光った部品の名前を隣の人に説明する。答え合わせは画面がしない</span></button><p class="pop-foot">台本パネルが開き、段落ごとに視点と表示が切り替わります。URL を共有すると同じ段落から開きます。</p>`;
+  const openPop = e => { e.stopPropagation(); $('#settings').hidden = true; $('#askPop').hidden = true; $('#lessonPop').hidden = !$('#lessonPop').hidden; };
+  $('#lessonBtn').addEventListener('click', openPop); const lm = $('#lessonBtnM'); if (lm) lm.addEventListener('click', openPop);
   $('#lessonPop').addEventListener('click', e => { const b = e.target.closest('.course'); if (b) { $('#lessonPop').hidden = true; startLesson(b.dataset.l, 0); } });
-  document.addEventListener('click', e => { if (!e.target.closest('#lessonPop') && !e.target.closest('#lessonBtn')) $('#lessonPop').hidden = true; });
-  $('#quizBtn').addEventListener('click', () => { $('#settings').hidden = true; if (S.lesson) { quizStart(); return; } if (theater.active) stopTheaterUI(); if (whatif.active) stopWhatifUI(); setTab('see'); quizStart(); });
+  document.addEventListener('click', e => { if (!e.target.closest('#lessonPop') && !e.target.closest('#lessonBtn') && !e.target.closest('#lessonBtnM')) $('#lessonPop').hidden = true; });
+  $('#quizBtn').addEventListener('click', e => { e.stopPropagation(); $('#lessonPop').hidden = true; if (S.lesson) { quizStart(); return; } setTab('see'); quizStart(); });
   $('#lessonPrev').addEventListener('click', () => gotoStep(S.lesson.step - 1));
   $('#lessonNext').addEventListener('click', () => gotoStep(S.lesson.step + 1));
   $('#lessonSteps').addEventListener('click', e => { const b = e.target.closest('.step'); if (!b || e.target.closest('details')) return; gotoStep(+b.dataset.i); });
   $('#lessonQuiz').addEventListener('click', () => (quiz.active ? quizStop() : quizStart()));
   $('#lessonPrint').addEventListener('click', printSheet);
-  $('#lessonEnd').addEventListener('click', () => stopLesson());
-  $('#lessonClose').addEventListener('click', () => { if (narrow()) $('#lesson').classList.remove('open'); else stopLesson(); });
+  $('#lessonEnd').addEventListener('click', lessonEndAsk);
+  $('#lessonClose').addEventListener('click', () => { if (narrow()) $('#lesson').classList.remove('open'); else lessonEndAsk(); });
+  $('#lessonSteps').addEventListener('keydown', e => { const b = e.target.closest('.step'); if (!b || e.target.closest('details')) return; if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); gotoStep(+b.dataset.i); } });
   bindLessonSheet();
   window.__lesson = { startLesson, stopLesson, gotoStep, tourNext, quizStart, quizStop, quizReveal, buildPrintSheet, printSheet, lesson };
   window.__quiz = quiz;

@@ -1,10 +1,10 @@
 :root {
   --bg: #eef0f4; --bg2: #e3e6eb;
-  --ink: #1b1f27; --ink2: #4b5260; --ink3: #7b8290;
+  --ink: #1b1f27; --ink2: #4b5260; --ink3: #6b7280;
   --glass: rgba(255,255,255,0.70); --glass-strong: rgba(255,255,255,0.88); --glass-border: rgba(255,255,255,0.7);
   --glass-shadow: 0 12px 40px rgba(20,26,40,0.12), 0 1px 2px rgba(20,26,40,0.08);
   --accent: #ef6a2d; --accent-text: #c9501a; --accent-soft: rgba(239,106,45,0.14);
-  --cw: #3b7df7; --ccw: #14b8a6; --ok: #16a34a; --warn: #d97706; --red: #ff3b30;
+  --cw: #3b7df7; --ccw: #14b8a6; --ok: #16a34a; --warn: #b45309; --red: #ff3b30;
   --hair: rgba(20,26,40,0.08); --hair2: rgba(20,26,40,0.14); --row-hover: rgba(20,26,40,0.05); --seg-bg: rgba(20,26,40,0.07);
   --radius: 16px; --tap: 32px; --insp-w: 344px; --dock-h: 96px; --fs: 1;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
@@ -13,7 +13,7 @@
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0e1116; --bg2: #171b22; --ink: #e8ebf0; --ink2: #aab2c0; --ink3: #78808f; --glass: rgba(26,29,36,0.66); --glass-strong: rgba(30,33,41,0.92); --glass-border: rgba(255,255,255,0.09); --glass-shadow: 0 12px 40px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.4); --accent: #ff7a3d; --accent-text: #ff9a66; --accent-soft: rgba(255,122,61,0.18); --hair: rgba(255,255,255,0.08); --hair2: rgba(255,255,255,0.14); --row-hover: rgba(255,255,255,0.06); --seg-bg: rgba(255,255,255,0.07); color-scheme: dark; } }
 :root[data-theme="dark"] { --bg: #0e1116; --bg2: #171b22; --ink: #e8ebf0; --ink2: #aab2c0; --ink3: #78808f; --glass: rgba(26,29,36,0.66); --glass-strong: rgba(30,33,41,0.92); --glass-border: rgba(255,255,255,0.09); --glass-shadow: 0 12px 40px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.4); --accent: #ff7a3d; --accent-text: #ff9a66; --accent-soft: rgba(255,122,61,0.18); --hair: rgba(255,255,255,0.08); --hair2: rgba(255,255,255,0.14); --row-hover: rgba(255,255,255,0.06); --seg-bg: rgba(255,255,255,0.07); color-scheme: dark; }
-@media (pointer: coarse) { :root { --tap: 44px; } .seg.tiny button { min-height: 36px; padding: 6px 10px; } .icon-btn.sm { min-width: 44px; min-height: 44px; } .note-actions button, .d-actions button { min-height: var(--tap); } }
+@media (pointer: coarse) { :root { --tap: 44px; } }
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -82,7 +82,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 
 /* ---- view column ---- */
 #viewCol { position: fixed; right: calc(var(--insp-w) + 30px); bottom: calc(var(--dock-h) + 30px); z-index: 9; display: flex; flex-direction: column; gap: 2px; padding: 6px; }
-#viewCol button { width: 40px; height: 40px; min-height: var(--tap); min-width: var(--tap); border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--ink2); display: grid; place-items: center; }
+#viewCol button { width: 44px; height: 40px; min-height: var(--tap); min-width: var(--tap); border-radius: 10px; font-size: 12px; font-weight: 600; color: var(--ink2); display: grid; place-items: center; }
 #viewCol button:hover { background: var(--hair); color: var(--ink); } #viewCol button.on { background: var(--accent-soft); color: var(--accent); }
 #viewCol .tgl i { display: none; }
 
@@ -174,7 +174,8 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 .tgl.on { background: var(--accent-soft) !important; color: var(--accent-text) !important; } .tgl.on i { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); position: relative; } .tgl.on i::after { content: ''; position: absolute; left: 2px; top: 1.5px; width: 3px; height: 1.5px; border: solid #fff; border-width: 0 0 1.5px 1.5px; transform: rotate(-45deg) scale(1.1); }
 .cards { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; } .cards::-webkit-scrollbar { display: none; }
 .cards button { flex: none; width: 150px; padding: 8px 10px; border-radius: 12px; background: var(--seg-bg); text-align: left; font-size: 12.5px; line-height: 1.35; min-height: 52px; transition: background .15s; }
-.cards button b { display: block; font-size: 13px; margin-bottom: 2px; } .cards button:hover { background: var(--hair2); } .cards button.on { background: var(--accent-soft); color: var(--accent); }
+.cards button b { display: block; font-size: 13px; margin-bottom: 2px; } .cards button:hover { background: var(--hair2); } .cards button.on { background: var(--accent-soft); color: var(--accent-text); }
+.cards button { min-height: 64px; } #whatifCards button { border-left: 3px solid var(--cw); border-radius: 6px 12px 12px 6px; }   /* 外の状況 = 青の帯（⑤の組み間違いは無印）
 .stages { display: flex; align-items: center; gap: 6px; flex: 1; justify-content: center; }
 .stages span { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--ink3); } .stages span::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--hair2); }
 .stages span.done::before { background: var(--accent); opacity: .5; } .stages span.on { color: var(--accent); font-weight: 700; } .stages span.on::before { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
@@ -279,7 +280,7 @@ body.theater #topbar, body.theater #viewCol { opacity: .35; pointer-events: none
 .two-col h4 { font-size: 11.5px; font-weight: 700; color: var(--ink3); letter-spacing: .02em; margin: 0 0 4px; }
 .two-col ul { margin: 0; padding-left: 1.1em; }
 .two-col li { font-size: 12.5px; line-height: 1.55; margin: 2px 0; }
-.caveat { margin: 8px 0 0; padding: 6px 9px; border-radius: 8px; background: var(--seg-bg); font-size: 11.5px; line-height: 1.5; color: var(--warn); }
+.caveat { margin: 8px 0 0; padding: 6px 9px; border-radius: 0 8px 8px 0; background: var(--seg-bg); border-left: 3px solid var(--warn); font-size: 11.5px; line-height: 1.5; color: var(--ink2); }
 .caveat::before { content: '⚠ '; }
 ol.parts-seq { margin: 8px 0 0; padding-left: 1.3em; }
 ol.parts-seq li { font-size: 12.5px; line-height: 1.5; margin: 3px 0; color: var(--ink3); }
@@ -325,7 +326,6 @@ body.big #noteCard { bottom: calc(var(--dock-h) + 104px); }
 .lesson-foot { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-top: 1px solid var(--hair); flex: none; flex-wrap: wrap; }
 .lesson-foot .sp { flex: 1; } .lesson-foot .pill-btn { padding: 5px 10px; font-size: 12px; min-height: 30px; }
 .lesson-foot .icon-btn:disabled { opacity: .35; }
-body.lesson #inspToggle { display: inline-flex; }
 .quiz-ans b { font-size: 16px; color: var(--accent-text); }
 /* 印刷ワークシート */
 #printSheet { display: none; }
@@ -347,5 +347,33 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
 .fill-line { flex: 1; border-bottom: 1pt solid #000; height: 14pt; }
 .ps-review ol { padding-left: 1.2em; } .ps-review li p { margin: 0 0 3pt; } .rv-box { height: 46pt; border: 1pt solid #000; border-radius: 3pt; margin-bottom: 8pt; }
 .ps-foot { margin-top: 10pt; font-size: 9pt; color: #444; border-top: 1pt solid #999; padding-top: 4pt; }
+
+/* ---------- 第3ラウンド UI/UX 反映 ---------- */
+.pill-btn.on, .pill-btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-text); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.mobile-only { display: none; }
+body.big #sticks { bottom: calc(var(--dock-h) + 104px); }
+#massBar { overflow: hidden; } .mb-main { flex: 1; min-height: 0; overflow: auto; }
+body.scale #noteCard { left: calc(14px + 212px + 12px); width: min(420px, calc(100vw - var(--insp-w) - 60px - 224px)); }
+.step.on .st-head::before { content: 'いま'; font: 700 10px/1 var(--font); color: #fff; background: var(--accent); padding: 3px 6px; border-radius: 6px; }
+#lessonClock { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.25; } #lessonClock b { color: var(--ink); font-weight: 700; } #lessonClock span { font-size: 11px; }
+.lesson-foot #lessonNext { background: var(--accent); color: #fff; border-radius: 999px; min-width: 44px; }
+#lessonPop .course.quiz { border-top: 1px solid var(--hair); margin-top: 10px; border-radius: 12px; }
+@media (max-width: 760px) {
+  #lessonBtn { display: none; } .mobile-only { display: flex; }
+  #toast { top: 128px; }
+  body.big #massBar { bottom: calc(var(--dock-h) + 72px); max-height: calc(42vh - 64px); }
+  body.big #sticks { bottom: calc(var(--dock-h) + 72px); }
+  body.scale #noteCard { left: 10px; width: calc(100vw - 20px); }
+  .popover .pop-row { padding: 4px 0; }
+}
+@media (pointer: coarse) {
+  .seg.tiny button { min-height: 36px; padding: 6px 10px; }
+  .icon-btn.sm { min-width: 44px; min-height: 44px; }
+  .note-actions button, .d-actions button { min-height: var(--tap); }
+  .pop-row .tgl { min-height: var(--tap); padding: 0 10px; border-radius: 10px; }
+  .mb-top .seg.small button, #priceBtn { min-height: var(--tap); }
+  .lesson-foot .pill-btn, .trivia-go { min-height: var(--tap); }
+  .mb-legend { gap: 4px 6px; } .mb-row { min-height: var(--tap); padding: 0 10px; flex: 1 1 30%; }
+}
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation-duration: .01s !important; } }

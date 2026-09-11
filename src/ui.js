@@ -24,6 +24,18 @@ function renderNote(o) {
 $('#noteClose').addEventListener('click', () => { const c = $('#noteCard'); if (c._onClose) c._onClose(); c.hidden = true; });
 
 // ---------- タブ ----------
+// 「同時に1つ」の対象（質問・飛行デモ・用途・重さ・シアター・もしも・クイズ）を、keep 以外すべて止める
+function stopOthers(keep, arg) {
+  if (keep !== 'quiz' && typeof quiz !== 'undefined' && quiz.active) quizStop();
+  if (keep !== 'theater' && theater.active) stopTheaterUI();
+  if (keep !== 'whatif' && whatif.active) stopWhatifUI();
+  // 質問の act が起こす飛行デモは質問の一部なので、そのときは質問を残す
+  const qOwnsFlight = keep === 'flight' && S.question && S.question.act && S.question.act.flight === arg;
+  if (keep !== 'question' && S.question && !qOwnsFlight) { clearQuestion(); if ($('#noteCard').dataset.kind === 'question') renderNote(null); }
+  if (keep !== 'flight' && S.flight) setFlight(null);
+  if (keep !== 'use' && S.use) setUse(null);
+  if (keep !== 'scale' && S.scale) setScale(false);
+}
 function setTab(tab) {
   $('#coach').hidden = true;
   if (theater.active && tab !== 'theater') { stopTheaterUI(); }
@@ -49,7 +61,7 @@ function setDepth(d) {
 $('#depthSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setDepth(b.dataset.d); });
 
 // ---------- モード / 分解 / モーター ----------
-function setMode(m) { const was = S.mode; S.mode = m; segSet($('#modeSeg'), 'mode', m); applyMode(); applyBlueprint(); if (m !== was) { if (m === 'cut') { setView('inside'); showToast('断面: モーター1つとバッテリーを半分に切った断面を見ています'); } else showToast({ normal: 'ふつうの見え方', xray: 'すけて見る: 外側を透かして中の部品が見えます', wire: '線だけ: 形の輪郭だけを見ます', blueprint: '設計図: 全部の部品を見た人だけのモードです' }[m]); } }
+function setMode(m) { const was = S.mode; S.mode = m; segSet($('#modeSeg'), 'mode', m); applyMode(); applyBlueprint(); if (m !== was) { if (m === 'cut') { setView('inside'); showToast('断面: モーター1つとバッテリーを半分に切った断面を見ています'); } else showToast({ normal: 'ふつうの見え方', xray: 'すけて見る: 外側を透かして中の部品が見えます', wire: '線だけ: 形の輪郭だけを見ます', blueprint: '設計図: 40部品をすべて見た人だけの見え方です' }[m]); } }
 $('#modeSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.mode); });
 const explodeEl = $('#explode');
 explodeEl.addEventListener('input', () => { S.explodeAt = performance.now(); S.explode = explodeEl.value / 100; S.explodeT = S.explode; $('#explodeVal').textContent = explodeEl.value + '%'; explodePullBack(); S.shadowDirty = S.csDirty = true; });
@@ -67,6 +79,7 @@ function syncBodyMode() {
 }
 // 飛行の原理
 function setFlight(f) {
+  if (f) stopOthers('flight', f);
   S.flight = f; body.t = 0; for (const b of $$('#flightChips button')) b.classList.toggle('on', b.dataset.f === f);
   if (f && S.power === 0) setPower(0.5, true);
   syncBodyMode();
@@ -119,6 +132,7 @@ function onVisibilityChanged() {
   if (S.isolated) showToast(`${PARTS[S.isolated].name} だけを表示中`); else if (hiddenKeys.length) showToast(`非表示: ${hiddenKeys.map(k => PARTS[k].name).join('・')}`);
 }
 function select(p, all = false, opts = {}) {
+  if (p && typeof quiz !== 'undefined' && quiz.active && !opts.fromQuiz) { showToast(S.lang === 'en' ? 'During the quiz, use "Show the name"' : 'クイズ中は「答えを見る」まで選べません'); return; }
   S.selected = p; S.selAll = !!(p && all); S.lastSelect = performance.now();
   outlineSel.selectedObjects = p ? (all ? partsOf(p.key).map(x => x.obj) : [p.obj]) : [];
   if (S.hovered) { setTint(S.hovered, HOVER_L, 0); S.hovered = null; }
@@ -139,17 +153,18 @@ function renderDetail() {
   const hidden = partsOf(p.key).some(x => x.hidden);
   let h = `<div class="d-group" style="--c:${g.color}"><i></i>${g.name}</div><div class="d-title"><h3>${partName(p)}</h3>${hasSpeech ? '<button id="detailSpeak" class="icon-btn sm speak" aria-label="読み上げ" title="読み上げ">🔊</button>' : ''}</div><p class="d-en">${S.lang === 'en' ? d.name : d.en}${d.count > 1 ? ` · ×${d.count}` : ''}${inst}</p>`;
   h += codexHead(p.key);
-  h += `<div class="d-actions"><button id="dFocus" class="primary">注目</button>${simple ? '' : `<button id="dIsolate">${S.isolated === p.key ? '単独表示を解除' : '単独表示'}</button><button id="dHide">${hidden ? '表示する' : '非表示'}</button>`}</div>`;
-  h += `<section><h4>${S.lang === 'en' ? 'Role' : S.lang === 'easy' ? 'やくわり' : '役割'}</h4><p>${simple && sd ? partRole(p.key) : d.role}</p></section>`;
+  h += `<div class="d-actions"><button id="dFocus" class="primary">${t('ui.focus')}</button>${simple ? '' : `<button id="dIsolate">${S.isolated === p.key ? '単独表示を解除' : '単独表示'}</button><button id="dHide">${hidden ? '表示する' : '非表示'}</button>`}</div>`;
+  h += `<section><h4>${t('sec.role')}</h4><p>${simple && sd ? partRole(p.key) : d.role}</p></section>`;
   if (!simple || !langEntry(p.key)) h += langNote();
   h += codexTriviaRow(p.key);
-  if (simple && sd) h += `<div class="analogy"><b>${S.lang === 'en' ? 'Like…' : S.lang === 'easy' ? 'たとえると' : 'たとえるなら'}</b>${partAnalogy(p.key)}</div>`;
+  if (simple && sd) h += `<div class="analogy"><b>${t('sec.analogy')}</b>${partAnalogy(p.key)}</div>`;
   if (!simple && (p.key === 'motor' || p.key === 'prop' || p.key === 'esc')) h += `<section><h4>配置と回転方向（上から見て）</h4><div class="mtab">${MOTOR_INFO.map(m => `<div class="${m.dir.toLowerCase()}"><b>${m.id} ${m.dir === 'CW' ? '↻' : '↺'}${m.dir}</b>${m.pos}</div>`).join('')}</div></section>`;
-  if (d.structure) h += `<section><h4>構造</h4><ul>${d.structure.slice(0, simple ? 3 : 9).map(s => `<li>${s}</li>`).join('')}</ul></section>`;
+  if (d.structure && S.lang === 'en' && simple && langEntry(p.key)) h += langNote();
+  if (d.structure) h += `<section><h4>${t('sec.structure')}</h4><ul>${d.structure.slice(0, simple ? 3 : 9).map(s => `<li>${s}</li>`).join('')}</ul></section>`;
   if (!simple && d.spec) h += `<details><summary>仕様例</summary><dl class="spec">${d.spec.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl></details>`;
   if (!simple && d.check) h += `<section class="check"><h4>点検ポイント</h4><ul>${d.check.map(s => `<li>${s}</li>`).join('')}</ul></section>`;
   if (!simple && d.tip) h += `<div class="tipbox"><b>Note</b>${d.tip}</div>`;
-  if (simple) h += `<div class="d-actions" style="margin-top:14px"><button id="dMore">くわしく見る</button></div>`;
+  if (simple) h += `<div class="d-actions" style="margin-top:14px"><button id="dMore">${t('ui.more')}</button></div>`;
   box.innerHTML = h; box.hidden = false; box.scrollTop = 0; body_.classList.add('detail'); $('#inspBack').hidden = false; $('#inspTitle').textContent = '';
   $('#dFocus').onclick = () => focusOn(S.selAll ? partsOf(p.key).map(x => x.obj) : [p.obj]);
   const iso = $('#dIsolate'); if (iso) iso.onclick = () => { S.isolated = S.isolated === p.key ? null : p.key; applyVisibility(); renderDetail(); if (S.isolated) focusOn(partsOf(p.key).map(x => x.obj)); };
@@ -224,14 +239,24 @@ $('#askBtn').addEventListener('click', e => { e.stopPropagation(); const p = $('
 $('#askList').addEventListener('click', e => { const b = e.target.closest('.ask'); if (!b) return; $('#askPop').hidden = true; askQuestion(b.dataset.q); });
 document.addEventListener('click', e => { if (!e.target.closest('#askPop') && !e.target.closest('#askBtn')) $('#askPop').hidden = true; if (!e.target.closest('#settings') && !e.target.closest('#settingsBtn')) $('#settings').hidden = true; });
 let qPulse = null;
-function clearQuestion() { if (!S.question) return; const q = S.question; S.question = null; if (qPulse) { clearInterval(qPulse); qPulse = null; } for (const k of q.parts) for (const p of partsOf(k)) setTint(p, ACCENT, 0); if (!S.selected) outlineSel.selectedObjects = []; if (q.act && q.act.flight && S.flight === q.act.flight) setFlight(null); }
+function clearQuestion() {
+  if (!S.question) return; const q = S.question; S.question = null; if (qPulse) { clearInterval(qPulse); qPulse = null; }
+  for (const k of q.parts) for (const p of partsOf(k)) setTint(p, ACCENT, 0); if (!S.selected) outlineSel.selectedObjects = [];
+  if (q.act && q.act.flight && S.flight === q.act.flight) setFlight(null);
+  // 質問が入れた気流・ゆっくり・矢印は、質問を閉じるときに戻す（自分で入れたものは残す）
+  const on = q._turnedOn || {};
+  if (on.air) { S.air = false; for (const x of $$('.tgl[data-t=air]')) { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); } }
+  if (on.slow) { setTimeScale(1); for (const x of $$('.tgl[data-t=slow]')) { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); } }
+  if (on.arrows) { S.arrows = false; for (const x of $$('.tgl[data-t=arrows]')) { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); } }
+  q._turnedOn = null;
+}
 function askQuestion(id) {
   const q = QUESTIONS.find(x => x.id === id); if (!q) return;
-  clearQuestion(); S.question = q; if (theater.active) stopTheaterUI(); if (q.act) setSticks(false);
+  clearQuestion(); stopOthers('question'); S.question = q; if (q.act) setSticks(false);
   const objs = q.parts.flatMap(k => partsOf(k).map(p => p.obj)); if (!S.selected) outlineSel.selectedObjects = objs;
   let n = 0; qPulse = setInterval(() => { n++; const k = n % 2 ? 0.7 : 0; for (const key of q.parts) for (const p of partsOf(key)) setTint(p, ACCENT, k); if (n >= 4) { clearInterval(qPulse); qPulse = null; for (const key of q.parts) for (const p of partsOf(key)) setTint(p, ACCENT, 0.25); } }, 260);
   focusOn(objs, { pull: true });
-  const a = q.act || {};
+  const a = q.act || {}; q._turnedOn = { air: !!a.air && !S.air, slow: !!a.slow && !S.slow, arrows: !!a.arrows && !S.arrows };
   if (a.power != null && S.power === 0) { setTab('fly'); setPower(a.power, true); }
   if (a.air) { S.air = true; for (const x of $$('.tgl[data-t=air]')) x.classList.add('on'); }
   if (a.slow) { setTimeScale(1 / 50); for (const x of $$('.tgl[data-t=slow]')) x.classList.add('on'); }
@@ -254,7 +279,7 @@ $('#useChips').addEventListener('click', e => { const b = e.target.closest('butt
 $('#useReset').addEventListener('click', () => setUse(null));
 function num(s) { const m = String(s).match(/[\d.]+/g); return m ? parseFloat(m[m.length - 1]) : 0; }
 function setUse(id) {
-  if (id && S.scale) setScale(false);
+  if (id) stopOthers('use');
   if (S.use) { const prev = USES.find(u => u.id === S.use); for (const k of prev.up) for (const p of partsOf(k)) setTint(p, UP_COLOR, 0); for (const k of (prev.drop || [])) for (const p of partsOf(k)) { setTint(p, DROP_COLOR, 0); } for (const c of ghostGroup.children) c.visible = false; }
   S.use = id; for (const b of $$('#useChips button')) b.classList.toggle('on', b.dataset.u === id); $('#useReset').hidden = !id;
   if (!id) { if ($('#noteCard').dataset.kind === 'use') renderNote(null); applyMode(); return; }
@@ -276,10 +301,10 @@ function setUse(id) {
 // ---------- もしも(シアター) ----------
 function buildMishapCards() { const list = S.depth === 'simple' ? MISHAPS.filter(m => ['propReverse', 'drop', 'motorOut'].includes(m.id)) : MISHAPS; $('#mishapCards').innerHTML = list.map(m => `<button data-m="${m.id}"><b>${m.short}</b>${m.name}</button>`).join(''); }
 $('#mishapCards').addEventListener('click', e => { const b = e.target.closest('button'); if (b) startTheaterUI(b.dataset.m); });
-function buildWhatifCards() { $('#whatifCards').innerHTML = WHATIF.map(w => `<button data-w="${w.id}"><b>${w.icon} ${w.name}</b>${w.intro.slice(0, 22)}…</button>`).join(''); }
+function buildWhatifCards() { $('#whatifCards').innerHTML = WHATIF.map(w => `<button data-w="${w.id}"><b>${w.icon} ${w.name}</b>${w.short || w.intro.slice(0, 22)}</button>`).join(''); }
 $('#whatifCards').addEventListener('click', e => { const b = e.target.closest('button'); if (b) startWhatifUI(b.dataset.w); });
 function startWhatifUI(id) {
-  if (S.flight) setFlight(null); clearQuestion(); select(null); setSticks(false); if (S.explode > 0) setExplode(0); if (S.mode !== 'normal') setMode('normal'); if (S.scale) setScale(false); if (S.use) setUse(null);
+  stopOthers('whatif'); if (S.flight) setFlight(null); clearQuestion(); select(null); setSticks(false); if (S.explode > 0) setExplode(0); if (S.mode !== 'normal') setMode('normal'); if (S.scale) setScale(false); if (S.use) setUse(null);
   $('#coach').hidden = true; startWhatif(id); document.body.classList.add('theater'); $('#inspector').inert = true; $('#topbar').inert = true; $('#inspector').classList.remove('open');
   S.tab = 'theater'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'theater'; segSet($('#tabs'), 'tab', 'mishap');
   for (const b of $$('#whatifCards button')) b.classList.toggle('on', b.dataset.w === id);
@@ -293,8 +318,8 @@ function onWhatifChanged() {
   if (!whatif.active) return;
   const d = whatif.def, si = whatifStageIndex();
   $('#thStages').innerHTML = WHATIF_STAGES.map((n, i) => `<span class="${i < si ? 'done' : i === si ? 'on' : ''}">${n}</span>`).join('');
-  const nb = $('#thNext'); nb.hidden = !(whatif.phase === 0 || whatif.phase === 3);
-  nb.textContent = whatif.phase === 0 ? '機体の反応を見る ▶' : 'とじる';
+  const nb = $('#thNext'); nb.hidden = whatif.phase !== 0;   // 最終段はカードの「もう一度」と ✕ やめる で足りる
+  nb.textContent = '機体の反応を見る ▶';
   $('#thSlow').hidden = true;
   let html = '', actions = [];
   if (whatif.phase === 0) html = `<p>${d.intro}</p>`;
@@ -305,7 +330,7 @@ function onWhatifChanged() {
   renderNote({ kind: 'whatif', title: `${d.icon} ${d.name}`, badge: WHATIF_STAGES[si], html, actions });
 }
 function startTheaterUI(id) {
-  if (whatif.active) { stopWhatif(true); for (const b of $$('#whatifCards button')) b.classList.remove('on'); }
+  stopOthers('theater'); if (whatif.active) { stopWhatif(true); for (const b of $$('#whatifCards button')) b.classList.remove('on'); }
   if (S.flight) setFlight(null); clearQuestion(); select(null); setSticks(false); if (S.explode > 0) setExplode(0); if (S.mode === 'cut') setMode('normal');
   $('#coach').hidden = true; startTheater(id); document.body.classList.add('theater'); $('#inspector').inert = true; $('#topbar').inert = true; $('#inspector').classList.remove('open'); S.tab = 'theater'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'theater'; segSet($('#tabs'), 'tab', 'mishap');
   for (const b of $$('#mishapCards button')) b.classList.toggle('on', b.dataset.m === id);
@@ -317,6 +342,7 @@ $('#thNext').addEventListener('click', () => {
   if (theater.done || !theater.active) { stopTheaterUI(); return; } theaterNext();
 });
 function onTheaterChanged() {
+  $('#thSlow').hidden = false;   // ⑩が隠したものを戻す
   if (!theater.active && !theater.done) return;
   const si = theaterStageIndex(); $('#thStages').innerHTML = TH_STAGES.map((n, i) => `<span class="${i < si ? 'done' : i === si ? 'on' : ''}">${n}</span>`).join('');
   const nb = $('#thNext'); nb.hidden = !theater.waiting;
@@ -427,6 +453,8 @@ document.addEventListener('keydown', e => {
   if (e.target.matches && e.target.matches('input, textarea, select')) return; const k = e.key.toLowerCase();
   if (S.lesson && lessonKey(e)) return;
   if (quiz.active && e.key === 'Escape') { quizStop(); return; }
+  if ((theater.active || whatif.active) && k !== 'escape') return;   // 再生中は表示モード等のキーを受けない
+  if (S.scale && (k === 'e' || /^[1-4]$/.test(k))) return;
   if (k === 'escape' && (!$('#askPop').hidden || !$('#settings').hidden)) { $('#askPop').hidden = true; $('#settings').hidden = true; return; }
   if (e.key === '?') { const st = $('#settings'); st.hidden = false; $('#askPop').hidden = true; const dt = st.querySelector('details'); if (dt) dt.open = true; return; }
   if (k === '1') setMode('normal'); else if (k === '2') setMode('xray'); else if (k === '3') setMode('wire'); else if (k === '4') setMode('cut');
@@ -441,7 +469,7 @@ document.addEventListener('keydown', e => {
 });
 
 // ---------- 設定 ----------
-$('#settingsBtn').addEventListener('click', e => { e.stopPropagation(); $('#settings').hidden = !$('#settings').hidden; $('#askPop').hidden = true; });
+$('#settingsBtn').addEventListener('click', e => { e.stopPropagation(); const st = $('#settings'); st.hidden = !st.hidden; $('#settingsBtn').setAttribute('aria-expanded', String(!st.hidden)); $('#askPop').hidden = true; });
 $('#themeSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; segSet($('#themeSeg'), 'th', b.dataset.th); if (b.dataset.th === 'auto') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = b.dataset.th; applyTheme(); });
 $('#fontSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; segSet($('#fontSeg'), 'f', b.dataset.f); document.documentElement.style.setProperty('--fs', b.dataset.f); });
 $('#qualitySeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; segSet($('#qualitySeg'), 'q', b.dataset.q); S.quality = b.dataset.q; if (b.dataset.q !== 'auto') applyQuality(parseInt(b.dataset.q, 10)); });
