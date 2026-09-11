@@ -13,7 +13,7 @@ DESC = ('ドローン（550クラスのクアッドコプター）を部品ご�
 
 tpl = (SRC / 'index.html').read_text(encoding='utf-8')
 css = (SRC / 'style.css').read_text(encoding='utf-8')
-SOURCES = ['data.js', 'materials.js', 'drone.js', 'engine.js', 'physics.js', 'airflow.js', 'theater.js', 'scale.js', 'ui.js', 'app.js']
+SOURCES = ['data.js', 'materials.js', 'drone.js', 'engine.js', 'physics.js', 'airflow.js', 'theater.js', 'scale.js', 'codex.js', 'ui.js', 'app.js']
 js = '\n'.join((SRC / f).read_text(encoding='utf-8') for f in SOURCES if (SRC / f).exists())
 
 frag = tpl.replace('/*INLINE:style.css*/', css).replace('/*INLINE:scripts*/', js)

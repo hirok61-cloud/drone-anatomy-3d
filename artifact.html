@@ -267,6 +267,15 @@ body.theater #topbar, body.theater #viewCol { opacity: .35; pointer-events: none
   .mb-row { width: auto; } .mb-row .nm { flex: none; }
 }
 
+/* ---------- 図鑑とカード (パッケージ⑦) ---------- */
+.insp-head .count.codex { color: var(--ink3); opacity: .8; }
+.insp-head .count.codex.pulse { animation: codexPop .6s ease; }
+@keyframes codexPop { 0% { transform: scale(1); } 35% { transform: scale(1.15); color: var(--accent); } 100% { transform: scale(1); } }
+.today-badge { display: inline-block; margin: 2px 0 6px; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; color: var(--accent-text); background: var(--accent-soft); }
+.trivia { margin: 8px 0 2px; padding: 8px 10px; border-radius: 10px; background: var(--seg-bg); font-size: 12.5px; line-height: 1.6; color: var(--ink2); }
+.trivia b { display: block; font-size: 10.5px; letter-spacing: .04em; color: var(--ink3); margin-bottom: 2px; }
+#photoPop img { width: 100%; border-radius: 10px; display: block; margin: 4px 0 8px; background: var(--seg-bg); }
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation-duration: .01s !important; } }
 
 </style>
@@ -283,7 +292,7 @@ body.theater #topbar, body.theater #viewCol { opacity: .35; pointer-events: none
     <div class="ctx-row" data-tab="see">
       <button id="inspToggle" class="pill-btn compact-only">部品一覧</button>
       <div class="dock-group grow"><label for="explode">分解 <span id="explodeVal" class="mono">0%</span></label><input type="range" id="explode" min="0" max="100" value="0"></div>
-      <div class="dock-group"><label>見え方</label><div class="seg small" id="modeSeg" role="radiogroup"><button data-mode="normal" class="on"><span data-simple>ふつう</span><span data-fullname>通常</span></button><button data-mode="xray"><span data-simple>すけて見る</span><span data-fullname>X線</span></button><button data-mode="wire"><span data-simple>線だけ</span><span data-fullname>線画</span></button><button data-mode="cut"><span data-simple>切って見る</span><span data-fullname>断面</span></button></div></div>
+      <div class="dock-group"><label>見え方</label><div class="seg small" id="modeSeg" role="radiogroup"><button data-mode="normal" class="on"><span data-simple>ふつう</span><span data-fullname>通常</span></button><button data-mode="xray"><span data-simple>すけて見る</span><span data-fullname>X線</span></button><button data-mode="wire"><span data-simple>線だけ</span><span data-fullname>線画</span></button><button data-mode="cut"><span data-simple>切って見る</span><span data-fullname>断面</span></button><button data-mode="blueprint" data-unlock hidden>設計図</button></div></div>
     </div>
     <div class="ctx-row" data-tab="fly" hidden>
       <button id="powerBtn" class="pill-btn primary">▶ プロペラを回す</button>
@@ -349,6 +358,13 @@ body.theater #topbar, body.theater #viewCol { opacity: .35; pointer-events: none
   <div id="askList"></div>
 </div>
 
+<div id="photoPop" class="glass popover" hidden role="dialog" aria-label="記念写真">
+<h3>記念写真</h3>
+<img id="photoImg" alt="この画面の記念写真">
+<p class="pop-foot">画像を長押し（右クリック）で保存できます。</p>
+<div class="note-actions"><button id="photoClose">閉じる</button></div>
+</div>
+
 <div id="toast" role="status" aria-live="polite" hidden></div>
 
 <div id="coach" class="glass" hidden>
@@ -359,7 +375,7 @@ body.theater #topbar, body.theater #viewCol { opacity: .35; pointer-events: none
 
 <div id="viewCol" class="glass" aria-label="視点">
   <button data-v="iso" class="on" title="斜め">斜</button><button data-v="front" title="前">前</button><button data-v="top" title="上">上</button><button data-v="side" title="横" data-full>横</button><button data-v="inside" title="モーター内部" data-full>内</button>
-  <hr><button class="tgl on" data-t="labels" aria-pressed="true" title="ラベル"><i></i>名</button><button id="fsBtn" title="全画面">⤢</button>
+  <hr><button class="tgl on" data-t="labels" aria-pressed="true" title="ラベル"><i></i>名</button><button id="photoBtn" title="記念写真">📷</button><button id="fsBtn" title="全画面">⤢</button>
 </div>
 
 <div id="noteCard" class="glass" hidden aria-live="polite">
@@ -378,7 +394,7 @@ body.theater #topbar, body.theater #viewCol { opacity: .35; pointer-events: none
   <div class="grabber" aria-hidden="true"></div>
   <div class="insp-head">
     <button id="inspBack" class="icon-btn sm" aria-label="一覧へ" hidden>‹</button>
-    <h2 id="inspTitle">部品</h2><span id="partCount" class="count"></span>
+    <h2 id="inspTitle">部品</h2><span id="partCount" class="count"></span><span id="codexCount" class="count codex" title="見た部品"></span>
     <button id="inspClose" class="icon-btn sm" aria-label="閉じる">✕</button>
   </div>
   <div id="inspBody">
@@ -921,6 +937,50 @@ const PAYLOADS = [
   { id: 'cam', name: 'カメラ +250g', g: 250, pos: [0, -0.12, -0.06] },
   { id: 'box', name: '荷物 1kg', g: 1000, pos: [0, -0.13, 0.02], ghost: { shape: 'box', size: [0.12, 0.08, 0.10] } },
 ];
+
+// ===== 図鑑の豆知識 (パッケージ⑦): 1部品1文 =====
+const TRIVIA = {
+  frameTop: '上と下の板で挟むから、アームは1本ずつ外して交換できる。',
+  frameBottom: '下の板は上より厚い。バッテリーと脚の荷重を受けるのはこちら。',
+  arm: '中空の管は同じ重さの棒より曲がりにくい。だから中は空っぽ。',
+  armClamp: '締めすぎるとカーボン管が割れる。トルクは「手で回して止まる少し先」。',
+  motorMount: '2ピースの下側にネジ穴がある。長すぎるネジは巻線に届いて短絡する。',
+  standoff: '支柱の長さが、上下の板の間に入る基板の高さを決める。',
+  screws: '振動でゆるむのでネジ止め剤か、緩み止め付きナットを使う。',
+  motor: '外側が回る「アウトランナー」。だから缶に触ってはいけない。',
+  bell: '缶の内側に磁石が貼ってある。回っているのは磁石のほう。',
+  stator: '固定子は動かない。回っているように見えたら軸受が壊れている。',
+  winding: '巻線は3本の線に分かれている。2本を入れ替えると回転方向が逆になる。',
+  magnet: '落として缶をぶつけると磁石が欠ける。欠けると振動が出る。',
+  shaft: 'ベアリングを指で回して「ザラッ」としたら交換のサイン。',
+  motorBase: 'ベースの穴の間隔（16×19mm など）が、載せられるアームを決める。',
+  prop: '翼端の色帯は「回転方向」の目印。CCW と CW を混ぜて付けると飛ばない。',
+  propNut: 'CCW 側は逆ネジ。回転で締まる向きに切ってある。',
+  propAdapter: 'アダプターの穴径とプロペラの穴径は合っていないと芯がずれて振動する。',
+  esc: 'ESC は「速さ」を命じるのではなく、電流を毎秒数万回オンオフしている。',
+  fc: '毎秒数千回、傾きを測って直す。人が手で同じことをするのは不可能。',
+  pdb: '1枚の基板で太い電流を4本の ESC に分ける。ここが焼けると全部止まる。',
+  capacitor: 'モーターが作る電圧の波を吸収する。無いと FC が誤作動することがある。',
+  buzzer: '草むらに落ちた機体を探すのは、この小さな音。',
+  battery: '重さの4分の1が電池。飛行時間を伸ばす一番の近道は「軽くする」。',
+  cells: '6枚のセルの電圧が 0.05V 以上ずれていたら休ませる。',
+  xt60: '黄色いコネクタは 60A 用。焼けて茶色くなっていたら交換。',
+  balance: '細い線はセルを1枚ずつ測るため。充電器はこれで各セルを揃える。',
+  strap: '面ファスナーのストラップ2本で 640g を支える。1本だと飛行中にずれる。',
+  wiring: '3本のモーター線をねじるのは、電気のノイズを外に出さないため。',
+  gps: '衛星からの電波は上からくる。だから一番高い所に載せる。',
+  rx: '受信機のアンテナは2本を 90° に開く。どちらかが必ず送信機を向くように。',
+  vtx: '映像送信機は熱くなる。風が当たる場所に置くのはそのため。',
+  led: '前が赤と緑、後ろが白。遠くからでも向きがわかる決まり。',
+  damper: 'ゴムのダンパーがモーターの細かい振動をカメラに伝えない。',
+  gimbal: '3つのモーターが機体の傾きを打ち消す。だから映像が水平のまま。',
+  camera: 'カメラは機体の中で一番揺れに弱い部品。だから一番下に、ゴムの上に載る。',
+  batteryTray: 'トレイの前後どこに電池を置くかで重心が決まる。',
+  remoteId: 'リモートIDは機体の「ナンバープレート」を電波で出す装置。',
+  regMark: '登録記号は外から読める場所に、消えない方法で表示する。',
+  telemetry: 'テレメトリーは機体から地上へ「電池が少ない」などを知らせる無線。',
+  landingGear: '脚は「壊れて機体を守る」部品。曲がったら交換で正解。',
+};
 
 // ===== 手続き生成テクスチャと材質 (v2: 製品レンダリング品質) =====
 function makeCanvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
@@ -1978,18 +2038,29 @@ function keepReal(m) {
   if (S.selAll) { if (f.key === sel.key || (c && c.key === sel.key)) return true; return partsOf(sel.key).some(sp => isAnc(sp.obj, f.obj)); }
   return f === sel || c === sel || isAnc(sel.obj, f.obj);
 }
+// 設計図モード(パッケージ⑦): 線画の色と背景だけを差し替える
+const isWireMode = () => S.mode === 'wire' || S.mode === 'blueprint';
+const BLUEPRINT = { paper: '#1d3a6e', wire: '#dfe9ff', bg: ['#20416f', '#1b365e', '#12284a', '#0c1c36'], grid: 0xdfe9ff };
+function applyBlueprint() {
+  const on = S.mode === 'blueprint', T = THEME[themeDark ? 'dark' : 'light'];
+  wireMat.color.set(on ? BLUEPRINT.wire : T.wire); paperMat.color.set(on ? BLUEPRINT.paper : T.paper);
+  gridU.uLine.value.set(on ? BLUEPRINT.grid : T.grid);
+  const bg = on ? BLUEPRINT.bg : T.bg;
+  backdropMat.uniforms.top.value.set(bg[0]); backdropMat.uniforms.mid.value.set(bg[1]); backdropMat.uniforms.edge.value.set(bg[2]); backdropMat.uniforms.bottom.value.set(bg[3]);
+  groundMat.color.set(on ? 0x16305c : T.ground);
+}
 function applyMode() {
   for (const p of D.parts) for (const m of p.meshes) {
     const real = S.mode === 'normal' || S.mode === 'cut' || keepReal(m);
     if (!real && S.mode === 'xray') { m.material = xrayMat; m.castShadow = false; }
-    else if (!real && S.mode === 'wire') { m.material = paperMat; m.castShadow = false; }
+    else if (!real && isWireMode()) { m.material = paperMat; m.castShadow = false; }
     else { m.material = m.userData.tint || m.userData.origMat; m.castShadow = m.userData.castShadow && S.shadows; }
-    if (m.userData.wireClone) m.userData.wireClone.visible = !real && S.mode === 'wire';
+    if (m.userData.wireClone) m.userData.wireClone.visible = !real && isWireMode();
   }
   const cutOn = S.mode === 'cut';
   for (const c of cut.list) { if (!cutOn) c.mat.clippingPlanes[0].copy(cut.far); }
-  renderer.shadowMap.enabled = key.castShadow = S.shadows && S.mode !== 'xray' && S.mode !== 'wire';
-  gridU.uGrid.value = (S.mode === 'xray' || S.mode === 'wire') ? 1 : 0;
+  renderer.shadowMap.enabled = key.castShadow = S.shadows && S.mode !== 'xray' && !isWireMode();
+  gridU.uGrid.value = (S.mode === 'xray' || isWireMode()) ? 1 : 0;
   S.shadowDirty = S.csDirty = S.aoDirty = true;
 }
 function updateCutPlanes() {
@@ -2092,6 +2163,7 @@ function applyTheme() {
   wireMat.color.set(T.wire); paperMat.color.set(T.paper);
   arrowNeutral = themeDark ? 0xf2f4f8 : 0x30343c;
   D.parts.filter(p => p.key === 'led').forEach(p => { if (p.obj.userData.halo) p.obj.userData.halo.material.opacity = T.halo; });
+  applyBlueprint();
   if (typeof onThemeChanged === 'function') onThemeChanged(themeDark);
   S.shadowDirty = S.csDirty = S.aoDirty = true;
 }
@@ -2760,6 +2832,122 @@ function initScale() {
   cv.addEventListener('pointerup', scaleDragEnd); cv.addEventListener('pointercancel', scaleDragEnd);
 }
 
+// ===== 図鑑とカード (パッケージ⑦) =====
+// 見た部品を静かに数え、今日の一部品をうっすら光らせ、記念写真を持ち帰れるようにする。
+// バッジ・称号・ランキング・音は作らない（数字ひとつと控えめな光だけ）。
+const codex = { seen: new Set(), today: null, pending: null, done: false, t: 0, litKey: null, total: 40 };
+
+function codexLoad() {
+  try { const a = JSON.parse(store.get('codex') || '[]'); if (Array.isArray(a)) codex.seen = new Set(a.filter(k => PARTS[k])); } catch (e) { codex.seen = new Set(); }
+  codex.done = store.get('codexDone') === '1';
+}
+function codexSave() { try { store.set('codex', JSON.stringify([...codex.seen])); } catch (e) {} }
+
+// 日付から今日の一部品を決める（端末内で完結。通信も乱数も使わない）
+function codexToday() {
+  const now = new Date();
+  const s = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  let h = 0; for (let i = 0; i < s.length; i++) h += s.charCodeAt(i);
+  return LIST_ORDER[h % LIST_ORDER.length];
+}
+
+function codexMark(key) {
+  if (!key || !PARTS[key] || codex.seen.has(key)) return;
+  codex.seen.add(key); codexSave(); renderCodexCount(true);
+  if (codex.seen.size >= codex.total && !codex.done) codexUnlock();
+}
+function codexOnSelect(p) { codex.pending = p && PARTS[p.key] && !codex.seen.has(p.key) ? { key: p.key, at: performance.now() } : null; }
+
+function renderCodexCount(pulse) {
+  const el = $('#codexCount'); if (!el) return;
+  el.textContent = `${codex.seen.size}/${codex.total}`;
+  el.title = `見た部品 ${codex.seen.size} / ${codex.total}`;
+  if (pulse && !reduceMotion) { el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
+}
+
+function codexUnlock() {
+  codex.done = true; store.set('codexDone', '1');
+  const b = $('#modeSeg [data-mode=blueprint]'); if (b) b.hidden = false;
+  showCoach('全部の部品を見ました', '設計図モードが使えるようになりました。見え方の「設計図」で開けます', () => setMode('blueprint'));
+}
+
+// 今日の一部品を光らせてよい状況か
+function codexGlowKey() {
+  const k = codex.today;
+  if (!k || codex.seen.has(k)) return null;
+  if (S.mode !== 'normal' || S.use || S.scale || S.question || theater.active || S.explodeT > 0.05) return null;
+  if (S.selected && S.selected.key === k) return null;
+  const ps = partsOf(k);
+  if (!ps.length || !ps.some(p => partVisible(p) && effVisible(p.obj))) return null;
+  return k;
+}
+function stepCodex(dtReal) {
+  if (codex.pending && performance.now() - codex.pending.at > 1500) { codexMark(codex.pending.key); codex.pending = null; }
+  codex.t += dtReal;
+  const k = codexGlowKey();
+  if (k !== codex.litKey) { if (codex.litKey) for (const p of partsOf(codex.litKey)) setTint(p, ACCENT, 0); codex.litKey = k; }
+  if (!k) return;
+  const amp = reduceMotion ? 0.2 : 0.225 + 0.075 * Math.sin(codex.t * 2 * Math.PI / 2.4);   // 0.15〜0.30 の呼吸
+  for (const p of partsOf(k)) setTint(p, ACCENT, amp);
+}
+
+// 解説カードに差し込む断片
+function codexHead(key) { return codex.today === key ? '<div class="today-badge">今日の一部品</div>' : ''; }
+function codexTriviaRow(key) { return TRIVIA[key] ? `<div class="trivia"><b>豆知識</b>${TRIVIA[key]}</div>` : ''; }
+
+// ---------- 記念写真 ----------
+async function codexPoster() {
+  const cv = document.createElement('canvas'); cv.width = 1600; cv.height = 1200;
+  const g = cv.getContext('2d');
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark' || (!document.documentElement.getAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+  g.fillStyle = dark ? '#12151b' : '#eef0f4'; g.fillRect(0, 0, 1600, 1200);
+  const src = renderer.domElement;
+  if (typeof renderOnce === 'function') renderOnce();
+  const url = src.toDataURL('image/jpeg', 0.92);
+  await new Promise(res => { const im = new Image(); im.onload = () => {
+      const H = 1100, sr = im.width / im.height, dr = 1600 / H;   // cover
+      let sw = im.width, sh = im.height, sx = 0, sy = 0;
+      if (sr > dr) { sw = im.height * dr; sx = (im.width - sw) / 2; } else { sh = im.width / dr; sy = (im.height - sh) / 2; }
+      g.drawImage(im, sx, sy, sw, sh, 0, 0, 1600, H); res();
+    }; im.onerror = () => res(); im.src = url; });
+  // 下の帯
+  g.fillStyle = dark ? '#171b22' : '#ffffff'; g.fillRect(0, 1100, 1600, 100);
+  g.fillStyle = dark ? 'rgba(255,255,255,.10)' : 'rgba(20,26,40,.10)'; g.fillRect(0, 1100, 1600, 1);
+  const F = '-apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif';
+  g.textBaseline = 'middle';
+  g.fillStyle = dark ? '#e8ebf0' : '#1b1f27'; g.font = `700 36px ${F}`; g.textAlign = 'left';
+  g.fillText('ドローンの構造', 44, 1152);
+  const p = S.selected;
+  const name = p ? ((S.depth === 'simple' && SIMPLE_NAME[p.key]) || PARTS[p.key].name) : '550クラス クアッドコプター';
+  g.fillStyle = '#ef6a2d'; g.font = `700 34px ${F}`; g.textAlign = 'center'; g.fillText(name, 800, 1152);
+  const n = new Date(), ds = `${n.getFullYear()}.${String(n.getMonth() + 1).padStart(2, '0')}.${String(n.getDate()).padStart(2, '0')}`;
+  g.fillStyle = dark ? '#8791a3' : '#7b8290'; g.font = `500 26px ${F}`; g.textAlign = 'right';
+  g.fillText(`${ds}　${codex.seen.size}/${codex.total}`, 1556, 1152);
+  return cv;
+}
+
+async function photoShare() {
+  let cv; try { cv = await codexPoster(); } catch (e) { showToast('写真を作れませんでした'); return; }
+  const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.92));
+  if (blob && navigator.canShare) {
+    const file = new File([blob], 'drone-anatomy.jpg', { type: 'image/jpeg' });
+    if (navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: 'ドローンの構造' }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+  }
+  $('#photoImg').src = cv.toDataURL('image/jpeg', 0.92);
+  $('#photoPop').hidden = false; $('#askPop').hidden = true; $('#settings').hidden = true;
+}
+
+function initCodex() {
+  codexLoad(); codex.today = codexToday(); renderCodexCount(false);
+  if (codex.seen.size >= codex.total && !codex.done) { codex.done = true; store.set('codexDone', '1'); }   // 既に全部見ている状態で開いた場合は静かに解放
+  const b = $('#modeSeg [data-mode=blueprint]'); if (b) b.hidden = !codex.done;
+  window.codexPoster = codexPoster;   // 検証用
+  $('#photoBtn').addEventListener('click', photoShare);
+  $('#photoClose').addEventListener('click', () => { $('#photoPop').hidden = true; });
+}
+
 // ===== UI: タブ・扉・解説・ラベル・スティック・入力 =====
 const LIST_ORDER = ['frameTop', 'frameBottom', 'regMark', 'arm', 'armClamp', 'motorMount', 'standoff', 'screws', 'motor', 'bell', 'stator', 'winding', 'magnet', 'shaft', 'motorBase', 'prop', 'propNut', 'propAdapter', 'esc', 'fc', 'pdb', 'capacitor', 'buzzer', 'battery', 'cells', 'batteryTray', 'xt60', 'balance', 'strap', 'wiring', 'gps', 'remoteId', 'rx', 'vtx', 'telemetry', 'led', 'gimbal', 'camera', 'damper', 'landingGear'];
 const SUB = { bell: 'motor', stator: 'motor', winding: 'motor', magnet: 'motor', shaft: 'motor', motorBase: 'motor', cells: 'battery', propNut: 'prop', propAdapter: 'prop' };
@@ -2809,7 +2997,7 @@ function setDepth(d) {
 $('#depthSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setDepth(b.dataset.d); });
 
 // ---------- モード / 分解 / モーター ----------
-function setMode(m) { const was = S.mode; S.mode = m; segSet($('#modeSeg'), 'mode', m); applyMode(); if (m !== was) { if (m === 'cut') { setView('inside'); showToast('断面: モーター1つとバッテリーを半分に切った断面を見ています'); } else showToast({ normal: 'ふつうの見え方', xray: 'すけて見る: 外側を透かして中の部品が見えます', wire: '線だけ: 形の輪郭だけを見ます' }[m]); } }
+function setMode(m) { const was = S.mode; S.mode = m; segSet($('#modeSeg'), 'mode', m); applyMode(); applyBlueprint(); if (m !== was) { if (m === 'cut') { setView('inside'); showToast('断面: モーター1つとバッテリーを半分に切った断面を見ています'); } else showToast({ normal: 'ふつうの見え方', xray: 'すけて見る: 外側を透かして中の部品が見えます', wire: '線だけ: 形の輪郭だけを見ます', blueprint: '設計図: 全部の部品を見た人だけのモードです' }[m]); } }
 $('#modeSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.mode); });
 const explodeEl = $('#explode');
 explodeEl.addEventListener('input', () => { S.explodeAt = performance.now(); S.explode = explodeEl.value / 100; S.explodeT = S.explode; $('#explodeVal').textContent = explodeEl.value + '%'; explodePullBack(); S.shadowDirty = S.csDirty = true; });
@@ -2884,6 +3072,7 @@ function select(p, all = false, opts = {}) {
   renderDetail();
   if (p && narrow() && !opts.quiet) $('#inspector').classList.add('open');
   if (S.scale) renderMassBar(p && p.key);
+  codexOnSelect(p);
 }
 function renderDetail() {
   const box = $('#detail'), p = S.selected, body_ = $('#inspBody');
@@ -2892,8 +3081,10 @@ function renderDetail() {
   const inst = PER_MOTOR.has(p.key) && !S.selAll ? ` · ${MOTOR_INFO[p.idx].id}（${MOTOR_INFO[p.idx].pos}・${MOTOR_INFO[p.idx].dir === 'CW' ? '↻' : '↺'}${MOTOR_INFO[p.idx].dir}）` : '';
   const hidden = partsOf(p.key).some(x => x.hidden);
   let h = `<div class="d-group" style="--c:${g.color}"><i></i>${g.name}</div><h3>${simple && SIMPLE_NAME[p.key] ? SIMPLE_NAME[p.key] : d.name}</h3><p class="d-en">${d.en}${d.count > 1 ? ` · ×${d.count}` : ''}${inst}</p>`;
+  h += codexHead(p.key);
   h += `<div class="d-actions"><button id="dFocus" class="primary">注目</button>${simple ? '' : `<button id="dIsolate">${S.isolated === p.key ? '単独表示を解除' : '単独表示'}</button><button id="dHide">${hidden ? '表示する' : '非表示'}</button>`}</div>`;
   h += `<section><h4>役割</h4><p>${simple && sd ? sd.role : d.role}</p></section>`;
+  h += codexTriviaRow(p.key);
   if (simple && sd) h += `<div class="analogy"><b>たとえるなら</b>${sd.analogy}</div>`;
   if (!simple && (p.key === 'motor' || p.key === 'prop' || p.key === 'esc')) h += `<section><h4>配置と回転方向（上から見て）</h4><div class="mtab">${MOTOR_INFO.map(m => `<div class="${m.dir.toLowerCase()}"><b>${m.id} ${m.dir === 'CW' ? '↻' : '↺'}${m.dir}</b>${m.pos}</div>`).join('')}</div></section>`;
   if (d.structure) h += `<section><h4>構造</h4><ul>${d.structure.slice(0, simple ? 3 : 9).map(s => `<li>${s}</li>`).join('')}</ul></section>`;
@@ -3179,6 +3370,7 @@ function initUI() {
 function rebuildAirflow() { const old = air.mesh; buildAirflow(Q.particles); if (old) { old.parent && old.parent.remove(old); } scenePass.particles = air.mesh; if (Q.direct) scene.add(air.mesh); airflowTheme(themeDark); }
 let last = performance.now(), fpsAcc = 0, fpsN = 0, perfT = 0, lowT = 0, highT = 0;
 function frame(now) { requestAnimationFrame(frame); tick(now); }
+window.renderOnce = () => tick(performance.now());   // 記念写真: 描画直後に同期で取り出すため
 function tick(now) {
   if (now < last) now = last + 1000 / 60;
   const dtRaw = Math.max(0, (now - last) / 1000), dt = Math.min(0.05, dtRaw); last = now; fpsAcc += dtRaw; fpsN++; perfPush(dtRaw * 1000);
@@ -3212,7 +3404,7 @@ function tick(now) {
   if (Q.direct) { if (air.mesh && air.mesh.parent !== scene) scene.add(air.mesh); renderer.setRenderTarget(null); renderer.render(scene, camera); }
   else { if (air.mesh && air.mesh.parent === scene) scene.remove(air.mesh); composer.render(); }
   perf.cpu = performance.now() - c0;
-  updateLabels(); if (S.flight) updateFlightTab();
+  updateLabels(); stepCodex(dt); if (S.flight) updateFlightTab();
   perfT += dtRaw;
   if (perfT > 1.5) {
     perfT = 0; perf.fps = fpsN / fpsAcc; fpsAcc = 0; fpsN = 0;
@@ -3226,13 +3418,15 @@ function tick(now) {
     perf.programs = renderer.info.programs.length;
   }
 }
-window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: scale, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
+// 検証用に最小限だけグローバルへ出す(モジュールスコープのままだとコンソールから触れないため)
+window.LIST_ORDER = LIST_ORDER; window.PARTS = PARTS;
+window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: scale, __codex: codex, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
 // ---------- 起動 ----------
 (async () => {
   $('#loadMsg').textContent = '照明と材質を準備しています…';
   buildList(); applyTheme(); resize();
   applyQuality(isMobile ? (HF ? 1 : 0) : 3);
-  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale();
+  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex();
   { const vs = viewScale(); if (vs > 1) camera.position.multiplyScalar(vs); }
   renderer.setClearColor(0x000000, 1);
   $('#loadMsg').textContent = 'シェーダーをコンパイルしています…'; mark('setup');

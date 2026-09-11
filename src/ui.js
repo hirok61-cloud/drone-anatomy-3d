@@ -47,7 +47,7 @@ function setDepth(d) {
 $('#depthSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setDepth(b.dataset.d); });
 
 // ---------- モード / 分解 / モーター ----------
-function setMode(m) { const was = S.mode; S.mode = m; segSet($('#modeSeg'), 'mode', m); applyMode(); if (m !== was) { if (m === 'cut') { setView('inside'); showToast('断面: モーター1つとバッテリーを半分に切った断面を見ています'); } else showToast({ normal: 'ふつうの見え方', xray: 'すけて見る: 外側を透かして中の部品が見えます', wire: '線だけ: 形の輪郭だけを見ます' }[m]); } }
+function setMode(m) { const was = S.mode; S.mode = m; segSet($('#modeSeg'), 'mode', m); applyMode(); applyBlueprint(); if (m !== was) { if (m === 'cut') { setView('inside'); showToast('断面: モーター1つとバッテリーを半分に切った断面を見ています'); } else showToast({ normal: 'ふつうの見え方', xray: 'すけて見る: 外側を透かして中の部品が見えます', wire: '線だけ: 形の輪郭だけを見ます', blueprint: '設計図: 全部の部品を見た人だけのモードです' }[m]); } }
 $('#modeSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.mode); });
 const explodeEl = $('#explode');
 explodeEl.addEventListener('input', () => { S.explodeAt = performance.now(); S.explode = explodeEl.value / 100; S.explodeT = S.explode; $('#explodeVal').textContent = explodeEl.value + '%'; explodePullBack(); S.shadowDirty = S.csDirty = true; });
@@ -122,6 +122,7 @@ function select(p, all = false, opts = {}) {
   renderDetail();
   if (p && narrow() && !opts.quiet) $('#inspector').classList.add('open');
   if (S.scale) renderMassBar(p && p.key);
+  codexOnSelect(p);
 }
 function renderDetail() {
   const box = $('#detail'), p = S.selected, body_ = $('#inspBody');
@@ -130,8 +131,10 @@ function renderDetail() {
   const inst = PER_MOTOR.has(p.key) && !S.selAll ? ` · ${MOTOR_INFO[p.idx].id}（${MOTOR_INFO[p.idx].pos}・${MOTOR_INFO[p.idx].dir === 'CW' ? '↻' : '↺'}${MOTOR_INFO[p.idx].dir}）` : '';
   const hidden = partsOf(p.key).some(x => x.hidden);
   let h = `<div class="d-group" style="--c:${g.color}"><i></i>${g.name}</div><h3>${simple && SIMPLE_NAME[p.key] ? SIMPLE_NAME[p.key] : d.name}</h3><p class="d-en">${d.en}${d.count > 1 ? ` · ×${d.count}` : ''}${inst}</p>`;
+  h += codexHead(p.key);
   h += `<div class="d-actions"><button id="dFocus" class="primary">注目</button>${simple ? '' : `<button id="dIsolate">${S.isolated === p.key ? '単独表示を解除' : '単独表示'}</button><button id="dHide">${hidden ? '表示する' : '非表示'}</button>`}</div>`;
   h += `<section><h4>役割</h4><p>${simple && sd ? sd.role : d.role}</p></section>`;
+  h += codexTriviaRow(p.key);
   if (simple && sd) h += `<div class="analogy"><b>たとえるなら</b>${sd.analogy}</div>`;
   if (!simple && (p.key === 'motor' || p.key === 'prop' || p.key === 'esc')) h += `<section><h4>配置と回転方向（上から見て）</h4><div class="mtab">${MOTOR_INFO.map(m => `<div class="${m.dir.toLowerCase()}"><b>${m.id} ${m.dir === 'CW' ? '↻' : '↺'}${m.dir}</b>${m.pos}</div>`).join('')}</div></section>`;
   if (d.structure) h += `<section><h4>構造</h4><ul>${d.structure.slice(0, simple ? 3 : 9).map(s => `<li>${s}</li>`).join('')}</ul></section>`;

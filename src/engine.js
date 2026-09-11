@@ -237,18 +237,29 @@ function keepReal(m) {
   if (S.selAll) { if (f.key === sel.key || (c && c.key === sel.key)) return true; return partsOf(sel.key).some(sp => isAnc(sp.obj, f.obj)); }
   return f === sel || c === sel || isAnc(sel.obj, f.obj);
 }
+// 設計図モード(パッケージ⑦): 線画の色と背景だけを差し替える
+const isWireMode = () => S.mode === 'wire' || S.mode === 'blueprint';
+const BLUEPRINT = { paper: '#1d3a6e', wire: '#dfe9ff', bg: ['#20416f', '#1b365e', '#12284a', '#0c1c36'], grid: 0xdfe9ff };
+function applyBlueprint() {
+  const on = S.mode === 'blueprint', T = THEME[themeDark ? 'dark' : 'light'];
+  wireMat.color.set(on ? BLUEPRINT.wire : T.wire); paperMat.color.set(on ? BLUEPRINT.paper : T.paper);
+  gridU.uLine.value.set(on ? BLUEPRINT.grid : T.grid);
+  const bg = on ? BLUEPRINT.bg : T.bg;
+  backdropMat.uniforms.top.value.set(bg[0]); backdropMat.uniforms.mid.value.set(bg[1]); backdropMat.uniforms.edge.value.set(bg[2]); backdropMat.uniforms.bottom.value.set(bg[3]);
+  groundMat.color.set(on ? 0x16305c : T.ground);
+}
 function applyMode() {
   for (const p of D.parts) for (const m of p.meshes) {
     const real = S.mode === 'normal' || S.mode === 'cut' || keepReal(m);
     if (!real && S.mode === 'xray') { m.material = xrayMat; m.castShadow = false; }
-    else if (!real && S.mode === 'wire') { m.material = paperMat; m.castShadow = false; }
+    else if (!real && isWireMode()) { m.material = paperMat; m.castShadow = false; }
     else { m.material = m.userData.tint || m.userData.origMat; m.castShadow = m.userData.castShadow && S.shadows; }
-    if (m.userData.wireClone) m.userData.wireClone.visible = !real && S.mode === 'wire';
+    if (m.userData.wireClone) m.userData.wireClone.visible = !real && isWireMode();
   }
   const cutOn = S.mode === 'cut';
   for (const c of cut.list) { if (!cutOn) c.mat.clippingPlanes[0].copy(cut.far); }
-  renderer.shadowMap.enabled = key.castShadow = S.shadows && S.mode !== 'xray' && S.mode !== 'wire';
-  gridU.uGrid.value = (S.mode === 'xray' || S.mode === 'wire') ? 1 : 0;
+  renderer.shadowMap.enabled = key.castShadow = S.shadows && S.mode !== 'xray' && !isWireMode();
+  gridU.uGrid.value = (S.mode === 'xray' || isWireMode()) ? 1 : 0;
   S.shadowDirty = S.csDirty = S.aoDirty = true;
 }
 function updateCutPlanes() {
@@ -351,6 +362,7 @@ function applyTheme() {
   wireMat.color.set(T.wire); paperMat.color.set(T.paper);
   arrowNeutral = themeDark ? 0xf2f4f8 : 0x30343c;
   D.parts.filter(p => p.key === 'led').forEach(p => { if (p.obj.userData.halo) p.obj.userData.halo.material.opacity = T.halo; });
+  applyBlueprint();
   if (typeof onThemeChanged === 'function') onThemeChanged(themeDark);
   S.shadowDirty = S.csDirty = S.aoDirty = true;
 }

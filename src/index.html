@@ -18,7 +18,7 @@
     <div class="ctx-row" data-tab="see">
       <button id="inspToggle" class="pill-btn compact-only">部品一覧</button>
       <div class="dock-group grow"><label for="explode">分解 <span id="explodeVal" class="mono">0%</span></label><input type="range" id="explode" min="0" max="100" value="0"></div>
-      <div class="dock-group"><label>見え方</label><div class="seg small" id="modeSeg" role="radiogroup"><button data-mode="normal" class="on"><span data-simple>ふつう</span><span data-fullname>通常</span></button><button data-mode="xray"><span data-simple>すけて見る</span><span data-fullname>X線</span></button><button data-mode="wire"><span data-simple>線だけ</span><span data-fullname>線画</span></button><button data-mode="cut"><span data-simple>切って見る</span><span data-fullname>断面</span></button></div></div>
+      <div class="dock-group"><label>見え方</label><div class="seg small" id="modeSeg" role="radiogroup"><button data-mode="normal" class="on"><span data-simple>ふつう</span><span data-fullname>通常</span></button><button data-mode="xray"><span data-simple>すけて見る</span><span data-fullname>X線</span></button><button data-mode="wire"><span data-simple>線だけ</span><span data-fullname>線画</span></button><button data-mode="cut"><span data-simple>切って見る</span><span data-fullname>断面</span></button><button data-mode="blueprint" data-unlock hidden>設計図</button></div></div>
     </div>
     <div class="ctx-row" data-tab="fly" hidden>
       <button id="powerBtn" class="pill-btn primary">▶ プロペラを回す</button>
@@ -84,6 +84,13 @@
   <div id="askList"></div>
 </div>
 
+<div id="photoPop" class="glass popover" hidden role="dialog" aria-label="記念写真">
+<h3>記念写真</h3>
+<img id="photoImg" alt="この画面の記念写真">
+<p class="pop-foot">画像を長押し（右クリック）で保存できます。</p>
+<div class="note-actions"><button id="photoClose">閉じる</button></div>
+</div>
+
 <div id="toast" role="status" aria-live="polite" hidden></div>
 
 <div id="coach" class="glass" hidden>
@@ -94,7 +101,7 @@
 
 <div id="viewCol" class="glass" aria-label="視点">
   <button data-v="iso" class="on" title="斜め">斜</button><button data-v="front" title="前">前</button><button data-v="top" title="上">上</button><button data-v="side" title="横" data-full>横</button><button data-v="inside" title="モーター内部" data-full>内</button>
-  <hr><button class="tgl on" data-t="labels" aria-pressed="true" title="ラベル"><i></i>名</button><button id="fsBtn" title="全画面">⤢</button>
+  <hr><button class="tgl on" data-t="labels" aria-pressed="true" title="ラベル"><i></i>名</button><button id="photoBtn" title="記念写真">📷</button><button id="fsBtn" title="全画面">⤢</button>
 </div>
 
 <div id="noteCard" class="glass" hidden aria-live="polite">
@@ -113,7 +120,7 @@
   <div class="grabber" aria-hidden="true"></div>
   <div class="insp-head">
     <button id="inspBack" class="icon-btn sm" aria-label="一覧へ" hidden>‹</button>
-    <h2 id="inspTitle">部品</h2><span id="partCount" class="count"></span>
+    <h2 id="inspTitle">部品</h2><span id="partCount" class="count"></span><span id="codexCount" class="count codex" title="見た部品"></span>
     <button id="inspClose" class="icon-btn sm" aria-label="閉じる">✕</button>
   </div>
   <div id="inspBody">
