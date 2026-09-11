@@ -3,7 +3,7 @@ const RPM_MAX = 9000, HOVER_RPM = RPM_MAX * 0.5, GRAV = 9.81;
 const MOTOR_U = [[1, -1], [1, 1], [-1, 1], [-1, -1]].map(([x, z]) => ({ x: x / Math.SQRT2, z: z / Math.SQRT2 }));
 const body = {
   px: 0, py: 0, pz: 0, vx: 0, vy: 0, vz: 0, tx: 0, tz: 0, wx: 0, wz: 0, ax: 0, az: 0, yaw: 0, yawRate: 0, vyF: 0,
-  home: { x: 0, z: 0 }, mode: 'idle', mult: [1, 1, 1, 1], t: 0,
+  home: { x: 0, z: 0 }, mode: 'idle', mult: [1, 1, 1, 1], t: 0, lookYaw: null,
   hold: null, stick: { x: 0, y: 0, yaw: 0, thr: 0, active: false, fx: 0, fy: 0 }, stickWas: false, tilt: { x: 0, y: 0, active: false }, v: new THREE.Vector3(),
 };
 const free = { Kx: THREE.MathUtils.degToRad(34), Kv: THREE.MathUtils.degToRad(12.7), KvBrake: THREE.MathUtils.degToRad(17), wAtt: 14, zAtt: 0.70, tiltMax: THREE.MathUtils.degToRad(22), holdMax: THREE.MathUtils.degToRad(18), kappa: 0.0057, hoverY: 0.06 };
@@ -61,7 +61,7 @@ function stepFree(dt) {
   const ay = 36 * (pyCmd - body.py) - 9.6 * body.vyF; body.vyF += ay * dt; body.py += body.vyF * dt;
   // ヨー
   const yawCmd = st.active ? -1.2 * st.yaw : 0; body.yawRate = dl(body.yawRate, yawCmd, dt, 6); body.yaw += body.yawRate * dt;
-  if (!st.active) { body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); body.yaw = dl(body.yaw, 0, dt, 1.5); }
+  if (!st.active) { body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); const look = (S.alive && body.lookYaw != null && !body.hold && !ti.active && !reduceMotion); body.yaw = dl(body.yaw, look ? body.lookYaw : 0, dt, look ? 2 : 1.5); }   // ⑧: ポインタの方へ数度だけ向く
   // モーター配分: α_z = −τ̈x, α_x = τ̈z
   const collective = 1 / Math.cos(th) - 1; const alz = -body.ax, alx = body.az;
   for (let i = 0; i < 4; i++) {
@@ -138,7 +138,7 @@ function updateMotors(dtSim, dtReal) {
     mo.disc.material.opacity = wDisc * 0.85; mo.disc.rotation.z += mo.dir * 4 * dtReal;
     const raw = mo.rpm / HOVER_RPM * 100; mo.pct = raw > mo.pct ? raw : mo.pct + (raw - mo.pct) * (1 - Math.exp(-dtReal / 0.5));
     if (mo.rpm > 50) anySpin = true;
-    const th = D.arrows.thrust[i]; th.visible = (body.mode === 'demo' || body.mode === 'free' || body.mode === 'theater') && partVisible(mo.part) && mo.rpm > 100;
+    const th = D.arrows.thrust[i]; th.visible = (body.mode === 'demo' || body.mode === 'free' || body.mode === 'theater') && partVisible(mo.part) && mo.rpm > 100 && !(typeof alive === 'object' && alive.on && !body.hold && Math.hypot(body.tx, body.tz) < 0.035);   // 生きているだけの間は矢印を出さない
     if (th.visible) { th.userData.setLength(0.02 + 0.11 * mo.rpm / RPM_MAX); const rel = mo.rpm / Math.max(1, S.power * RPM_MAX); th.userData.mat.color.set(rel > 1.03 ? 0x22c55e : rel < 0.97 ? 0xf59e0b : arrowNeutral); }
     D.arrows.rot[i].visible = (S.arrows || S.flight === 'yaw') && partVisible(mo.part) && S.explodeT < 0.05;
   });

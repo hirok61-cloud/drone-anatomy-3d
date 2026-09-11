@@ -586,3 +586,32 @@ const WHATIF = [
     human: ['補助者が近づく人を止める', '離着陸場所にロープや目印を置く', '人が来たら機体を離す、または降ろして止める', '回っているプロペラに近づかない'],
     caveat: '人の上や近くを飛ばす場合は、機体の性能ではなく運用（補助者・区画・手順）で守る。' },
 ];
+
+// ===== 言語 (パッケージ⑧): やさしい日本語 / English。段階1 = タブ・主要ボタン・8部品・12質問 =====
+const I18N = {
+  ja: { tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを回す', stop: '■ 止める', views: { iso: '斜', front: '前', top: '上', side: '横', inside: '内', labels: '名' }, big: '大きく', speak: '読み上げ', parts: {} , questions: {} },
+  easy: { tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを 回す', stop: '■ とめる', views: { iso: 'ななめ', front: 'まえ', top: 'うえ', side: 'よこ', inside: 'なか', labels: 'なまえ' }, big: 'おおきく', speak: 'よみあげ',
+    parts: {
+      prop: { name: 'プロペラ', role: 'まわって、空気を 下に おします。それで きたいが うきます。', analogy: 'せんぷうきの はねを 下に むけて、じぶんが うくような もの' },
+      motor: { name: 'モーター', role: 'プロペラを まわす 力の もとです。1分に 何千回も まわります。', analogy: 'おもちゃの モーターを、もっと つよく しずかに したもの' },
+      arm: { name: 'アーム（うで）', role: 'モーターを、きたいの まん中から おなじ きょりに ささえる ぼうです。', analogy: 'てんびんの うで。左右が おなじ 長さだから つりあう' },
+      frameTop: { name: 'フレーム（ほね）', role: 'きたいの ほねぐみ。ぜんぶの ぶひんは ここに つきます。', analogy: '人の せぼねと ろっこつ' },
+      battery: { name: 'バッテリー（でんち）', role: 'ぜんぶの 電気の もと。きたいで いちばん おもくて、いちばん 高い ぶひんです。', analogy: 'スマホの でんちを 30こ あつめた くらい' },
+      fc: { name: 'あたま（FC）', role: 'きたいの あたま。かたむきを 1秒に 何千回も はかって、4つの モーターの はやさを きめます。', analogy: 'じてんしゃに のるときの「からだの バランス」。たおれそうに なると かってに なおす' },
+      landingGear: { name: 'あし', role: 'ちゃくりくの とき、きたいと カメラを 地面から まもる あしです。', analogy: 'ひこうきの タイヤ。でも ころがらずに、そりで すべる' },
+      camera: { name: 'カメラ', role: '上から しゃしんや ビデオを とります。ゆれない ように、ゴムの 上に のっています。', analogy: 'スマホの カメラを、ゆれない だいに のせたもの' },
+    },
+    questions: { lift: 'どうして うくの？', fwd: 'どうして 前に すすむの？', ccw: 'どうして 4まい ぜんぶ おなじ 向きに まわさないの？', time: '何分 とべるの？', rain: '雨の日は とべるの？', radio: '電波が きれたら どうなるの？', where: 'どうやって 自分の ばしょを 知るの？', weight: 'どのくらい おもいの？', crash: 'おちたら どこが こわれるの？', oneout: 'モーターが 1つ とまったら？', shake: 'カメラは どうして ゆれないの？', night: 'よるも とべるの？' } },
+  en: { tabs: { see: 'Look', fly: 'Fly', use: 'Use', mishap: 'What if' }, depth: { simple: 'Basic', full: 'Detail' }, ask: 'Ask', power: '▶ Spin props', stop: '■ Stop', views: { iso: 'Iso', front: 'Front', top: 'Top', side: 'Side', inside: 'Inside', labels: 'Names' }, big: 'Large', speak: 'Speak',
+    parts: {
+      prop: { name: 'Propeller', role: 'It spins and pushes air down. The push-back lifts the drone.', analogy: 'Like pointing a fan downward until you float.' },
+      motor: { name: 'Motor', role: 'It turns the propeller. Thousands of turns every minute.', analogy: 'A toy motor made stronger and quieter.' },
+      arm: { name: 'Arm', role: 'It holds each motor at the same distance from the center.', analogy: 'The arms of a balance scale: equal length, so it balances.' },
+      frameTop: { name: 'Frame', role: 'The skeleton. Every part is attached to it.', analogy: 'Your spine and ribs.' },
+      battery: { name: 'Battery', role: 'The source of all power. The heaviest and most expensive part.', analogy: 'About 30 phone batteries in one pack.' },
+      fc: { name: 'Brain (FC)', role: 'It measures tilt thousands of times a second and sets the speed of the 4 motors.', analogy: 'Your sense of balance on a bicycle: it corrects before you fall.' },
+      landingGear: { name: 'Legs', role: 'They protect the body and camera when landing.', analogy: 'Airplane wheels, but skids instead of rolling.' },
+      camera: { name: 'Camera', role: 'It takes photos and video from above. It sits on rubber so it does not shake.', analogy: 'A phone camera on a steady mount.' },
+    },
+    questions: { lift: 'Why does it float?', fwd: 'How does it move forward?', ccw: 'Why not spin all 4 the same way?', time: 'How many minutes can it fly?', rain: 'Can it fly in the rain?', radio: 'What if the radio link is lost?', where: 'How does it know where it is?', weight: 'How heavy is it?', crash: 'What breaks in a crash?', oneout: 'What if one motor stops?', shake: 'Why does the camera not shake?', night: 'Can it fly at night?' } },
+};

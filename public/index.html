@@ -307,6 +307,19 @@ ol.parts-seq li b { display: inline-block; margin-right: 6px; color: var(--ink2)
 ol.parts-seq li.lit { color: var(--ink); } ol.parts-seq li.lit b { color: var(--accent-text); }
 @media (max-width: 760px) { .two-col { flex-direction: column; gap: 8px; } }
 
+/* ---------- 生きている機体と土台 (パッケージ⑧) ---------- */
+#bigBand { position: fixed; left: 50%; bottom: calc(var(--dock-h) + 30px); transform: translateX(-50%); z-index: 11; height: 64px; padding: 0 18px 0 26px; display: flex; align-items: center; gap: 14px; max-width: min(860px, calc(100vw - var(--insp-w) - 60px)); }
+#bigText { font-size: 28px; font-weight: 700; letter-spacing: .02em; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#bigBand .icon-btn { font-size: 18px; }
+body.big #noteCard { bottom: calc(var(--dock-h) + 104px); }
+#bigBtn.on { background: var(--accent-soft); color: var(--accent-text); }
+.d-title { display: flex; align-items: center; gap: 8px; } .d-title h3 { flex: 1; min-width: 0; }
+.speak { font-size: 15px; }
+.lang-note { margin: -2px 0 8px; font-size: 11px; color: var(--ink3); letter-spacing: .04em; }
+#langSeg button { padding: 4px 8px; font-size: 12px; }
+.tgl:disabled { opacity: .45; }
+@media (max-width: 760px) { #bigBand { left: 10px; right: 10px; transform: none; max-width: none; height: 56px; padding: 0 12px 0 16px; bottom: calc(var(--dock-h) + 8px); } #bigText { font-size: 22px; } body.big #noteCard { bottom: calc(var(--dock-h) + 72px); } }
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation-duration: .01s !important; } }
 
 </style>
@@ -354,26 +367,31 @@ ol.parts-seq li.lit { color: var(--ink); } ol.parts-seq li.lit b { color: var(--
     </div>
   </div>
   <nav class="tabs" id="tabs" role="tablist">
-    <button data-tab="see" class="on" role="tab" aria-selected="true"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10" cy="10" r="3"/><path d="M2 10s3-5.5 8-5.5 8 5.5 8 5.5-3 5.5-8 5.5S2 10 2 10z"/></svg><span>みる</span></button>
-    <button data-tab="fly" role="tab" aria-selected="false"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M10 3v14M3 10h14M5 5l10 10M15 5L5 15"/></svg><span>とばす</span></button>
-    <button data-tab="use" role="tab" aria-selected="false"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h14v9H3zM7 7V4h6v3"/></svg><span>つかう</span></button>
-    <button data-tab="mishap" role="tab" aria-selected="false"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3l8 14H2z"/><path d="M10 8v4M10 14.5v.5"/></svg><span>もしも</span></button>
+    <button data-tab="see" class="on" role="tab" aria-selected="true"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10" cy="10" r="3"/><path d="M2 10s3-5.5 8-5.5 8 5.5 8 5.5-3 5.5-8 5.5S2 10 2 10z"/></svg><span data-i18n="tabs.see">みる</span></button>
+    <button data-tab="fly" role="tab" aria-selected="false"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M10 3v14M3 10h14M5 5l10 10M15 5L5 15"/></svg><span data-i18n="tabs.fly">とばす</span></button>
+    <button data-tab="use" role="tab" aria-selected="false"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h14v9H3zM7 7V4h6v3"/></svg><span data-i18n="tabs.use">つかう</span></button>
+    <button data-tab="mishap" role="tab" aria-selected="false"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3l8 14H2z"/><path d="M10 8v4M10 14.5v.5"/></svg><span data-i18n="tabs.mishap">もしも</span></button>
   </nav>
 </div>
 
 <header id="topbar" class="glass">
   <div class="brand">
     <h1>ドローンの構造</h1>
-    <div class="seg tiny" id="depthSeg" role="radiogroup" aria-label="くわしさ"><button data-d="simple" class="on">はじめて</button><button data-d="full">くわしく</button></div>
+    <div class="seg tiny" id="depthSeg" role="radiogroup" aria-label="くわしさ"><button data-d="simple" class="on" data-i18n="depth.simple">はじめて</button><button data-d="full" data-i18n="depth.full">くわしく</button></div>
   </div>
   <div class="top-actions">
-    <button id="askBtn" class="pill-btn" aria-haspopup="dialog"><span class="q">？</span>きく</button>
+    <button id="askBtn" class="pill-btn" aria-haspopup="dialog"><span class="q">？</span><span data-i18n="ask">きく</span></button>
     <button id="settingsBtn" class="icon-btn" aria-label="設定" title="設定">
       <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.6"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/></svg>
     </button>
   </div>
 </header>
 <div id="settings" class="glass popover" hidden>
+  <div class="pop-row"><span>言語</span><div class="seg small" id="langSeg"><button data-lang="ja" class="on">日本語</button><button data-lang="easy">やさしい日本語</button><button data-lang="en">English</button></div></div>
+  <div class="pop-row"><span>機体</span><button class="tgl on" data-t="alive" aria-pressed="true"><i></i>浮かせておく</button></div>
+  <p class="pop-foot" id="aliveNote" hidden>軽量画質では止まっています</p>
+  <div class="pop-row"><span>表示</span><button class="tgl" data-t="big" aria-pressed="false"><i></i>大きく読む</button></div>
+  <div class="pop-row speakrow"><span>読み上げ</span><button class="tgl speak" data-t="speakAuto" aria-pressed="false"><i></i>選ぶと自動で読む</button></div>
   <div class="pop-row"><span>テーマ</span><div class="seg small" id="themeSeg"><button data-th="auto" class="on">システム</button><button data-th="light">ライト</button><button data-th="dark">ダーク</button></div></div>
   <div class="pop-row"><span>文字の大きさ</span><div class="seg small" id="fontSeg"><button data-f="1" class="on">標準</button><button data-f="1.18">大</button></div></div>
   <div class="pop-row"><span>品質</span><div class="seg small" id="qualitySeg"><button data-q="auto" class="on">自動</button><button data-q="3">最高</button><button data-q="2">高</button><button data-q="1">標準</button><button data-q="0">軽量</button></div></div>
@@ -406,8 +424,8 @@ ol.parts-seq li.lit { color: var(--ink); } ol.parts-seq li.lit b { color: var(--
 </div>
 
 <div id="viewCol" class="glass" aria-label="視点">
-  <button data-v="iso" class="on" title="斜め">斜</button><button data-v="front" title="前">前</button><button data-v="top" title="上">上</button><button data-v="side" title="横" data-full>横</button><button data-v="inside" title="モーター内部" data-full>内</button>
-  <hr><button class="tgl on" data-t="labels" aria-pressed="true" title="ラベル"><i></i>名</button><button id="photoBtn" title="記念写真">📷</button><button id="fsBtn" title="全画面">⤢</button>
+  <button data-v="iso" class="on" title="斜め" data-i18n="views.iso">斜</button><button data-v="front" title="前" data-i18n="views.front">前</button><button data-v="top" title="上" data-i18n="views.top">上</button><button data-v="side" title="横" data-full data-i18n="views.side">横</button><button data-v="inside" title="モーター内部" data-full data-i18n="views.inside">内</button>
+  <hr><button class="tgl on" data-t="labels" aria-pressed="true" title="ラベル"><i></i><span data-i18n="views.labels">名</span></button><button id="bigBtn" title="大きく読む" aria-pressed="false" data-i18n="big">大</button><button id="photoBtn" title="記念写真">📷</button><button id="fsBtn" title="全画面">⤢</button>
 </div>
 
 <div id="noteCard" class="glass" hidden aria-live="polite">
@@ -415,6 +433,8 @@ ol.parts-seq li.lit { color: var(--ink); } ol.parts-seq li.lit b { color: var(--
   <div id="noteBody"></div>
   <div id="noteActions" class="note-actions"></div>
 </div>
+
+<div id="bigBand" class="glass" hidden aria-live="polite"><span id="bigText"></span><button id="bigSpeak" class="icon-btn sm speak" aria-label="読み上げ" title="読み上げ">🔊</button></div>
 
 <aside id="massBar" class="glass" hidden aria-label="重さの内訳">
   <div class="mb-top"><div class="seg small" id="payloadSeg"></div><button id="priceBtn" class="pill-btn" aria-pressed="false" title="参考価格を見る">¥</button></div>
@@ -1058,6 +1078,35 @@ const WHATIF = [
     human: ['補助者が近づく人を止める', '離着陸場所にロープや目印を置く', '人が来たら機体を離す、または降ろして止める', '回っているプロペラに近づかない'],
     caveat: '人の上や近くを飛ばす場合は、機体の性能ではなく運用（補助者・区画・手順）で守る。' },
 ];
+
+// ===== 言語 (パッケージ⑧): やさしい日本語 / English。段階1 = タブ・主要ボタン・8部品・12質問 =====
+const I18N = {
+  ja: { tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを回す', stop: '■ 止める', views: { iso: '斜', front: '前', top: '上', side: '横', inside: '内', labels: '名' }, big: '大きく', speak: '読み上げ', parts: {} , questions: {} },
+  easy: { tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを 回す', stop: '■ とめる', views: { iso: 'ななめ', front: 'まえ', top: 'うえ', side: 'よこ', inside: 'なか', labels: 'なまえ' }, big: 'おおきく', speak: 'よみあげ',
+    parts: {
+      prop: { name: 'プロペラ', role: 'まわって、空気を 下に おします。それで きたいが うきます。', analogy: 'せんぷうきの はねを 下に むけて、じぶんが うくような もの' },
+      motor: { name: 'モーター', role: 'プロペラを まわす 力の もとです。1分に 何千回も まわります。', analogy: 'おもちゃの モーターを、もっと つよく しずかに したもの' },
+      arm: { name: 'アーム（うで）', role: 'モーターを、きたいの まん中から おなじ きょりに ささえる ぼうです。', analogy: 'てんびんの うで。左右が おなじ 長さだから つりあう' },
+      frameTop: { name: 'フレーム（ほね）', role: 'きたいの ほねぐみ。ぜんぶの ぶひんは ここに つきます。', analogy: '人の せぼねと ろっこつ' },
+      battery: { name: 'バッテリー（でんち）', role: 'ぜんぶの 電気の もと。きたいで いちばん おもくて、いちばん 高い ぶひんです。', analogy: 'スマホの でんちを 30こ あつめた くらい' },
+      fc: { name: 'あたま（FC）', role: 'きたいの あたま。かたむきを 1秒に 何千回も はかって、4つの モーターの はやさを きめます。', analogy: 'じてんしゃに のるときの「からだの バランス」。たおれそうに なると かってに なおす' },
+      landingGear: { name: 'あし', role: 'ちゃくりくの とき、きたいと カメラを 地面から まもる あしです。', analogy: 'ひこうきの タイヤ。でも ころがらずに、そりで すべる' },
+      camera: { name: 'カメラ', role: '上から しゃしんや ビデオを とります。ゆれない ように、ゴムの 上に のっています。', analogy: 'スマホの カメラを、ゆれない だいに のせたもの' },
+    },
+    questions: { lift: 'どうして うくの？', fwd: 'どうして 前に すすむの？', ccw: 'どうして 4まい ぜんぶ おなじ 向きに まわさないの？', time: '何分 とべるの？', rain: '雨の日は とべるの？', radio: '電波が きれたら どうなるの？', where: 'どうやって 自分の ばしょを 知るの？', weight: 'どのくらい おもいの？', crash: 'おちたら どこが こわれるの？', oneout: 'モーターが 1つ とまったら？', shake: 'カメラは どうして ゆれないの？', night: 'よるも とべるの？' } },
+  en: { tabs: { see: 'Look', fly: 'Fly', use: 'Use', mishap: 'What if' }, depth: { simple: 'Basic', full: 'Detail' }, ask: 'Ask', power: '▶ Spin props', stop: '■ Stop', views: { iso: 'Iso', front: 'Front', top: 'Top', side: 'Side', inside: 'Inside', labels: 'Names' }, big: 'Large', speak: 'Speak',
+    parts: {
+      prop: { name: 'Propeller', role: 'It spins and pushes air down. The push-back lifts the drone.', analogy: 'Like pointing a fan downward until you float.' },
+      motor: { name: 'Motor', role: 'It turns the propeller. Thousands of turns every minute.', analogy: 'A toy motor made stronger and quieter.' },
+      arm: { name: 'Arm', role: 'It holds each motor at the same distance from the center.', analogy: 'The arms of a balance scale: equal length, so it balances.' },
+      frameTop: { name: 'Frame', role: 'The skeleton. Every part is attached to it.', analogy: 'Your spine and ribs.' },
+      battery: { name: 'Battery', role: 'The source of all power. The heaviest and most expensive part.', analogy: 'About 30 phone batteries in one pack.' },
+      fc: { name: 'Brain (FC)', role: 'It measures tilt thousands of times a second and sets the speed of the 4 motors.', analogy: 'Your sense of balance on a bicycle: it corrects before you fall.' },
+      landingGear: { name: 'Legs', role: 'They protect the body and camera when landing.', analogy: 'Airplane wheels, but skids instead of rolling.' },
+      camera: { name: 'Camera', role: 'It takes photos and video from above. It sits on rubber so it does not shake.', analogy: 'A phone camera on a steady mount.' },
+    },
+    questions: { lift: 'Why does it float?', fwd: 'How does it move forward?', ccw: 'Why not spin all 4 the same way?', time: 'How many minutes can it fly?', rain: 'Can it fly in the rain?', radio: 'What if the radio link is lost?', where: 'How does it know where it is?', weight: 'How heavy is it?', crash: 'What breaks in a crash?', oneout: 'What if one motor stops?', shake: 'Why does the camera not shake?', night: 'Can it fly at night?' } },
+};
 
 // ===== 手続き生成テクスチャと材質 (v2: 製品レンダリング品質) =====
 function makeCanvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
@@ -1893,7 +1942,7 @@ const S = {
   mode: 'normal', explode: 0, explodeT: 0, power: 0, flight: null, flightT: 0, depth: 'simple', tab: 'see',
   labels: true, arrows: false, air: false, autoRotate: !reduceMotion, shadows: true, slow: false, ts: 1, logTs: 0, tsTarget: 1,
   selected: null, selAll: false, hovered: null, isolated: null, quality: 'auto', qLevel: 3, lastInteract: performance.now(), lastSelect: -1e9,
-  camSpring: null, camInertia: null, sticks: false, tilt: false, theater: null, overlay: null, question: null, use: null, scale: false, price: false, whatif: null, labelOnly: null, labelsSuppressed: false,
+  camSpring: null, camInertia: null, sticks: false, tilt: false, theater: null, overlay: null, question: null, use: null, scale: false, price: false, whatif: null, labelOnly: null, labelsSuppressed: false, alive: true, big: false, lang: 'ja', lesson: null,
   aoDirty: true, shadowDirty: true, csDirty: true, envMul: 1, exposureMul: 1,
 };
 
@@ -2263,6 +2312,7 @@ function applyQuality(level) {
   Q.particles = [150, 300, 450, 600][level]; Q.ghosts = level >= 2;
   S.shadowDirty = S.csDirty = S.aoDirty = true;
   resize();
+  if (typeof aliveQuality === 'function' && typeof alive === 'object') aliveQuality(level);
   if (typeof onQualityChanged === 'function') onQualityChanged(level);
 }
 function resize() {
@@ -2296,7 +2346,7 @@ const RPM_MAX = 9000, HOVER_RPM = RPM_MAX * 0.5, GRAV = 9.81;
 const MOTOR_U = [[1, -1], [1, 1], [-1, 1], [-1, -1]].map(([x, z]) => ({ x: x / Math.SQRT2, z: z / Math.SQRT2 }));
 const body = {
   px: 0, py: 0, pz: 0, vx: 0, vy: 0, vz: 0, tx: 0, tz: 0, wx: 0, wz: 0, ax: 0, az: 0, yaw: 0, yawRate: 0, vyF: 0,
-  home: { x: 0, z: 0 }, mode: 'idle', mult: [1, 1, 1, 1], t: 0,
+  home: { x: 0, z: 0 }, mode: 'idle', mult: [1, 1, 1, 1], t: 0, lookYaw: null,
   hold: null, stick: { x: 0, y: 0, yaw: 0, thr: 0, active: false, fx: 0, fy: 0 }, stickWas: false, tilt: { x: 0, y: 0, active: false }, v: new THREE.Vector3(),
 };
 const free = { Kx: THREE.MathUtils.degToRad(34), Kv: THREE.MathUtils.degToRad(12.7), KvBrake: THREE.MathUtils.degToRad(17), wAtt: 14, zAtt: 0.70, tiltMax: THREE.MathUtils.degToRad(22), holdMax: THREE.MathUtils.degToRad(18), kappa: 0.0057, hoverY: 0.06 };
@@ -2354,7 +2404,7 @@ function stepFree(dt) {
   const ay = 36 * (pyCmd - body.py) - 9.6 * body.vyF; body.vyF += ay * dt; body.py += body.vyF * dt;
   // ヨー
   const yawCmd = st.active ? -1.2 * st.yaw : 0; body.yawRate = dl(body.yawRate, yawCmd, dt, 6); body.yaw += body.yawRate * dt;
-  if (!st.active) { body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); body.yaw = dl(body.yaw, 0, dt, 1.5); }
+  if (!st.active) { body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); const look = (S.alive && body.lookYaw != null && !body.hold && !ti.active && !reduceMotion); body.yaw = dl(body.yaw, look ? body.lookYaw : 0, dt, look ? 2 : 1.5); }   // ⑧: ポインタの方へ数度だけ向く
   // モーター配分: α_z = −τ̈x, α_x = τ̈z
   const collective = 1 / Math.cos(th) - 1; const alz = -body.ax, alx = body.az;
   for (let i = 0; i < 4; i++) {
@@ -2431,7 +2481,7 @@ function updateMotors(dtSim, dtReal) {
     mo.disc.material.opacity = wDisc * 0.85; mo.disc.rotation.z += mo.dir * 4 * dtReal;
     const raw = mo.rpm / HOVER_RPM * 100; mo.pct = raw > mo.pct ? raw : mo.pct + (raw - mo.pct) * (1 - Math.exp(-dtReal / 0.5));
     if (mo.rpm > 50) anySpin = true;
-    const th = D.arrows.thrust[i]; th.visible = (body.mode === 'demo' || body.mode === 'free' || body.mode === 'theater') && partVisible(mo.part) && mo.rpm > 100;
+    const th = D.arrows.thrust[i]; th.visible = (body.mode === 'demo' || body.mode === 'free' || body.mode === 'theater') && partVisible(mo.part) && mo.rpm > 100 && !(typeof alive === 'object' && alive.on && !body.hold && Math.hypot(body.tx, body.tz) < 0.035);   // 生きているだけの間は矢印を出さない
     if (th.visible) { th.userData.setLength(0.02 + 0.11 * mo.rpm / RPM_MAX); const rel = mo.rpm / Math.max(1, S.power * RPM_MAX); th.userData.mat.color.set(rel > 1.03 ? 0x22c55e : rel < 0.97 ? 0xf59e0b : arrowNeutral); }
     D.arrows.rot[i].visible = (S.arrows || S.flight === 'yaw') && partVisible(mo.part) && S.explodeT < 0.05;
   });
@@ -3150,6 +3200,136 @@ function initCodex() {
   $('#photoClose').addEventListener('click', () => { $('#photoPop').hidden = true; });
 }
 
+// ===== 生きている機体と、みんなの土台 (パッケージ⑧) =====
+// A: 開いた瞬間からホバーし、ポインタの方へ数度だけ向く  B: 大きく読む  C: 日本語／やさしい日本語／English  D: 読み上げ
+const alive = { want: false, since: 0, on: false, forcedOff: false, big: false, speakAuto: false, prevLabels: null, prevFs: null };
+const hasSpeech = 'speechSynthesis' in window && typeof SpeechSynthesisUtterance === 'function';
+
+// ---------- A. 生きている機体 ----------
+function aliveWanted() {
+  if (!S.alive || alive.forcedOff) return false;
+  return S.tab === 'see' && !S.selected && S.explode < 0.02 && S.mode === 'normal' && !S.question && !theater.active && !whatif.active && !S.lesson && !S.scale && !S.use && !(typeof quiz !== 'undefined' && quiz.active);
+}
+function stepAlive(dtReal) {
+  const w = aliveWanted();
+  if (w !== alive.want) {
+    alive.want = w; alive.since = 0;
+    if (!w && alive.on) { alive.on = false; body.lookYaw = null; if (S.power > 0 && S.tab !== 'fly') setPower(0, true); else syncBodyMode(); }
+  }
+  alive.since += dtReal;
+  if (w && !alive.on && alive.since >= 0.8) { alive.on = true; setPower(0.5, true); syncBodyMode(); }
+}
+function setAlive(on) {
+  S.alive = !!on; store.set('alive', on ? '1' : '0');
+  for (const x of $$('.tgl[data-t=alive]')) { x.classList.toggle('on', S.alive); x.setAttribute('aria-pressed', String(S.alive)); }
+}
+function updateLookYaw(clientX, clientY) {
+  if (!alive.on || reduceMotion) { body.lookYaw = null; return; }
+  const w = new THREE.Vector3(); if (!screenToDronePlane(clientX, clientY, w)) { body.lookYaw = null; return; }
+  const dx = w.x - body.px, dz = w.z - body.pz, dist = Math.hypot(dx, dz);
+  if (dist > 0.6 || dist < 0.02) { body.lookYaw = 0; return; }
+  body.lookYaw = -clamp(Math.atan2(dx, -dz), -0.07, 0.07);   // 機首は −z。+yaw は機首を −x へ振るので符号を反転
+}
+function aliveQuality(level) {
+  alive.forcedOff = level <= 1;
+  const n = $('#aliveNote'); if (n) n.hidden = !alive.forcedOff;
+  for (const x of $$('.tgl[data-t=alive]')) x.disabled = alive.forcedOff;
+}
+
+// ---------- C. 言語 ----------
+function t(path) {
+  const walk = (o) => path.split('.').reduce((a, k) => (a && a[k] != null ? a[k] : undefined), o);
+  const v = walk(I18N[S.lang] || I18N.ja); if (v != null && typeof v !== 'object') return v;
+  const j = walk(I18N.ja); return j != null && typeof j !== 'object' ? j : path;
+}
+function langEntry(key) { const L = I18N[S.lang]; return L && L.parts ? L.parts[key] : null; }
+function partName(pk) {
+  const key = pk && pk.key ? pk.key : pk; const d = PARTS[key]; if (!d) return '';
+  const e = langEntry(key);
+  if (S.depth === 'simple') return (e && e.name) || SIMPLE_NAME[key] || d.name;
+  return S.lang === 'en' ? (d.en || d.name) : d.name;
+}
+function firstSentence(s) { const i = s.indexOf('。'); return i > 0 ? s.slice(0, i + 1) : s; }
+function partRole(key) {
+  const e = langEntry(key), sd = SIMPLE[key];
+  if (S.depth === 'simple' && (e || sd)) return (e && e.role) || (sd && sd.role) || '';
+  return firstSentence(PARTS[key].role || '');
+}
+function partAnalogy(key) { const e = langEntry(key), sd = SIMPLE[key]; return (e && e.analogy) || (sd && sd.analogy) || ''; }
+function qText(q) { const L = I18N[S.lang]; return (L && L.questions && L.questions[q.id]) || q.q; }
+function langNote() { return S.lang === 'en' ? '<p class="lang-note">— Japanese only —</p>' : ''; }
+function setLastText(el, text) {
+  // <i></i>名 のように装飾子を持つボタンは最後のテキストノードだけ差し替える
+  let node = null; for (const c of el.childNodes) if (c.nodeType === 3 && c.textContent.trim()) node = c;
+  if (node) node.textContent = text; else el.textContent = text;
+}
+function applyLang() {
+  document.documentElement.lang = S.lang === 'en' ? 'en' : 'ja';
+  for (const el of $$('[data-i18n]')) setLastText(el, t(el.dataset.i18n));
+  segSet($('#langSeg'), 'lang', S.lang);
+  const pb = $('#powerBtn'); if (pb) pb.textContent = S.power > 0 ? t('stop') : t('power');
+  buildList(); buildLabels(); buildAsk(); renderDetail(); updateBigBand();
+  if (S.question && $('#noteCard').dataset.kind === 'question') $('#noteTitle').textContent = qText(S.question);
+}
+function setLang(l) { if (!I18N[l]) l = 'ja'; S.lang = l; store.set('lang', l); if (hasSpeech) speechSynthesis.cancel(); applyLang(); }
+
+// ---------- B. 大きく読む ----------
+function setBig(on) {
+  on = !!on; alive.big = on; S.big = on; store.set('big', on ? '1' : '0');
+  for (const x of $$('.tgl[data-t=big]')) { x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); }
+  const bb = $('#bigBtn'); if (bb) { bb.classList.toggle('on', on); bb.setAttribute('aria-pressed', String(on)); }
+  if (on) {
+    alive.prevLabels = S.labels; alive.prevFs = document.documentElement.style.getPropertyValue('--fs') || '';
+    document.documentElement.style.setProperty('--fs', '1.18'); S.labels = false;
+    for (const x of $$('.tgl[data-t=labels]')) { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); }
+  } else {
+    document.documentElement.style.setProperty('--fs', alive.prevFs || (($('#fontSeg .on') || {}).dataset || {}).f || '1');
+    if (alive.prevLabels != null) { S.labels = alive.prevLabels; for (const x of $$('.tgl[data-t=labels]')) { x.classList.toggle('on', S.labels); x.setAttribute('aria-pressed', String(S.labels)); } }
+  }
+  document.body.classList.toggle('big', on);
+  updateBigBand();
+}
+function updateBigBand() {
+  const band = $('#bigBand'); if (!band) return;
+  const p = S.selected || S.hovered;
+  if (!alive.big || !p) { band.hidden = true; return; }
+  $('#bigText').textContent = partName(p); band.hidden = false;
+  $('#bigSpeak').hidden = !hasSpeech;
+}
+
+// ---------- D. 読み上げ ----------
+function speak(text) {
+  if (!hasSpeech || !text) return false;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = { ja: 'ja-JP', easy: 'ja-JP', en: 'en-US' }[S.lang] || 'ja-JP';
+    u.rate = S.lang === 'easy' ? 0.85 : 1.0;
+    speechSynthesis.speak(u); return true;
+  } catch (e) { return false; }
+}
+function speakPart(p) { if (!p) return; const key = p.key || p; speak(`${partName(key)}。${partRole(key)}`); }
+function setSpeakAuto(on) {
+  alive.speakAuto = !!on; store.set('speakAuto', on ? '1' : '0');
+  for (const x of $$('.tgl[data-t=speakAuto]')) { x.classList.toggle('on', alive.speakAuto); x.setAttribute('aria-pressed', String(alive.speakAuto)); }
+}
+
+function initLive() {
+  S.alive = store.get('alive') !== '0';
+  for (const x of $$('.tgl[data-t=alive]')) { x.classList.toggle('on', S.alive); x.setAttribute('aria-pressed', String(S.alive)); }
+  alive.speakAuto = store.get('speakAuto') === '1';
+  for (const x of $$('.tgl[data-t=speakAuto]')) { x.classList.toggle('on', alive.speakAuto); x.setAttribute('aria-pressed', String(alive.speakAuto)); }
+  if (!hasSpeech) for (const el of $$('.speak, .pop-row.speakrow')) el.hidden = true;
+  S.lang = I18N[store.get('lang')] ? store.get('lang') : 'ja';
+  $('#langSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setLang(b.dataset.lang); });
+  $('#bigBtn').addEventListener('click', () => setBig(!alive.big));
+  $('#bigSpeak').addEventListener('click', () => speakPart(S.selected || S.hovered));
+  aliveQuality(S.qLevel);
+  applyLang();
+  if (store.get('big') === '1') setBig(true);
+  window.updateBigBand = updateBigBand; window.speak = speak;   // 検証用
+}
+
 // ===== UI: タブ・扉・解説・ラベル・スティック・入力 =====
 const LIST_ORDER = ['frameTop', 'frameBottom', 'regMark', 'arm', 'armClamp', 'motorMount', 'standoff', 'screws', 'motor', 'bell', 'stator', 'winding', 'magnet', 'shaft', 'motorBase', 'prop', 'propNut', 'propAdapter', 'esc', 'fc', 'pdb', 'capacitor', 'buzzer', 'battery', 'cells', 'batteryTray', 'xt60', 'balance', 'strap', 'wiring', 'gps', 'remoteId', 'rx', 'vtx', 'telemetry', 'led', 'gimbal', 'camera', 'damper', 'landingGear'];
 const SUB = { bell: 'motor', stator: 'motor', winding: 'motor', magnet: 'motor', shaft: 'motor', motorBase: 'motor', cells: 'battery', propNut: 'prop', propAdapter: 'prop' };
@@ -3194,7 +3374,7 @@ $('#tabs').addEventListener('click', e => { const b = e.target.closest('button')
 // ---------- はじめて / くわしく ----------
 function setDepth(d) {
   S.depth = d; store.set('depth', d); document.body.classList.toggle('full', d === 'full'); segSet($('#depthSeg'), 'd', d); $('#coach').hidden = true;
-  buildList(); renderDetail(); buildLabels(); buildMishapCards(); if (S.scale) renderMassBar(S.selected && S.selected.key);
+  buildList(); renderDetail(); buildLabels(); buildMishapCards(); buildAsk(); updateBigBand(); if (S.scale) renderMassBar(S.selected && S.selected.key);
   buildWhatifCards();
   if (d === 'full') showToast('くわしく: 部品40種の仕様例と点検ポイントも見られます'); 
 }
@@ -3207,14 +3387,14 @@ const explodeEl = $('#explode');
 explodeEl.addEventListener('input', () => { S.explodeAt = performance.now(); S.explode = explodeEl.value / 100; S.explodeT = S.explode; $('#explodeVal').textContent = explodeEl.value + '%'; explodePullBack(); S.shadowDirty = S.csDirty = true; });
 function explodePullBack() { if (S.explode < 0.35 || S.explodedCam) return; S.explodedCam = true; S.explodeFrame = true; }
 function setExplode(v) { S.explode = v; S.explodeAt = performance.now(); explodeEl.value = Math.round(v * 100); $('#explodeVal').textContent = Math.round(v * 100) + '%'; explodePullBack(); }
-function setPower(p, silent) { S.power = p; segSet($('#powerSeg'), 'p', p); const b = $('#powerBtn'); b.textContent = p > 0 ? '■ 止める' : '▶ プロペラを回す'; b.classList.toggle('primary', p === 0); syncBodyMode();
+function setPower(p, silent) { S.power = p; segSet($('#powerSeg'), 'p', p); const b = $('#powerBtn'); b.textContent = p > 0 ? t('stop') : t('power'); b.classList.toggle('primary', p === 0); syncBodyMode();
   if (p > 0 && !silent && !store.get('coachFlick') && S.tab === 'fly') setTimeout(() => { if (S.power > 0 && body.mode === 'free') showCoach('機体をはじいてみよう', '浮いている機体を指やマウスでさっとはじくと、傾いたぶんを頭脳（FC）がモーターの速さで直します。', null, () => store.set('coachFlick', '1')); }, 2500); }
 $('#powerBtn').addEventListener('click', () => setPower(S.power > 0 ? 0 : (S.depth === 'full' ? (parseFloat($('#powerSeg .on')?.dataset.p) || 0.5) : 0.5)));
 $('#powerSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setPower(parseFloat(b.dataset.p)); });
 function syncBodyMode() {
   if (theater.active) return setBodyMode('theater');
   if (S.flight) return setBodyMode('demo');
-  if (S.power > 0 && (S.tab === 'fly' || S.scale)) return setBodyMode('free');
+  if (S.power > 0 && (S.tab === 'fly' || S.scale || alive.on)) return setBodyMode('free');
   setBodyMode('idle');
 }
 // 飛行の原理
@@ -3239,6 +3419,9 @@ document.addEventListener('click', e => {
   else if (t === 'sticks') setSticks(on);
   else if (t === 'tilt') setTilt(on);
   else if (t === 'shadows') { S.shadows = on; applyMode(); }
+  else if (t === 'alive') setAlive(on);
+  else if (t === 'speakAuto') setSpeakAuto(on);
+  else if (t === 'big') setBig(on);
 });
 function showLegend() { if ($('#noteCard').dataset.kind === 'flight' || $('#noteCard').dataset.kind === 'question') return;
   renderNote({ kind: 'legend', title: 'まわる向きのしるし', badge: S.slow ? '1/50のはやさ' : null, html: `<div class="legend"><span class="ccw"><b>↺ 反時計まわり(CCW)</b></span> しま模様の羽・翼端が青緑<br><span class="cw"><b>↻ 時計まわり(CW)</b></span> 無地の羽・翼端が青<br>白い印が上を向いていれば正しい向きに付いています<br><b>灯火</b> 前・左 <span style="color:#ff3b30">●</span>赤 / 前・右 <span style="color:#22c55e">■</span>緑 / 後ろ ◆白</div>` }); }
@@ -3250,10 +3433,10 @@ $('#fsBtn').addEventListener('click', () => { const el = document.documentElemen
 // ---------- 部品一覧 / 解説 ----------
 function buildList() {
   const list = $('#partList'); let html = '';
-  if (S.depth === 'simple') { for (const k of SIMPLE_KEYS) html += `<div class="row" data-key="${k}" tabindex="0" role="button"><span class="nm">${SIMPLE_NAME[k]}</span><span class="cnt"></span><span></span></div>`; $('#partCount').textContent = `${SIMPLE_KEYS.length} 部品`; }
+  if (S.depth === 'simple') { for (const k of SIMPLE_KEYS) html += `<div class="row" data-key="${k}" tabindex="0" role="button"><span class="nm">${partName(k)}</span><span class="cnt"></span><span></span></div>`; $('#partCount').textContent = `${SIMPLE_KEYS.length} 部品`; }
   else {
     for (const g of GROUPS) { const keys = LIST_ORDER.filter(k => PARTS[k] && PARTS[k].group === g.id); html += `<div class="grp" style="--c:${g.color}"><i></i>${g.name}</div>`;
-      for (const k of keys) { const d = PARTS[k]; const hid = partsOf(k).some(p => p.hidden); html += `<div class="row${SUB[k] ? ' sub' : ''}${hid ? ' off' : ''}" data-key="${k}" tabindex="0" role="button"><span class="nm">${d.name}</span><span class="cnt">${d.count > 1 ? '×' + d.count : ''}</span><button class="eye" aria-label="${d.name}の表示切替">${hid ? ICON.eyeOff : ICON.eye}</button></div>`; } }
+      for (const k of keys) { const d = PARTS[k]; const hid = partsOf(k).some(p => p.hidden); html += `<div class="row${SUB[k] ? ' sub' : ''}${hid ? ' off' : ''}" data-key="${k}" tabindex="0" role="button"><span class="nm">${partName(k)}</span><span class="cnt">${d.count > 1 ? '×' + d.count : ''}</span><button class="eye" aria-label="${d.name}の表示切替">${hid ? ICON.eyeOff : ICON.eye}</button></div>`; } }
     $('#partCount').textContent = `${LIST_ORDER.length} 部品`;
   }
   list.innerHTML = html;
@@ -3276,7 +3459,8 @@ function select(p, all = false, opts = {}) {
   renderDetail();
   if (p && narrow() && !opts.quiet) $('#inspector').classList.add('open');
   if (S.scale) renderMassBar(p && p.key);
-  codexOnSelect(p);
+  codexOnSelect(p); updateBigBand();
+  if (p && alive.speakAuto && !opts.quiet) speakPart(p);
 }
 function renderDetail() {
   const box = $('#detail'), p = S.selected, body_ = $('#inspBody');
@@ -3284,12 +3468,13 @@ function renderDetail() {
   const d = PARTS[p.key], g = GROUPS.find(x => x.id === d.group), simple = S.depth === 'simple', sd = SIMPLE[p.key];
   const inst = PER_MOTOR.has(p.key) && !S.selAll ? ` · ${MOTOR_INFO[p.idx].id}（${MOTOR_INFO[p.idx].pos}・${MOTOR_INFO[p.idx].dir === 'CW' ? '↻' : '↺'}${MOTOR_INFO[p.idx].dir}）` : '';
   const hidden = partsOf(p.key).some(x => x.hidden);
-  let h = `<div class="d-group" style="--c:${g.color}"><i></i>${g.name}</div><h3>${simple && SIMPLE_NAME[p.key] ? SIMPLE_NAME[p.key] : d.name}</h3><p class="d-en">${d.en}${d.count > 1 ? ` · ×${d.count}` : ''}${inst}</p>`;
+  let h = `<div class="d-group" style="--c:${g.color}"><i></i>${g.name}</div><div class="d-title"><h3>${partName(p)}</h3>${hasSpeech ? '<button id="detailSpeak" class="icon-btn sm speak" aria-label="読み上げ" title="読み上げ">🔊</button>' : ''}</div><p class="d-en">${S.lang === 'en' ? d.name : d.en}${d.count > 1 ? ` · ×${d.count}` : ''}${inst}</p>`;
   h += codexHead(p.key);
   h += `<div class="d-actions"><button id="dFocus" class="primary">注目</button>${simple ? '' : `<button id="dIsolate">${S.isolated === p.key ? '単独表示を解除' : '単独表示'}</button><button id="dHide">${hidden ? '表示する' : '非表示'}</button>`}</div>`;
-  h += `<section><h4>役割</h4><p>${simple && sd ? sd.role : d.role}</p></section>`;
+  h += `<section><h4>${S.lang === 'en' ? 'Role' : S.lang === 'easy' ? 'やくわり' : '役割'}</h4><p>${simple && sd ? partRole(p.key) : d.role}</p></section>`;
+  if (!simple || !langEntry(p.key)) h += langNote();
   h += codexTriviaRow(p.key);
-  if (simple && sd) h += `<div class="analogy"><b>たとえるなら</b>${sd.analogy}</div>`;
+  if (simple && sd) h += `<div class="analogy"><b>${S.lang === 'en' ? 'Like…' : S.lang === 'easy' ? 'たとえると' : 'たとえるなら'}</b>${partAnalogy(p.key)}</div>`;
   if (!simple && (p.key === 'motor' || p.key === 'prop' || p.key === 'esc')) h += `<section><h4>配置と回転方向（上から見て）</h4><div class="mtab">${MOTOR_INFO.map(m => `<div class="${m.dir.toLowerCase()}"><b>${m.id} ${m.dir === 'CW' ? '↻' : '↺'}${m.dir}</b>${m.pos}</div>`).join('')}</div></section>`;
   if (d.structure) h += `<section><h4>構造</h4><ul>${d.structure.slice(0, simple ? 3 : 9).map(s => `<li>${s}</li>`).join('')}</ul></section>`;
   if (!simple && d.spec) h += `<details><summary>仕様例</summary><dl class="spec">${d.spec.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl></details>`;
@@ -3301,6 +3486,7 @@ function renderDetail() {
   const iso = $('#dIsolate'); if (iso) iso.onclick = () => { S.isolated = S.isolated === p.key ? null : p.key; applyVisibility(); renderDetail(); if (S.isolated) focusOn(partsOf(p.key).map(x => x.obj)); };
   const hd = $('#dHide'); if (hd) hd.onclick = () => toggleHidden(p.key);
   const more = $('#dMore'); if (more) more.onclick = () => setDepth('full');
+  const sp = $('#detailSpeak'); if (sp) sp.onclick = () => speakPart(p);
 }
 
 // ---------- ラベル / モーターバッジ ----------
@@ -3309,7 +3495,7 @@ function buildLabels() {
   $('#labels').innerHTML = ''; $('#leaders').innerHTML = '';
   const keys = S.depth === 'simple' ? new Set(SIMPLE_KEYS) : null;
   labelEls = D.parts.filter(p => (p.label || p.labelObj) && (!keys || keys.has(p.key) || (S.labelOnly && S.labelOnly.has(p.key))) && (!S.price || PRICE[p.key])).map(p => {
-    const el = document.createElement('button'); el.className = 'lbl'; el.textContent = S.price ? '¥' + PRICE[p.key].toLocaleString() : ((S.depth === 'simple' && SIMPLE_NAME[p.key]) || PARTS[p.key].name); el.type = 'button';
+    const el = document.createElement('button'); el.className = 'lbl'; el.textContent = S.price ? '¥' + PRICE[p.key].toLocaleString() : partName(p); el.type = 'button';
     el.tabIndex = -1; el.addEventListener('click', () => select(p, true)); $('#labels').appendChild(el);
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line'), dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); dot.setAttribute('r', '3'); $('#leaders').append(line, dot);
     return { p, el, line, dot, w: 0, h: 0, x: 0, y: 0, ax: 0, ay: 0, show: false };
@@ -3319,7 +3505,7 @@ const badgeEls = D.motors.map((mo, i) => { const el = document.createElement('di
 function updateLabels() {
   const camDist = camera.position.distanceTo(controls.target);
   const forced = !!S.labelOnly;                       // ⑩: 特定の部品だけを強制表示
-  const live = body.mode !== 'idle' && !forced;
+  const live = body.mode !== 'idle' && !forced && !(alive.on && body.mode === 'free' && !body.hold && !body.stick.active);   // ⑧: 生きているだけならラベルは出す
   for (const L of labelEls) {
     const p = L.p;
     let show = (forced || (S.labels && !S.labelsSuppressed)) && !live && partVisible(p) && effVisible(p.obj) && (!S.labelOnly || S.labelOnly.has(p.key));
@@ -3361,7 +3547,7 @@ function updateLabels() {
 // ---------- coach / 質問 ----------
 function showCoach(text, sub, go, later) { const c = $('#coach'); $('#coachText').textContent = text; $('#coachSub').textContent = sub || ''; c.hidden = false; $('#coachGo').hidden = !go; $('#coachGo').onclick = () => { c.hidden = true; if (go) go(); }; $('#coachLater').onclick = () => { c.hidden = true; if (later) later(); }; if (!go) $('#coachLater').textContent = 'わかった'; else $('#coachLater').textContent = 'あとで'; }
 function buildAsk() {
-  const list = $('#askList'); list.innerHTML = QUESTIONS.slice(0, 6).map(q => `<button class="ask" data-q="${q.id}"><span class="q">？</span>${q.q}</button>`).join('') + `<button class="more" id="askMore">ほかの質問 ▾</button><div id="askRest" hidden>${QUESTIONS.slice(6).map(q => `<button class="ask" data-q="${q.id}"><span class="q">？</span>${q.q}</button>`).join('')}</div>`;
+  const list = $('#askList'); list.innerHTML = QUESTIONS.slice(0, 6).map(q => `<button class="ask" data-q="${q.id}"><span class="q">？</span>${qText(q)}</button>`).join('') + `<button class="more" id="askMore">${S.lang === 'en' ? 'More questions ▾' : S.lang === 'easy' ? 'ほかの しつもん ▾' : 'ほかの質問 ▾'}</button><div id="askRest" hidden>${QUESTIONS.slice(6).map(q => `<button class="ask" data-q="${q.id}"><span class="q">？</span>${qText(q)}</button>`).join('')}</div>`;
   $('#askMore').onclick = () => { $('#askRest').hidden = false; $('#askMore').hidden = true; };
 }
 $('#askBtn').addEventListener('click', e => { e.stopPropagation(); const p = $('#askPop'); p.hidden = !p.hidden; $('#settings').hidden = true; });
@@ -3382,10 +3568,11 @@ function askQuestion(id) {
   if (a.arrows) { S.arrows = true; for (const x of $$('.tgl[data-t=arrows]')) x.classList.add('on'); }
   if (a.flight) { setTab('fly'); setFlight(a.flight); }
   const actions = [];
-  actions.push({ label: `${(S.depth === 'simple' && SIMPLE_NAME[q.parts[0]]) || PARTS[q.parts[0]].name}をくわしく ›`, fn: () => select(partsOf(q.parts[0])[0], true) });
+  actions.push({ label: S.lang === 'en' ? `About ${partName(q.parts[0])} ›` : `${partName(q.parts[0])}をくわしく ›`, fn: () => select(partsOf(q.parts[0])[0], true) });
+  if (hasSpeech) actions.push({ label: '🔊', fn: () => speak(`${qText(q)}。${q.a}`) });
   if (a.theater) actions.push({ label: 'やってみる ▶', primary: true, fn: () => { setTab('mishap'); startTheaterUI(a.theater); } });
   const idx = QUESTIONS.indexOf(q); actions.push({ label: 'つぎの質問 ›', fn: () => askQuestion(QUESTIONS[(idx + 1) % QUESTIONS.length].id) });
-  renderNote({ kind: 'question', title: q.q, html: `<p>${q.a}</p>`, actions, onClose: () => { clearQuestion(); } });
+  renderNote({ kind: 'question', title: qText(q), html: `<p>${q.a}</p>${langNote()}`, actions, onClose: () => { clearQuestion(); } });
   syncBodyMode();
 }
 
@@ -3527,7 +3714,7 @@ canvas.addEventListener('pointerdown', e => {
   if (hit && body.mode === 'free' && !theater.active) {
     e.stopImmediatePropagation(); controls.enabled = false; canvas.setPointerCapture(e.pointerId);
     const w = new THREE.Vector3(); screenToDronePlane(e.clientX, e.clientY, w);
-    push = { id: e.pointerId, x0: e.clientX, y0: e.clientY, w0: w.clone(), hist: [[w.clone(), performance.now()]], t0: performance.now() };
+    push = { id: e.pointerId, x0: e.clientX, y0: e.clientY, w0: w.clone(), hist: [[w.clone(), performance.now()]], t0: performance.now(), hit, moved: 0 };
     canvas.classList.add('push'); return;
   }
   pend = theater.active ? null : { x: e.clientX, y: e.clientY, t: performance.now(), hit };
@@ -3536,15 +3723,17 @@ canvas.addEventListener('pointermove', e => {
   if (push && e.pointerId === push.id) {
     const w = new THREE.Vector3(); if (!screenToDronePlane(e.clientX, e.clientY, w)) return;
     push.hist.push([w.clone(), performance.now()]); while (push.hist.length > 2 && performance.now() - push.hist[0][1] > 80) push.hist.shift();
-    const d = w.clone().sub(push.w0); d.y = 0; const px = Math.hypot(e.clientX - push.x0, e.clientY - push.y0); if (d.length() > 1e-4) holdBody(d.normalize(), px); return;
+    const d = w.clone().sub(push.w0); d.y = 0; const px = Math.hypot(e.clientX - push.x0, e.clientY - push.y0); push.moved = Math.max(push.moved, px); if (d.length() > 1e-4) holdBody(d.normalize(), px); return;
   }
-  if (e.pointerType === 'mouse') hoverAt = { x: e.clientX, y: e.clientY };
+  if (e.pointerType === 'mouse') { hoverAt = { x: e.clientX, y: e.clientY }; updateLookYaw(e.clientX, e.clientY); }
 });
+canvas.addEventListener('pointerleave', () => { body.lookYaw = null; });
 const endPush = e => {
   if (!push || e.pointerId !== push.id) return;
   const h0 = push.hist[0], h1 = push.hist[push.hist.length - 1]; const dt = Math.max(1, h1[1] - h0[1]) / 1000; const v = h1[0].clone().sub(h0[0]).divideScalar(dt); v.y = 0;
   const age = performance.now() - push.t0;
   const hold = body.hold; body.hold = null;
+  if (alive.on && push.moved < 8 && age < 350 && push.hit) { const hit = push.hit; push = null; controls.enabled = true; canvas.classList.remove('push'); select(hit, true); return; }   // 生きている機体を軽くタップ = 選ぶ
   if (hold && hold.th > 1e-4) { const k = 9.81 * Math.tan(hold.th) * 0.12; body.vx += hold.x / hold.th * k; body.vz += hold.z / hold.th * k; }  // 溜めの解放
   if (age < 350 && v.length() > 0.25) flickBody(v); else if (v.length() > 0.6) flickBody(v.multiplyScalar(0.5));
   if (!store.get('flicked')) { store.set('flicked', '1'); showToast('押された側のモーターが速くなって、元の姿勢にもどりました。', 3200); }
@@ -3560,6 +3749,7 @@ function updateHover() {
   if (S.hovered && !S.use && !theater.active) setTint(S.hovered, HOVER_L, 0);
   S.hovered = p;
   if (p && p !== S.selected && !S.use && !theater.active && !S.question) setTint(p, themeDark ? HOVER_D : HOVER_L, 0.25);
+  if (alive.big) updateBigBand();
   canvas.classList.toggle('pick', !!p);
 }
 // キーボード
@@ -3618,7 +3808,7 @@ function tick(now) {
   stepCamera(dt);
   if (!S.camSpring && S.springWas) S.rotFrom = now; S.springWas = !!S.camSpring;
   const rotFor = (now - Math.max(S.lastInteract, S.rotFrom || 0, S.lastSelect + 7000)) / 1000;
-  const wantRot = S.autoRotate && !S.camSpring && !S.camInertia && rotFor > 5 && body.mode === 'idle' && !reduceMotion && $('#inspector').classList.contains('open') === false && !S.question;
+  const wantRot = S.autoRotate && !S.camSpring && !S.camInertia && rotFor > 5 && (body.mode === 'idle' || alive.on) && !reduceMotion && $('#inspector').classList.contains('open') === false && !S.question;
   controls.autoRotate = wantRot; controls.autoRotateSpeed = 0.45 * smoothstep(5, 7, rotFor);
   if (body.mode === 'free' && !S.camSpring) { const r = Math.hypot(body.px, body.pz); const w = smoothstep(0.08, 0.20, r); if (w > 0) controls.target.lerp(new THREE.Vector3(body.px, controls.target.y, body.pz), w * (1 - Math.exp(-dt / 0.6))); }
   controls.update();
@@ -3629,7 +3819,7 @@ function tick(now) {
   if (S.scale) stepScale();
   if (S.explodeFrame && Math.abs(S.explode - S.explodeT) < 0.01 && performance.now() - (S.explodeAt || 0) > 350) { S.explodeFrame = false; D.root.updateWorldMatrix(true, true); focusOn(D.parts.filter(p => partVisible(p) && effVisible(p.obj)).map(p => p.obj), { pull: true }); }   // 分解が落ち着いたら全体をフレーミング
   // 機体
-  stepBody(dtSim, dt); if (theater.active) stepTheater(dtSim, dt); if (whatif.active) stepWhatif(dtSim, dt); applyBody(dt);
+  stepAlive(dt); stepBody(dtSim, dt); if (theater.active) stepTheater(dtSim, dt); if (whatif.active) stepWhatif(dtSim, dt); applyBody(dt);
   updateMotors(dtSim, dt); updateMoveArrow(); updateAirflow(dtSim, dt);
   if (S.mode === 'cut') updateCutPlanes();
   updateHover();
@@ -3659,13 +3849,13 @@ function tick(now) {
 }
 // 検証用に最小限だけグローバルへ出す(モジュールスコープのままだとコンソールから触れないため)
 window.LIST_ORDER = LIST_ORDER; window.PARTS = PARTS; window.WHATIF = WHATIF;
-window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: scale, __codex: codex, __whatif: whatif, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
+window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: scale, __codex: codex, __whatif: whatif, __alive: alive, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
 // ---------- 起動 ----------
 (async () => {
   $('#loadMsg').textContent = '照明と材質を準備しています…';
   buildList(); applyTheme(); resize();
   applyQuality(isMobile ? (HF ? 1 : 0) : 3);
-  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif();
+  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif(); initLive();
   { const vs = viewScale(); if (vs > 1) camera.position.multiplyScalar(vs); }
   renderer.setClearColor(0x000000, 1);
   $('#loadMsg').textContent = 'シェーダーをコンパイルしています…'; mark('setup');

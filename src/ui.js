@@ -42,7 +42,7 @@ $('#tabs').addEventListener('click', e => { const b = e.target.closest('button')
 // ---------- はじめて / くわしく ----------
 function setDepth(d) {
   S.depth = d; store.set('depth', d); document.body.classList.toggle('full', d === 'full'); segSet($('#depthSeg'), 'd', d); $('#coach').hidden = true;
-  buildList(); renderDetail(); buildLabels(); buildMishapCards(); if (S.scale) renderMassBar(S.selected && S.selected.key);
+  buildList(); renderDetail(); buildLabels(); buildMishapCards(); buildAsk(); updateBigBand(); if (S.scale) renderMassBar(S.selected && S.selected.key);
   buildWhatifCards();
   if (d === 'full') showToast('くわしく: 部品40種の仕様例と点検ポイントも見られます'); 
 }
@@ -55,14 +55,14 @@ const explodeEl = $('#explode');
 explodeEl.addEventListener('input', () => { S.explodeAt = performance.now(); S.explode = explodeEl.value / 100; S.explodeT = S.explode; $('#explodeVal').textContent = explodeEl.value + '%'; explodePullBack(); S.shadowDirty = S.csDirty = true; });
 function explodePullBack() { if (S.explode < 0.35 || S.explodedCam) return; S.explodedCam = true; S.explodeFrame = true; }
 function setExplode(v) { S.explode = v; S.explodeAt = performance.now(); explodeEl.value = Math.round(v * 100); $('#explodeVal').textContent = Math.round(v * 100) + '%'; explodePullBack(); }
-function setPower(p, silent) { S.power = p; segSet($('#powerSeg'), 'p', p); const b = $('#powerBtn'); b.textContent = p > 0 ? '■ 止める' : '▶ プロペラを回す'; b.classList.toggle('primary', p === 0); syncBodyMode();
+function setPower(p, silent) { S.power = p; segSet($('#powerSeg'), 'p', p); const b = $('#powerBtn'); b.textContent = p > 0 ? t('stop') : t('power'); b.classList.toggle('primary', p === 0); syncBodyMode();
   if (p > 0 && !silent && !store.get('coachFlick') && S.tab === 'fly') setTimeout(() => { if (S.power > 0 && body.mode === 'free') showCoach('機体をはじいてみよう', '浮いている機体を指やマウスでさっとはじくと、傾いたぶんを頭脳（FC）がモーターの速さで直します。', null, () => store.set('coachFlick', '1')); }, 2500); }
 $('#powerBtn').addEventListener('click', () => setPower(S.power > 0 ? 0 : (S.depth === 'full' ? (parseFloat($('#powerSeg .on')?.dataset.p) || 0.5) : 0.5)));
 $('#powerSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setPower(parseFloat(b.dataset.p)); });
 function syncBodyMode() {
   if (theater.active) return setBodyMode('theater');
   if (S.flight) return setBodyMode('demo');
-  if (S.power > 0 && (S.tab === 'fly' || S.scale)) return setBodyMode('free');
+  if (S.power > 0 && (S.tab === 'fly' || S.scale || alive.on)) return setBodyMode('free');
   setBodyMode('idle');
 }
 // 飛行の原理
@@ -87,6 +87,9 @@ document.addEventListener('click', e => {
   else if (t === 'sticks') setSticks(on);
   else if (t === 'tilt') setTilt(on);
   else if (t === 'shadows') { S.shadows = on; applyMode(); }
+  else if (t === 'alive') setAlive(on);
+  else if (t === 'speakAuto') setSpeakAuto(on);
+  else if (t === 'big') setBig(on);
 });
 function showLegend() { if ($('#noteCard').dataset.kind === 'flight' || $('#noteCard').dataset.kind === 'question') return;
   renderNote({ kind: 'legend', title: 'まわる向きのしるし', badge: S.slow ? '1/50のはやさ' : null, html: `<div class="legend"><span class="ccw"><b>↺ 反時計まわり(CCW)</b></span> しま模様の羽・翼端が青緑<br><span class="cw"><b>↻ 時計まわり(CW)</b></span> 無地の羽・翼端が青<br>白い印が上を向いていれば正しい向きに付いています<br><b>灯火</b> 前・左 <span style="color:#ff3b30">●</span>赤 / 前・右 <span style="color:#22c55e">■</span>緑 / 後ろ ◆白</div>` }); }
@@ -98,10 +101,10 @@ $('#fsBtn').addEventListener('click', () => { const el = document.documentElemen
 // ---------- 部品一覧 / 解説 ----------
 function buildList() {
   const list = $('#partList'); let html = '';
-  if (S.depth === 'simple') { for (const k of SIMPLE_KEYS) html += `<div class="row" data-key="${k}" tabindex="0" role="button"><span class="nm">${SIMPLE_NAME[k]}</span><span class="cnt"></span><span></span></div>`; $('#partCount').textContent = `${SIMPLE_KEYS.length} 部品`; }
+  if (S.depth === 'simple') { for (const k of SIMPLE_KEYS) html += `<div class="row" data-key="${k}" tabindex="0" role="button"><span class="nm">${partName(k)}</span><span class="cnt"></span><span></span></div>`; $('#partCount').textContent = `${SIMPLE_KEYS.length} 部品`; }
   else {
     for (const g of GROUPS) { const keys = LIST_ORDER.filter(k => PARTS[k] && PARTS[k].group === g.id); html += `<div class="grp" style="--c:${g.color}"><i></i>${g.name}</div>`;
-      for (const k of keys) { const d = PARTS[k]; const hid = partsOf(k).some(p => p.hidden); html += `<div class="row${SUB[k] ? ' sub' : ''}${hid ? ' off' : ''}" data-key="${k}" tabindex="0" role="button"><span class="nm">${d.name}</span><span class="cnt">${d.count > 1 ? '×' + d.count : ''}</span><button class="eye" aria-label="${d.name}の表示切替">${hid ? ICON.eyeOff : ICON.eye}</button></div>`; } }
+      for (const k of keys) { const d = PARTS[k]; const hid = partsOf(k).some(p => p.hidden); html += `<div class="row${SUB[k] ? ' sub' : ''}${hid ? ' off' : ''}" data-key="${k}" tabindex="0" role="button"><span class="nm">${partName(k)}</span><span class="cnt">${d.count > 1 ? '×' + d.count : ''}</span><button class="eye" aria-label="${d.name}の表示切替">${hid ? ICON.eyeOff : ICON.eye}</button></div>`; } }
     $('#partCount').textContent = `${LIST_ORDER.length} 部品`;
   }
   list.innerHTML = html;
@@ -124,7 +127,8 @@ function select(p, all = false, opts = {}) {
   renderDetail();
   if (p && narrow() && !opts.quiet) $('#inspector').classList.add('open');
   if (S.scale) renderMassBar(p && p.key);
-  codexOnSelect(p);
+  codexOnSelect(p); updateBigBand();
+  if (p && alive.speakAuto && !opts.quiet) speakPart(p);
 }
 function renderDetail() {
   const box = $('#detail'), p = S.selected, body_ = $('#inspBody');
@@ -132,12 +136,13 @@ function renderDetail() {
   const d = PARTS[p.key], g = GROUPS.find(x => x.id === d.group), simple = S.depth === 'simple', sd = SIMPLE[p.key];
   const inst = PER_MOTOR.has(p.key) && !S.selAll ? ` · ${MOTOR_INFO[p.idx].id}（${MOTOR_INFO[p.idx].pos}・${MOTOR_INFO[p.idx].dir === 'CW' ? '↻' : '↺'}${MOTOR_INFO[p.idx].dir}）` : '';
   const hidden = partsOf(p.key).some(x => x.hidden);
-  let h = `<div class="d-group" style="--c:${g.color}"><i></i>${g.name}</div><h3>${simple && SIMPLE_NAME[p.key] ? SIMPLE_NAME[p.key] : d.name}</h3><p class="d-en">${d.en}${d.count > 1 ? ` · ×${d.count}` : ''}${inst}</p>`;
+  let h = `<div class="d-group" style="--c:${g.color}"><i></i>${g.name}</div><div class="d-title"><h3>${partName(p)}</h3>${hasSpeech ? '<button id="detailSpeak" class="icon-btn sm speak" aria-label="読み上げ" title="読み上げ">🔊</button>' : ''}</div><p class="d-en">${S.lang === 'en' ? d.name : d.en}${d.count > 1 ? ` · ×${d.count}` : ''}${inst}</p>`;
   h += codexHead(p.key);
   h += `<div class="d-actions"><button id="dFocus" class="primary">注目</button>${simple ? '' : `<button id="dIsolate">${S.isolated === p.key ? '単独表示を解除' : '単独表示'}</button><button id="dHide">${hidden ? '表示する' : '非表示'}</button>`}</div>`;
-  h += `<section><h4>役割</h4><p>${simple && sd ? sd.role : d.role}</p></section>`;
+  h += `<section><h4>${S.lang === 'en' ? 'Role' : S.lang === 'easy' ? 'やくわり' : '役割'}</h4><p>${simple && sd ? partRole(p.key) : d.role}</p></section>`;
+  if (!simple || !langEntry(p.key)) h += langNote();
   h += codexTriviaRow(p.key);
-  if (simple && sd) h += `<div class="analogy"><b>たとえるなら</b>${sd.analogy}</div>`;
+  if (simple && sd) h += `<div class="analogy"><b>${S.lang === 'en' ? 'Like…' : S.lang === 'easy' ? 'たとえると' : 'たとえるなら'}</b>${partAnalogy(p.key)}</div>`;
   if (!simple && (p.key === 'motor' || p.key === 'prop' || p.key === 'esc')) h += `<section><h4>配置と回転方向（上から見て）</h4><div class="mtab">${MOTOR_INFO.map(m => `<div class="${m.dir.toLowerCase()}"><b>${m.id} ${m.dir === 'CW' ? '↻' : '↺'}${m.dir}</b>${m.pos}</div>`).join('')}</div></section>`;
   if (d.structure) h += `<section><h4>構造</h4><ul>${d.structure.slice(0, simple ? 3 : 9).map(s => `<li>${s}</li>`).join('')}</ul></section>`;
   if (!simple && d.spec) h += `<details><summary>仕様例</summary><dl class="spec">${d.spec.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl></details>`;
@@ -149,6 +154,7 @@ function renderDetail() {
   const iso = $('#dIsolate'); if (iso) iso.onclick = () => { S.isolated = S.isolated === p.key ? null : p.key; applyVisibility(); renderDetail(); if (S.isolated) focusOn(partsOf(p.key).map(x => x.obj)); };
   const hd = $('#dHide'); if (hd) hd.onclick = () => toggleHidden(p.key);
   const more = $('#dMore'); if (more) more.onclick = () => setDepth('full');
+  const sp = $('#detailSpeak'); if (sp) sp.onclick = () => speakPart(p);
 }
 
 // ---------- ラベル / モーターバッジ ----------
@@ -157,7 +163,7 @@ function buildLabels() {
   $('#labels').innerHTML = ''; $('#leaders').innerHTML = '';
   const keys = S.depth === 'simple' ? new Set(SIMPLE_KEYS) : null;
   labelEls = D.parts.filter(p => (p.label || p.labelObj) && (!keys || keys.has(p.key) || (S.labelOnly && S.labelOnly.has(p.key))) && (!S.price || PRICE[p.key])).map(p => {
-    const el = document.createElement('button'); el.className = 'lbl'; el.textContent = S.price ? '¥' + PRICE[p.key].toLocaleString() : ((S.depth === 'simple' && SIMPLE_NAME[p.key]) || PARTS[p.key].name); el.type = 'button';
+    const el = document.createElement('button'); el.className = 'lbl'; el.textContent = S.price ? '¥' + PRICE[p.key].toLocaleString() : partName(p); el.type = 'button';
     el.tabIndex = -1; el.addEventListener('click', () => select(p, true)); $('#labels').appendChild(el);
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line'), dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); dot.setAttribute('r', '3'); $('#leaders').append(line, dot);
     return { p, el, line, dot, w: 0, h: 0, x: 0, y: 0, ax: 0, ay: 0, show: false };
@@ -167,7 +173,7 @@ const badgeEls = D.motors.map((mo, i) => { const el = document.createElement('di
 function updateLabels() {
   const camDist = camera.position.distanceTo(controls.target);
   const forced = !!S.labelOnly;                       // ⑩: 特定の部品だけを強制表示
-  const live = body.mode !== 'idle' && !forced;
+  const live = body.mode !== 'idle' && !forced && !(alive.on && body.mode === 'free' && !body.hold && !body.stick.active);   // ⑧: 生きているだけならラベルは出す
   for (const L of labelEls) {
     const p = L.p;
     let show = (forced || (S.labels && !S.labelsSuppressed)) && !live && partVisible(p) && effVisible(p.obj) && (!S.labelOnly || S.labelOnly.has(p.key));
@@ -209,7 +215,7 @@ function updateLabels() {
 // ---------- coach / 質問 ----------
 function showCoach(text, sub, go, later) { const c = $('#coach'); $('#coachText').textContent = text; $('#coachSub').textContent = sub || ''; c.hidden = false; $('#coachGo').hidden = !go; $('#coachGo').onclick = () => { c.hidden = true; if (go) go(); }; $('#coachLater').onclick = () => { c.hidden = true; if (later) later(); }; if (!go) $('#coachLater').textContent = 'わかった'; else $('#coachLater').textContent = 'あとで'; }
 function buildAsk() {
-  const list = $('#askList'); list.innerHTML = QUESTIONS.slice(0, 6).map(q => `<button class="ask" data-q="${q.id}"><span class="q">？</span>${q.q}</button>`).join('') + `<button class="more" id="askMore">ほかの質問 ▾</button><div id="askRest" hidden>${QUESTIONS.slice(6).map(q => `<button class="ask" data-q="${q.id}"><span class="q">？</span>${q.q}</button>`).join('')}</div>`;
+  const list = $('#askList'); list.innerHTML = QUESTIONS.slice(0, 6).map(q => `<button class="ask" data-q="${q.id}"><span class="q">？</span>${qText(q)}</button>`).join('') + `<button class="more" id="askMore">${S.lang === 'en' ? 'More questions ▾' : S.lang === 'easy' ? 'ほかの しつもん ▾' : 'ほかの質問 ▾'}</button><div id="askRest" hidden>${QUESTIONS.slice(6).map(q => `<button class="ask" data-q="${q.id}"><span class="q">？</span>${qText(q)}</button>`).join('')}</div>`;
   $('#askMore').onclick = () => { $('#askRest').hidden = false; $('#askMore').hidden = true; };
 }
 $('#askBtn').addEventListener('click', e => { e.stopPropagation(); const p = $('#askPop'); p.hidden = !p.hidden; $('#settings').hidden = true; });
@@ -230,10 +236,11 @@ function askQuestion(id) {
   if (a.arrows) { S.arrows = true; for (const x of $$('.tgl[data-t=arrows]')) x.classList.add('on'); }
   if (a.flight) { setTab('fly'); setFlight(a.flight); }
   const actions = [];
-  actions.push({ label: `${(S.depth === 'simple' && SIMPLE_NAME[q.parts[0]]) || PARTS[q.parts[0]].name}をくわしく ›`, fn: () => select(partsOf(q.parts[0])[0], true) });
+  actions.push({ label: S.lang === 'en' ? `About ${partName(q.parts[0])} ›` : `${partName(q.parts[0])}をくわしく ›`, fn: () => select(partsOf(q.parts[0])[0], true) });
+  if (hasSpeech) actions.push({ label: '🔊', fn: () => speak(`${qText(q)}。${q.a}`) });
   if (a.theater) actions.push({ label: 'やってみる ▶', primary: true, fn: () => { setTab('mishap'); startTheaterUI(a.theater); } });
   const idx = QUESTIONS.indexOf(q); actions.push({ label: 'つぎの質問 ›', fn: () => askQuestion(QUESTIONS[(idx + 1) % QUESTIONS.length].id) });
-  renderNote({ kind: 'question', title: q.q, html: `<p>${q.a}</p>`, actions, onClose: () => { clearQuestion(); } });
+  renderNote({ kind: 'question', title: qText(q), html: `<p>${q.a}</p>${langNote()}`, actions, onClose: () => { clearQuestion(); } });
   syncBodyMode();
 }
 
@@ -375,7 +382,7 @@ canvas.addEventListener('pointerdown', e => {
   if (hit && body.mode === 'free' && !theater.active) {
     e.stopImmediatePropagation(); controls.enabled = false; canvas.setPointerCapture(e.pointerId);
     const w = new THREE.Vector3(); screenToDronePlane(e.clientX, e.clientY, w);
-    push = { id: e.pointerId, x0: e.clientX, y0: e.clientY, w0: w.clone(), hist: [[w.clone(), performance.now()]], t0: performance.now() };
+    push = { id: e.pointerId, x0: e.clientX, y0: e.clientY, w0: w.clone(), hist: [[w.clone(), performance.now()]], t0: performance.now(), hit, moved: 0 };
     canvas.classList.add('push'); return;
   }
   pend = theater.active ? null : { x: e.clientX, y: e.clientY, t: performance.now(), hit };
@@ -384,15 +391,17 @@ canvas.addEventListener('pointermove', e => {
   if (push && e.pointerId === push.id) {
     const w = new THREE.Vector3(); if (!screenToDronePlane(e.clientX, e.clientY, w)) return;
     push.hist.push([w.clone(), performance.now()]); while (push.hist.length > 2 && performance.now() - push.hist[0][1] > 80) push.hist.shift();
-    const d = w.clone().sub(push.w0); d.y = 0; const px = Math.hypot(e.clientX - push.x0, e.clientY - push.y0); if (d.length() > 1e-4) holdBody(d.normalize(), px); return;
+    const d = w.clone().sub(push.w0); d.y = 0; const px = Math.hypot(e.clientX - push.x0, e.clientY - push.y0); push.moved = Math.max(push.moved, px); if (d.length() > 1e-4) holdBody(d.normalize(), px); return;
   }
-  if (e.pointerType === 'mouse') hoverAt = { x: e.clientX, y: e.clientY };
+  if (e.pointerType === 'mouse') { hoverAt = { x: e.clientX, y: e.clientY }; updateLookYaw(e.clientX, e.clientY); }
 });
+canvas.addEventListener('pointerleave', () => { body.lookYaw = null; });
 const endPush = e => {
   if (!push || e.pointerId !== push.id) return;
   const h0 = push.hist[0], h1 = push.hist[push.hist.length - 1]; const dt = Math.max(1, h1[1] - h0[1]) / 1000; const v = h1[0].clone().sub(h0[0]).divideScalar(dt); v.y = 0;
   const age = performance.now() - push.t0;
   const hold = body.hold; body.hold = null;
+  if (alive.on && push.moved < 8 && age < 350 && push.hit) { const hit = push.hit; push = null; controls.enabled = true; canvas.classList.remove('push'); select(hit, true); return; }   // 生きている機体を軽くタップ = 選ぶ
   if (hold && hold.th > 1e-4) { const k = 9.81 * Math.tan(hold.th) * 0.12; body.vx += hold.x / hold.th * k; body.vz += hold.z / hold.th * k; }  // 溜めの解放
   if (age < 350 && v.length() > 0.25) flickBody(v); else if (v.length() > 0.6) flickBody(v.multiplyScalar(0.5));
   if (!store.get('flicked')) { store.set('flicked', '1'); showToast('押された側のモーターが速くなって、元の姿勢にもどりました。', 3200); }
@@ -408,6 +417,7 @@ function updateHover() {
   if (S.hovered && !S.use && !theater.active) setTint(S.hovered, HOVER_L, 0);
   S.hovered = p;
   if (p && p !== S.selected && !S.use && !theater.active && !S.question) setTint(p, themeDark ? HOVER_D : HOVER_L, 0.25);
+  if (alive.big) updateBigBand();
   canvas.classList.toggle('pick', !!p);
 }
 // キーボード

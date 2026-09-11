@@ -284,4 +284,17 @@ ol.parts-seq li b { display: inline-block; margin-right: 6px; color: var(--ink2)
 ol.parts-seq li.lit { color: var(--ink); } ol.parts-seq li.lit b { color: var(--accent-text); }
 @media (max-width: 760px) { .two-col { flex-direction: column; gap: 8px; } }
 
+/* ---------- 生きている機体と土台 (パッケージ⑧) ---------- */
+#bigBand { position: fixed; left: 50%; bottom: calc(var(--dock-h) + 30px); transform: translateX(-50%); z-index: 11; height: 64px; padding: 0 18px 0 26px; display: flex; align-items: center; gap: 14px; max-width: min(860px, calc(100vw - var(--insp-w) - 60px)); }
+#bigText { font-size: 28px; font-weight: 700; letter-spacing: .02em; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#bigBand .icon-btn { font-size: 18px; }
+body.big #noteCard { bottom: calc(var(--dock-h) + 104px); }
+#bigBtn.on { background: var(--accent-soft); color: var(--accent-text); }
+.d-title { display: flex; align-items: center; gap: 8px; } .d-title h3 { flex: 1; min-width: 0; }
+.speak { font-size: 15px; }
+.lang-note { margin: -2px 0 8px; font-size: 11px; color: var(--ink3); letter-spacing: .04em; }
+#langSeg button { padding: 4px 8px; font-size: 12px; }
+.tgl:disabled { opacity: .45; }
+@media (max-width: 760px) { #bigBand { left: 10px; right: 10px; transform: none; max-width: none; height: 56px; padding: 0 12px 0 16px; bottom: calc(var(--dock-h) + 8px); } #bigText { font-size: 22px; } body.big #noteCard { bottom: calc(var(--dock-h) + 72px); } }
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation-duration: .01s !important; } }
