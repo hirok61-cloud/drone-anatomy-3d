@@ -279,7 +279,7 @@ function buildDrone(M) {
     const core = new THREE.Sprite(M.glowCore(A.glow)); core.scale.set(0.009, 0.009, 1); core.position.set(0.006, 0, 0); core.renderOrder = 6; led.add(core);
     const halo = new THREE.Sprite(M.glowHalo(A.glow)); halo.scale.set(0.022, 0.022, 1); halo.position.set(0.009, 0, 0); halo.renderOrder = 6; led.add(halo);
     ag.add(led); reg(led, 'led', V3(0.14, 0.02, 0), { label: k === 0 ? V3(0.004, 0, 0) : null });
-    led.userData.halo = halo;
+    led.userData.halo = halo; led.userData.core = core; halo.userData.baseColor = halo.material.color.clone();
     // モーター
     const mo = buildMotor(M, G, A.dir, reg); mo.group.rotation.y = Math.PI / 4; at(mo.group, 0.275, 0.034, 0); ag.add(mo.group);
     const mp = reg(mo.group, 'motor', V3(0.12, 0.075, 0), { coarse: true, label: k === 0 ? V3(0, 0.02, 0) : null });
@@ -504,7 +504,7 @@ function buildDrone(M) {
 
   // 重心マーカー(パッケージ⑥): 白黒4分割の球。重さモード中だけ出す
   const cgMarker = new THREE.Group(); cgMarker.visible = false;
-  { const r = 0.007, segs = 16;
+  { const r = 0.012, segs = 20;
     for (const [phi0, col] of [[0, 0x1b1f27], [Math.PI / 2, 0xf2f4f7]]) {
       for (const off of [0, Math.PI]) {
         const g = new THREE.SphereGeometry(r, segs, 12, phi0 + off, Math.PI / 2);
@@ -512,6 +512,10 @@ function buildDrone(M) {
         m.renderOrder = 8; m.userData.noPart = m.userData.noPick = m.userData.noAO = m.userData.noShadow = true; cgMarker.add(m);   // 機体に隠れないよう手前に描く
       }
     }
+  }
+  { // 床への垂線: 重心の前後ずれを床の上で読めるように
+    const plumb = new THREE.Mesh(new THREE.CylinderGeometry(0.0008, 0.0008, 1, 6), new THREE.MeshBasicMaterial({ color: 0x1b1f27, transparent: true, opacity: 0.45, depthTest: false, toneMapped: false }));
+    plumb.userData.noPart = plumb.userData.noPick = plumb.userData.noAO = plumb.userData.noShadow = true; plumb.renderOrder = 8; cgMarker.add(plumb); cgMarker.userData.plumb = plumb;
   }
   root.add(cgMarker);
 
@@ -524,15 +528,18 @@ function buildDrone(M) {
 // ---- 大きさの目安になる人型 (パッケージ⑥。身長1.70m、機体の右 0.9m) ----
 function buildPerson() {
   // 既定の斜め視点から見て機体と同じ奥行きに立たせる(遠近で大きさが狂わないように)
-  const g = new THREE.Group(); g.visible = false; g.position.set(0.65, -0.158, 0.62);
-  const mat = new THREE.MeshStandardMaterial({ color: 0x9aa3b0, roughness: 0.9, metalness: 0 });
-  const put = (geo, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = false; m.userData.noPick = m.userData.noAO = true; g.add(m); return m; };   // noPart は付けない(カメラの枠決めに人型を含めるため)
-  put(new THREE.SphereGeometry(0.11, 20, 14), 0, 1.56, 0);
-  put(new THREE.CapsuleGeometry(0.16, 0.42, 6, 16), 0, 1.18, 0);
-  put(new THREE.CapsuleGeometry(0.07, 0.62, 6, 12), -0.09, 0.44, 0);
-  put(new THREE.CapsuleGeometry(0.07, 0.62, 6, 12), 0.09, 0.44, 0);
-  put(new THREE.CapsuleGeometry(0.045, 0.5, 6, 12), -0.21, 1.14, 0);
-  put(new THREE.CapsuleGeometry(0.045, 0.5, 6, 12), 0.21, 1.14, 0);
+  // 画面右(既定視点の右手)・機体と同じ奥行きに立つ。ピクトグラム寄りの簡易人型: 頭・首・胴・腕・脚・足(接地)
+  const g = new THREE.Group(); g.visible = false; g.position.set(-0.50, -0.158, -0.48);
+  const mat = new THREE.MeshStandardMaterial({ color: 0x6f7784, roughness: 0.85, metalness: 0 });
+  const put = (geo, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; m.userData.noPick = m.userData.noAO = true; g.add(m); return m; };   // noPart は付けない(カメラの枠決めに人型を含めるため)
+  put(new THREE.SphereGeometry(0.105, 24, 16), 0, 1.595, 0);                 // 頭 top = 1.70
+  put(new THREE.CylinderGeometry(0.045, 0.05, 0.07, 12), 0, 1.50, 0);        // 首
+  put(new THREE.CapsuleGeometry(0.155, 0.40, 8, 16), 0, 1.13, 0);            // 胴
+  for (const s of [-1, 1]) {
+    put(new THREE.CapsuleGeometry(0.075, 0.62, 6, 12), s * 0.09, 0.445, 0);  // 脚(底 0.06 → 足に乗る)
+    put(rboxGeo(0.10, 0.06, 0.25, 0.02), s * 0.09, 0.03, -0.04);            // 足(接地)
+    const arm = put(new THREE.CapsuleGeometry(0.045, 0.50, 6, 12), s * 0.205, 1.15, 0); arm.rotation.z = -s * 0.10;
+  }
   return g;
 }
 

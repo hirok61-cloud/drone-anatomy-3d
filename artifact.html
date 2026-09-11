@@ -222,7 +222,8 @@ body.theater #topbar, body.theater #viewCol { opacity: .35; pointer-events: none
   .top-actions { gap: 4px; } .top-actions .pill-btn { padding: 6px 8px; }
   .popover { position: fixed; left: 10px; right: 10px; top: auto; bottom: 10px; width: auto; max-height: 60vh; }
   #dock { left: 10px; right: 10px; bottom: 10px; }
-  .ctx { padding: 8px 10px 6px; } .ctx-row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; align-items: flex-end; gap: 12px; padding-right: 24px; mask-image: linear-gradient(to right, #000 88%, transparent); -webkit-mask-image: linear-gradient(to right, #000 88%, transparent); } .ctx-row::-webkit-scrollbar { display: none; }
+  .ctx { padding: 8px 10px 6px; } .ctx-row[data-tab=mishap] { flex-wrap: wrap; overflow-x: hidden; mask-image: none; -webkit-mask-image: none; padding-right: 0; gap: 6px; } .ctx-row[data-tab=mishap] .dock-group.grow { width: 100%; flex: none; }
+  .ctx-row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; align-items: flex-end; gap: 12px; padding-right: 24px; mask-image: linear-gradient(to right, #000 88%, transparent); -webkit-mask-image: linear-gradient(to right, #000 88%, transparent); } .ctx-row::-webkit-scrollbar { display: none; }
   .dock-group { flex: none; } .dock-group.grow { flex: none; width: 150px; } .chips { flex-wrap: nowrap; }
   .tabs button span { font-size: 11px; } .tabs button { flex-direction: column; gap: 2px; padding: 6px 4px; }
   #viewCol { flex-direction: row; bottom: auto; top: 66px; right: 10px; padding: 4px; } #viewCol hr { display: none; }
@@ -1773,7 +1774,7 @@ function buildDrone(M) {
     const core = new THREE.Sprite(M.glowCore(A.glow)); core.scale.set(0.009, 0.009, 1); core.position.set(0.006, 0, 0); core.renderOrder = 6; led.add(core);
     const halo = new THREE.Sprite(M.glowHalo(A.glow)); halo.scale.set(0.022, 0.022, 1); halo.position.set(0.009, 0, 0); halo.renderOrder = 6; led.add(halo);
     ag.add(led); reg(led, 'led', V3(0.14, 0.02, 0), { label: k === 0 ? V3(0.004, 0, 0) : null });
-    led.userData.halo = halo;
+    led.userData.halo = halo; led.userData.core = core; halo.userData.baseColor = halo.material.color.clone();
     // モーター
     const mo = buildMotor(M, G, A.dir, reg); mo.group.rotation.y = Math.PI / 4; at(mo.group, 0.275, 0.034, 0); ag.add(mo.group);
     const mp = reg(mo.group, 'motor', V3(0.12, 0.075, 0), { coarse: true, label: k === 0 ? V3(0, 0.02, 0) : null });
@@ -1998,7 +1999,7 @@ function buildDrone(M) {
 
   // 重心マーカー(パッケージ⑥): 白黒4分割の球。重さモード中だけ出す
   const cgMarker = new THREE.Group(); cgMarker.visible = false;
-  { const r = 0.007, segs = 16;
+  { const r = 0.012, segs = 20;
     for (const [phi0, col] of [[0, 0x1b1f27], [Math.PI / 2, 0xf2f4f7]]) {
       for (const off of [0, Math.PI]) {
         const g = new THREE.SphereGeometry(r, segs, 12, phi0 + off, Math.PI / 2);
@@ -2006,6 +2007,10 @@ function buildDrone(M) {
         m.renderOrder = 8; m.userData.noPart = m.userData.noPick = m.userData.noAO = m.userData.noShadow = true; cgMarker.add(m);   // 機体に隠れないよう手前に描く
       }
     }
+  }
+  { // 床への垂線: 重心の前後ずれを床の上で読めるように
+    const plumb = new THREE.Mesh(new THREE.CylinderGeometry(0.0008, 0.0008, 1, 6), new THREE.MeshBasicMaterial({ color: 0x1b1f27, transparent: true, opacity: 0.45, depthTest: false, toneMapped: false }));
+    plumb.userData.noPart = plumb.userData.noPick = plumb.userData.noAO = plumb.userData.noShadow = true; plumb.renderOrder = 8; cgMarker.add(plumb); cgMarker.userData.plumb = plumb;
   }
   root.add(cgMarker);
 
@@ -2018,15 +2023,18 @@ function buildDrone(M) {
 // ---- 大きさの目安になる人型 (パッケージ⑥。身長1.70m、機体の右 0.9m) ----
 function buildPerson() {
   // 既定の斜め視点から見て機体と同じ奥行きに立たせる(遠近で大きさが狂わないように)
-  const g = new THREE.Group(); g.visible = false; g.position.set(0.65, -0.158, 0.62);
-  const mat = new THREE.MeshStandardMaterial({ color: 0x9aa3b0, roughness: 0.9, metalness: 0 });
-  const put = (geo, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = false; m.userData.noPick = m.userData.noAO = true; g.add(m); return m; };   // noPart は付けない(カメラの枠決めに人型を含めるため)
-  put(new THREE.SphereGeometry(0.11, 20, 14), 0, 1.56, 0);
-  put(new THREE.CapsuleGeometry(0.16, 0.42, 6, 16), 0, 1.18, 0);
-  put(new THREE.CapsuleGeometry(0.07, 0.62, 6, 12), -0.09, 0.44, 0);
-  put(new THREE.CapsuleGeometry(0.07, 0.62, 6, 12), 0.09, 0.44, 0);
-  put(new THREE.CapsuleGeometry(0.045, 0.5, 6, 12), -0.21, 1.14, 0);
-  put(new THREE.CapsuleGeometry(0.045, 0.5, 6, 12), 0.21, 1.14, 0);
+  // 画面右(既定視点の右手)・機体と同じ奥行きに立つ。ピクトグラム寄りの簡易人型: 頭・首・胴・腕・脚・足(接地)
+  const g = new THREE.Group(); g.visible = false; g.position.set(-0.50, -0.158, -0.48);
+  const mat = new THREE.MeshStandardMaterial({ color: 0x6f7784, roughness: 0.85, metalness: 0 });
+  const put = (geo, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; m.userData.noPick = m.userData.noAO = true; g.add(m); return m; };   // noPart は付けない(カメラの枠決めに人型を含めるため)
+  put(new THREE.SphereGeometry(0.105, 24, 16), 0, 1.595, 0);                 // 頭 top = 1.70
+  put(new THREE.CylinderGeometry(0.045, 0.05, 0.07, 12), 0, 1.50, 0);        // 首
+  put(new THREE.CapsuleGeometry(0.155, 0.40, 8, 16), 0, 1.13, 0);            // 胴
+  for (const s of [-1, 1]) {
+    put(new THREE.CapsuleGeometry(0.075, 0.62, 6, 12), s * 0.09, 0.445, 0);  // 脚(底 0.06 → 足に乗る)
+    put(rboxGeo(0.10, 0.06, 0.25, 0.02), s * 0.09, 0.03, -0.04);            // 足(接地)
+    const arm = put(new THREE.CapsuleGeometry(0.045, 0.50, 6, 12), s * 0.205, 1.15, 0); arm.rotation.z = -s * 0.10;
+  }
   return g;
 }
 
@@ -2185,7 +2193,8 @@ class ScenePass extends Pass {
 const scenePass = new ScenePass();
 class GtaoLite extends GTAOPass {
   constructor(...a) { super(...a); this.needsSwap = false; this.every = 2; this._n = 0; this.ok = true; }
-  overrideVisibility() { const cache = this._visibilityCache; this.scene.traverse(o => { cache.set(o, o.visible); if (o.isPoints || o.isLine || o.isSprite || o.userData.noAO) o.visible = false; }); }   // スプライト・ブラー円盤・LEDカバーはAOに入れない
+  overrideVisibility() { this._hid = []; this.scene.traverse(o => { if (o.visible && (o.isPoints || o.isLine || o.isSprite || o.userData.noAO)) { o.visible = false; this._hid.push(o); } }); }   // スプライト・ブラー円盤・LEDカバーはAOに入れない(自前のリストで確実に戻す)
+  restoreVisibility() { if (this._hid) for (const o of this._hid) o.visible = true; this._hid = null; }
   render(renderer, writeBuffer, readBuffer) {
     const fresh = S.aoDirty || (++this._n % this.every === 0);
     try {
@@ -2300,6 +2309,7 @@ function applyMode() {
   }
   const cutOn = S.mode === 'cut';
   for (const c of cut.list) { if (!cutOn) c.mat.clippingPlanes[0].copy(cut.far); }
+  { const on = !isWireMode(); for (const p of D.parts) if (p.key === 'led') { const u = p.obj.userData; if (u.core) u.core.visible = on; if (u.halo) u.halo.visible = on; } }   // 線画/設計図ではLEDの光を消す
   renderer.shadowMap.enabled = key.castShadow = S.shadows && S.mode !== 'xray' && !isWireMode();
   gridU.uGrid.value = (S.mode === 'xray' || isWireMode()) ? 1 : 0;
   S.shadowDirty = S.csDirty = S.aoDirty = true;
@@ -2519,7 +2529,7 @@ function stepFree(dt) {
   const ay = 36 * (pyCmd - body.py) - 9.6 * body.vyF; body.vyF += ay * dt; body.py += body.vyF * dt;
   // ヨー
   const yawCmd = st.active ? -1.2 * st.yaw : 0; body.yawRate = dl(body.yawRate, yawCmd, dt, 6); body.yaw += body.yawRate * dt;
-  if (!st.active) { body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); const look = (S.alive && body.lookYaw != null && !body.hold && !ti.active && !reduceMotion); body.yaw = dl(body.yaw, look ? body.lookYaw : 0, dt, look ? 2 : 1.5); }   // ⑧: ポインタの方へ数度だけ向く
+  if (!st.active) { body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); const look = (S.alive && body.lookYaw != null && !body.hold && !ti.active && !reduceMotion); body.yaw = dl(body.yaw, look ? body.lookYaw : 0, dt, look ? 2.5 : 1.5); }   // ⑧: ポインタの方へ数度だけ向く
   // モーター配分: α_z = −τ̈x, α_x = τ̈z
   const collective = 1 / Math.cos(th) - 1; const alz = -body.ax, alx = body.az;
   for (let i = 0; i < 4; i++) {
@@ -2550,7 +2560,8 @@ function stepDemo(dt) {
 }
 function stepIdle(dt) {
   const r = 4; body.tx = dl(body.tx, 0, dt, r); body.tz = dl(body.tz, 0, dt, r); body.wx = body.wz = 0;
-  body.px = dl(body.px, 0, dt, r); body.py = dl(body.py, 0, dt, r); body.pz = dl(body.pz, 0, dt, r); body.vx = body.vz = body.vy = 0;
+  body.px = dl(body.px, 0, dt, r); body.pz = dl(body.pz, 0, dt, r); body.vx = body.vz = body.vy = 0;
+  { const ay = 25 * (0 - body.py) - 10 * body.vyF; body.vyF += ay * dt; body.py = Math.max(0, body.py + body.vyF * dt); if (body.py === 0) body.vyF = 0; }   // 着陸は初速0のS字(臨界減衰)
   body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); body.yaw = dl(body.yaw, 0, dt, 3);
   if (!S.scale) for (let i = 0; i < 4; i++) body.mult[i] = dl(body.mult[i], 1, dt, 4);
 }
@@ -2597,7 +2608,14 @@ function updateMotors(dtSim, dtReal) {
     const raw = mo.rpm / HOVER_RPM * 100; mo.pct = raw > mo.pct ? raw : mo.pct + (raw - mo.pct) * (1 - Math.exp(-dtReal / 0.5));
     if (mo.rpm > 50) anySpin = true;
     const th = D.arrows.thrust[i]; th.visible = (body.mode === 'demo' || body.mode === 'free' || body.mode === 'theater') && partVisible(mo.part) && mo.rpm > 100 && !(typeof alive === 'object' && alive.on && !body.hold && Math.hypot(body.tx, body.tz) < 0.035);   // 生きているだけの間は矢印を出さない
-    if (th.visible) { th.userData.setLength(0.02 + 0.11 * mo.rpm / RPM_MAX); const rel = mo.rpm / Math.max(1, S.power * RPM_MAX); th.userData.mat.color.set(rel > 1.03 ? 0x22c55e : rel < 0.97 ? 0xf59e0b : arrowNeutral); }
+    if (th.visible) {
+      th.userData.setLength(0.02 + 0.11 * mo.rpm / RPM_MAX);
+      const base = S.scale ? D.motors.reduce((a, m) => a + m.rpm, 0) / 4 : Math.max(1, S.power * RPM_MAX);   // 重さモードは4基平均との比
+      const rel = mo.rpm / Math.max(1, base); let col = rel > 1.03 ? 0x22c55e : rel < 0.97 ? 0xf59e0b : arrowNeutral;
+      if (S.scale && typeof scale === 'object' && scale.share[i] > SCALE_OVER) col = 0xff3b30;   // バッジの赤と揃える
+      if (mo.rpmTarget === 0) col = arrowNeutral;                                                // 着陸の減速は「遅い」ではない
+      th.userData.mat.color.set(col);
+    }
     D.arrows.rot[i].visible = (S.arrows || S.flight === 'yaw') && partVisible(mo.part) && S.explodeT < 0.05;
   });
   if (anySpin) { shadowTick += dtReal; if (shadowTick > 1 / 30) { shadowTick = 0; S.shadowDirty = true; } S.aoDirty = true; }
@@ -2658,7 +2676,7 @@ function buildAirflow(N) {
         float life = fract(seed.y + uPhase[k]);
         vec3 p0 = flow(life, seed.z, seed.w, dir, s), p1 = flow(life - 0.015, seed.z, seed.w, dir, s);
         vec4 w0 = uRotor[k] * vec4(p0, 1.0), w1 = uRotor[k] * vec4(p1, 1.0);
-        float down = max(0.0, 0.043 - p0.y); w0.xyz += uWind * down * 0.6; w1.xyz += uWind * down * 0.6;
+        float down = max(0.0, 0.043 - p0.y); w0.xyz += uWind * down * 1.2; w1.xyz += uWind * down * 1.2;
         // 床に当たると外へ広がる
         vec3 rc = (uRotor[k] * vec4(0.0, 0.043, 0.0, 1.0)).xyz; float g = clamp((uGroundY + 0.035 - w0.y) / 0.035, 0.0, 1.0);
         vec2 rad = normalize(w0.xz - rc.xz + 1e-5); w0.xz += rad * g * g * 0.16; w1.xz += rad * g * g * 0.16; w0.y = max(w0.y, uGroundY + 0.004); w1.y = max(w1.y, uGroundY + 0.004);
@@ -2689,7 +2707,7 @@ function updateAirflow(dtSim, dtReal) {
   let vis = false;
   D.motors.forEach((mo, i) => { const s = mo.rpm / RPM_MAX; if (mo.rpm > 600) vis = true; air.phase[i] = (air.phase[i] + dtSim * (0.4 + 3.6 * s)) % 1000; air.mat.uniforms.uRotor.value[i].copy(mo.group.matrixWorld); air.mat.uniforms.uRpm.value.setComponent(i, on ? mo.rpm : 0); });
   if (!air.cols && D.motors[0] && D.motors[0].group) buildAirColumns();
-  if (air.cols) air.cols.forEach((c, i) => { const mo = D.motors[i]; const k = on ? mo.rpm / RPM_MAX : 0; c.material.uniforms.uK.value = k; c.visible = on && vis && mo.rpm > 600; air.colT[i] += dtSim * (1 + 3 * k); c.material.uniforms.uT.value = air.colT[i]; });
+  if (air.cols) air.cols.forEach((c, i) => { const mo = D.motors[i]; const k = on ? mo.rpm / RPM_MAX : 0; c.material.uniforms.uK.value = k; c.visible = on && vis && mo.rpm > 600 && !air.windOverride; /* 柱は風で傾かないので風の場面では隠す */ air.colT[i] += dtSim * (1 + 3 * k); c.material.uniforms.uT.value = air.colT[i]; });
   m.visible = on && vis;
   if (!m.visible) return;
   const u = air.mat.uniforms; u.uPhase.value.set(air.phase[0], air.phase[1], air.phase[2], air.phase[3]); if (air.windOverride) u.uWind.value.copy(air.windOverride); else u.uWind.value.copy(body.v).negate(); u.uTime.value += dtSim;
@@ -2880,7 +2898,7 @@ function stepTheater(dtSim, dtReal) {
 // ⑤が「組み立ての間違い」なのに対し、こちらは外の状況。機体ができることと人がやることを対で見せる。
 const whatif = {
   active: false, def: null, phase: 0, t: 0, litIdx: -1, blink: 0,
-  saved: { air: false, personPos: null, personVis: false }, seq: [],
+  saved: { air: false, personPos: null, personVis: false }, seq: [], ring: null,
 };
 const D2R_W = (d) => THREE.MathUtils.degToRad(d);
 
@@ -2895,18 +2913,26 @@ function startWhatif(id) {
   D.motors.forEach(mo => { mo.rpmTarget = null; mo.rpmRate = 3.5; });
   S.power = 0.5;
   whatif.saved.air = S.air; S.labelsSuppressed = true; S.labelOnly = null;
+  if (def.motion === 'wind') { S.air = true; for (const x of $$('.tgl[data-t=air]')) x.classList.add('on'); }   // 風の場面だけ気流を出す
+  if (def.motion === 'driftHold') {   // GPS: 開始位置の床リング(流された量の基準)
+    if (!whatif.ring) { const rg = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.002, 8, 72), new THREE.MeshBasicMaterial({ color: 0x3b7df7, transparent: true, opacity: 0.5, toneMapped: false })); rg.rotation.x = Math.PI / 2; rg.position.y = -0.156; rg.userData.noPart = rg.userData.noPick = rg.userData.noAO = rg.userData.noShadow = true; scene.add(rg); whatif.ring = rg; }
+    whatif.ring.visible = true;
+  }
   if (D.personGroup) { whatif.saved.personPos = D.personGroup.position.clone(); whatif.saved.personVis = D.personGroup.visible; }
-  theaterCamera(new THREE.Vector3(1.05 * viewScale(), 0.55 * viewScale(), -1.05 * viewScale()), new THREE.Vector3(0, 0.03, 0), 800);
+  const vs = viewScale();
+  if (def.motion === 'person') theaterCamera(new THREE.Vector3(3.2 * vs, 1.6 * vs, -2.6 * vs), new THREE.Vector3(-0.35, 0.72, -0.35), 900);   // 人型(1.7m)が全身で入る引き(約4.4m)
+  else theaterCamera(new THREE.Vector3(1.05 * vs, 0.55 * vs, -1.05 * vs), new THREE.Vector3(0, 0.03, 0), 800);
   if (typeof onWhatifChanged === 'function') onWhatifChanged();
 }
 
 function stopWhatif(silent) {
   if (!whatif.active) { S.labelsSuppressed = false; S.labelOnly = null; return; }
   for (const k of whatif.def.parts) for (const p of partsOf(k)) setTint(p, ACCENT, 0);
-  for (const p of partsOf('led')) setTint(p, RED, 0);
+  for (const p of partsOf('led')) { setTint(p, RED, 0); const h = p.obj.userData.halo; if (h && h.userData.baseColor) { h.material.color.copy(h.userData.baseColor); h.material.opacity = THEME[themeDark ? 'dark' : 'light'].halo; } }
+  if (whatif.ring) whatif.ring.visible = false;
   D.motors.forEach(mo => { mo.rpmTarget = null; mo.rpmRate = null; });
   for (let i = 0; i < 4; i++) body.mult[i] = 1;
-  air.windOverride = null; S.air = whatif.saved.air;
+  air.windOverride = null; S.air = whatif.saved.air; for (const x of $$('.tgl[data-t=air]')) x.classList.toggle('on', S.air);
   if (D.personGroup) { if (whatif.saved.personPos) D.personGroup.position.copy(whatif.saved.personPos); D.personGroup.visible = whatif.saved.personVis; }
   S.labelsSuppressed = false; S.labelOnly = null; buildLabels();
   whatif.active = false; whatif.def = null; whatif.phase = 0; S.whatif = null;
@@ -2962,7 +2988,7 @@ const WHATIF_MOTION = {
     body.tx = -D2R_W(7) * RM() * k;
     body.px = 0.02 * k * Math.sin(2 * Math.PI * 0.4 * t);
     air.windOverride = air.windOverride || new THREE.Vector3();
-    air.windOverride.set(0.4 * k, 0, 0);
+    air.windOverride.set(0.9 * k, 0, 0);
     const tr = Math.sin(Math.PI * clamp(t / 1.0, 0, 1)), coll = 0.05 * k;
     body.mult[0] = 1 + 0.12 * tr + coll; body.mult[1] = 1 + 0.12 * tr + coll; body.mult[2] = 1 - 0.12 * tr + coll; body.mult[3] = 1 - 0.12 * tr + coll;
     return t > 4.5;
@@ -2971,8 +2997,11 @@ const WHATIF_MOTION = {
   person(t, dt) {
     body.py = free.hoverY + 0.03 * smoothstep(1.0, 1.8, t);
     const g = D.personGroup;
-    if (g) { g.visible = true; const k = smoothstep(1.0, 3.0, t); g.position.set(0, -0.158, -1.2 + 0.6 * k); }
-    if (t > 3.0) { const b = 0.5 + 0.5 * Math.sin((t - 3.0) * 2 * Math.PI / 0.5); for (const p of partsOf('led')) setTint(p, RED, 0.8 * b); }
+    if (g) {   // 機体の前左(画面右・同じ奥行き)から 2.4m → 1.0m に歩いて寄る。歩きの上下 12mm
+      g.visible = true; const k = smoothstep(1.0, 3.0, t), dd = 2.6 - 1.3 * k;
+      g.position.set(-0.707 * dd, -0.158 + (k < 1 ? 0.012 * Math.abs(Math.sin(2 * Math.PI * 1.6 * t)) : 0), -0.707 * dd);
+    }
+    if (t > 3.0) { const b = 0.5 + 0.5 * Math.sin((t - 3.0) * 2 * Math.PI / 0.5); for (const p of partsOf('led')) { setTint(p, RED, 0.8 * b); const h = p.obj.userData.halo; if (h) { h.material.color.copy(RED); h.material.opacity = 0.06 + 0.5 * b; } } }
     return t > 4.4;
   },
 };
@@ -3069,8 +3098,12 @@ function setScale(on) {
     if (D.cgMarker) D.cgMarker.visible = true;
     if (D.personGroup) D.personGroup.visible = !compact();
     setPayload(scale.payload); renderMassBar(); setPower(0.5, true);
-    const objs = [D.root]; if (D.personGroup && D.personGroup.visible) objs.push(D.personGroup);
-    focusOn(objs, { pull: true, margin: 1.12, max: 4.6 });
+    // 機体を主役に枠を決め、人型は「物差し」として画面右の端に腰まで入れる
+    focusOn([D.root], { pull: true, margin: 1.75 });
+    if (S.camSpring) {
+      if (D.personGroup && D.personGroup.visible) { const off = new THREE.Vector3(-0.16, 0.06, -0.15); S.camSpring.p1.add(off); S.camSpring.q1.add(off); }
+      if (compact()) S.camSpring.q1.y -= 0.12;   // スマホは下の横バーに隠れないよう機体を上へ
+    }
   } else {
     setPrice(false); scale.batDz = 0; scale.payDz = 0; setPayload('none');
     if (D.cgMarker) D.cgMarker.visible = false;
@@ -3115,7 +3148,7 @@ function stepScale() {
     scale.overShown = scale.over; const n = $('#massNote');
     if (n) { n.textContent = scale.over ? SCALE_TEXT.overNote + scaleOverWhy() : ''; n.hidden = !scale.over; }
   }
-  if (D.cgMarker) { D.cgMarker.position.copy(scale.cg); D.cgMarker.visible = true; }
+  if (D.cgMarker) { D.cgMarker.position.copy(scale.cg); D.cgMarker.visible = true; const pl = D.cgMarker.userData.plumb; if (pl) { const len = Math.max(0.001, scale.cg.y + 0.158 + body.py); pl.scale.y = len; pl.position.y = -len / 2; } }
   for (let i = 0; i < 4; i++) body.mult[i] = scale.share[i];
 }
 
@@ -3290,27 +3323,29 @@ async function codexPoster() {
   if (typeof renderOnce === 'function') renderOnce();
   const url = src.toDataURL('image/jpeg', 0.92);
   await new Promise(res => { const im = new Image(); im.onload = () => {
-      const H = 1100, sr = im.width / im.height, dr = 1600 / H;   // cover
-      let sw = im.width, sh = im.height, sx = 0, sy = 0;
-      if (sr > dr) { sw = im.height * dr; sx = (im.width - sw) / 2; } else { sh = im.width / dr; sy = (im.height - sh) / 2; }
+      const vw = narrow() ? im.width : Math.round(im.width * Math.max(0.5, (W - 384) / W));   // 右パネルの下は撮らない(見えている構図をそのまま)
+      const H = 1100, sr = vw / im.height, dr = 1600 / H;   // cover
+      let sw = vw, sh = im.height, sx = 0, sy = 0;
+      if (sr > dr) { sw = im.height * dr; sx = (vw - sw) / 2; } else { sh = vw / dr; sy = (im.height - sh) / 2; }
       g.drawImage(im, sx, sy, sw, sh, 0, 0, 1600, H); res();
     }; im.onerror = () => res(); im.src = url; });
   // 下の帯（豆知識があれば2段）
   const p0 = S.selected, triv = p0 && TRIVIA[p0.key] ? TRIVIA[p0.key] : null; const bandY = triv ? 1060 : 1100;
-  g.fillStyle = dark ? '#171b22' : '#ffffff'; g.fillRect(0, bandY, 1600, 1200 - bandY);
-  g.fillStyle = dark ? 'rgba(255,255,255,.10)' : 'rgba(20,26,40,.10)'; g.fillRect(0, bandY, 1600, 1);
+  const bp = S.mode === 'blueprint';
+  g.fillStyle = bp ? '#12284a' : (dark ? '#171b22' : '#ffffff'); g.fillRect(0, bandY, 1600, 1200 - bandY);
+  g.fillStyle = bp ? '#dfe9ff' : '#ef6a2d'; g.fillRect(0, bandY, 1600, 3);   // 上端のアクセント線
   const F = '-apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif';
   g.textBaseline = 'middle';
-  g.fillStyle = dark ? '#e8ebf0' : '#1b1f27'; g.font = `700 36px ${F}`; g.textAlign = 'left';
+  g.fillStyle = bp ? '#dfe9ff' : (dark ? '#e8ebf0' : '#1b1f27'); g.font = `700 36px ${F}`; g.textAlign = 'left';
   const rowY = triv ? 1104 : 1152;
   g.fillText('ドローンの構造', 44, rowY);
   const p = S.selected;
   const name = p ? ((S.depth === 'simple' && SIMPLE_NAME[p.key]) || PARTS[p.key].name) : '550クラス クアッドコプター';
-  g.fillStyle = '#ef6a2d'; g.font = `700 34px ${F}`; g.textAlign = 'center'; g.fillText(name, 800, rowY);
+  g.fillStyle = bp ? '#ffffff' : '#ef6a2d'; g.font = `700 34px ${F}`; g.textAlign = 'center'; g.fillText(name, 800, rowY);
   const n = new Date(), ds = `${n.getFullYear()}.${String(n.getMonth() + 1).padStart(2, '0')}.${String(n.getDate()).padStart(2, '0')}`;
-  g.fillStyle = dark ? '#8791a3' : '#7b8290'; g.font = `500 26px ${F}`; g.textAlign = 'right';
-  g.fillText(`${ds}　${codex.seen.size}/${codex.total}`, 1556, rowY);
-  if (triv) { g.fillStyle = dark ? '#b3bccb' : '#4b5260'; g.font = `500 24px ${F}`; g.textAlign = 'center'; g.fillText(triv, 800, 1162, 1500); }
+  g.fillStyle = bp ? '#9db3d8' : (dark ? '#8791a3' : '#7b8290'); g.font = `500 26px ${F}`; g.textAlign = 'right';
+  g.fillText(`${ds}　見た部品 ${codex.seen.size}/${codex.total}`, 1556, rowY);
+  if (triv) { g.fillStyle = bp ? '#b9c8e6' : (dark ? '#b3bccb' : '#4b5260'); g.font = `500 24px ${F}`; g.textAlign = 'center'; g.fillText(triv, 800, 1162, 1500); }
   return cv;
 }
 
@@ -3365,7 +3400,8 @@ function updateLookYaw(clientX, clientY) {
   const w = new THREE.Vector3(); if (!screenToDronePlane(clientX, clientY, w)) { body.lookYaw = null; return; }
   const dx = w.x - body.px, dz = w.z - body.pz, dist = Math.hypot(dx, dz);
   if (dist > 0.6 || dist < 0.02) { body.lookYaw = 0; return; }
-  body.lookYaw = -clamp(Math.atan2(dx, -dz), -0.07, 0.07);   // 機首は −z。+yaw は機首を −x へ振るので符号を反転
+  const ang = Math.atan2(dx, -dz), k = smoothstep(0.05, 0.45, dist);
+  body.lookYaw = -clamp(ang / (Math.PI / 2), -1, 1) * 0.07 * k;   // 方位±90°→±4°に比例。機首は −z、+yaw は機首を −x へ振るので符号を反転
 }
 function aliveQuality(level) {
   alive.forcedOff = level <= 1;
@@ -3464,7 +3500,7 @@ function initLive() {
   aliveQuality(S.qLevel);
   applyLang();
   if (store.get('big') === '1') setBig(true);
-  window.updateBigBand = updateBigBand; window.speak = speak;   // 検証用
+  window.updateBigBand = updateBigBand; window.speak = speak; window.updateLookYaw = updateLookYaw;   // 検証用
 }
 
 // ===== 授業・説明会モード (パッケージ⑨) =====
@@ -3886,8 +3922,8 @@ function buildLabels() {
 const badgeEls = D.motors.map((mo, i) => { const el = document.createElement('div'); el.className = 'mbadge'; el.hidden = true; $('#badges').appendChild(el); return { mo, el, i }; });
 function updateLabels() {
   const camDist = camera.position.distanceTo(controls.target);
-  const forced = !!S.labelOnly;                       // ⑩: 特定の部品だけを強制表示
-  const live = body.mode !== 'idle' && !forced && !((alive.on || (S.lesson && lesson.hover)) && body.mode === 'free' && !body.hold && !body.stick.active);   // ⑧: 生きているだけならラベルは出す
+  const forced = !!S.labelOnly || (S.scale && S.price);   // ⑩: 特定の部品だけを強制表示 / ⑥: ¥表示中は価格ラベルを必ず出す
+  const live = body.mode !== 'idle' && !forced && !(S.scale && S.price) && !((alive.on || (S.lesson && lesson.hover)) && body.mode === 'free' && !body.hold && !body.stick.active);   // ¥表示中は価格ラベルを出す   // ⑧: 生きているだけならラベルは出す
   for (const L of labelEls) {
     const p = L.p;
     let show = (forced || (S.labels && !S.labelsSuppressed)) && !live && partVisible(p) && effVisible(p.obj) && (!S.labelOnly || S.labelOnly.has(p.key));

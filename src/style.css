@@ -216,7 +216,8 @@ body.theater #topbar, body.theater #viewCol { opacity: .35; pointer-events: none
   .top-actions { gap: 4px; } .top-actions .pill-btn { padding: 6px 8px; }
   .popover { position: fixed; left: 10px; right: 10px; top: auto; bottom: 10px; width: auto; max-height: 60vh; }
   #dock { left: 10px; right: 10px; bottom: 10px; }
-  .ctx { padding: 8px 10px 6px; } .ctx-row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; align-items: flex-end; gap: 12px; padding-right: 24px; mask-image: linear-gradient(to right, #000 88%, transparent); -webkit-mask-image: linear-gradient(to right, #000 88%, transparent); } .ctx-row::-webkit-scrollbar { display: none; }
+  .ctx { padding: 8px 10px 6px; } .ctx-row[data-tab=mishap] { flex-wrap: wrap; overflow-x: hidden; mask-image: none; -webkit-mask-image: none; padding-right: 0; gap: 6px; } .ctx-row[data-tab=mishap] .dock-group.grow { width: 100%; flex: none; }
+  .ctx-row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; align-items: flex-end; gap: 12px; padding-right: 24px; mask-image: linear-gradient(to right, #000 88%, transparent); -webkit-mask-image: linear-gradient(to right, #000 88%, transparent); } .ctx-row::-webkit-scrollbar { display: none; }
   .dock-group { flex: none; } .dock-group.grow { flex: none; width: 150px; } .chips { flex-wrap: nowrap; }
   .tabs button span { font-size: 11px; } .tabs button { flex-direction: column; gap: 2px; padding: 6px 4px; }
   #viewCol { flex-direction: row; bottom: auto; top: 66px; right: 10px; padding: 4px; } #viewCol hr { display: none; }

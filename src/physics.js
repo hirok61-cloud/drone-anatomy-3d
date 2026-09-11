@@ -61,7 +61,7 @@ function stepFree(dt) {
   const ay = 36 * (pyCmd - body.py) - 9.6 * body.vyF; body.vyF += ay * dt; body.py += body.vyF * dt;
   // ヨー
   const yawCmd = st.active ? -1.2 * st.yaw : 0; body.yawRate = dl(body.yawRate, yawCmd, dt, 6); body.yaw += body.yawRate * dt;
-  if (!st.active) { body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); const look = (S.alive && body.lookYaw != null && !body.hold && !ti.active && !reduceMotion); body.yaw = dl(body.yaw, look ? body.lookYaw : 0, dt, look ? 2 : 1.5); }   // ⑧: ポインタの方へ数度だけ向く
+  if (!st.active) { body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); const look = (S.alive && body.lookYaw != null && !body.hold && !ti.active && !reduceMotion); body.yaw = dl(body.yaw, look ? body.lookYaw : 0, dt, look ? 2.5 : 1.5); }   // ⑧: ポインタの方へ数度だけ向く
   // モーター配分: α_z = −τ̈x, α_x = τ̈z
   const collective = 1 / Math.cos(th) - 1; const alz = -body.ax, alx = body.az;
   for (let i = 0; i < 4; i++) {
@@ -92,7 +92,8 @@ function stepDemo(dt) {
 }
 function stepIdle(dt) {
   const r = 4; body.tx = dl(body.tx, 0, dt, r); body.tz = dl(body.tz, 0, dt, r); body.wx = body.wz = 0;
-  body.px = dl(body.px, 0, dt, r); body.py = dl(body.py, 0, dt, r); body.pz = dl(body.pz, 0, dt, r); body.vx = body.vz = body.vy = 0;
+  body.px = dl(body.px, 0, dt, r); body.pz = dl(body.pz, 0, dt, r); body.vx = body.vz = body.vy = 0;
+  { const ay = 25 * (0 - body.py) - 10 * body.vyF; body.vyF += ay * dt; body.py = Math.max(0, body.py + body.vyF * dt); if (body.py === 0) body.vyF = 0; }   // 着陸は初速0のS字(臨界減衰)
   body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); body.yaw = dl(body.yaw, 0, dt, 3);
   if (!S.scale) for (let i = 0; i < 4; i++) body.mult[i] = dl(body.mult[i], 1, dt, 4);
 }
@@ -139,7 +140,14 @@ function updateMotors(dtSim, dtReal) {
     const raw = mo.rpm / HOVER_RPM * 100; mo.pct = raw > mo.pct ? raw : mo.pct + (raw - mo.pct) * (1 - Math.exp(-dtReal / 0.5));
     if (mo.rpm > 50) anySpin = true;
     const th = D.arrows.thrust[i]; th.visible = (body.mode === 'demo' || body.mode === 'free' || body.mode === 'theater') && partVisible(mo.part) && mo.rpm > 100 && !(typeof alive === 'object' && alive.on && !body.hold && Math.hypot(body.tx, body.tz) < 0.035);   // 生きているだけの間は矢印を出さない
-    if (th.visible) { th.userData.setLength(0.02 + 0.11 * mo.rpm / RPM_MAX); const rel = mo.rpm / Math.max(1, S.power * RPM_MAX); th.userData.mat.color.set(rel > 1.03 ? 0x22c55e : rel < 0.97 ? 0xf59e0b : arrowNeutral); }
+    if (th.visible) {
+      th.userData.setLength(0.02 + 0.11 * mo.rpm / RPM_MAX);
+      const base = S.scale ? D.motors.reduce((a, m) => a + m.rpm, 0) / 4 : Math.max(1, S.power * RPM_MAX);   // 重さモードは4基平均との比
+      const rel = mo.rpm / Math.max(1, base); let col = rel > 1.03 ? 0x22c55e : rel < 0.97 ? 0xf59e0b : arrowNeutral;
+      if (S.scale && typeof scale === 'object' && scale.share[i] > SCALE_OVER) col = 0xff3b30;   // バッジの赤と揃える
+      if (mo.rpmTarget === 0) col = arrowNeutral;                                                // 着陸の減速は「遅い」ではない
+      th.userData.mat.color.set(col);
+    }
     D.arrows.rot[i].visible = (S.arrows || S.flight === 'yaw') && partVisible(mo.part) && S.explodeT < 0.05;
   });
   if (anySpin) { shadowTick += dtReal; if (shadowTick > 1 / 30) { shadowTick = 0; S.shadowDirty = true; } S.aoDirty = true; }

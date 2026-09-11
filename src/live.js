@@ -27,7 +27,8 @@ function updateLookYaw(clientX, clientY) {
   const w = new THREE.Vector3(); if (!screenToDronePlane(clientX, clientY, w)) { body.lookYaw = null; return; }
   const dx = w.x - body.px, dz = w.z - body.pz, dist = Math.hypot(dx, dz);
   if (dist > 0.6 || dist < 0.02) { body.lookYaw = 0; return; }
-  body.lookYaw = -clamp(Math.atan2(dx, -dz), -0.07, 0.07);   // 機首は −z。+yaw は機首を −x へ振るので符号を反転
+  const ang = Math.atan2(dx, -dz), k = smoothstep(0.05, 0.45, dist);
+  body.lookYaw = -clamp(ang / (Math.PI / 2), -1, 1) * 0.07 * k;   // 方位±90°→±4°に比例。機首は −z、+yaw は機首を −x へ振るので符号を反転
 }
 function aliveQuality(level) {
   alive.forcedOff = level <= 1;
@@ -126,5 +127,5 @@ function initLive() {
   aliveQuality(S.qLevel);
   applyLang();
   if (store.get('big') === '1') setBig(true);
-  window.updateBigBand = updateBigBand; window.speak = speak;   // 検証用
+  window.updateBigBand = updateBigBand; window.speak = speak; window.updateLookYaw = updateLookYaw;   // 検証用
 }

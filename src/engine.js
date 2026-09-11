@@ -143,7 +143,8 @@ class ScenePass extends Pass {
 const scenePass = new ScenePass();
 class GtaoLite extends GTAOPass {
   constructor(...a) { super(...a); this.needsSwap = false; this.every = 2; this._n = 0; this.ok = true; }
-  overrideVisibility() { const cache = this._visibilityCache; this.scene.traverse(o => { cache.set(o, o.visible); if (o.isPoints || o.isLine || o.isSprite || o.userData.noAO) o.visible = false; }); }   // スプライト・ブラー円盤・LEDカバーはAOに入れない
+  overrideVisibility() { this._hid = []; this.scene.traverse(o => { if (o.visible && (o.isPoints || o.isLine || o.isSprite || o.userData.noAO)) { o.visible = false; this._hid.push(o); } }); }   // スプライト・ブラー円盤・LEDカバーはAOに入れない(自前のリストで確実に戻す)
+  restoreVisibility() { if (this._hid) for (const o of this._hid) o.visible = true; this._hid = null; }
   render(renderer, writeBuffer, readBuffer) {
     const fresh = S.aoDirty || (++this._n % this.every === 0);
     try {
@@ -258,6 +259,7 @@ function applyMode() {
   }
   const cutOn = S.mode === 'cut';
   for (const c of cut.list) { if (!cutOn) c.mat.clippingPlanes[0].copy(cut.far); }
+  { const on = !isWireMode(); for (const p of D.parts) if (p.key === 'led') { const u = p.obj.userData; if (u.core) u.core.visible = on; if (u.halo) u.halo.visible = on; } }   // 線画/設計図ではLEDの光を消す
   renderer.shadowMap.enabled = key.castShadow = S.shadows && S.mode !== 'xray' && !isWireMode();
   gridU.uGrid.value = (S.mode === 'xray' || isWireMode()) ? 1 : 0;
   S.shadowDirty = S.csDirty = S.aoDirty = true;

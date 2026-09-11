@@ -82,27 +82,29 @@ async function codexPoster() {
   if (typeof renderOnce === 'function') renderOnce();
   const url = src.toDataURL('image/jpeg', 0.92);
   await new Promise(res => { const im = new Image(); im.onload = () => {
-      const H = 1100, sr = im.width / im.height, dr = 1600 / H;   // cover
-      let sw = im.width, sh = im.height, sx = 0, sy = 0;
-      if (sr > dr) { sw = im.height * dr; sx = (im.width - sw) / 2; } else { sh = im.width / dr; sy = (im.height - sh) / 2; }
+      const vw = narrow() ? im.width : Math.round(im.width * Math.max(0.5, (W - 384) / W));   // 右パネルの下は撮らない(見えている構図をそのまま)
+      const H = 1100, sr = vw / im.height, dr = 1600 / H;   // cover
+      let sw = vw, sh = im.height, sx = 0, sy = 0;
+      if (sr > dr) { sw = im.height * dr; sx = (vw - sw) / 2; } else { sh = vw / dr; sy = (im.height - sh) / 2; }
       g.drawImage(im, sx, sy, sw, sh, 0, 0, 1600, H); res();
     }; im.onerror = () => res(); im.src = url; });
   // 下の帯（豆知識があれば2段）
   const p0 = S.selected, triv = p0 && TRIVIA[p0.key] ? TRIVIA[p0.key] : null; const bandY = triv ? 1060 : 1100;
-  g.fillStyle = dark ? '#171b22' : '#ffffff'; g.fillRect(0, bandY, 1600, 1200 - bandY);
-  g.fillStyle = dark ? 'rgba(255,255,255,.10)' : 'rgba(20,26,40,.10)'; g.fillRect(0, bandY, 1600, 1);
+  const bp = S.mode === 'blueprint';
+  g.fillStyle = bp ? '#12284a' : (dark ? '#171b22' : '#ffffff'); g.fillRect(0, bandY, 1600, 1200 - bandY);
+  g.fillStyle = bp ? '#dfe9ff' : '#ef6a2d'; g.fillRect(0, bandY, 1600, 3);   // 上端のアクセント線
   const F = '-apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif';
   g.textBaseline = 'middle';
-  g.fillStyle = dark ? '#e8ebf0' : '#1b1f27'; g.font = `700 36px ${F}`; g.textAlign = 'left';
+  g.fillStyle = bp ? '#dfe9ff' : (dark ? '#e8ebf0' : '#1b1f27'); g.font = `700 36px ${F}`; g.textAlign = 'left';
   const rowY = triv ? 1104 : 1152;
   g.fillText('ドローンの構造', 44, rowY);
   const p = S.selected;
   const name = p ? ((S.depth === 'simple' && SIMPLE_NAME[p.key]) || PARTS[p.key].name) : '550クラス クアッドコプター';
-  g.fillStyle = '#ef6a2d'; g.font = `700 34px ${F}`; g.textAlign = 'center'; g.fillText(name, 800, rowY);
+  g.fillStyle = bp ? '#ffffff' : '#ef6a2d'; g.font = `700 34px ${F}`; g.textAlign = 'center'; g.fillText(name, 800, rowY);
   const n = new Date(), ds = `${n.getFullYear()}.${String(n.getMonth() + 1).padStart(2, '0')}.${String(n.getDate()).padStart(2, '0')}`;
-  g.fillStyle = dark ? '#8791a3' : '#7b8290'; g.font = `500 26px ${F}`; g.textAlign = 'right';
-  g.fillText(`${ds}　${codex.seen.size}/${codex.total}`, 1556, rowY);
-  if (triv) { g.fillStyle = dark ? '#b3bccb' : '#4b5260'; g.font = `500 24px ${F}`; g.textAlign = 'center'; g.fillText(triv, 800, 1162, 1500); }
+  g.fillStyle = bp ? '#9db3d8' : (dark ? '#8791a3' : '#7b8290'); g.font = `500 26px ${F}`; g.textAlign = 'right';
+  g.fillText(`${ds}　見た部品 ${codex.seen.size}/${codex.total}`, 1556, rowY);
+  if (triv) { g.fillStyle = bp ? '#b9c8e6' : (dark ? '#b3bccb' : '#4b5260'); g.font = `500 24px ${F}`; g.textAlign = 'center'; g.fillText(triv, 800, 1162, 1500); }
   return cv;
 }
 

@@ -174,8 +174,8 @@ function buildLabels() {
 const badgeEls = D.motors.map((mo, i) => { const el = document.createElement('div'); el.className = 'mbadge'; el.hidden = true; $('#badges').appendChild(el); return { mo, el, i }; });
 function updateLabels() {
   const camDist = camera.position.distanceTo(controls.target);
-  const forced = !!S.labelOnly;                       // ⑩: 特定の部品だけを強制表示
-  const live = body.mode !== 'idle' && !forced && !((alive.on || (S.lesson && lesson.hover)) && body.mode === 'free' && !body.hold && !body.stick.active);   // ⑧: 生きているだけならラベルは出す
+  const forced = !!S.labelOnly || (S.scale && S.price);   // ⑩: 特定の部品だけを強制表示 / ⑥: ¥表示中は価格ラベルを必ず出す
+  const live = body.mode !== 'idle' && !forced && !(S.scale && S.price) && !((alive.on || (S.lesson && lesson.hover)) && body.mode === 'free' && !body.hold && !body.stick.active);   // ¥表示中は価格ラベルを出す   // ⑧: 生きているだけならラベルは出す
   for (const L of labelEls) {
     const p = L.p;
     let show = (forced || (S.labels && !S.labelsSuppressed)) && !live && partVisible(p) && effVisible(p.obj) && (!S.labelOnly || S.labelOnly.has(p.key));

@@ -65,8 +65,12 @@ function setScale(on) {
     if (D.cgMarker) D.cgMarker.visible = true;
     if (D.personGroup) D.personGroup.visible = !compact();
     setPayload(scale.payload); renderMassBar(); setPower(0.5, true);
-    const objs = [D.root]; if (D.personGroup && D.personGroup.visible) objs.push(D.personGroup);
-    focusOn(objs, { pull: true, margin: 1.12, max: 4.6 });
+    // 機体を主役に枠を決め、人型は「物差し」として画面右の端に腰まで入れる
+    focusOn([D.root], { pull: true, margin: 1.75 });
+    if (S.camSpring) {
+      if (D.personGroup && D.personGroup.visible) { const off = new THREE.Vector3(-0.16, 0.06, -0.15); S.camSpring.p1.add(off); S.camSpring.q1.add(off); }
+      if (compact()) S.camSpring.q1.y -= 0.12;   // スマホは下の横バーに隠れないよう機体を上へ
+    }
   } else {
     setPrice(false); scale.batDz = 0; scale.payDz = 0; setPayload('none');
     if (D.cgMarker) D.cgMarker.visible = false;
@@ -111,7 +115,7 @@ function stepScale() {
     scale.overShown = scale.over; const n = $('#massNote');
     if (n) { n.textContent = scale.over ? SCALE_TEXT.overNote + scaleOverWhy() : ''; n.hidden = !scale.over; }
   }
-  if (D.cgMarker) { D.cgMarker.position.copy(scale.cg); D.cgMarker.visible = true; }
+  if (D.cgMarker) { D.cgMarker.position.copy(scale.cg); D.cgMarker.visible = true; const pl = D.cgMarker.userData.plumb; if (pl) { const len = Math.max(0.001, scale.cg.y + 0.158 + body.py); pl.scale.y = len; pl.position.y = -len / 2; } }
   for (let i = 0; i < 4; i++) body.mult[i] = scale.share[i];
 }
 

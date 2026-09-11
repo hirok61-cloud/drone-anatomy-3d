@@ -2,7 +2,7 @@
 // ⑤が「組み立ての間違い」なのに対し、こちらは外の状況。機体ができることと人がやることを対で見せる。
 const whatif = {
   active: false, def: null, phase: 0, t: 0, litIdx: -1, blink: 0,
-  saved: { air: false, personPos: null, personVis: false }, seq: [],
+  saved: { air: false, personPos: null, personVis: false }, seq: [], ring: null,
 };
 const D2R_W = (d) => THREE.MathUtils.degToRad(d);
 
@@ -17,18 +17,26 @@ function startWhatif(id) {
   D.motors.forEach(mo => { mo.rpmTarget = null; mo.rpmRate = 3.5; });
   S.power = 0.5;
   whatif.saved.air = S.air; S.labelsSuppressed = true; S.labelOnly = null;
+  if (def.motion === 'wind') { S.air = true; for (const x of $$('.tgl[data-t=air]')) x.classList.add('on'); }   // 風の場面だけ気流を出す
+  if (def.motion === 'driftHold') {   // GPS: 開始位置の床リング(流された量の基準)
+    if (!whatif.ring) { const rg = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.002, 8, 72), new THREE.MeshBasicMaterial({ color: 0x3b7df7, transparent: true, opacity: 0.5, toneMapped: false })); rg.rotation.x = Math.PI / 2; rg.position.y = -0.156; rg.userData.noPart = rg.userData.noPick = rg.userData.noAO = rg.userData.noShadow = true; scene.add(rg); whatif.ring = rg; }
+    whatif.ring.visible = true;
+  }
   if (D.personGroup) { whatif.saved.personPos = D.personGroup.position.clone(); whatif.saved.personVis = D.personGroup.visible; }
-  theaterCamera(new THREE.Vector3(1.05 * viewScale(), 0.55 * viewScale(), -1.05 * viewScale()), new THREE.Vector3(0, 0.03, 0), 800);
+  const vs = viewScale();
+  if (def.motion === 'person') theaterCamera(new THREE.Vector3(3.2 * vs, 1.6 * vs, -2.6 * vs), new THREE.Vector3(-0.35, 0.72, -0.35), 900);   // 人型(1.7m)が全身で入る引き(約4.4m)
+  else theaterCamera(new THREE.Vector3(1.05 * vs, 0.55 * vs, -1.05 * vs), new THREE.Vector3(0, 0.03, 0), 800);
   if (typeof onWhatifChanged === 'function') onWhatifChanged();
 }
 
 function stopWhatif(silent) {
   if (!whatif.active) { S.labelsSuppressed = false; S.labelOnly = null; return; }
   for (const k of whatif.def.parts) for (const p of partsOf(k)) setTint(p, ACCENT, 0);
-  for (const p of partsOf('led')) setTint(p, RED, 0);
+  for (const p of partsOf('led')) { setTint(p, RED, 0); const h = p.obj.userData.halo; if (h && h.userData.baseColor) { h.material.color.copy(h.userData.baseColor); h.material.opacity = THEME[themeDark ? 'dark' : 'light'].halo; } }
+  if (whatif.ring) whatif.ring.visible = false;
   D.motors.forEach(mo => { mo.rpmTarget = null; mo.rpmRate = null; });
   for (let i = 0; i < 4; i++) body.mult[i] = 1;
-  air.windOverride = null; S.air = whatif.saved.air;
+  air.windOverride = null; S.air = whatif.saved.air; for (const x of $$('.tgl[data-t=air]')) x.classList.toggle('on', S.air);
   if (D.personGroup) { if (whatif.saved.personPos) D.personGroup.position.copy(whatif.saved.personPos); D.personGroup.visible = whatif.saved.personVis; }
   S.labelsSuppressed = false; S.labelOnly = null; buildLabels();
   whatif.active = false; whatif.def = null; whatif.phase = 0; S.whatif = null;
@@ -84,7 +92,7 @@ const WHATIF_MOTION = {
     body.tx = -D2R_W(7) * RM() * k;
     body.px = 0.02 * k * Math.sin(2 * Math.PI * 0.4 * t);
     air.windOverride = air.windOverride || new THREE.Vector3();
-    air.windOverride.set(0.4 * k, 0, 0);
+    air.windOverride.set(0.9 * k, 0, 0);
     const tr = Math.sin(Math.PI * clamp(t / 1.0, 0, 1)), coll = 0.05 * k;
     body.mult[0] = 1 + 0.12 * tr + coll; body.mult[1] = 1 + 0.12 * tr + coll; body.mult[2] = 1 - 0.12 * tr + coll; body.mult[3] = 1 - 0.12 * tr + coll;
     return t > 4.5;
@@ -93,8 +101,11 @@ const WHATIF_MOTION = {
   person(t, dt) {
     body.py = free.hoverY + 0.03 * smoothstep(1.0, 1.8, t);
     const g = D.personGroup;
-    if (g) { g.visible = true; const k = smoothstep(1.0, 3.0, t); g.position.set(0, -0.158, -1.2 + 0.6 * k); }
-    if (t > 3.0) { const b = 0.5 + 0.5 * Math.sin((t - 3.0) * 2 * Math.PI / 0.5); for (const p of partsOf('led')) setTint(p, RED, 0.8 * b); }
+    if (g) {   // 機体の前左(画面右・同じ奥行き)から 2.4m → 1.0m に歩いて寄る。歩きの上下 12mm
+      g.visible = true; const k = smoothstep(1.0, 3.0, t), dd = 2.6 - 1.3 * k;
+      g.position.set(-0.707 * dd, -0.158 + (k < 1 ? 0.012 * Math.abs(Math.sin(2 * Math.PI * 1.6 * t)) : 0), -0.707 * dd);
+    }
+    if (t > 3.0) { const b = 0.5 + 0.5 * Math.sin((t - 3.0) * 2 * Math.PI / 0.5); for (const p of partsOf('led')) { setTint(p, RED, 0.8 * b); const h = p.obj.userData.halo; if (h) { h.material.color.copy(RED); h.material.opacity = 0.06 + 0.5 * b; } } }
     return t > 4.4;
   },
 };

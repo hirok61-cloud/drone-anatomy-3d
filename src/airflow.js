@@ -43,7 +43,7 @@ function buildAirflow(N) {
         float life = fract(seed.y + uPhase[k]);
         vec3 p0 = flow(life, seed.z, seed.w, dir, s), p1 = flow(life - 0.015, seed.z, seed.w, dir, s);
         vec4 w0 = uRotor[k] * vec4(p0, 1.0), w1 = uRotor[k] * vec4(p1, 1.0);
-        float down = max(0.0, 0.043 - p0.y); w0.xyz += uWind * down * 0.6; w1.xyz += uWind * down * 0.6;
+        float down = max(0.0, 0.043 - p0.y); w0.xyz += uWind * down * 1.2; w1.xyz += uWind * down * 1.2;
         // 床に当たると外へ広がる
         vec3 rc = (uRotor[k] * vec4(0.0, 0.043, 0.0, 1.0)).xyz; float g = clamp((uGroundY + 0.035 - w0.y) / 0.035, 0.0, 1.0);
         vec2 rad = normalize(w0.xz - rc.xz + 1e-5); w0.xz += rad * g * g * 0.16; w1.xz += rad * g * g * 0.16; w0.y = max(w0.y, uGroundY + 0.004); w1.y = max(w1.y, uGroundY + 0.004);
@@ -74,7 +74,7 @@ function updateAirflow(dtSim, dtReal) {
   let vis = false;
   D.motors.forEach((mo, i) => { const s = mo.rpm / RPM_MAX; if (mo.rpm > 600) vis = true; air.phase[i] = (air.phase[i] + dtSim * (0.4 + 3.6 * s)) % 1000; air.mat.uniforms.uRotor.value[i].copy(mo.group.matrixWorld); air.mat.uniforms.uRpm.value.setComponent(i, on ? mo.rpm : 0); });
   if (!air.cols && D.motors[0] && D.motors[0].group) buildAirColumns();
-  if (air.cols) air.cols.forEach((c, i) => { const mo = D.motors[i]; const k = on ? mo.rpm / RPM_MAX : 0; c.material.uniforms.uK.value = k; c.visible = on && vis && mo.rpm > 600; air.colT[i] += dtSim * (1 + 3 * k); c.material.uniforms.uT.value = air.colT[i]; });
+  if (air.cols) air.cols.forEach((c, i) => { const mo = D.motors[i]; const k = on ? mo.rpm / RPM_MAX : 0; c.material.uniforms.uK.value = k; c.visible = on && vis && mo.rpm > 600 && !air.windOverride; /* 柱は風で傾かないので風の場面では隠す */ air.colT[i] += dtSim * (1 + 3 * k); c.material.uniforms.uT.value = air.colT[i]; });
   m.visible = on && vis;
   if (!m.visible) return;
   const u = air.mat.uniforms; u.uPhase.value.set(air.phase[0], air.phase[1], air.phase[2], air.phase[3]); if (air.windOverride) u.uWind.value.copy(air.windOverride); else u.uWind.value.copy(body.v).negate(); u.uTime.value += dtSim;
