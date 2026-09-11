@@ -134,7 +134,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 .keys i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
 
 /* ---- inspector ---- */
-#inspector { position: fixed; top: 14px; right: 14px; bottom: 14px; width: var(--insp-w); z-index: 10; display: flex; flex-direction: column; overflow: hidden; }
+#inspector, #lesson { position: fixed; top: 14px; right: 14px; bottom: 14px; width: var(--insp-w); z-index: 10; display: flex; flex-direction: column; overflow: hidden; }
 .grabber { display: none; }
 .insp-head { display: flex; align-items: center; gap: 8px; padding: 12px 10px 10px 16px; border-bottom: 1px solid var(--hair); flex: none; }
 .insp-head h2 { font-size: 15px; font-weight: 700; letter-spacing: -0.005em; flex: 1; }
@@ -224,8 +224,8 @@ body.theater #topbar, body.theater #viewCol { opacity: .35; pointer-events: none
 /* ---- responsive ---- */
 @media (max-width: 1100px) {
   :root { --insp-w: 0px; }
-  #inspector { top: auto; right: 0; left: 0; bottom: 0; width: auto; height: min(78vh, 640px); border-radius: 20px 20px 0 0; transform: translateY(102%); transition: transform .38s cubic-bezier(.32,.72,0,1); will-change: transform; z-index: 14; }
-  #inspector.open { transform: translateY(0); } #inspector.dragging { transition: none; }
+  #inspector, #lesson { top: auto; right: 0; left: 0; bottom: 0; width: auto; height: min(78vh, 640px); border-radius: 20px 20px 0 0; transform: translateY(102%); transition: transform .38s cubic-bezier(.32,.72,0,1); will-change: transform; z-index: 14; }
+  #inspector.open, #lesson.open { transform: translateY(0); } #inspector.dragging, #lesson.dragging { transition: none; }
   .grabber { display: block; width: 40px; height: 5px; border-radius: 3px; background: var(--hair2); margin: 8px auto 0; position: relative; }
   .grabber::before { content: ''; position: absolute; inset: -22px -60px; }
   #inspClose { display: grid; }
@@ -320,6 +320,54 @@ body.big #noteCard { bottom: calc(var(--dock-h) + 104px); }
 .tgl:disabled { opacity: .45; }
 @media (max-width: 760px) { #bigBand { left: 10px; right: 10px; transform: none; max-width: none; height: 56px; padding: 0 12px 0 16px; bottom: calc(var(--dock-h) + 8px); } #bigText { font-size: 22px; } body.big #noteCard { bottom: calc(var(--dock-h) + 72px); } }
 
+/* ---------- 授業・説明会モード (パッケージ⑨) ---------- */
+.lesson-row { gap: 8px; } .lesson-row .pill-btn { flex: 1; justify-content: center; }
+#lessonPop .course { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; text-align: left; padding: 10px 12px; border-radius: 12px; background: var(--seg-bg); margin: 6px 0; }
+#lessonPop .course:hover { background: var(--hair2); } #lessonPop .course b { font-size: 14px; } #lessonPop .course span { font-size: 12px; color: var(--ink3); }
+.lesson-head { gap: 10px; } .lesson-title { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.lesson-title h2 { font-size: 15px; } .lesson-title span { font-size: 11.5px; color: var(--ink3); }
+#lessonClock { font-variant-numeric: tabular-nums; white-space: nowrap; }
+#lessonSel { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-bottom: 1px solid var(--hair); background: var(--accent-soft); font-size: 12.5px; }
+#lessonSel b { color: var(--accent-text); white-space: nowrap; } #lessonSel span { flex: 1; min-width: 0; color: var(--ink2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#lessonSteps { flex: 1; overflow-y: auto; padding: 8px 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.step { display: block; text-align: left; width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid transparent; background: transparent; color: var(--ink2); transition: background .15s, border-color .15s; }
+.step:hover { background: var(--row-hover); }
+.step.on { background: var(--glass-strong); border-color: var(--hair2); color: var(--ink); box-shadow: 0 1px 3px rgba(20,26,40,.08); }
+.st-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+.st-head .st-t { font-family: var(--mono); font-size: 11px; color: var(--ink3); font-variant-numeric: tabular-nums; }
+.st-head b { flex: 1; font-size: 13.5px; } .st-head .st-min { font-size: 11px; color: var(--ink3); }
+.step .say { font-size: 12.5px; line-height: 1.6; margin: 0; }
+.step:not(.on) .say { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.step .ask { margin: 6px 0 0; padding: 6px 9px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 12.5px; line-height: 1.55; }
+.step .ask::before { content: '問いかけ　'; font-weight: 700; font-size: 11px; }
+.step:not(.on) .ask, .step:not(.on) details { display: none; }
+.step details { margin-top: 6px; font-size: 12px; color: var(--ink2); } .step details summary { cursor: pointer; color: var(--ink3); font-size: 11.5px; } .step details p { margin: 4px 0 0; line-height: 1.55; }
+.lesson-foot { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-top: 1px solid var(--hair); flex: none; flex-wrap: wrap; }
+.lesson-foot .sp { flex: 1; } .lesson-foot .pill-btn { padding: 5px 10px; font-size: 12px; min-height: 30px; }
+.lesson-foot .icon-btn:disabled { opacity: .35; }
+body.lesson #inspToggle { display: inline-flex; }
+.quiz-ans b { font-size: 16px; color: var(--accent-text); }
+/* 印刷ワークシート */
+#printSheet { display: none; }
+@media print {
+  @page { size: A4 portrait; margin: 12mm; }
+  body > *:not(#printSheet) { display: none !important; }
+  #printSheet { display: block; }
+}
+body.print-preview > *:not(#printSheet) { display: none !important; }
+body.print-preview #printSheet { display: block; position: fixed; inset: 0; overflow: auto; z-index: 100; padding: 12mm; }
+#printSheet { font: 11pt/1.5 var(--font); color: #000; background: #fff; }
+#printSheet h1 { font-size: 16pt; margin: 0 0 4pt; } #printSheet h2 { font-size: 13pt; margin: 14pt 0 6pt; }
+.ps-meta { display: flex; gap: 18pt; font-size: 10.5pt; border-bottom: 1.5pt solid #000; padding-bottom: 6pt; margin-bottom: 8pt; }
+.ps-figwrap { position: relative; width: 100%; border: 1pt solid #000; } .ps-figwrap img { display: block; width: 100%; } .ps-figwrap svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ps-cap { margin: 6pt 0 4pt; font-size: 10.5pt; }
+.ps-fill { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 4pt 18pt; }
+.ps-fill li { display: flex; align-items: center; gap: 6pt; font-size: 11pt; }
+.fill-num { display: inline-grid; place-items: center; width: 18pt; height: 18pt; border: 1.5pt solid #000; border-radius: 50%; font-weight: 700; font-size: 10pt; }
+.fill-line { flex: 1; border-bottom: 1pt solid #000; height: 14pt; }
+.ps-review ol { padding-left: 1.2em; } .ps-review li p { margin: 0 0 3pt; } .rv-box { height: 46pt; border: 1pt solid #000; border-radius: 3pt; margin-bottom: 8pt; }
+.ps-foot { margin-top: 10pt; font-size: 9pt; color: #444; border-top: 1pt solid #999; padding-top: 4pt; }
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation-duration: .01s !important; } }
 
 </style>
@@ -387,6 +435,7 @@ body.big #noteCard { bottom: calc(var(--dock-h) + 104px); }
   </div>
 </header>
 <div id="settings" class="glass popover" hidden>
+  <div class="pop-row lesson-row"><button id="lessonBtn" class="pill-btn primary">授業・説明会 ›</button><button id="quizBtn" class="pill-btn">ふたりクイズ</button></div>
   <div class="pop-row"><span>言語</span><div class="seg small" id="langSeg"><button data-lang="ja" class="on">日本語</button><button data-lang="easy">やさしい日本語</button><button data-lang="en">English</button></div></div>
   <div class="pop-row"><span>機体</span><button class="tgl on" data-t="alive" aria-pressed="true"><i></i>浮かせておく</button></div>
   <p class="pop-foot" id="aliveNote" hidden>軽量画質では止まっています</p>
@@ -407,6 +456,8 @@ body.big #noteCard { bottom: calc(var(--dock-h) + 104px); }
   <h3>きいてみよう</h3>
   <div id="askList"></div>
 </div>
+
+<div id="lessonPop" class="glass popover" hidden role="dialog" aria-label="授業・説明会"></div>
 
 <div id="photoPop" class="glass popover" hidden role="dialog" aria-label="記念写真">
 <h3>記念写真</h3>
@@ -442,6 +493,22 @@ body.big #noteCard { bottom: calc(var(--dock-h) + 104px); }
   <div class="mb-foot"><b id="massTotal">—</b><span id="massSub" class="mb-sub"></span><div id="massPrice" class="mb-price" hidden></div><p id="massNote" class="mb-note" hidden></p></div>
 </aside>
 
+<aside id="lesson" class="glass" hidden aria-label="授業の台本">
+  <div class="grabber" aria-hidden="true"></div>
+  <div class="insp-head lesson-head">
+    <div class="lesson-title"><h2 id="lessonName"></h2><span id="lessonAud"></span></div>
+    <span id="lessonClock" class="count">--:-- / --:--</span>
+    <button id="lessonClose" class="icon-btn sm" aria-label="閉じる">✕</button>
+  </div>
+  <div id="lessonSel" hidden></div>
+  <div id="lessonSteps"></div>
+  <div class="lesson-foot">
+    <button id="lessonPrev" class="icon-btn sm" aria-label="前の段落">‹</button><span id="lessonPos" class="count"></span><button id="lessonNext" class="icon-btn sm" aria-label="次の段落">›</button>
+    <span class="sp"></span>
+    <button id="lessonQuiz" class="pill-btn">ふたりクイズ</button><button id="lessonPrint" class="pill-btn">印刷</button><button id="lessonEnd" class="pill-btn">終了</button>
+  </div>
+</aside>
+
 <aside id="inspector" class="glass" aria-label="部品一覧と解説">
   <div class="grabber" aria-hidden="true"></div>
   <div class="insp-head">
@@ -460,6 +527,8 @@ body.big #noteCard { bottom: calc(var(--dock-h) + 104px); }
   <div class="stick-mid"><div class="seg tiny" id="modeSeg2"><button data-m="1" class="on">モード1</button><button data-m="2">モード2</button></div></div>
   <div class="stick" id="stickR"><div class="knob"></div><span class="lbl t"></span><span class="lbl b"></span><span class="lbl l"></span><span class="lbl r"></span></div>
 </div>
+
+<div id="printSheet" aria-hidden="true"></div>
 
 <div id="loading"><div class="spinner"></div><p id="loadMsg">3Dモデルを生成しています…</p></div>
 
@@ -1107,6 +1176,53 @@ const I18N = {
     },
     questions: { lift: 'Why does it float?', fwd: 'How does it move forward?', ccw: 'Why not spin all 4 the same way?', time: 'How many minutes can it fly?', rain: 'Can it fly in the rain?', radio: 'What if the radio link is lost?', where: 'How does it know where it is?', weight: 'How heavy is it?', crash: 'What breaks in a crash?', oneout: 'What if one motor stops?', shake: 'Why does the camera not shake?', night: 'Can it fly at night?' } },
 };
+
+// ===== 授業・説明会モード (パッケージ⑨): 台本は確定文。法令は断定しない =====
+const LESSONS = [
+  { id: 'class45', name: '45分授業', audience: '中学・高校・初心者', total: 45, depth: 'simple',
+    review: ['ドローンが浮く理由を、ひとことで書いてみよう。', '隣どうしのプロペラが逆に回るのはなぜ？', '飛ばす前に、自分ならどこを点検する？（2つ）'],
+    steps: [
+      { t: 0, title: '眺める', min: 5, view: 'iso', act: { alive: true },
+        say: '今日はドローンの中身を見ます。まず 1 分、何も説明せずに眺めてください。気づいたことを隣の人と 1 つずつ言い合ってください。',
+        ask: '「これは何のためにあると思う？」と指をさして聞いてみよう。', expect: 'プロペラ・電池・カメラなど。答えが違っていてもここでは正さない。' },
+      { t: 5, title: '4枚のプロペラ', min: 6, view: 'top', act: { question: 'ccw' },
+        say: '上から見ます。プロペラは 4 枚。となり同士は逆向きに回っています。機体に「なぜ？」を演じてもらいます。',
+        ask: '全部同じ向きに回したら、機体はどうなる？', expect: '機体そのものが逆向きに回ってしまう（反トルク）。だから 2 枚ずつ逆にして打ち消す。' },
+      { t: 11, title: 'なぜ浮くのか', min: 6, view: 'front', act: { power: 0.5, air: true, flight: 'hover' },
+        say: 'プロペラが空気を下に押しています。青い流れが空気です。押した分だけ、機体は上に押し返されます。',
+        ask: '4 枚の押す力の合計が、機体の重さより小さかったら？', expect: '浮かない。ちょうど同じで空中に止まる。大きいと上がる。' },
+      { t: 17, title: '頭脳が直す', min: 7, view: 'iso', act: { power: 0.5, sticks: false, coach: '機体を指ではじいてみよう' },
+        say: '機体を指ではじいてください。傾いた分を、頭脳（FC）がモーターの速さを変えて直します。人間には速すぎてできません。',
+        ask: 'どのモーターが速くなった？ %の表示を見て。', expect: '押されて下がった側のモーターが速くなる（110% など）。' },
+      { t: 24, title: '中を開ける', min: 7, view: 'iso', act: { explode: 1 },
+        say: 'ここからは分解します。上から順に、プロペラ・モーター・アーム・フレーム・基板・電池。',
+        ask: '一番重い部品はどれだと思う？', expect: '電池。全体の 4 分の 1 くらい。だから飛べる時間が短い。（⑥があれば重さモードで見せる）' },
+      { t: 31, title: 'やってしまった', min: 7, view: 'iso', act: { theater: 'propReverse' },
+        say: 'プロペラを 1 枚、逆向き用に付けてしまいました。離陸するとどうなるか、見てください。',
+        ask: 'どの点検をしていれば防げた？', expect: 'プロペラの向き（CW/CCW）と刻印が上を向いているか。飛行前点検で見つかる。' },
+      { t: 38, title: 'ふたりクイズとふりかえり', min: 7, view: 'iso', act: { quiz: true },
+        say: '最後に隣の人とクイズ。画面は答えを出しません。光った部品の名前と役割を、相手に説明してください。',
+        ask: '（ふりかえりカードの 3 問）', expect: 'カードは印刷して配る。答えは書かせて回収しない（自分のメモにする）。' },
+    ] },
+  { id: 'town10', name: '10分住民説明会', audience: '地域の方・保護者', total: 10, depth: 'simple',
+    review: ['ドローンが「落ちにくい」ための仕組みを 1 つ挙げてください。', '飛行中に電波が切れたとき、機体は何をするように設定されていますか。', '私たちが安全のためにお願いしたいことは何でしたか。'],
+    steps: [
+      { t: 0, title: 'これが飛ぶ機体です', min: 2, view: 'iso', act: { alive: true },
+        say: 'この地域で飛ばす機体と同じ型です。重さは約 2.4 kg、500ml のペットボトル 5 本分です。',
+        ask: '（問いかけなし。眺めてもらう）', expect: '' },
+      { t: 2, title: 'なぜ落ちにくいのか', min: 3, view: 'iso', act: { power: 0.5, coach: '機体を指ではじいてみよう' },
+        say: '傾いても、頭脳がモーターの速さを変えて自分で直します。指ではじいても戻ります。',
+        ask: '「風が吹いたら？」と聞かれたら、次の場面で答えます。', expect: '' },
+      { t: 5, title: 'もしも電波が切れたら', min: 3, view: 'iso', act: { whatif: 'signal' },
+        say: '操縦の電波が切れると、機体は自分で気づいて、あらかじめ決めた動き（離陸地点へ戻る）をします。これは設定と点検が前提で、万能ではありません。',
+        ask: '私たちがお願いしたいことは、飛行中に機体へ近づかないこと、補助者の指示に従うことです。', expect: '' },
+      { t: 8, title: '飛ばす前に必ずすること', min: 2, view: 'iso', act: { select: 'prop' },
+        say: 'プロペラの向き・電池・ネジ・脚を毎回点検します。壊れる前に見つけるのが仕事です。',
+        ask: '質問があればどうぞ。この機体の画面は、どなたでも同じ URL で開けます。', expect: '' },
+    ] },
+];
+// 部品めぐりの順（外→内）
+const TOUR_ORDER = ['prop','propNut','propAdapter','motor','bell','magnet','winding','stator','shaft','motorBase','motorMount','arm','armClamp','frameTop','standoff','frameBottom','screws','esc','pdb','capacitor','xt60','battery','cells','balance','strap','batteryTray','wiring','fc','buzzer','gps','rx','vtx','telemetry','remoteId','led','regMark','damper','gimbal','camera','landingGear'];
 
 // ===== 手続き生成テクスチャと材質 (v2: 製品レンダリング品質) =====
 function makeCanvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
@@ -3330,6 +3446,249 @@ function initLive() {
   window.updateBigBand = updateBigBand; window.speak = speak;   // 検証用
 }
 
+// ===== 授業・説明会モード (パッケージ⑨) =====
+// 台本を右に固定し、段落ごとに視点と表示を切り替える。答えは画面が出さず、隣の人との会話に残す。
+const lesson = { def: null, hover: false, saved: null, clockAcc: 0, swipe: null };
+const quiz = { active: false, key: null, recent: [], t: 0, revealed: false, saved: null };
+
+function lessonStep() { return lesson.def && S.lesson ? lesson.def.steps[S.lesson.step] : null; }
+function fmtClock(sec) { sec = Math.max(0, Math.floor(sec)); return `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`; }
+
+// ---------- 開始 / 終了 ----------
+function startLesson(id, step = 0) {
+  const def = LESSONS.find(l => l.id === id); if (!def) return;
+  if (S.lesson) stopLesson(true);
+  lesson.def = def; lesson.saved = { depth: S.depth, tab: S.tab };
+  S.lesson = { id, step: -1, startedAt: performance.now() };
+  if (def.depth && S.depth !== def.depth) setDepth(def.depth);
+  document.body.classList.add('lesson');
+  $('#inspector').hidden = true; $('#inspector').classList.remove('open');
+  const panel = $('#lesson'); panel.hidden = false; if (narrow()) panel.classList.add('open');
+  $('#lessonName').textContent = def.name; $('#lessonAud').textContent = def.audience || '';
+  $('#lessonSteps').innerHTML = def.steps.map((st, i) => `<button class="step" data-i="${i}"><div class="st-head"><span class="st-t">${fmtClock(st.t * 60)}</span><b>${st.title}</b><span class="st-min">${st.min}分</span></div><p class="say">${st.say}</p>${st.ask ? `<p class="ask">${st.ask}</p>` : ''}${st.expect ? `<details><summary>想定回答</summary><p>${st.expect}</p></details>` : ''}</button>`).join('');
+  gotoStep(clamp(step | 0, 0, def.steps.length - 1));
+}
+function stopLesson(silent) {
+  if (!S.lesson) return;
+  resetStage(); S.labelOnly = null; buildLabels();
+  const saved = lesson.saved; S.lesson = null; lesson.def = null; lesson.hover = false;
+  document.body.classList.remove('lesson');
+  $('#lesson').hidden = true; $('#lesson').classList.remove('open'); $('#inspector').hidden = false;
+  $('#lessonSel').hidden = true;
+  if (saved && saved.depth !== S.depth) setDepth(saved.depth);
+  setTab('see');
+  const u = new URL(location.href); u.searchParams.delete('lesson'); u.searchParams.delete('step'); history.replaceState(null, '', u);
+  syncBodyMode();
+}
+
+// 段落の前に舞台をまっさらに戻す（前の段落の気流・シアター・質問が残らないように）
+function resetStage() {
+  if (quiz.active) quizStop();
+  if (theater.active) stopTheaterUI();
+  if (whatif.active) stopWhatifUI();
+  if (S.question) { clearQuestion(); renderNote(null); }
+  if (S.flight) setFlight(null);
+  if (S.use) setUse(null);
+  if (S.scale) setScale(false);
+  if (S.explode > 0) setExplode(0);
+  if (S.mode !== 'normal') setMode('normal');
+  if (S.selected) select(null);
+  setSticks(false);
+  if (S.air) { S.air = false; for (const x of $$('.tgl[data-t=air]')) { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); } }
+  if (S.slow) { setTimeScale(1); for (const x of $$('.tgl[data-t=slow]')) { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); } }
+  lesson.hover = false; setPower(0, true);
+  $('#coach').hidden = true; S.labelOnly = null; buildLabels();
+}
+
+function gotoStep(n) {
+  if (!S.lesson || !lesson.def) return;
+  const steps = lesson.def.steps; n = clamp(n, 0, steps.length - 1);
+  S.lesson.step = n; const st = steps[n];
+  resetStage();
+  if (st.view) { segSet($('#viewCol'), 'v', st.view); setView(st.view); }
+  runAct(st.act || {});
+  renderLessonPanel();
+  const u = new URL(location.href); u.searchParams.set('lesson', lesson.def.id); u.searchParams.set('step', String(n)); history.replaceState(null, '', u);
+}
+function runAct(a) {
+  // 未実装の機能を指すキーは黙って飛ばす
+  if (a.alive) { setTab('see'); lesson.hover = true; setPower(0.5, true); syncBodyMode(); }
+  if (a.question && typeof askQuestion === 'function') askQuestion(a.question);
+  if (a.power != null && !a.alive) { setTab('fly'); setPower(a.power, true); }
+  if (a.air) { S.air = true; for (const x of $$('.tgl[data-t=air]')) { x.classList.add('on'); x.setAttribute('aria-pressed', 'true'); } }
+  if (a.flight && typeof setFlight === 'function') { setTab('fly'); setFlight(a.flight); }
+  if (a.sticks != null && typeof setSticks === 'function') setSticks(!!a.sticks);
+  if (a.explode != null) { setTab('see'); setExplode(a.explode); }
+  if (a.theater && typeof startTheaterUI === 'function') { setTab('mishap'); startTheaterUI(a.theater); }
+  if (a.whatif && typeof startWhatifUI === 'function') { setTab('mishap'); startWhatifUI(a.whatif); }
+  if (a.use && typeof setUse === 'function') { setTab('use'); setUse(a.use); }
+  if (a.scale && typeof setScale === 'function') { setTab('use'); setScale(true); }
+  if (a.select) { const p = partsOf(a.select)[0]; if (p) { select(p, true, { quiet: true }); focusOn(partsOf(a.select).map(x => x.obj), { pull: true }); } }
+  if (a.coach) showCoach(a.coach, '', null, null);
+  if (a.quiz) quizStart();
+}
+
+function renderLessonPanel() {
+  if (!S.lesson) return;
+  const n = S.lesson.step, steps = lesson.def.steps;
+  for (const el of $$('#lessonSteps .step')) el.classList.toggle('on', +el.dataset.i === n);
+  const cur = $(`#lessonSteps .step[data-i="${n}"]`); if (cur) cur.scrollIntoView({ block: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });
+  $('#lessonPrev').disabled = n === 0; $('#lessonNext').disabled = n >= steps.length - 1;
+  $('#lessonPos').textContent = `${n + 1} / ${steps.length}`;
+  tickLessonClock(0, true);
+}
+function tickLessonClock(dt, force) {
+  if (!S.lesson) return;
+  lesson.clockAcc += dt; if (!force && lesson.clockAcc < 1) return; lesson.clockAcc = 0;
+  const el = $('#lessonClock'); if (!el) return;
+  const sec = (performance.now() - S.lesson.startedAt) / 1000;
+  el.textContent = `${fmtClock(sec)} / ${fmtClock(lesson.def.total * 60)}`;   // 超過しても赤くしない（叱らない）
+}
+// 選んだ部品の名前を台本パネルの上に1行（右パネルが台本に差し替わっているため）
+function renderLessonSel() {
+  const box = $('#lessonSel'); if (!box) return;
+  const p = S.selected; if (!S.lesson || !p) { box.hidden = true; return; }
+  box.innerHTML = `<b>${partName(p)}</b><span>${partRole(p.key)}</span>${hasSpeech ? '<button class="icon-btn sm speak" id="lessonSpeak" aria-label="読み上げ">🔊</button>' : ''}`;
+  box.hidden = false; const sp = $('#lessonSpeak'); if (sp) sp.onclick = () => speakPart(p);
+}
+
+// ---------- 部品めぐり（外→内） ----------
+function tourNext(dir) {
+  const cur = S.selected ? TOUR_ORDER.indexOf(S.selected.key) : -1;
+  let i = cur < 0 ? (dir > 0 ? 0 : TOUR_ORDER.length - 1) : (cur + dir + TOUR_ORDER.length) % TOUR_ORDER.length;
+  for (let n = 0; n < TOUR_ORDER.length; n++) { const k = TOUR_ORDER[i]; const ps = partsOf(k); if (ps.length && ps.some(p => partVisible(p))) break; i = (i + dir + TOUR_ORDER.length) % TOUR_ORDER.length; }
+  const k = TOUR_ORDER[i], ps = partsOf(k); if (!ps.length) return;
+  if (S.mode !== 'normal') setMode('normal');
+  select(ps[0], true, { quiet: true });
+  S.labelOnly = new Set([k]); buildLabels();
+  focusOn(ps.map(p => p.obj), { pull: true });
+}
+
+// ---------- ふたりクイズ（答えは画面が出さない） ----------
+function quizStart() {
+  if (quiz.active) return;
+  quiz.active = true; quiz.recent = []; quiz.t = 0; S.labelsSuppressed = true; S.labelOnly = null; buildLabels();
+  if (S.selected) select(null);
+  quizNext();
+}
+function quizPool() { const pool = S.depth === 'simple' ? SIMPLE_KEYS : TOUR_ORDER; return pool.filter(k => PARTS[k] && partsOf(k).some(p => partVisible(p) && effVisible(p.obj))); }
+function quizNext() {
+  if (!quiz.active) return;
+  if (quiz.key) for (const p of partsOf(quiz.key)) setTint(p, ACCENT, 0);
+  const pool = quizPool(); let cands = pool.filter(k => !quiz.recent.includes(k)); if (!cands.length) cands = pool;
+  const k = cands[Math.floor(Math.random() * cands.length)]; if (!k) return;
+  quiz.key = k; quiz.recent.push(k); if (quiz.recent.length > 5) quiz.recent.shift(); quiz.revealed = false; quiz.t = 0;
+  focusOn(partsOf(k).map(p => p.obj), { pull: true });
+  renderQuizNote();
+}
+function quizReveal() { if (!quiz.active) return; quiz.revealed = true; renderQuizNote(); }
+function quizStop() {
+  if (!quiz.active) return;
+  if (quiz.key) for (const p of partsOf(quiz.key)) setTint(p, ACCENT, 0);
+  quiz.active = false; quiz.key = null; S.labelsSuppressed = false; buildLabels();
+  if ($('#noteCard').dataset.kind === 'quiz') renderNote(null);
+}
+function stepQuiz(dtReal) {
+  if (!quiz.active || !quiz.key) return;
+  quiz.t += dtReal; const k = reduceMotion ? 0.6 : 0.6 + 0.3 * Math.sin(quiz.t * 2 * Math.PI / 1.2);   // 0.3〜0.9
+  for (const p of partsOf(quiz.key)) setTint(p, ACCENT, k);
+}
+function renderQuizNote() {
+  const en = S.lang === 'en', k = quiz.key;
+  const title = en ? 'What do you think this is?' : S.lang === 'easy' ? 'ここ、なんだと おもう？' : 'ここ、なんだと思う？';
+  const html = quiz.revealed
+    ? `<p class="quiz-ans"><b>${partName(k)}</b></p><p>${partRole(k)}</p>`
+    : `<p>${en ? 'Tell the person next to you the name and the job of the glowing part. The screen will not say if you are right.' : S.lang === 'easy' ? 'ひかっている ぶひんの なまえと やくわりを、となりの 人に せつめいして みよう。' : '光っている部品の名前と役割を、隣の人に説明してみよう。画面は答え合わせをしません。'}</p>`;
+  const actions = [];
+  if (!quiz.revealed) actions.push({ label: en ? 'Show the name' : '答えを見る', primary: true, fn: quizReveal });
+  actions.push({ label: en ? 'Next one ›' : 'つぎの問題 ›', fn: quizNext });
+  actions.push({ label: en ? 'Finish' : 'おわる', fn: quizStop });
+  renderNote({ kind: 'quiz', title, html, actions, onClose: quizStop });
+}
+
+// ---------- 印刷（線画の穴埋め図 + ふりかえりカード） ----------
+async function buildPrintSheet() {
+  const sheet = $('#printSheet'); const def = lesson.def || LESSONS[0];
+  const wasMode = S.mode, wasLabels = S.labels;
+  if (S.mode !== 'wire') { S.mode = 'wire'; applyMode(); applyBlueprint(); }
+  if (typeof renderOnce === 'function') renderOnce();
+  const url = renderer.domElement.toDataURL('image/jpeg', 0.92);
+  // ラベル位置（updateLabels と同じ計算）
+  const keys = (S.depth === 'simple' ? SIMPLE_KEYS : LIST_ORDER).filter(k => D.parts.some(p => p.key === k && (p.label || p.labelObj)));
+  const pts = [];
+  for (const k of keys) {
+    const p = D.parts.find(x => x.key === k && (x.label || x.labelObj)); if (!p) continue;
+    const a = p.labelObj ? p.labelObj.getWorldPosition(new THREE.Vector3()) : p.obj.localToWorld(new THREE.Vector3().copy(p.label));
+    const pr = a.project(camera); if (pr.z > 1) continue;
+    pts.push({ key: k, x: (pr.x + 1) / 2 * 1600, y: (1 - pr.y) / 2 * 1200 });
+  }
+  if (wasMode !== 'wire') { S.mode = wasMode; applyMode(); applyBlueprint(); }
+  S.labels = wasLabels;
+  // 番号バッジは左右の余白に縦に並べ、引き出し線でつなぐ
+  const left = pts.filter(p => p.x < 800).sort((a, b) => a.y - b.y), right = pts.filter(p => p.x >= 800).sort((a, b) => a.y - b.y);
+  const place = (arr, x) => { const n = arr.length, gap = Math.min(150, 1000 / Math.max(1, n)); const y0 = 600 - gap * (n - 1) / 2; arr.forEach((p, i) => { p.bx = x; p.by = y0 + gap * i; }); };
+  place(left, 70); place(right, 1530);
+  const ordered = [...left, ...right]; ordered.forEach((p, i) => { p.n = i + 1; });
+  const svg = ordered.map(p => `<line x1="${p.bx}" y1="${p.by}" x2="${p.x.toFixed(0)}" y2="${p.y.toFixed(0)}" stroke="#000" stroke-width="2.5"/><circle cx="${p.x.toFixed(0)}" cy="${p.y.toFixed(0)}" r="6" fill="#000"/><circle cx="${p.bx}" cy="${p.by}" r="28" fill="#fff" stroke="#000" stroke-width="3"/><text x="${p.bx}" y="${p.by + 12}" text-anchor="middle" font-size="34" font-weight="700" fill="#000">${p.n}</text>`).join('');
+  const blanks = ordered.map(p => `<li><span class="fill-num">${p.n}</span><span class="fill-line"></span></li>`).join('');
+  const review = (def.review || []).map((q, i) => `<li><p>${q}</p><div class="rv-box"></div></li>`).join('');
+  sheet.innerHTML = `
+    <header class="ps-head"><h1>ドローンの構造 — ワークシート</h1><div class="ps-meta"><span>${def.name}</span><span>____年__月__日</span><span>名前 ______________</span></div></header>
+    <section class="ps-fig"><div class="ps-figwrap"><img src="${url}" alt="機体の線画"><svg viewBox="0 0 1600 1200" aria-hidden="true">${svg}</svg></div>
+      <p class="ps-cap">番号の部品の名前を書こう。</p><ol class="ps-fill">${blanks}</ol></section>
+    <section class="ps-review"><h2>ふりかえり</h2><ol>${review}</ol></section>
+    <footer class="ps-foot">${location.origin + location.pathname}${def ? `?lesson=${def.id}` : ''}</footer>`;
+  return sheet;
+}
+async function printSheet() { await buildPrintSheet(); window.print(); }
+
+// ---------- 入力 ----------
+function lessonKey(e) {
+  if (!S.lesson) return false;
+  const k = e.key;
+  if (k === 'ArrowRight' || k === ' ' || k === 'PageDown') { e.preventDefault(); gotoStep(S.lesson.step + 1); return true; }
+  if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); gotoStep(S.lesson.step - 1); return true; }
+  if (k === 'Tab') { e.preventDefault(); tourNext(e.shiftKey ? -1 : 1); return true; }
+  if (k === 'q' || k === 'Q') { if (quiz.active) quizStop(); else quizStart(); return true; }
+  if (k === 'Escape') {
+    if (quiz.active) { quizStop(); return true; }
+    if (theater.active || whatif.active || S.question || S.selected) return false;   // まずは中の物を閉じる
+    if (confirm('授業モードを終了しますか？')) stopLesson(); return true;
+  }
+  return false;
+}
+function bindLessonSheet() {
+  const el = $('#lesson'), grab = el.querySelector('.grabber'); let drag = null;
+  grab.addEventListener('pointerdown', e => { drag = { y0: e.clientY, hist: [[e.clientY, performance.now()]] }; grab.setPointerCapture(e.pointerId); el.classList.add('dragging'); });
+  grab.addEventListener('pointermove', e => { if (!drag) return; const dy = Math.max(0, e.clientY - drag.y0); el.style.transform = `translateY(${dy}px)`; drag.hist.push([e.clientY, performance.now()]); if (drag.hist.length > 6) drag.hist.shift(); });
+  const end = e => { if (!drag) return; const dy = Math.max(0, e.clientY - drag.y0); const h0 = drag.hist[0], h1 = drag.hist[drag.hist.length - 1]; const v = (h1[0] - h0[0]) / Math.max(1, h1[1] - h0[1]); el.classList.remove('dragging'); el.style.transform = ''; if (v > 0.5 || dy > el.offsetHeight * 0.4) el.classList.remove('open'); drag = null; };
+  grab.addEventListener('pointerup', end); grab.addEventListener('pointercancel', end);
+  // 段落リスト上の左右スワイプで前後
+  const steps = $('#lessonSteps');
+  steps.addEventListener('pointerdown', e => { if (e.pointerType !== 'touch') return; lesson.swipe = { x0: e.clientX, y0: e.clientY, t0: performance.now() }; });
+  steps.addEventListener('pointerup', e => { const s = lesson.swipe; lesson.swipe = null; if (!s) return; const dx = e.clientX - s.x0, dy = e.clientY - s.y0, dt = performance.now() - s.t0; if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5 && dt < 600) gotoStep(S.lesson.step + (dx < 0 ? 1 : -1)); });
+}
+
+function initLesson() {
+  $('#lessonPop').innerHTML = `<h3>授業・説明会</h3>${LESSONS.map(l => `<button class="course" data-l="${l.id}"><b>${l.name}</b><span>${l.audience} · 約${l.total}分 · ${l.steps.length}段落</span></button>`).join('')}<p class="pop-foot">台本が右に出て、段落ごとに視点と表示が切り替わります。URL を共有すると同じ段落から開きます。</p>`;
+  $('#lessonBtn').addEventListener('click', e => { e.stopPropagation(); $('#settings').hidden = true; $('#askPop').hidden = true; $('#lessonPop').hidden = !$('#lessonPop').hidden; });
+  $('#lessonPop').addEventListener('click', e => { const b = e.target.closest('.course'); if (b) { $('#lessonPop').hidden = true; startLesson(b.dataset.l, 0); } });
+  document.addEventListener('click', e => { if (!e.target.closest('#lessonPop') && !e.target.closest('#lessonBtn')) $('#lessonPop').hidden = true; });
+  $('#quizBtn').addEventListener('click', () => { $('#settings').hidden = true; if (S.lesson) { quizStart(); return; } if (theater.active) stopTheaterUI(); if (whatif.active) stopWhatifUI(); setTab('see'); quizStart(); });
+  $('#lessonPrev').addEventListener('click', () => gotoStep(S.lesson.step - 1));
+  $('#lessonNext').addEventListener('click', () => gotoStep(S.lesson.step + 1));
+  $('#lessonSteps').addEventListener('click', e => { const b = e.target.closest('.step'); if (!b || e.target.closest('details')) return; gotoStep(+b.dataset.i); });
+  $('#lessonQuiz').addEventListener('click', () => (quiz.active ? quizStop() : quizStart()));
+  $('#lessonPrint').addEventListener('click', printSheet);
+  $('#lessonEnd').addEventListener('click', () => stopLesson());
+  $('#lessonClose').addEventListener('click', () => { if (narrow()) $('#lesson').classList.remove('open'); else stopLesson(); });
+  bindLessonSheet();
+  window.__lesson = { startLesson, stopLesson, gotoStep, tourNext, quizStart, quizStop, quizReveal, buildPrintSheet, printSheet, lesson };
+  window.__quiz = quiz;
+  const q = new URLSearchParams(location.search); const id = q.get('lesson');
+  if (id && LESSONS.some(l => l.id === id)) startLesson(id, parseInt(q.get('step') || '0', 10) || 0);
+}
+
 // ===== UI: タブ・扉・解説・ラベル・スティック・入力 =====
 const LIST_ORDER = ['frameTop', 'frameBottom', 'regMark', 'arm', 'armClamp', 'motorMount', 'standoff', 'screws', 'motor', 'bell', 'stator', 'winding', 'magnet', 'shaft', 'motorBase', 'prop', 'propNut', 'propAdapter', 'esc', 'fc', 'pdb', 'capacitor', 'buzzer', 'battery', 'cells', 'batteryTray', 'xt60', 'balance', 'strap', 'wiring', 'gps', 'remoteId', 'rx', 'vtx', 'telemetry', 'led', 'gimbal', 'camera', 'damper', 'landingGear'];
 const SUB = { bell: 'motor', stator: 'motor', winding: 'motor', magnet: 'motor', shaft: 'motor', motorBase: 'motor', cells: 'battery', propNut: 'prop', propAdapter: 'prop' };
@@ -3394,7 +3753,7 @@ $('#powerSeg').addEventListener('click', e => { const b = e.target.closest('butt
 function syncBodyMode() {
   if (theater.active) return setBodyMode('theater');
   if (S.flight) return setBodyMode('demo');
-  if (S.power > 0 && (S.tab === 'fly' || S.scale || alive.on)) return setBodyMode('free');
+  if (S.power > 0 && (S.tab === 'fly' || S.scale || alive.on || (S.lesson && lesson.hover))) return setBodyMode('free');
   setBodyMode('idle');
 }
 // 飛行の原理
@@ -3457,7 +3816,8 @@ function select(p, all = false, opts = {}) {
   applyMode();
   for (const row of $$('#partList .row')) row.classList.toggle('on', !!p && row.dataset.key === p.key);
   renderDetail();
-  if (p && narrow() && !opts.quiet) $('#inspector').classList.add('open');
+  if (p && narrow() && !opts.quiet && !S.lesson) $('#inspector').classList.add('open');
+  if (S.lesson) renderLessonSel();
   if (S.scale) renderMassBar(p && p.key);
   codexOnSelect(p); updateBigBand();
   if (p && alive.speakAuto && !opts.quiet) speakPart(p);
@@ -3505,7 +3865,7 @@ const badgeEls = D.motors.map((mo, i) => { const el = document.createElement('di
 function updateLabels() {
   const camDist = camera.position.distanceTo(controls.target);
   const forced = !!S.labelOnly;                       // ⑩: 特定の部品だけを強制表示
-  const live = body.mode !== 'idle' && !forced && !(alive.on && body.mode === 'free' && !body.hold && !body.stick.active);   // ⑧: 生きているだけならラベルは出す
+  const live = body.mode !== 'idle' && !forced && !((alive.on || (S.lesson && lesson.hover)) && body.mode === 'free' && !body.hold && !body.stick.active);   // ⑧: 生きているだけならラベルは出す
   for (const L of labelEls) {
     const p = L.p;
     let show = (forced || (S.labels && !S.labelsSuppressed)) && !live && partVisible(p) && effVisible(p.obj) && (!S.labelOnly || S.labelOnly.has(p.key));
@@ -3755,6 +4115,8 @@ function updateHover() {
 // キーボード
 document.addEventListener('keydown', e => {
   if (e.target.matches && e.target.matches('input, textarea, select')) return; const k = e.key.toLowerCase();
+  if (S.lesson && lessonKey(e)) return;
+  if (quiz.active && e.key === 'Escape') { quizStop(); return; }
   if (k === 'escape' && (!$('#askPop').hidden || !$('#settings').hidden)) { $('#askPop').hidden = true; $('#settings').hidden = true; return; }
   if (e.key === '?') { const st = $('#settings'); st.hidden = false; $('#askPop').hidden = true; const dt = st.querySelector('details'); if (dt) dt.open = true; return; }
   if (k === '1') setMode('normal'); else if (k === '2') setMode('xray'); else if (k === '3') setMode('wire'); else if (k === '4') setMode('cut');
@@ -3776,7 +4138,7 @@ $('#qualitySeg').addEventListener('click', e => { const b = e.target.closest('bu
 $('#envSlider').addEventListener('input', e => { S.envMul = e.target.value / 100; applyTheme(); });
 $('#expSlider').addEventListener('input', e => { S.exposureMul = e.target.value / 100; applyTheme(); });
 // モバイルシート
-$('#inspToggle').addEventListener('click', () => $('#inspector').classList.add('open'));
+$('#inspToggle').addEventListener('click', () => (S.lesson ? $('#lesson') : $('#inspector')).classList.add('open'));
 $('#inspClose').addEventListener('click', () => $('#inspector').classList.remove('open'));
 { const insp = $('#inspector'), grab = $('.grabber'); let drag = null;
   grab.addEventListener('pointerdown', e => { drag = { y0: e.clientY, hist: [[e.clientY, performance.now()]] }; grab.setPointerCapture(e.pointerId); insp.classList.add('dragging'); });
@@ -3833,7 +4195,7 @@ function tick(now) {
   if (Q.direct) { if (air.mesh && air.mesh.parent !== scene) scene.add(air.mesh); renderer.setRenderTarget(null); renderer.render(scene, camera); }
   else { if (air.mesh && air.mesh.parent === scene) scene.remove(air.mesh); composer.render(); }
   perf.cpu = performance.now() - c0;
-  updateLabels(); stepCodex(dt); if (S.flight) updateFlightTab();
+  updateLabels(); stepCodex(dt); if (S.lesson) tickLessonClock(dt); if (quiz.active) stepQuiz(dt); if (S.flight) updateFlightTab();
   perfT += dtRaw;
   if (perfT > 1.5) {
     perfT = 0; perf.fps = fpsN / fpsAcc; fpsAcc = 0; fpsN = 0;
@@ -3849,13 +4211,13 @@ function tick(now) {
 }
 // 検証用に最小限だけグローバルへ出す(モジュールスコープのままだとコンソールから触れないため)
 window.LIST_ORDER = LIST_ORDER; window.PARTS = PARTS; window.WHATIF = WHATIF;
-window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: scale, __codex: codex, __whatif: whatif, __alive: alive, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
+window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: scale, __codex: codex, __whatif: whatif, __alive: alive, __lesson: lesson, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
 // ---------- 起動 ----------
 (async () => {
   $('#loadMsg').textContent = '照明と材質を準備しています…';
   buildList(); applyTheme(); resize();
   applyQuality(isMobile ? (HF ? 1 : 0) : 3);
-  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif(); initLive();
+  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif(); initLive(); initLesson();
   { const vs = viewScale(); if (vs > 1) camera.position.multiplyScalar(vs); }
   renderer.setClearColor(0x000000, 1);
   $('#loadMsg').textContent = 'シェーダーをコンパイルしています…'; mark('setup');

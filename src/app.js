@@ -36,7 +36,7 @@ function tick(now) {
   if (Q.direct) { if (air.mesh && air.mesh.parent !== scene) scene.add(air.mesh); renderer.setRenderTarget(null); renderer.render(scene, camera); }
   else { if (air.mesh && air.mesh.parent === scene) scene.remove(air.mesh); composer.render(); }
   perf.cpu = performance.now() - c0;
-  updateLabels(); stepCodex(dt); if (S.flight) updateFlightTab();
+  updateLabels(); stepCodex(dt); if (S.lesson) tickLessonClock(dt); if (quiz.active) stepQuiz(dt); if (S.flight) updateFlightTab();
   perfT += dtRaw;
   if (perfT > 1.5) {
     perfT = 0; perf.fps = fpsN / fpsAcc; fpsAcc = 0; fpsN = 0;
@@ -52,13 +52,13 @@ function tick(now) {
 }
 // 検証用に最小限だけグローバルへ出す(モジュールスコープのままだとコンソールから触れないため)
 window.LIST_ORDER = LIST_ORDER; window.PARTS = PARTS; window.WHATIF = WHATIF;
-window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: scale, __codex: codex, __whatif: whatif, __alive: alive, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
+window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: scale, __codex: codex, __whatif: whatif, __alive: alive, __lesson: lesson, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
 // ---------- 起動 ----------
 (async () => {
   $('#loadMsg').textContent = '照明と材質を準備しています…';
   buildList(); applyTheme(); resize();
   applyQuality(isMobile ? (HF ? 1 : 0) : 3);
-  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif(); initLive();
+  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif(); initLive(); initLesson();
   { const vs = viewScale(); if (vs > 1) camera.position.multiplyScalar(vs); }
   renderer.setClearColor(0x000000, 1);
   $('#loadMsg').textContent = 'シェーダーをコンパイルしています…'; mark('setup');

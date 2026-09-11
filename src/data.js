@@ -615,3 +615,50 @@ const I18N = {
     },
     questions: { lift: 'Why does it float?', fwd: 'How does it move forward?', ccw: 'Why not spin all 4 the same way?', time: 'How many minutes can it fly?', rain: 'Can it fly in the rain?', radio: 'What if the radio link is lost?', where: 'How does it know where it is?', weight: 'How heavy is it?', crash: 'What breaks in a crash?', oneout: 'What if one motor stops?', shake: 'Why does the camera not shake?', night: 'Can it fly at night?' } },
 };
+
+// ===== 授業・説明会モード (パッケージ⑨): 台本は確定文。法令は断定しない =====
+const LESSONS = [
+  { id: 'class45', name: '45分授業', audience: '中学・高校・初心者', total: 45, depth: 'simple',
+    review: ['ドローンが浮く理由を、ひとことで書いてみよう。', '隣どうしのプロペラが逆に回るのはなぜ？', '飛ばす前に、自分ならどこを点検する？（2つ）'],
+    steps: [
+      { t: 0, title: '眺める', min: 5, view: 'iso', act: { alive: true },
+        say: '今日はドローンの中身を見ます。まず 1 分、何も説明せずに眺めてください。気づいたことを隣の人と 1 つずつ言い合ってください。',
+        ask: '「これは何のためにあると思う？」と指をさして聞いてみよう。', expect: 'プロペラ・電池・カメラなど。答えが違っていてもここでは正さない。' },
+      { t: 5, title: '4枚のプロペラ', min: 6, view: 'top', act: { question: 'ccw' },
+        say: '上から見ます。プロペラは 4 枚。となり同士は逆向きに回っています。機体に「なぜ？」を演じてもらいます。',
+        ask: '全部同じ向きに回したら、機体はどうなる？', expect: '機体そのものが逆向きに回ってしまう（反トルク）。だから 2 枚ずつ逆にして打ち消す。' },
+      { t: 11, title: 'なぜ浮くのか', min: 6, view: 'front', act: { power: 0.5, air: true, flight: 'hover' },
+        say: 'プロペラが空気を下に押しています。青い流れが空気です。押した分だけ、機体は上に押し返されます。',
+        ask: '4 枚の押す力の合計が、機体の重さより小さかったら？', expect: '浮かない。ちょうど同じで空中に止まる。大きいと上がる。' },
+      { t: 17, title: '頭脳が直す', min: 7, view: 'iso', act: { power: 0.5, sticks: false, coach: '機体を指ではじいてみよう' },
+        say: '機体を指ではじいてください。傾いた分を、頭脳（FC）がモーターの速さを変えて直します。人間には速すぎてできません。',
+        ask: 'どのモーターが速くなった？ %の表示を見て。', expect: '押されて下がった側のモーターが速くなる（110% など）。' },
+      { t: 24, title: '中を開ける', min: 7, view: 'iso', act: { explode: 1 },
+        say: 'ここからは分解します。上から順に、プロペラ・モーター・アーム・フレーム・基板・電池。',
+        ask: '一番重い部品はどれだと思う？', expect: '電池。全体の 4 分の 1 くらい。だから飛べる時間が短い。（⑥があれば重さモードで見せる）' },
+      { t: 31, title: 'やってしまった', min: 7, view: 'iso', act: { theater: 'propReverse' },
+        say: 'プロペラを 1 枚、逆向き用に付けてしまいました。離陸するとどうなるか、見てください。',
+        ask: 'どの点検をしていれば防げた？', expect: 'プロペラの向き（CW/CCW）と刻印が上を向いているか。飛行前点検で見つかる。' },
+      { t: 38, title: 'ふたりクイズとふりかえり', min: 7, view: 'iso', act: { quiz: true },
+        say: '最後に隣の人とクイズ。画面は答えを出しません。光った部品の名前と役割を、相手に説明してください。',
+        ask: '（ふりかえりカードの 3 問）', expect: 'カードは印刷して配る。答えは書かせて回収しない（自分のメモにする）。' },
+    ] },
+  { id: 'town10', name: '10分住民説明会', audience: '地域の方・保護者', total: 10, depth: 'simple',
+    review: ['ドローンが「落ちにくい」ための仕組みを 1 つ挙げてください。', '飛行中に電波が切れたとき、機体は何をするように設定されていますか。', '私たちが安全のためにお願いしたいことは何でしたか。'],
+    steps: [
+      { t: 0, title: 'これが飛ぶ機体です', min: 2, view: 'iso', act: { alive: true },
+        say: 'この地域で飛ばす機体と同じ型です。重さは約 2.4 kg、500ml のペットボトル 5 本分です。',
+        ask: '（問いかけなし。眺めてもらう）', expect: '' },
+      { t: 2, title: 'なぜ落ちにくいのか', min: 3, view: 'iso', act: { power: 0.5, coach: '機体を指ではじいてみよう' },
+        say: '傾いても、頭脳がモーターの速さを変えて自分で直します。指ではじいても戻ります。',
+        ask: '「風が吹いたら？」と聞かれたら、次の場面で答えます。', expect: '' },
+      { t: 5, title: 'もしも電波が切れたら', min: 3, view: 'iso', act: { whatif: 'signal' },
+        say: '操縦の電波が切れると、機体は自分で気づいて、あらかじめ決めた動き（離陸地点へ戻る）をします。これは設定と点検が前提で、万能ではありません。',
+        ask: '私たちがお願いしたいことは、飛行中に機体へ近づかないこと、補助者の指示に従うことです。', expect: '' },
+      { t: 8, title: '飛ばす前に必ずすること', min: 2, view: 'iso', act: { select: 'prop' },
+        say: 'プロペラの向き・電池・ネジ・脚を毎回点検します。壊れる前に見つけるのが仕事です。',
+        ask: '質問があればどうぞ。この機体の画面は、どなたでも同じ URL で開けます。', expect: '' },
+    ] },
+];
+// 部品めぐりの順（外→内）
+const TOUR_ORDER = ['prop','propNut','propAdapter','motor','bell','magnet','winding','stator','shaft','motorBase','motorMount','arm','armClamp','frameTop','standoff','frameBottom','screws','esc','pdb','capacitor','xt60','battery','cells','balance','strap','batteryTray','wiring','fc','buzzer','gps','rx','vtx','telemetry','remoteId','led','regMark','damper','gimbal','camera','landingGear'];

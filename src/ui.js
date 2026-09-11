@@ -62,7 +62,7 @@ $('#powerSeg').addEventListener('click', e => { const b = e.target.closest('butt
 function syncBodyMode() {
   if (theater.active) return setBodyMode('theater');
   if (S.flight) return setBodyMode('demo');
-  if (S.power > 0 && (S.tab === 'fly' || S.scale || alive.on)) return setBodyMode('free');
+  if (S.power > 0 && (S.tab === 'fly' || S.scale || alive.on || (S.lesson && lesson.hover))) return setBodyMode('free');
   setBodyMode('idle');
 }
 // 飛行の原理
@@ -125,7 +125,8 @@ function select(p, all = false, opts = {}) {
   applyMode();
   for (const row of $$('#partList .row')) row.classList.toggle('on', !!p && row.dataset.key === p.key);
   renderDetail();
-  if (p && narrow() && !opts.quiet) $('#inspector').classList.add('open');
+  if (p && narrow() && !opts.quiet && !S.lesson) $('#inspector').classList.add('open');
+  if (S.lesson) renderLessonSel();
   if (S.scale) renderMassBar(p && p.key);
   codexOnSelect(p); updateBigBand();
   if (p && alive.speakAuto && !opts.quiet) speakPart(p);
@@ -173,7 +174,7 @@ const badgeEls = D.motors.map((mo, i) => { const el = document.createElement('di
 function updateLabels() {
   const camDist = camera.position.distanceTo(controls.target);
   const forced = !!S.labelOnly;                       // ⑩: 特定の部品だけを強制表示
-  const live = body.mode !== 'idle' && !forced && !(alive.on && body.mode === 'free' && !body.hold && !body.stick.active);   // ⑧: 生きているだけならラベルは出す
+  const live = body.mode !== 'idle' && !forced && !((alive.on || (S.lesson && lesson.hover)) && body.mode === 'free' && !body.hold && !body.stick.active);   // ⑧: 生きているだけならラベルは出す
   for (const L of labelEls) {
     const p = L.p;
     let show = (forced || (S.labels && !S.labelsSuppressed)) && !live && partVisible(p) && effVisible(p.obj) && (!S.labelOnly || S.labelOnly.has(p.key));
@@ -423,6 +424,8 @@ function updateHover() {
 // キーボード
 document.addEventListener('keydown', e => {
   if (e.target.matches && e.target.matches('input, textarea, select')) return; const k = e.key.toLowerCase();
+  if (S.lesson && lessonKey(e)) return;
+  if (quiz.active && e.key === 'Escape') { quizStop(); return; }
   if (k === 'escape' && (!$('#askPop').hidden || !$('#settings').hidden)) { $('#askPop').hidden = true; $('#settings').hidden = true; return; }
   if (e.key === '?') { const st = $('#settings'); st.hidden = false; $('#askPop').hidden = true; const dt = st.querySelector('details'); if (dt) dt.open = true; return; }
   if (k === '1') setMode('normal'); else if (k === '2') setMode('xray'); else if (k === '3') setMode('wire'); else if (k === '4') setMode('cut');
@@ -444,7 +447,7 @@ $('#qualitySeg').addEventListener('click', e => { const b = e.target.closest('bu
 $('#envSlider').addEventListener('input', e => { S.envMul = e.target.value / 100; applyTheme(); });
 $('#expSlider').addEventListener('input', e => { S.exposureMul = e.target.value / 100; applyTheme(); });
 // モバイルシート
-$('#inspToggle').addEventListener('click', () => $('#inspector').classList.add('open'));
+$('#inspToggle').addEventListener('click', () => (S.lesson ? $('#lesson') : $('#inspector')).classList.add('open'));
 $('#inspClose').addEventListener('click', () => $('#inspector').classList.remove('open'));
 { const insp = $('#inspector'), grab = $('.grabber'); let drag = null;
   grab.addEventListener('pointerdown', e => { drag = { y0: e.clientY, hist: [[e.clientY, performance.now()]] }; grab.setPointerCapture(e.pointerId); insp.classList.add('dragging'); });

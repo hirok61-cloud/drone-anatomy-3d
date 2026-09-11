@@ -56,3 +56,6 @@ npx wrangler@latest deploy
 デプロイされてしまう**。これを防ぐため GitHub Actions（`.github/workflows/deploy.yml`）が
 push のたびに再ビルドして差分が無いか検査する。差分があれば赤バツで知らせる。
 このワークフローは検査専用で、デプロイはしない（`CLOUDFLARE_API_TOKEN` 未設定のため）。
+
+## 授業・説明会モード
+- `?lesson=class45`（45分授業）/ `?lesson=town10`（10分住民説明会）で台本つきで開きます。`&step=N` で途中の段落から。設定 › 授業・説明会 からも開始できます。

@@ -69,6 +69,7 @@
   </div>
 </header>
 <div id="settings" class="glass popover" hidden>
+  <div class="pop-row lesson-row"><button id="lessonBtn" class="pill-btn primary">授業・説明会 ›</button><button id="quizBtn" class="pill-btn">ふたりクイズ</button></div>
   <div class="pop-row"><span>言語</span><div class="seg small" id="langSeg"><button data-lang="ja" class="on">日本語</button><button data-lang="easy">やさしい日本語</button><button data-lang="en">English</button></div></div>
   <div class="pop-row"><span>機体</span><button class="tgl on" data-t="alive" aria-pressed="true"><i></i>浮かせておく</button></div>
   <p class="pop-foot" id="aliveNote" hidden>軽量画質では止まっています</p>
@@ -89,6 +90,8 @@
   <h3>きいてみよう</h3>
   <div id="askList"></div>
 </div>
+
+<div id="lessonPop" class="glass popover" hidden role="dialog" aria-label="授業・説明会"></div>
 
 <div id="photoPop" class="glass popover" hidden role="dialog" aria-label="記念写真">
 <h3>記念写真</h3>
@@ -124,6 +127,22 @@
   <div class="mb-foot"><b id="massTotal">—</b><span id="massSub" class="mb-sub"></span><div id="massPrice" class="mb-price" hidden></div><p id="massNote" class="mb-note" hidden></p></div>
 </aside>
 
+<aside id="lesson" class="glass" hidden aria-label="授業の台本">
+  <div class="grabber" aria-hidden="true"></div>
+  <div class="insp-head lesson-head">
+    <div class="lesson-title"><h2 id="lessonName"></h2><span id="lessonAud"></span></div>
+    <span id="lessonClock" class="count">--:-- / --:--</span>
+    <button id="lessonClose" class="icon-btn sm" aria-label="閉じる">✕</button>
+  </div>
+  <div id="lessonSel" hidden></div>
+  <div id="lessonSteps"></div>
+  <div class="lesson-foot">
+    <button id="lessonPrev" class="icon-btn sm" aria-label="前の段落">‹</button><span id="lessonPos" class="count"></span><button id="lessonNext" class="icon-btn sm" aria-label="次の段落">›</button>
+    <span class="sp"></span>
+    <button id="lessonQuiz" class="pill-btn">ふたりクイズ</button><button id="lessonPrint" class="pill-btn">印刷</button><button id="lessonEnd" class="pill-btn">終了</button>
+  </div>
+</aside>
+
 <aside id="inspector" class="glass" aria-label="部品一覧と解説">
   <div class="grabber" aria-hidden="true"></div>
   <div class="insp-head">
@@ -142,6 +161,8 @@
   <div class="stick-mid"><div class="seg tiny" id="modeSeg2"><button data-m="1" class="on">モード1</button><button data-m="2">モード2</button></div></div>
   <div class="stick" id="stickR"><div class="knob"></div><span class="lbl t"></span><span class="lbl b"></span><span class="lbl l"></span><span class="lbl r"></span></div>
 </div>
+
+<div id="printSheet" aria-hidden="true"></div>
 
 <div id="loading"><div class="spinner"></div><p id="loadMsg">3Dモデルを生成しています…</p></div>
 

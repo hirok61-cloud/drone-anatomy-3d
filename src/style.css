@@ -111,7 +111,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 .keys i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
 
 /* ---- inspector ---- */
-#inspector { position: fixed; top: 14px; right: 14px; bottom: 14px; width: var(--insp-w); z-index: 10; display: flex; flex-direction: column; overflow: hidden; }
+#inspector, #lesson { position: fixed; top: 14px; right: 14px; bottom: 14px; width: var(--insp-w); z-index: 10; display: flex; flex-direction: column; overflow: hidden; }
 .grabber { display: none; }
 .insp-head { display: flex; align-items: center; gap: 8px; padding: 12px 10px 10px 16px; border-bottom: 1px solid var(--hair); flex: none; }
 .insp-head h2 { font-size: 15px; font-weight: 700; letter-spacing: -0.005em; flex: 1; }
@@ -201,8 +201,8 @@ body.theater #topbar, body.theater #viewCol { opacity: .35; pointer-events: none
 /* ---- responsive ---- */
 @media (max-width: 1100px) {
   :root { --insp-w: 0px; }
-  #inspector { top: auto; right: 0; left: 0; bottom: 0; width: auto; height: min(78vh, 640px); border-radius: 20px 20px 0 0; transform: translateY(102%); transition: transform .38s cubic-bezier(.32,.72,0,1); will-change: transform; z-index: 14; }
-  #inspector.open { transform: translateY(0); } #inspector.dragging { transition: none; }
+  #inspector, #lesson { top: auto; right: 0; left: 0; bottom: 0; width: auto; height: min(78vh, 640px); border-radius: 20px 20px 0 0; transform: translateY(102%); transition: transform .38s cubic-bezier(.32,.72,0,1); will-change: transform; z-index: 14; }
+  #inspector.open, #lesson.open { transform: translateY(0); } #inspector.dragging, #lesson.dragging { transition: none; }
   .grabber { display: block; width: 40px; height: 5px; border-radius: 3px; background: var(--hair2); margin: 8px auto 0; position: relative; }
   .grabber::before { content: ''; position: absolute; inset: -22px -60px; }
   #inspClose { display: grid; }
@@ -296,5 +296,53 @@ body.big #noteCard { bottom: calc(var(--dock-h) + 104px); }
 #langSeg button { padding: 4px 8px; font-size: 12px; }
 .tgl:disabled { opacity: .45; }
 @media (max-width: 760px) { #bigBand { left: 10px; right: 10px; transform: none; max-width: none; height: 56px; padding: 0 12px 0 16px; bottom: calc(var(--dock-h) + 8px); } #bigText { font-size: 22px; } body.big #noteCard { bottom: calc(var(--dock-h) + 72px); } }
+
+/* ---------- 授業・説明会モード (パッケージ⑨) ---------- */
+.lesson-row { gap: 8px; } .lesson-row .pill-btn { flex: 1; justify-content: center; }
+#lessonPop .course { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; text-align: left; padding: 10px 12px; border-radius: 12px; background: var(--seg-bg); margin: 6px 0; }
+#lessonPop .course:hover { background: var(--hair2); } #lessonPop .course b { font-size: 14px; } #lessonPop .course span { font-size: 12px; color: var(--ink3); }
+.lesson-head { gap: 10px; } .lesson-title { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.lesson-title h2 { font-size: 15px; } .lesson-title span { font-size: 11.5px; color: var(--ink3); }
+#lessonClock { font-variant-numeric: tabular-nums; white-space: nowrap; }
+#lessonSel { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-bottom: 1px solid var(--hair); background: var(--accent-soft); font-size: 12.5px; }
+#lessonSel b { color: var(--accent-text); white-space: nowrap; } #lessonSel span { flex: 1; min-width: 0; color: var(--ink2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#lessonSteps { flex: 1; overflow-y: auto; padding: 8px 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.step { display: block; text-align: left; width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid transparent; background: transparent; color: var(--ink2); transition: background .15s, border-color .15s; }
+.step:hover { background: var(--row-hover); }
+.step.on { background: var(--glass-strong); border-color: var(--hair2); color: var(--ink); box-shadow: 0 1px 3px rgba(20,26,40,.08); }
+.st-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+.st-head .st-t { font-family: var(--mono); font-size: 11px; color: var(--ink3); font-variant-numeric: tabular-nums; }
+.st-head b { flex: 1; font-size: 13.5px; } .st-head .st-min { font-size: 11px; color: var(--ink3); }
+.step .say { font-size: 12.5px; line-height: 1.6; margin: 0; }
+.step:not(.on) .say { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.step .ask { margin: 6px 0 0; padding: 6px 9px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-text); font-size: 12.5px; line-height: 1.55; }
+.step .ask::before { content: '問いかけ　'; font-weight: 700; font-size: 11px; }
+.step:not(.on) .ask, .step:not(.on) details { display: none; }
+.step details { margin-top: 6px; font-size: 12px; color: var(--ink2); } .step details summary { cursor: pointer; color: var(--ink3); font-size: 11.5px; } .step details p { margin: 4px 0 0; line-height: 1.55; }
+.lesson-foot { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-top: 1px solid var(--hair); flex: none; flex-wrap: wrap; }
+.lesson-foot .sp { flex: 1; } .lesson-foot .pill-btn { padding: 5px 10px; font-size: 12px; min-height: 30px; }
+.lesson-foot .icon-btn:disabled { opacity: .35; }
+body.lesson #inspToggle { display: inline-flex; }
+.quiz-ans b { font-size: 16px; color: var(--accent-text); }
+/* 印刷ワークシート */
+#printSheet { display: none; }
+@media print {
+  @page { size: A4 portrait; margin: 12mm; }
+  body > *:not(#printSheet) { display: none !important; }
+  #printSheet { display: block; }
+}
+body.print-preview > *:not(#printSheet) { display: none !important; }
+body.print-preview #printSheet { display: block; position: fixed; inset: 0; overflow: auto; z-index: 100; padding: 12mm; }
+#printSheet { font: 11pt/1.5 var(--font); color: #000; background: #fff; }
+#printSheet h1 { font-size: 16pt; margin: 0 0 4pt; } #printSheet h2 { font-size: 13pt; margin: 14pt 0 6pt; }
+.ps-meta { display: flex; gap: 18pt; font-size: 10.5pt; border-bottom: 1.5pt solid #000; padding-bottom: 6pt; margin-bottom: 8pt; }
+.ps-figwrap { position: relative; width: 100%; border: 1pt solid #000; } .ps-figwrap img { display: block; width: 100%; } .ps-figwrap svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ps-cap { margin: 6pt 0 4pt; font-size: 10.5pt; }
+.ps-fill { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 4pt 18pt; }
+.ps-fill li { display: flex; align-items: center; gap: 6pt; font-size: 11pt; }
+.fill-num { display: inline-grid; place-items: center; width: 18pt; height: 18pt; border: 1.5pt solid #000; border-radius: 50%; font-weight: 700; font-size: 10pt; }
+.fill-line { flex: 1; border-bottom: 1pt solid #000; height: 14pt; }
+.ps-review ol { padding-left: 1.2em; } .ps-review li p { margin: 0 0 3pt; } .rv-box { height: 46pt; border: 1pt solid #000; border-radius: 3pt; margin-bottom: 8pt; }
+.ps-foot { margin-top: 10pt; font-size: 9pt; color: #444; border-top: 1pt solid #999; padding-top: 4pt; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation-duration: .01s !important; } }
