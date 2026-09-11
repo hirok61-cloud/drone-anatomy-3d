@@ -59,7 +59,18 @@ function stepCodex(dtReal) {
 
 // 解説カードに差し込む断片
 function codexHead(key) { return codex.today === key ? '<div class="today-badge">今日の一部品</div>' : ''; }
-function codexTriviaRow(key) { return TRIVIA[key] ? `<div class="trivia"><b>豆知識</b>${TRIVIA[key]}</div>` : ''; }
+function codexTriviaRow(key) { if (!TRIVIA[key]) return ''; const act = typeof TRIVIA_ACT !== 'undefined' && TRIVIA_ACT[key]; return `<div class="trivia"><b>豆知識</b>${TRIVIA[key]}${act ? '<button id="triviaGo" class="trivia-go">確かめる ›</button>' : ''}</div>`; }
+// 豆知識の内容を機体に演じさせる
+function triviaAct(key) {
+  const a = TRIVIA_ACT && TRIVIA_ACT[key]; if (!a) return;
+  if (a.explode != null) { setTab('see'); setExplode(a.explode); }
+  else if (a.mode) { setTab('see'); setMode(a.mode); if (a.mode === 'cut' && key !== 'motor') select(partsOf(key)[0], true, { quiet: true }); }
+  else if (a.question) askQuestion(a.question);
+  else if (a.theater) { setTab('mishap'); startTheaterUI(a.theater); }
+  else if (a.whatif) { setTab('mishap'); startWhatifUI(a.whatif); }
+  else if (a.scale) { setTab('use'); setScale(true); }
+  else if (a.fly) { setTab('fly'); setPower(0.5, true); if (a.coach) showCoach(a.coach, '', null, null); }
+}
 
 // ---------- 記念写真 ----------
 async function codexPoster() {
@@ -76,19 +87,22 @@ async function codexPoster() {
       if (sr > dr) { sw = im.height * dr; sx = (im.width - sw) / 2; } else { sh = im.width / dr; sy = (im.height - sh) / 2; }
       g.drawImage(im, sx, sy, sw, sh, 0, 0, 1600, H); res();
     }; im.onerror = () => res(); im.src = url; });
-  // 下の帯
-  g.fillStyle = dark ? '#171b22' : '#ffffff'; g.fillRect(0, 1100, 1600, 100);
-  g.fillStyle = dark ? 'rgba(255,255,255,.10)' : 'rgba(20,26,40,.10)'; g.fillRect(0, 1100, 1600, 1);
+  // 下の帯（豆知識があれば2段）
+  const p0 = S.selected, triv = p0 && TRIVIA[p0.key] ? TRIVIA[p0.key] : null; const bandY = triv ? 1060 : 1100;
+  g.fillStyle = dark ? '#171b22' : '#ffffff'; g.fillRect(0, bandY, 1600, 1200 - bandY);
+  g.fillStyle = dark ? 'rgba(255,255,255,.10)' : 'rgba(20,26,40,.10)'; g.fillRect(0, bandY, 1600, 1);
   const F = '-apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif';
   g.textBaseline = 'middle';
   g.fillStyle = dark ? '#e8ebf0' : '#1b1f27'; g.font = `700 36px ${F}`; g.textAlign = 'left';
-  g.fillText('ドローンの構造', 44, 1152);
+  const rowY = triv ? 1104 : 1152;
+  g.fillText('ドローンの構造', 44, rowY);
   const p = S.selected;
   const name = p ? ((S.depth === 'simple' && SIMPLE_NAME[p.key]) || PARTS[p.key].name) : '550クラス クアッドコプター';
-  g.fillStyle = '#ef6a2d'; g.font = `700 34px ${F}`; g.textAlign = 'center'; g.fillText(name, 800, 1152);
+  g.fillStyle = '#ef6a2d'; g.font = `700 34px ${F}`; g.textAlign = 'center'; g.fillText(name, 800, rowY);
   const n = new Date(), ds = `${n.getFullYear()}.${String(n.getMonth() + 1).padStart(2, '0')}.${String(n.getDate()).padStart(2, '0')}`;
   g.fillStyle = dark ? '#8791a3' : '#7b8290'; g.font = `500 26px ${F}`; g.textAlign = 'right';
-  g.fillText(`${ds}　${codex.seen.size}/${codex.total}`, 1556, 1152);
+  g.fillText(`${ds}　${codex.seen.size}/${codex.total}`, 1556, rowY);
+  if (triv) { g.fillStyle = dark ? '#b3bccb' : '#4b5260'; g.font = `500 24px ${F}`; g.textAlign = 'center'; g.fillText(triv, 800, 1162, 1500); }
   return cv;
 }
 

@@ -12,7 +12,8 @@ function stepAlive(dtReal) {
   const w = aliveWanted();
   if (w !== alive.want) {
     alive.want = w; alive.since = 0;
-    if (!w && alive.on) { alive.on = false; body.lookYaw = null; if (S.power > 0 && S.tab !== 'fly') setPower(0, true); else syncBodyMode(); }
+    // 他の機能（重さ・シアター・もしも・授業・とばす）が電源を持っているときは切らない。みるタブ内で条件が外れたときだけ着陸させる
+    if (!w && alive.on) { alive.on = false; body.lookYaw = null; if (S.power > 0 && S.tab === 'see' && !S.scale && !theater.active && !whatif.active && !S.lesson) setPower(0, true); else syncBodyMode(); }
   }
   alive.since += dtReal;
   if (w && !alive.on && alive.since >= 0.8) { alive.on = true; setPower(0.5, true); syncBodyMode(); }

@@ -156,6 +156,7 @@ function renderDetail() {
   const hd = $('#dHide'); if (hd) hd.onclick = () => toggleHidden(p.key);
   const more = $('#dMore'); if (more) more.onclick = () => setDepth('full');
   const sp = $('#detailSpeak'); if (sp) sp.onclick = () => speakPart(p);
+  const tg = $('#triviaGo'); if (tg) tg.onclick = () => triviaAct(p.key);
 }
 
 // ---------- ラベル / モーターバッジ ----------
@@ -298,7 +299,7 @@ function onWhatifChanged() {
   let html = '', actions = [];
   if (whatif.phase === 0) html = `<p>${d.intro}</p>`;
   else if (whatif.phase === 1) html = `<p>${d.reaction}</p>`;
-  else if (whatif.phase === 2) html = `<p>${d.reaction}</p><ol class="parts-seq">${whatif.seq.map((k, i) => `<li class="${i === whatif.seq.length - 1 ? 'lit' : ''}"><b>${PARTS[k].name}</b>${d.partNotes[k] || ''}</li>`).join('')}</ol>`;
+  else if (whatif.phase === 2) html = `<p>${d.reaction}</p><ol class="parts-seq">${whatif.seq.map((k, i) => `<li class="${i === whatif.seq.length - 1 ? 'lit' : ''}"><b>${partName(k)}</b>${d.partNotes[k] || ''}</li>`).join('')}</ol>`;
   else html = `<div class="two-col"><div><h4>機体ができること</h4><ul>${d.can.map(t => `<li>${t}</li>`).join('')}</ul></div><div><h4>人がやること</h4><ul>${d.human.map(t => `<li>${t}</li>`).join('')}</ul></div></div><p class="caveat">${d.caveat}</p>`;
   if (whatif.phase === 3) actions = [{ label: 'もう一度', fn: () => whatifRestart() }];
   renderNote({ kind: 'whatif', title: `${d.icon} ${d.name}`, badge: WHATIF_STAGES[si], html, actions });

@@ -80,12 +80,13 @@ const WHATIF_MOTION = {
   wind(t, dt) {
     body.py = free.hoverY;
     const k = smoothstep(0, 1.0, t);
-    body.tz = -D2R_W(7) * RM() * k;
+    // 風は +x へ吹く → 風上(−x)へ傾く。傾きを作る一瞬だけ風下側(+x: M1/M2)が強く回り、傾いたままの間は4つとも少し余分に働く
+    body.tx = -D2R_W(7) * RM() * k;
     body.px = 0.02 * k * Math.sin(2 * Math.PI * 0.4 * t);
     air.windOverride = air.windOverride || new THREE.Vector3();
     air.windOverride.set(0.4 * k, 0, 0);
-    const m = [1.15, 0.90, 0.90, 1.15];   // 風上側(M1/M4)が速く回る
-    for (let i = 0; i < 4; i++) body.mult[i] = 1 + (m[i] - 1) * k;
+    const tr = Math.sin(Math.PI * clamp(t / 1.0, 0, 1)), coll = 0.05 * k;
+    body.mult[0] = 1 + 0.12 * tr + coll; body.mult[1] = 1 + 0.12 * tr + coll; body.mult[2] = 1 - 0.12 * tr + coll; body.mult[3] = 1 - 0.12 * tr + coll;
     return t > 4.5;
   },
   // 人が近づいた → 機体は避けられない。灯火と音で知らせるだけ

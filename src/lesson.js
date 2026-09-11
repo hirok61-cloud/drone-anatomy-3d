@@ -183,7 +183,7 @@ async function buildPrintSheet() {
   const ordered = [...left, ...right]; ordered.forEach((p, i) => { p.n = i + 1; });
   const svg = ordered.map(p => `<line x1="${p.bx}" y1="${p.by}" x2="${p.x.toFixed(0)}" y2="${p.y.toFixed(0)}" stroke="#000" stroke-width="2.5"/><circle cx="${p.x.toFixed(0)}" cy="${p.y.toFixed(0)}" r="6" fill="#000"/><circle cx="${p.bx}" cy="${p.by}" r="28" fill="#fff" stroke="#000" stroke-width="3"/><text x="${p.bx}" y="${p.by + 12}" text-anchor="middle" font-size="34" font-weight="700" fill="#000">${p.n}</text>`).join('');
   const blanks = ordered.map(p => `<li><span class="fill-num">${p.n}</span><span class="fill-line"></span></li>`).join('');
-  const review = (def.review || []).map((q, i) => `<li><p>${q}</p><div class="rv-box"></div></li>`).join('');
+  const review = [...(def.review || []), '今日いちばん「おっ」と思ったこと'].map((q, i) => `<li><p>${q}</p><div class="rv-box"></div></li>`).join('');
   sheet.innerHTML = `
     <header class="ps-head"><h1>ドローンの構造 — ワークシート</h1><div class="ps-meta"><span>${def.name}</span><span>____年__月__日</span><span>名前 ______________</span></div></header>
     <section class="ps-fig"><div class="ps-figwrap"><img src="${url}" alt="機体の線画"><svg viewBox="0 0 1600 1200" aria-hidden="true">${svg}</svg></div>
