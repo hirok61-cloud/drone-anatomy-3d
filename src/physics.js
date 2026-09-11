@@ -65,6 +65,7 @@ function stepFree(dt) {
   // モーター配分: α_z = −τ̈x, α_x = τ̈z
   const collective = 1 / Math.cos(th) - 1; const alz = -body.ax, alx = body.az;
   for (let i = 0; i < 4; i++) {
+    if (S.scale) break;   // 重さモードでは重心から決めた負担率を使う
     const u = MOTOR_U[i]; let d = free.kappa * (alz * u.x - alx * u.z);
     if (body.hold) d += 0.25 * (u.x * body.hold.x + u.z * body.hold.z) / Math.max(1e-6, body.hold.th) * (body.hold.th / free.holdMax);
     d += 0.12 * (st.active ? st.yaw : 0) * (i % 2 === 0 ? 1 : -1);
@@ -93,7 +94,7 @@ function stepIdle(dt) {
   const r = 4; body.tx = dl(body.tx, 0, dt, r); body.tz = dl(body.tz, 0, dt, r); body.wx = body.wz = 0;
   body.px = dl(body.px, 0, dt, r); body.py = dl(body.py, 0, dt, r); body.pz = dl(body.pz, 0, dt, r); body.vx = body.vz = body.vy = 0;
   body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); body.yaw = dl(body.yaw, 0, dt, 3);
-  for (let i = 0; i < 4; i++) body.mult[i] = dl(body.mult[i], 1, dt, 4);
+  if (!S.scale) for (let i = 0; i < 4; i++) body.mult[i] = dl(body.mult[i], 1, dt, 4);
 }
 function stepBody(dtSim, dtReal) {
   const prev = { x: body.px, y: body.py, z: body.pz };

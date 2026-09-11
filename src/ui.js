@@ -32,6 +32,7 @@ function setTab(tab) {
   if (tab === 'fly') { if (S.explode > 0.02) { setExplode(0); showToast('分解をもどしました'); } if (S.mode === 'cut') setMode('normal'); }
   if (tab !== 'fly') { setSticks(false); if (S.power > 0 && !theater.active) setPower(0, true); if (S.flight) setFlight(null); }
   if (tab !== 'use' && S.use) setUse(null);
+  if (tab !== 'use' && S.scale) setScale(false);
   if (tab === 'mishap') { if (!store.get('mishapSeen')) { showToast('まちがえた機体を飛ばして、どこが壊れるか見てみよう', 3200); store.set('mishapSeen', '1'); } }
   syncBodyMode();
 }
@@ -40,7 +41,7 @@ $('#tabs').addEventListener('click', e => { const b = e.target.closest('button')
 // ---------- はじめて / くわしく ----------
 function setDepth(d) {
   S.depth = d; store.set('depth', d); document.body.classList.toggle('full', d === 'full'); segSet($('#depthSeg'), 'd', d); $('#coach').hidden = true;
-  buildList(); renderDetail(); buildLabels(); buildMishapCards();
+  buildList(); renderDetail(); buildLabels(); buildMishapCards(); if (S.scale) renderMassBar(S.selected && S.selected.key);
   if (d === 'full') showToast('くわしく: 部品40種の仕様例と点検ポイントも見られます'); 
 }
 $('#depthSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setDepth(b.dataset.d); });
@@ -59,7 +60,7 @@ $('#powerSeg').addEventListener('click', e => { const b = e.target.closest('butt
 function syncBodyMode() {
   if (theater.active) return setBodyMode('theater');
   if (S.flight) return setBodyMode('demo');
-  if (S.power > 0 && S.tab === 'fly') return setBodyMode('free');
+  if (S.power > 0 && (S.tab === 'fly' || S.scale)) return setBodyMode('free');
   setBodyMode('idle');
 }
 // 飛行の原理
@@ -120,6 +121,7 @@ function select(p, all = false, opts = {}) {
   for (const row of $$('#partList .row')) row.classList.toggle('on', !!p && row.dataset.key === p.key);
   renderDetail();
   if (p && narrow() && !opts.quiet) $('#inspector').classList.add('open');
+  if (S.scale) renderMassBar(p && p.key);
 }
 function renderDetail() {
   const box = $('#detail'), p = S.selected, body_ = $('#inspBody');
@@ -149,8 +151,8 @@ let labelEls = [];
 function buildLabels() {
   $('#labels').innerHTML = ''; $('#leaders').innerHTML = '';
   const keys = S.depth === 'simple' ? new Set(SIMPLE_KEYS) : null;
-  labelEls = D.parts.filter(p => (p.label || p.labelObj) && (!keys || keys.has(p.key))).map(p => {
-    const el = document.createElement('button'); el.className = 'lbl'; el.textContent = (S.depth === 'simple' && SIMPLE_NAME[p.key]) || PARTS[p.key].name; el.type = 'button';
+  labelEls = D.parts.filter(p => (p.label || p.labelObj) && (!keys || keys.has(p.key)) && (!S.price || PRICE[p.key])).map(p => {
+    const el = document.createElement('button'); el.className = 'lbl'; el.textContent = S.price ? '¥' + PRICE[p.key].toLocaleString() : ((S.depth === 'simple' && SIMPLE_NAME[p.key]) || PARTS[p.key].name); el.type = 'button';
     el.tabIndex = -1; el.addEventListener('click', () => select(p, true)); $('#labels').appendChild(el);
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line'), dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); dot.setAttribute('r', '3'); $('#leaders').append(line, dot);
     return { p, el, line, dot, w: 0, h: 0, x: 0, y: 0, ax: 0, ay: 0, show: false };
@@ -187,12 +189,12 @@ function updateLabels() {
   }
   // モーターの%バッジ
   for (const B of badgeEls) {
-    const show = live && B.mo.rpm > 100 && partVisible(B.mo.part) && !theater.active;
+    const show = (live || S.scale) && B.mo.rpm > 100 && partVisible(B.mo.part) && !theater.active;
     B.el.hidden = !show; if (!show) continue;
     const a = B.mo.group.localToWorld(tmpV.set(0, 0.10, 0)); const pr = tmpV2.copy(a).project(camera); if (pr.z > 1) { B.el.hidden = true; continue; }
     const x = clamp((pr.x + 1) / 2 * W, 60, W - 60), y = clamp((1 - pr.y) / 2 * H, 40, H - 40); B.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%,-50%)`;
-    const pct = Math.round(B.mo.pct), mean = Math.max(1, D.motors.reduce((a, m) => a + m.pct, 0) / 4), up = B.mo.pct > mean * 1.03, dn = B.mo.pct < mean * 0.97; B.el.classList.toggle('up', up); B.el.classList.toggle('down', dn);
-    B.el.innerHTML = S.depth === 'simple' ? (up ? 'はやい ▲' : dn ? 'おそい ▼' : 'ふつう') : `${MOTOR_INFO[B.i].id} ${pct}% ${up ? '▲' : dn ? '▼' : ''}<small>${MOTOR_INFO[B.i].pos} ${MOTOR_INFO[B.i].dir === 'CW' ? '↻' : '↺'}</small>`;
+    const pct = Math.round(B.mo.pct), mean = Math.max(1, D.motors.reduce((a, m) => a + m.pct, 0) / 4), up = B.mo.pct > mean * 1.03, dn = B.mo.pct < mean * 0.97; B.el.classList.toggle('up', up); B.el.classList.toggle('down', dn); B.el.classList.toggle('over', !!(S.scale && scale.share[B.i] > SCALE_OVER));
+    B.el.innerHTML = S.depth === 'simple' && !S.scale ? (up ? 'はやい ▲' : dn ? 'おそい ▼' : 'ふつう') : `${MOTOR_INFO[B.i].id} ${pct}% ${up ? '▲' : dn ? '▼' : ''}<small>${MOTOR_INFO[B.i].pos} ${MOTOR_INFO[B.i].dir === 'CW' ? '↻' : '↺'}</small>`;
   }
 }
 
@@ -235,6 +237,7 @@ $('#useChips').addEventListener('click', e => { const b = e.target.closest('butt
 $('#useReset').addEventListener('click', () => setUse(null));
 function num(s) { const m = String(s).match(/[\d.]+/g); return m ? parseFloat(m[m.length - 1]) : 0; }
 function setUse(id) {
+  if (id && S.scale) setScale(false);
   if (S.use) { const prev = USES.find(u => u.id === S.use); for (const k of prev.up) for (const p of partsOf(k)) setTint(p, UP_COLOR, 0); for (const k of (prev.drop || [])) for (const p of partsOf(k)) { setTint(p, DROP_COLOR, 0); } for (const c of ghostGroup.children) c.visible = false; }
   S.use = id; for (const b of $$('#useChips button')) b.classList.toggle('on', b.dataset.u === id); $('#useReset').hidden = !id;
   if (!id) { if ($('#noteCard').dataset.kind === 'use') renderNote(null); applyMode(); return; }
@@ -327,6 +330,7 @@ function screenToDronePlane(x, y, out) { ptr.set((x / W) * 2 - 1, -(y / H) * 2 +
 let pend = null, hoverAt = null, push = null;
 canvas.addEventListener('pointerdown', e => {
   S.lastInteract = performance.now(); $('#coach').hidden = true;
+  if (S.scale && scaleTryDrag(e)) { e.stopImmediatePropagation(); return; }
   const hit = pickAt(e.clientX, e.clientY);
   if (hit && body.mode === 'free' && !theater.active) {
     e.stopImmediatePropagation(); controls.enabled = false; canvas.setPointerCapture(e.pointerId);
@@ -401,7 +405,8 @@ new ResizeObserver(() => document.documentElement.style.setProperty('--dock-h', 
 
 function onThemeChanged(dark) { airflowTheme(dark); }
 function onQualityChanged(level) { if (air.mesh && air.N !== Q.particles) rebuildAirflow(); $('#perfInfo').textContent = `品質 ${level}`; }
-function onResized() { for (const L of labelEls) L.w = 0; if (!S.labelsTouched) { S.labels = !narrow(); for (const x of $$('.tgl[data-t=labels]')) x.classList.toggle('on', S.labels); } }
+function onResized() {
+  if (S.scale) { if (D.personGroup) D.personGroup.visible = !compact(); renderMassBar(S.selected && S.selected.key); } for (const L of labelEls) L.w = 0; if (!S.labelsTouched) { S.labels = !narrow(); for (const x of $$('.tgl[data-t=labels]')) x.classList.toggle('on', S.labels); } }
 function initUI() {
   buildUseChips(); buildAsk(); buildMishapCards(); labelSticks(); segSet($('#modeSeg2'), 'm', stickMode);
   const d = store.get('depth') || 'simple'; setDepth(d);

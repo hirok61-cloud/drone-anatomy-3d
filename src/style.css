@@ -226,4 +226,39 @@ body.theater #topbar, body.theater #viewCol { opacity: .35; pointer-events: none
   #sticks { bottom: calc(var(--dock-h) + 10px); gap: 10px; } .stick { width: 112px; height: 112px; }
   .cards button { width: 140px; }
 }
+/* ---------- 重さ・お金・重心 (パッケージ⑥) ---------- */
+#massBar { position: fixed; left: 14px; top: 76px; z-index: 9; width: 212px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; max-height: min(62vh, 540px); overflow: auto; }
+.mb-top { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.mb-top .seg.small button { padding: 4px 8px; font-size: 11.5px; min-height: 28px; }
+#priceBtn { padding: 4px 11px; min-height: 28px; font-size: 13px; font-weight: 700; }
+#priceBtn.on { background: var(--accent); color: #fff; }
+.mb-main { display: flex; gap: 10px; }
+.mb-stack { width: 22px; flex: none; height: 220px; border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; background: var(--hair); }
+.mb-stack .seg-i { display: block; width: 100%; height: var(--h); background: var(--c); transition: opacity .15s; }
+.mb-stack .seg-i.dim { opacity: .28; }
+.mb-legend { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.mb-row { display: flex; align-items: center; gap: 6px; padding: 2px 4px; border-radius: 6px; font-size: 11.5px; color: var(--ink2); text-align: left; width: 100%; transition: background .15s, opacity .15s; }
+.mb-row:hover { background: var(--row-hover); color: var(--ink); }
+.mb-row.dim { opacity: .4; }
+.mb-row i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.mb-row .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mb-row .g, .mb-row .yen { font-variant-numeric: tabular-nums; }
+.mb-row .g { color: var(--ink3); } .mb-row .yen { color: var(--accent-text); }
+.mb-foot { border-top: 1px solid var(--hair); padding-top: 6px; display: flex; flex-direction: column; gap: 2px; }
+#massTotal { font-size: 18px; font-variant-numeric: tabular-nums; }
+.mb-sub { font-size: 11.5px; color: var(--ink3); }
+.mb-price { font-size: 11px; color: var(--ink3); display: flex; flex-direction: column; gap: 1px; }
+.mb-price b { font-size: 14px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.mb-note { margin: 4px 0 0; font-size: 11.5px; font-weight: 600; color: var(--warn); }
+.mbadge.over { background: var(--red); border-color: var(--red); color: #fff !important; }
+.mbadge.over small { color: rgba(255,255,255,.85); }
+@media (max-width: 760px) {
+  #massBar { left: 10px; right: 10px; top: auto; bottom: calc(var(--dock-h) + 8px); width: auto; max-height: 42vh; }
+  .mb-main { flex-direction: column; gap: 6px; }
+  .mb-stack { width: 100%; height: 16px; flex-direction: row; }
+  .mb-stack .seg-i { width: var(--h); height: 100%; }
+  .mb-legend { flex-direction: row; flex-wrap: wrap; gap: 2px 10px; }
+  .mb-row { width: auto; } .mb-row .nm { flex: none; }
+}
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation-duration: .01s !important; } }

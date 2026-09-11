@@ -502,10 +502,38 @@ function buildDrone(M) {
   const move = arrowMesh(0xef6a2d, 0.14, 0.005); move.visible = false; root.add(move); arrows.move = move;
   const yaw = rotationArc(-1, 0.20); yaw.position.set(0, 0.16, 0); yaw.visible = false; root.add(yaw); arrows.yaw = yaw;
 
+  // 重心マーカー(パッケージ⑥): 白黒4分割の球。重さモード中だけ出す
+  const cgMarker = new THREE.Group(); cgMarker.visible = false;
+  { const r = 0.007, segs = 16;
+    for (const [phi0, col] of [[0, 0x1b1f27], [Math.PI / 2, 0xf2f4f7]]) {
+      for (const off of [0, Math.PI]) {
+        const g = new THREE.SphereGeometry(r, segs, 12, phi0 + off, Math.PI / 2);
+        const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: col, toneMapped: false, depthTest: false }));
+        m.renderOrder = 8; m.userData.noPart = m.userData.noPick = m.userData.noAO = m.userData.noShadow = true; cgMarker.add(m);   // 機体に隠れないよう手前に描く
+      }
+    }
+  }
+  root.add(cgMarker);
+
   const propPart = parts.find(p => p.key === 'prop' && p.idx === 3);
   if (propPart) propPart.labelObj = motors[3].part.propAnchor;
 
-  return { root, parts, pick, wires, motors, legs, arrows, batPart, G };
+  return { root, parts, pick, wires, motors, legs, arrows, batPart, G, cgMarker, personGroup: buildPerson() };
+}
+
+// ---- 大きさの目安になる人型 (パッケージ⑥。身長1.70m、機体の右 0.9m) ----
+function buildPerson() {
+  // 既定の斜め視点から見て機体と同じ奥行きに立たせる(遠近で大きさが狂わないように)
+  const g = new THREE.Group(); g.visible = false; g.position.set(0.65, -0.158, 0.62);
+  const mat = new THREE.MeshStandardMaterial({ color: 0x9aa3b0, roughness: 0.9, metalness: 0 });
+  const put = (geo, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = false; m.userData.noPick = m.userData.noAO = true; g.add(m); return m; };   // noPart は付けない(カメラの枠決めに人型を含めるため)
+  put(new THREE.SphereGeometry(0.11, 20, 14), 0, 1.56, 0);
+  put(new THREE.CapsuleGeometry(0.16, 0.42, 6, 16), 0, 1.18, 0);
+  put(new THREE.CapsuleGeometry(0.07, 0.62, 6, 12), -0.09, 0.44, 0);
+  put(new THREE.CapsuleGeometry(0.07, 0.62, 6, 12), 0.09, 0.44, 0);
+  put(new THREE.CapsuleGeometry(0.045, 0.5, 6, 12), -0.21, 1.14, 0);
+  put(new THREE.CapsuleGeometry(0.045, 0.5, 6, 12), 0.21, 1.14, 0);
+  return g;
 }
 
 // ---- 用途モードの追加部品 (半透明の概念シルエット) ----

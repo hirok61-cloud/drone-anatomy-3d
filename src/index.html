@@ -35,6 +35,7 @@
     <div class="ctx-row" data-tab="use" hidden>
       <div class="dock-group"><label>なにに使う？</label><div class="chips" id="useChips"></div></div>
       <button id="useReset" class="pill-btn" hidden>もどす</button>
+      <button id="scaleBtn" class="pill-btn" aria-pressed="false">重さ・お金</button>
     </div>
     <div class="ctx-row" data-tab="mishap" hidden>
       <div class="dock-group grow"><label>もしも、まちがえたら</label><div class="cards" id="mishapCards"></div></div>
@@ -101,6 +102,12 @@
   <div id="noteBody"></div>
   <div id="noteActions" class="note-actions"></div>
 </div>
+
+<aside id="massBar" class="glass" hidden aria-label="重さの内訳">
+  <div class="mb-top"><div class="seg small" id="payloadSeg"></div><button id="priceBtn" class="pill-btn" aria-pressed="false" title="参考価格を見る">¥</button></div>
+  <div class="mb-main"><div class="mb-stack" id="massStack"></div><div class="mb-legend" id="massLegend"></div></div>
+  <div class="mb-foot"><b id="massTotal">—</b><span id="massSub" class="mb-sub"></span><div id="massPrice" class="mb-price" hidden></div><p id="massNote" class="mb-note" hidden></p></div>
+</aside>
 
 <aside id="inspector" class="glass" aria-label="部品一覧と解説">
   <div class="grabber" aria-hidden="true"></div>

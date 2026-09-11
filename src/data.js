@@ -476,3 +476,24 @@ const MISHAPS = [
     prevent: '飛行前の「モーターを手で回して引っかかり・異音がないか」の点検で防げた。',
     checkPart: 'motor', physics: 'motorOut' },
 ];
+
+// ===== 重さ・お金・重心 (パッケージ⑥) =====
+// 質量 [g/個]。PARTS[key].count を掛けて合計する。内部部品(SUB の子)は親に含める:
+// motor 95g はベル・ステーター・巻線・磁石・シャフト・ベース込み / prop 29g はナット3g+アダプター6g込み / battery 640g はセル込み。
+const MASS = { frameTop: 45, frameBottom: 70, arm: 32, armClamp: 12, motorMount: 14, standoff: 3, screws: 30,
+  motor: 95, prop: 29, esc: 26, fc: 30, pdb: 25, capacitor: 8, buzzer: 4,
+  battery: 640, xt60: 10, balance: 4, strap: 12, wiring: 60, gps: 45, rx: 18, vtx: 30, led: 4, damper: 5,
+  gimbal: 150, camera: 100, batteryTray: 40, remoteId: 25, regMark: 1, telemetry: 30, landingGear: 70 };
+// 参考価格 [円/個]。複数通販サイトの中央値(2026年時点)の目安で、機種・時期で大きく変わる。
+const PRICE = { frameTop: 6000, frameBottom: 8000, arm: 3200, armClamp: 900, motorMount: 1200, standoff: 150, screws: 1500,
+  motor: 4500, prop: 900, propNut: 150, propAdapter: 400, esc: 3000, fc: 9000, pdb: 3500, capacitor: 300, buzzer: 400,
+  battery: 16000, xt60: 300, balance: 200, strap: 400, wiring: 2500, gps: 7000, rx: 6000, vtx: 5000, led: 800, damper: 250,
+  gimbal: 40000, camera: 20000, batteryTray: 2500, remoteId: 12000, regMark: 300, telemetry: 8000, landingGear: 2000 };
+const SCALE_TEXT = { bottle: '500mlペットボトル', bottleG: 500, person: '身長170cmの人の手のひら〜肘くらいの大きさ',
+  priceNote: '参考価格（2026年時点・国内通販の目安）。機種・時期で大きく変わります',
+  overNote: '後ろのモーターに余裕がありません。前に進む・風に逆らう余力が減ります' };
+const PAYLOADS = [
+  { id: 'none', name: 'なし', g: 0, pos: [0, 0, 0] },
+  { id: 'cam', name: 'カメラ +250g', g: 250, pos: [0, -0.12, -0.06] },
+  { id: 'box', name: '荷物 1kg', g: 1000, pos: [0, -0.13, 0.02], ghost: { shape: 'box', size: [0.12, 0.08, 0.10] } },
+];

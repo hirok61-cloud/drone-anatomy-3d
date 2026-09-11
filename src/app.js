@@ -16,8 +16,9 @@ function tick(now) {
   controls.update();
   // 分解
   S.explodeT += (S.explode - S.explodeT) * (1 - Math.exp(-dt * 9)); if (Math.abs(S.explode - S.explodeT) < 0.0005) S.explodeT = S.explode; if (S.explode < 0.05 && S.explodedCam) { S.explodedCam = false; S.explodeFrame = true; }   // 戻したら組み上がった機体を再フレーミング
-  { const fs = 0.5 + 0.45 * S.explodeT + 0.3 * Math.max(0, body.py); const c = key.shadow.camera; if (Math.abs(c.right - fs) > 0.01) { c.left = c.bottom = -fs; c.right = c.top = fs; c.updateProjectionMatrix(); S.shadowDirty = true; } const si = 1 - 0.55 * S.explodeT; if (Math.abs((key.shadow.intensity ?? 1) - si) > 0.01) { key.shadow.intensity = si; S.shadowDirty = true; } }
+  { const fs = 0.5 + 0.45 * S.explodeT + 0.3 * Math.max(0, body.py) + (S.scale && D.personGroup && D.personGroup.visible ? 0.8 : 0); const c = key.shadow.camera; if (Math.abs(c.right - fs) > 0.01) { c.left = c.bottom = -fs; c.right = c.top = fs; c.updateProjectionMatrix(); S.shadowDirty = true; } const si = 1 - 0.55 * S.explodeT; if (Math.abs((key.shadow.intensity ?? 1) - si) > 0.01) { key.shadow.intensity = si; S.shadowDirty = true; } }
   applyExplode();
+  if (S.scale) stepScale();
   if (S.explodeFrame && Math.abs(S.explode - S.explodeT) < 0.01 && performance.now() - (S.explodeAt || 0) > 350) { S.explodeFrame = false; D.root.updateWorldMatrix(true, true); focusOn(D.parts.filter(p => partVisible(p) && effVisible(p.obj)).map(p => p.obj), { pull: true }); }   // 分解が落ち着いたら全体をフレーミング
   // 機体
   stepBody(dtSim, dt); if (theater.active) stepTheater(dtSim, dt); applyBody(dt);
@@ -48,13 +49,13 @@ function tick(now) {
     perf.programs = renderer.info.programs.length;
   }
 }
-window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
+window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: scale, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
 // ---------- 起動 ----------
 (async () => {
   $('#loadMsg').textContent = '照明と材質を準備しています…';
   buildList(); applyTheme(); resize();
   applyQuality(isMobile ? (HF ? 1 : 0) : 3);
-  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI();
+  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale();
   { const vs = viewScale(); if (vs > 1) camera.position.multiplyScalar(vs); }
   renderer.setClearColor(0x000000, 1);
   $('#loadMsg').textContent = 'シェーダーをコンパイルしています…'; mark('setup');

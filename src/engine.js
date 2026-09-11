@@ -15,7 +15,7 @@ const S = {
   mode: 'normal', explode: 0, explodeT: 0, power: 0, flight: null, flightT: 0, depth: 'simple', tab: 'see',
   labels: true, arrows: false, air: false, autoRotate: !reduceMotion, shadows: true, slow: false, ts: 1, logTs: 0, tsTarget: 1,
   selected: null, selAll: false, hovered: null, isolated: null, quality: 'auto', qLevel: 3, lastInteract: performance.now(), lastSelect: -1e9,
-  camSpring: null, camInertia: null, sticks: false, tilt: false, theater: null, overlay: null, question: null, use: null,
+  camSpring: null, camInertia: null, sticks: false, tilt: false, theater: null, overlay: null, question: null, use: null, scale: false, price: false,
   aoDirty: true, shadowDirty: true, csDirty: true, envMul: 1, exposureMul: 1,
 };
 
@@ -44,6 +44,7 @@ mark('gl');
 const M = makeMaterials(renderer.capabilities.getMaxAnisotropy()); mark('mat');
 const D = buildDrone(M); mark('geo');
 scene.add(D.root);
+if (D.personGroup) scene.add(D.personGroup);
 
 // ---------- 環境マップ (羽根付きパネルのスタジオ) ----------
 function makeStudioEnv() {
@@ -318,7 +319,7 @@ function focusOn(objs, opts = {}) {
   const fwd = dir.clone().negate(), right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize(), up = new THREE.Vector3().crossVectors(right, fwd).normalize();
   const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), tanH = tanV * Math.max(0.6, camera.aspect); let need = 0.05; const rel = new THREE.Vector3();
   for (const q of pts) { rel.copy(q).sub(sph.center); const t = rel.dot(dir); need = Math.max(need, Math.abs(rel.dot(right)) / tanH + t, Math.abs(rel.dot(up)) / tanV + t); }
-  const dist = clamp((need * (opts.margin || 1.18) + 0.02) * viewScale(), 0.12, 3.2);
+  const dist = clamp((need * (opts.margin || 1.18) + 0.02) * viewScale(), 0.12, opts.max || 3.2);
   const dur = 600 + 500 * clamp((camera.position.distanceTo(sph.center.clone().addScaledVector(dir, dist)) + controls.target.distanceTo(sph.center)) / 0.6, 0, 1);
   flyTo(sph.center.clone().addScaledVector(dir, dist), sph.center, dur, opts.pull !== false);
 }
