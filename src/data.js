@@ -263,6 +263,43 @@ const PARTS = {
     check: ['レンズの汚れ・傷', 'メモリーカードの残量', '固定ネジ'],
   },
 
+  propAdapter: {
+    name: 'プロペラアダプター', en: 'Prop adapter', group: 'prop', count: 4,
+    role: 'モーターのベル天面にネジ止めされ、プロペラを載せる座とM6のねじ軸を提供する部品。',
+    structure: ['φ14の座と長さ17mmのねじ軸', 'ベルに4本の小ネジで固定される'],
+    spec: [['ねじ', 'M6'], ['固定', 'M3 × 4']],
+    check: ['ねじ軸の曲がり（プロペラの面ぶれ）', '固定ネジのゆるみ'],
+  },
+  batteryTray: {
+    name: 'バッテリートレイ', en: 'Battery tray', group: 'elec', count: 1,
+    role: 'バッテリーを受けるカーボンの板。表面のすべり止めゴムが振動でのずれを防ぐ。',
+    structure: ['CFRP 2mm + EVAスポンジ3mm', 'ストラップを通すスロット付き'],
+    spec: [['寸法', '60 × 170 mm']],
+    check: ['スポンジの劣化・はがれ', 'スロットの摩耗'],
+  },
+  remoteId: {
+    name: 'リモートID', en: 'Remote ID module', group: 'nav', count: 1,
+    role: '機体の登録記号・位置・速度などを電波で発信する装置。地上から誰の機体かを識別できるようにする。100g以上の機体は原則として搭載が義務。',
+    structure: ['小型の樹脂ケースに無線モジュールとアンテナ', 'FCから電源と位置情報を受ける'],
+    spec: [['方式', 'Bluetooth 5 / Wi-Fi Beacon'], ['発信間隔', '1 秒']],
+    check: ['発信状態のLED', 'アプリで受信できるか', '登録記号との紐づけ'],
+    tip: '内蔵型の機体は別売りの外付けモジュールが不要。搭載免除の条件（係留飛行・登録講習機関の講習など）もある。',
+  },
+  regMark: {
+    name: '登録記号の表示', en: 'Registration mark', group: 'frame', count: 1,
+    role: '国土交通省に登録した機体の記号（JU〜）を機体表面に表示するラベル。',
+    structure: ['耐候性のラベルに文字高3mm以上で表示', '外から見える位置に貼る'],
+    spec: [['文字の高さ', '3 mm 以上（25kg以上は25mm以上）'], ['位置', '機体表面の外から見える場所']],
+    check: ['文字がかすれていないか', 'はがれ'],
+  },
+  telemetry: {
+    name: 'テレメトリー無線機', en: 'Telemetry radio', group: 'nav', count: 1,
+    role: '機体の姿勢・電圧・位置などのデータを地上局（パソコンやタブレット）とやり取りする無線機。自動飛行の指令もここを通る。',
+    structure: ['無線モジュールとダイポールアンテナ'],
+    spec: [['周波数', '2.4 GHz'], ['通信', 'MAVLink']],
+    check: ['アンテナの固定', 'リンク品質の確認'],
+  },
+
   landingGear: {
     name: '降着装置(スキッド)', en: 'Landing skids', group: 'gear', count: 2,
     role: '離着陸時に機体を支え、ジンバルとカメラを地面から守る。',
@@ -292,4 +329,150 @@ const MOTOR_INFO = [
   { id: 'M2', pos: '後右', dir: 'CW' },
   { id: 'M3', pos: '後左', dir: 'CCW' },
   { id: 'M4', pos: '前左', dir: 'CW' },
+];
+
+// ===== はじめてモード: 8部品の平易な説明とたとえ話 =====
+const SIMPLE = {
+  prop:        { role: '回って空気を下に押します。その反動で機体が浮きます。', analogy: '扇風機の羽根を下に向けて、自分が浮くようなもの' },
+  motor:       { role: 'プロペラを回す力の元です。1分間に数千回まわります。', analogy: 'ミニ四駆のモーターを、もっと強く静かにしたもの' },
+  arm:         { role: 'モーターを機体の真ん中から同じ距離に支える棒です。', analogy: '天秤の腕。左右の長さが同じだから釣り合う' },
+  frameTop:    { role: '機体の骨格。すべての部品はここに取り付けられています。', analogy: '人の背骨と肋骨' },
+  battery:     { role: '全部の電気のもと。機体で一番重くて、一番高い部品です。', analogy: 'スマホの電池を30個まとめたくらい' },
+  fc:          { role: '機体の頭脳。傾きを毎秒何千回も測って、4つのモーターの速さを決めます。', analogy: '自転車に乗るときの「小脳」。倒れそうになると勝手に直す' },
+  landingGear: { role: '着陸のときに機体とカメラを地面から守る脚です。', analogy: '飛行機の車輪。でも転がらずに、そりで滑る' },
+  camera:      { role: '空から写真や映像をとる目です。下のジンバルが揺れを打ち消します。', analogy: 'カメラマンが息を止めて撮るのを、機械が代わりにやる' },
+};
+const SIMPLE_KEYS = Object.keys(SIMPLE);
+// ラベル簡略名（はじめて用）
+const SIMPLE_NAME = { prop: 'プロペラ', motor: 'モーター', arm: 'アーム', frameTop: 'フレーム', battery: 'バッテリー', fc: '頭脳（FC）', landingGear: '脚', camera: 'カメラ' };
+
+// ===== 用途から入る扉: 部品の3分類（共通 / 強化 / 追加） =====
+// keep: 今の機体のまま使う部品 / up: 同じ役割だが大型化・強化される / ghost: 新たに載る物（機体に半透明で重ねる）
+const USES = [
+  { id: 'disaster', name: '防災', tagline: '被災地の状況を上から確かめ、声を届ける',
+    up: ['battery', 'led', 'vtx', 'landingGear', 'gps'],
+    ghost: [
+      { id: 'speaker', name: '拡声器（スピーカー）', shape: 'box', size: [0.10, 0.06, 0.06], pos: [0, -0.06, 0.06], note: '住民への呼びかけ。約400 g' },
+      { id: 'thermal', name: '赤外線（サーマル）カメラ', shape: 'box', size: [0.05, 0.04, 0.05], pos: [0.05, -0.10, -0.085], note: '夜間や煙の中でも人を探す' },
+      { id: 'light', name: '投光器', shape: 'cyl', size: [0.03, 0.05], pos: [-0.06, -0.06, -0.06], note: '夜間の捜索・作業の照明' },
+      { id: 'chute', name: 'パラシュート', shape: 'cyl', size: [0.045, 0.06], pos: [0, 0.075, 0.0], note: '人の上を飛ぶための安全装備' },
+    ],
+    weight: '+1.0 kg', time: '約20分 → 約12分', how: '機体は同じ設計のまま、装備を足す。夜や煙の中で働くので灯火と赤外線が要る。' },
+  { id: 'farm', name: '農業', tagline: '田畑に薬剤や肥料をまく',
+    up: ['arm', 'motor', 'prop', 'battery', 'frameBottom', 'landingGear', 'esc', 'pdb', 'wiring'],
+    ghost: [
+      { id: 'tank', name: '薬剤タンク（10 L）', shape: 'box', size: [0.16, 0.12, 0.16], pos: [0, -0.09, 0.0], note: '満タンで約10 kg。機体全体は別設計の大型機になる' },
+      { id: 'nozzleL', name: 'ノズル', shape: 'cyl', size: [0.012, 0.04], pos: [0.19, -0.02, 0.19], note: 'アーム先端から噴霧' },
+      { id: 'nozzleR', name: 'ノズル', shape: 'cyl', size: [0.012, 0.04], pos: [-0.19, -0.02, -0.19], note: 'アーム先端から噴霧' },
+      { id: 'pump', name: 'ポンプ', shape: 'box', size: [0.05, 0.04, 0.05], pos: [0, -0.17, 0.0], note: '流量を調節する' },
+    ],
+    weight: '+10〜15 kg（機体ごと大型化）', time: '約20分 → 約8分（散布中）', how: '原理は同じだが、6〜8ローターの大型機として別に設計される。ジンバルとカメラは外す。' , drop: ['gimbal', 'camera', 'damper'] },
+  { id: 'inspect', name: '点検', tagline: '橋やビルの壁を近くで撮る',
+    up: ['gimbal', 'camera', 'gps', 'led', 'fc'],
+    ghost: [
+      { id: 'guardFR', name: 'プロペラガード', shape: 'ring', size: [0.17, 0.006], pos: [0.194, 0.045, -0.194], note: '構造物への接触から守る' },
+      { id: 'guardFL', name: 'プロペラガード', shape: 'ring', size: [0.17, 0.006], pos: [-0.194, 0.045, -0.194], note: '' },
+      { id: 'guardRR', name: 'プロペラガード', shape: 'ring', size: [0.17, 0.006], pos: [0.194, 0.045, 0.194], note: '' },
+      { id: 'guardRL', name: 'プロペラガード', shape: 'ring', size: [0.17, 0.006], pos: [-0.194, 0.045, 0.194], note: '' },
+      { id: 'upcam', name: '上向きカメラ', shape: 'box', size: [0.04, 0.03, 0.04], pos: [0.03, 0.055, -0.03], note: '橋の裏側を見る' },
+      { id: 'sensor', name: '障害物センサー', shape: 'box', size: [0.03, 0.02, 0.02], pos: [0, 0.02, -0.10], note: '壁との距離を測って止まる' },
+    ],
+    weight: '+0.6 kg', time: '約20分 → 約15分', how: '橋の下ではGPSが届かないので、センサーとガードで壁に寄れるようにする。' },
+  { id: 'photo', name: '空撮', tagline: '映像作品や測量の写真を撮る',
+    up: ['gimbal', 'camera', 'damper', 'vtx'],
+    ghost: [
+      { id: 'bigcam', name: '大型カメラ（1インチ以上）', shape: 'box', size: [0.06, 0.05, 0.06], pos: [0, -0.095, -0.085], note: '画質のためにセンサーが大きい' },
+      { id: 'nd', name: 'NDフィルター', shape: 'cyl', size: [0.02, 0.006], pos: [0, -0.085, -0.125], note: '明るすぎる昼間の光を減らす' },
+    ],
+    weight: '+0.3 kg', time: '約20分 → 約17分', how: '揺れを消すジンバルと、重いカメラを支えるダンパーが主役。機体そのものは今のまま。' },
+  { id: 'school', name: '教育', tagline: '安全に練習して、仕組みを学ぶ',
+    up: ['landingGear', 'led'],
+    ghost: [
+      { id: 'guardFR', name: 'プロペラガード', shape: 'ring', size: [0.17, 0.006], pos: [0.194, 0.045, -0.194], note: '練習中の接触事故を防ぐ' },
+      { id: 'guardFL', name: 'プロペラガード', shape: 'ring', size: [0.17, 0.006], pos: [-0.194, 0.045, -0.194], note: '' },
+      { id: 'guardRR', name: 'プロペラガード', shape: 'ring', size: [0.17, 0.006], pos: [0.194, 0.045, 0.194], note: '' },
+      { id: 'guardRL', name: 'プロペラガード', shape: 'ring', size: [0.17, 0.006], pos: [-0.194, 0.045, 0.194], note: '' },
+    ],
+    weight: '+0.2 kg', time: '約20分 → 約19分', how: 'カメラとジンバルは外して軽くし、ガードを付ける。中身はこの教材の機体そのもの。', drop: ['gimbal', 'camera', 'damper'] },
+  { id: 'delivery', name: '配送', tagline: '荷物を運んで届ける',
+    up: ['motor', 'prop', 'battery', 'frameBottom', 'arm', 'esc'],
+    ghost: [
+      { id: 'boxp', name: '荷物ボックス（2 kg）', shape: 'box', size: [0.14, 0.10, 0.14], pos: [0, -0.10, 0.0], note: '重心の真下に固定する' },
+      { id: 'winch', name: 'ウインチ', shape: 'cyl', size: [0.02, 0.05], pos: [0, -0.04, 0.0], note: '着陸せずに荷物を下ろす' },
+      { id: 'chute', name: 'パラシュート', shape: 'cyl', size: [0.045, 0.06], pos: [0, 0.075, 0.0], note: '人や家の上を飛ぶための安全装備' },
+      { id: 'sensor', name: '障害物センサー', shape: 'box', size: [0.03, 0.02, 0.02], pos: [0, 0.02, -0.10], note: '電線や木を避ける' },
+    ],
+    weight: '+2.5 kg', time: '約20分 → 約9分', how: '荷物の分だけ推力と電池が要る。人の上を飛ぶので安全装備が増える。', drop: ['gimbal', 'camera', 'damper'] },
+];
+
+// ===== 素朴な質問 =====
+// parts: 光らせる部品 / act: 押したときに起こす動作
+const QUESTIONS = [
+  { id: 'lift', q: 'なぜ浮くの？', parts: ['prop', 'motor'], act: { power: 0.5, air: true, flight: 'hover' },
+    a: 'プロペラが空気を下に押すと、その反動で機体が上に押されます。4枚の合計が機体の重さと釣り合うと、空中で止まっていられます。' },
+  { id: 'fwd', q: 'なぜ前に進むの？', parts: ['motor', 'fc'], act: { power: 0.5, air: true, flight: 'pitch' },
+    a: '後ろ2つのモーターを少し速く、前2つを少し遅くすると機体が前に傾きます。傾くと、空気を押す向きも斜め後ろになるので、前へ進みます。' },
+  { id: 'ccw', q: 'なぜ4枚とも同じ向きに回さないの？', parts: ['prop'], act: { power: 0.5, slow: true, arrows: true },
+    a: 'プロペラを回すと、機体は反対向きに回されようとします。隣同士を逆向きにすると、その力が打ち消し合って機体は回りません。ゆっくり回して見ると、隣が逆向きなのがわかります。' },
+  { id: 'time', q: '何分飛べる？', parts: ['battery'],
+    a: 'この機体の例では、荷物なしで約20分です。バッテリーは機体で一番重い部品で、その重さを持ち上げるためにも電気を使います。だから電池を大きくしても、飛べる時間はそれほど伸びません。' },
+  { id: 'rain', q: '雨の日は飛べる？', parts: ['fc', 'esc', 'battery'],
+    a: '多くの機体は防水ではありません。基板や配線に水が入ると故障し、落ちることがあります。防滴の機体もありますが、風雨で姿勢も乱れやすいので、雨の日は飛ばさないのが基本です。' },
+  { id: 'radio', q: '電波が切れたら？', parts: ['rx', 'gps', 'fc'],
+    a: '受信機が電波を失うと、頭脳（FC）が「フェイルセーフ」を発動します。多くの機体はGPSを頼りに離陸した場所へ自動で帰ります。ただし設定と点検が前提で、万能ではありません。' },
+  { id: 'where', q: 'どうやって自分の場所を知るの？', parts: ['gps', 'fc'],
+    a: '上の白い円盤が衛星の電波を受けて位置を測ります。中には方位を知るためのコンパスも入っていて、モーターや電線の磁気から離すために棒の先に付けています。' },
+  { id: 'weight', q: 'どれくらい重い？', parts: ['battery', 'frameBottom'],
+    a: 'この機体の例で約2.4 kg、500 mLのペットボトル5本分です。そのうち640 gがバッテリー。100 g以上の機体は国への登録が必要です。' },
+  { id: 'crash', q: '落ちたらどこが壊れる？', parts: ['prop', 'landingGear', 'gimbal'], act: { theater: 'drop' },
+    a: 'まずプロペラと脚、次にカメラを支えるジンバルです。フレームは強いので残ることが多い。「やってみる」で落として確かめられます。' },
+  { id: 'oneout', q: 'モーターが1つ止まったら？', parts: ['motor', 'esc'], act: { theater: 'motorOut' },
+    a: '4つの機体は、1つ止まると姿勢を保てずに落ちます。6つ以上の機体なら、残りで降りられる場合があります。だから飛ぶ前にモーターの点検をします。' },
+  { id: 'shake', q: 'カメラはなぜ揺れないの？', parts: ['gimbal', 'damper'],
+    a: '3つの小さなモーターが、機体の揺れを瞬時に打ち消してカメラを水平に保ちます。さらにゴムのダンパーが細かい振動を吸収します。' },
+  { id: 'night', q: '夜でも飛べる？', parts: ['led'],
+    a: '夜間の飛行には承認が必要で、機体の向きがわかる灯火が要ります。この機体では前の左が赤、右が緑、後ろが白。遠くからでもどちらを向いているかわかります。' },
+];
+// 初回だけ浮かぶ一問
+const FIRST_QUESTION = { q: '隣り合うプロペラは、なぜ逆向きに回るのでしょう？', hint: 'タップすると答えを機体が演じます', qid: 'ccw' };
+
+// ===== やってしまったシアター =====
+// setup: 見た目の違和感 / result: 離陸後に起きること / broken: 赤く点灯する部品 / prevent: どの点検で防げたか
+const MISHAPS = [
+  { id: 'propReverse', name: 'プロペラを1枚、逆向き用に付けた', short: 'プロペラ逆付け',
+    setup: '前右（M1）に時計回り用のプロペラを付けてしまった。刻印は下向き。', flag: ['prop'], flagIdx: [0],
+    result: 'M1だけ空気を上に押す（推力が下向き）。離陸した瞬間に前右へ倒れ、ひっくり返る。',
+    broken: ['prop', 'motorMount', 'gimbal'], brokenIdx: { prop: [0, 3] },
+    prevent: '飛行前点検「プロペラの向き（CW/CCW）と刻印が上を向いているか」で防げた。',
+    checkPart: 'prop', physics: 'flipFR' },
+  { id: 'escSwap', name: 'ESCの配線を2本入れ替えた', short: 'モーター順序違い',
+    setup: '後右（M2）と後左（M3）の信号線をFCの逆の端子に挿した。頭脳は「M2を速く」と命じているのにM3が速くなる。', flag: ['esc'], flagIdx: [1, 2],
+    result: '傾きを直そうとするほど逆に傾く。離陸直後に横転する。',
+    broken: ['prop', 'landingGear', 'arm'], brokenIdx: { prop: [1, 2], landingGear: [1] },
+    prevent: '組み立て後の「モーター順序と回転方向のテスト」（プロペラを外して1基ずつ回す）で防げた。',
+    checkPart: 'esc', physics: 'rollOver' },
+  { id: 'fcRotated', name: '頭脳（FC）を90°回して取り付けた', short: 'FC取付向き',
+    setup: '基板の矢印が機首ではなく右を向いている。頭脳は「前」を「右」だと思っている。', flag: ['fc'], flagIdx: [0],
+    result: '前に傾くと頭脳は「右に傾いた」と判断して左に直そうとする。補正が空回りし、激しく揺れて反転する。',
+    broken: ['prop', 'gps', 'landingGear'], brokenIdx: { prop: [0, 1, 2, 3] },
+    prevent: '設定画面で「機体を手で傾けて、画面の機体が同じ向きに傾くか」を見る確認で防げた。',
+    checkPart: 'fc', physics: 'wobbleFlip' },
+  { id: 'dirAndProp', name: 'モーターの回転方向とプロペラを両方逆にした', short: '反トルクの偏り',
+    setup: '前右（M1）の相線を2本入れ替えて時計回りにし、プロペラも時計回り用に交換した。推力は出る。', flag: ['motor', 'prop'], flagIdx: [0],
+    result: '浮くが、時計回りが3基・反時計回りが1基になり反トルクが釣り合わない。その場でクルクル回り続ける。',
+    broken: [], brokenIdx: {},
+    prevent: '「隣り合うモーターは逆回転」を1基ずつ確認する組み立て後テストで防げた。',
+    checkPart: 'motor', physics: 'spin' },
+  { id: 'drop', name: '1.5 mの高さから落とした', short: '落下',
+    setup: 'バッテリーが切れて、1.5 mからそのまま落ちた。', flag: ['battery'], flagIdx: [0],
+    result: '脚がしなって衝撃を受け、プロペラが弾け飛び、ジンバルが地面に当たる。',
+    broken: ['prop', 'landingGear', 'gimbal', 'camera', 'damper'], brokenIdx: { prop: [0, 2] },
+    prevent: '「残量30%で着陸」の運用と、離陸前のバッテリー電圧確認で防げた。',
+    checkPart: 'battery', physics: 'drop' },
+  { id: 'motorOut', name: 'モーターが1基止まった', short: '1基停止',
+    setup: '後左（M3）のベアリングが焼き付いて回らなくなった。', flag: ['motor'], flagIdx: [2],
+    result: 'M3の側が支えを失って落ち込み、反トルクの釣り合いも崩れて回転しながら傾いて落ちる。',
+    broken: ['motor', 'prop', 'arm', 'landingGear'], brokenIdx: { motor: [2], prop: [2, 3], arm: [2] },
+    prevent: '飛行前の「モーターを手で回して引っかかり・異音がないか」の点検で防げた。',
+    checkPart: 'motor', physics: 'motorOut' },
 ];

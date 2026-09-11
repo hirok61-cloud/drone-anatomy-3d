@@ -13,8 +13,8 @@ DESC = ('ドローン（550クラスのクアッドコプター）を部品ご�
 
 tpl = (SRC / 'index.html').read_text(encoding='utf-8')
 css = (SRC / 'style.css').read_text(encoding='utf-8')
-js = '\n'.join((SRC / f).read_text(encoding='utf-8')
-               for f in ['data.js', 'materials.js', 'drone.js', 'app.js'])
+SOURCES = ['data.js', 'materials.js', 'drone.js', 'engine.js', 'physics.js', 'airflow.js', 'theater.js', 'ui.js', 'app.js']
+js = '\n'.join((SRC / f).read_text(encoding='utf-8') for f in SOURCES if (SRC / f).exists())
 
 frag = tpl.replace('/*INLINE:style.css*/', css).replace('/*INLINE:scripts*/', js)
 # 出力は決定的にする（日付などを混ぜると CI の差分検査が誤検知する）
