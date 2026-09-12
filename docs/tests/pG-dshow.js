@@ -26,7 +26,7 @@ A(document.getElementById('showBtn').getAttribute('aria-pressed') === 'true', '�
   A(diff > 1, '図形ごとに座標が違う', diff.toFixed(1));
   // どの図形も、点は隊列の広がりの中に収まる
   let maxR = 0; for (let i = 0; i < n; i++) maxR = Math.max(maxR, Math.hypot(b[i * 3], b[i * 3 + 1] - 2.25));
-  A(maxR > 0.5 && maxR < 2.2, '図形は隊列の広がりに収まる', maxR.toFixed(2)); }
+  A(maxR > 0.5 && maxR < 3.6, '図形は隊列の広がりに収まる', maxR.toFixed(2)); }
 
 // 点がちゃんと動いている（位置バッファが更新される）
 { const p0 = ds.pos.slice(0, 30); d.step(1.2, 30); let diff = 0; for (let i = 0; i < 30; i++) diff += Math.abs(ds.pos[i] - p0[i]);

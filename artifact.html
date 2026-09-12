@@ -6242,9 +6242,9 @@ const dshow = {
   pos: null, from: null, to: null, col: null, colFrom: null, colTo: null, lag: null,
   fig: 0, figT: 0, phase: 'move', saved: null, star: 0, lastVals: 0,
 };
-const DSHOW_N = () => (S.qLevel <= 1 ? 160 : 260);   // 実際のショーは数百〜数千機。箱庭では見える密度に落とす
-const DSHOW_H = 2.25;      // 隊列の中心の高さ(m)
-const DSHOW_R = 1.55;      // 隊列の広がり(m)
+const DSHOW_N = () => (S.qLevel <= 1 ? 600 : S.qLevel === 2 ? 1200 : 2000);   // 実際のショーは数百〜数千機
+const DSHOW_H = 3.10;      // 隊列の中心の高さ(m)
+const DSHOW_R = 2.25;      // 隊列の広がり(m)
 const DSHOW_MOVE = 2.6, DSHOW_HOLD = 3.4;   // 移り変わりと静止の秒数
 // 縦長の画面は説明カードが下半分を覆う。隊列を少し縮めて低くすると、上の帯に全部入る
 const dshowTall = () => innerWidth / Math.max(1, innerHeight) < 1.05;
@@ -6294,12 +6294,39 @@ function dshowShape(id, n, out) {
       for (let j = 0; j < arm; j++) { const t = 0.18 + (j / Math.max(1, arm - 1)) * 0.72; put(i++, cx * t, cy * t, 0); }
     }
     for (let j = 0; j < rest; j++) { const a = (j / rest) * Math.PI * 2, r = DSHOW_R * 0.2 * (0.4 + 0.6 * ((j % 3) / 2)); put(i++, Math.cos(a) * r, Math.sin(a) * r, 0); }
+  } else if (id.slice(0, 5) === 'text:') {
+    const t = id.slice(5);
+    dshowFromCanvas((c, W, H) => { c.font = `900 ${Math.round(H * 0.78)}px "Noto Sans JP", ${'sans-serif'}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(t, W / 2, H * 0.54); },
+      n, out, { w: 300, h: 150, scale: DSHOW_R * 2.0 / 300 });
   } else {   // sphere: フィボナッチ球
     const g = Math.PI * (3 - Math.sqrt(5));
     for (let i = 0; i < n; i++) { const y = 1 - (i / (n - 1)) * 2, r = Math.sqrt(Math.max(0, 1 - y * y)), a = g * i;
       put(i, Math.cos(a) * r * DSHOW_R, y * DSHOW_R, Math.sin(a) * r * DSHOW_R); }
   }
 }
+// Canvas に描いた形の内側から n 点を取る。文字も塗りつぶしの図形も、これ一つで作れる。
+// 走査順に並べると遷移のとき点が帯になって動くので、候補をシャッフルしてから配る。
+const _dsCv = { el: null, ctx: null };
+function dshowFromCanvas(draw, n, out, opts) {
+  const o = opts || {}, W = o.w || 220, H = o.h || 140, S1 = o.scale || (DSHOW_R * 2 / W);
+  if (!_dsCv.el) { _dsCv.el = document.createElement('canvas'); _dsCv.ctx = _dsCv.el.getContext('2d', { willReadFrequently: true }); }
+  const cv = _dsCv.el, c = _dsCv.ctx;
+  cv.width = W; cv.height = H;
+  c.fillStyle = '#000'; c.fillRect(0, 0, W, H); c.fillStyle = '#fff';
+  draw(c, W, H);
+  const px = c.getImageData(0, 0, W, H).data, cand = [];
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (px[(y * W + x) * 4] > 120) cand.push(x + y * W);
+  if (!cand.length) { for (let i = 0; i < n; i++) { out[i * 3] = 0; out[i * 3 + 1] = DSHOW_H; out[i * 3 + 2] = 0; } return; }
+  for (let i = cand.length - 1; i > 0; i--) { const j = (Math.sin(i * 12.9898) * 43758.5453 % 1 + 1) % 1 * (i + 1) | 0; const t = cand[i]; cand[i] = cand[j]; cand[j] = t; }
+  for (let i = 0; i < n; i++) {
+    const k = cand[i % cand.length], x = k % W, y = (k / W) | 0;
+    const jx = i >= cand.length ? (Math.sin(i * 7.13) * 0.5) : 0, jy = i >= cand.length ? (Math.cos(i * 5.71) * 0.5) : 0;
+    out[i * 3] = (x + 0.5 + jx - W / 2) * S1;
+    out[i * 3 + 1] = DSHOW_H - (y + 0.5 + jy - H / 2) * S1;
+    out[i * 3 + 2] = 0;
+  }
+}
+
 // 折れ線の上に等間隔で並べる（頂点の数に関わらず密度が揃う）
 function dshowAlong(pts, n, put, close) {
   const P = close ? pts.concat([pts[0]]) : pts;
@@ -6324,7 +6351,7 @@ function dshowBuild() {
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(dshow.pos, 3));
   geo.setAttribute('color', new THREE.BufferAttribute(dshow.col, 3));
-  const mat = new THREE.PointsMaterial({ size: 0.155, map: canvasTex(glowCanvas(true)), vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true, toneMapped: false });
+  const mat = new THREE.PointsMaterial({ size: 0.135, map: canvasTex(glowCanvas(true)), vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true, toneMapped: false });
   const pts = new THREE.Points(geo, mat); pts.frustumCulled = false; pts.renderOrder = 6;
   pts.userData.noPart = pts.userData.noPick = pts.userData.noShadow = pts.userData.noAO = true;
   pts.visible = false; scene.add(pts);
@@ -6347,6 +6374,7 @@ function dshowOn(on) {
     dshowLayout();   /* 主役機の置き場所は画面の形で決まる。位置を読む前に確定させる */
     dshow.on = true; dshow.t = 0; dshow.fig = 0; dshow.figT = 0; dshow.phase = 'hold'; dshow.star = 0; dshow.lastVals = 0;
     document.body.classList.add('dshow'); syncDockH();   /* 操作列を畳んで夜空を広くとる */
+    $('#coach').hidden = true;   /* 見ている最中に問いかけを割り込ませない */
     dshow.saved = { power: S.power, labels: S.labelsSuppressed, air: S.air };
     S.labelsSuppressed = true; buildLabels();
     S.air = false; for (const x of $$('.tgl[data-t=air]')) { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); }
@@ -6360,8 +6388,8 @@ function dshowOn(on) {
     body.px = bp[0]; body.py = bp[1]; body.pz = bp[2]; body.tx = body.tz = body.wx = body.wz = 0; body.yaw = 0; body.mult = [1, 1, 1, 1];
     dshowSky();
     { const tall = dshowTall();
-      const dir = new THREE.Vector3(0.32, 0.40, 1).normalize(), aim = new THREE.Vector3(0, tall ? 1.25 : 1.45, 0);   /* 見上げるほど空が広い */   /* 観客の位置から見上げる。隊列と地上の機体を1枚に入れる */
-      flyTo(aim.clone().addScaledVector(dir, (tall ? 9.2 : 10.6) * viewScale()), aim, 1100, false); }
+      const dir = new THREE.Vector3(0.32, 0.40, 1).normalize(), aim = new THREE.Vector3(0, tall ? 2.25 : 2.55, 0);   /* 見上げるほど空が広い */   /* 観客の位置から見上げる。隊列と地上の機体を1枚に入れる */
+      flyTo(aim.clone().addScaledVector(dir, (tall ? 13.8 : 15.6) * viewScale()), aim, 1100, false); }
     renderDshow();
     { const b = $('#noteCard .note-actions button'); if (b) b.focus({ preventScroll: true }); }   /* 押したボタンは畳まれて消えるので、行き先を渡す */
     if (!store.get('dshowSeen')) { store.set('dshowSeen', '1'); showToast('図形は自動で切り替わります。1機ずつ操縦しているのではありません', 4600); }
