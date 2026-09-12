@@ -1,0 +1,181 @@
+<title>制度レイヤー案</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@600&display=swap">
+<style>
+:root{
+  --bg:#f6f5f1; --paper:#fffdf9; --ink:#1f2328; --ink2:#4b5563; --ink3:#6b7280;
+  --hair:#e3e0d8; --hair2:#cfcbc0; --accent:#1d4e89; --accent-soft:#e7eef7; --accent-text:#173f70;
+  --warn:#8a5a00; --warn-soft:#fbf1dc; --ok:#1f6b3a; --ok-soft:#e5f2ea;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#171a1f; --paper:#1f242b; --ink:#e8eaee; --ink2:#c2c7d0; --ink3:#939aa6;
+  --hair:#2c323b; --hair2:#3a414c; --accent:#8db4e8; --accent-soft:#1f2f45; --accent-text:#bcd4f5;
+  --warn:#e0b25a; --warn-soft:#332a17; --ok:#7cc79a; --ok-soft:#183024;
+}}
+:root[data-theme="dark"]{
+  --bg:#171a1f; --paper:#1f242b; --ink:#e8eaee; --ink2:#c2c7d0; --ink3:#939aa6;
+  --hair:#2c323b; --hair2:#3a414c; --accent:#8db4e8; --accent-soft:#1f2f45; --accent-text:#bcd4f5;
+  --warn:#e0b25a; --warn-soft:#332a17; --ok:#7cc79a; --ok-soft:#183024;
+}
+body{background:var(--bg);color:var(--ink);font:15px/1.75 "Noto Sans JP",system-ui,-apple-system,"Hiragino Sans",sans-serif;margin:0}
+.wrap{max-width:960px;margin:0 auto;padding:40px 22px 80px}
+header{border-bottom:1px solid var(--hair2);padding-bottom:18px;margin-bottom:28px}
+.eyebrow{font-size:12px;letter-spacing:.14em;color:var(--ink3);text-transform:uppercase;margin:0 0 6px}
+h1{font-family:"Noto Serif JP","Hiragino Mincho ProN",serif;font-weight:600;font-size:30px;line-height:1.3;margin:0 0 10px;text-wrap:balance}
+.lead{color:var(--ink2);margin:0;max-width:44em}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;color:var(--ink3);margin-top:12px}
+h2{font-size:20px;margin:44px 0 10px;padding-top:6px;border-top:2px solid var(--accent);display:flex;align-items:baseline;gap:10px;text-wrap:balance}
+h2 .no{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.06em}
+h3{font-size:15px;margin:22px 0 6px;color:var(--ink)}
+p{margin:0 0 10px;max-width:46em}
+.kv{display:grid;grid-template-columns:7.5em 1fr;gap:6px 14px;margin:10px 0 14px;font-size:14px}
+.kv dt{color:var(--ink3);font-weight:500}
+.kv dd{margin:0;color:var(--ink)}
+.tbl{overflow-x:auto;margin:10px 0 16px;border:1px solid var(--hair);border-radius:8px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:620px}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--hair)}
+th{font-weight:500;color:var(--ink3);background:var(--accent-soft);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.part{white-space:nowrap;font-weight:500}
+.tag{display:inline-block;font-size:11.5px;padding:1px 7px;border-radius:999px;background:var(--accent-soft);color:var(--accent-text);margin-right:4px;white-space:nowrap}
+.tag.w{background:var(--warn-soft);color:var(--warn)}
+.tag.g{background:var(--ok-soft);color:var(--ok)}
+.note{background:var(--paper);border:1px solid var(--hair);border-left:3px solid var(--accent);border-radius:6px;padding:10px 14px;margin:14px 0;font-size:14px;color:var(--ink2)}
+.note b{color:var(--ink)}
+.quote{font-family:var(--mono);font-size:13px;background:var(--paper);border:1px dashed var(--hair2);border-radius:6px;padding:8px 12px;margin:6px 0 12px;color:var(--ink)}
+ul{padding-left:1.3em;margin:6px 0 12px}
+li{margin:3px 0}
+code{font-family:var(--mono);font-size:12.5px;background:var(--accent-soft);padding:1px 5px;border-radius:4px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin:12px 0}
+.card{background:var(--paper);border:1px solid var(--hair);border-radius:8px;padding:12px 14px}
+.card h4{margin:0 0 6px;font-size:14px}
+.card p{font-size:13.5px;color:var(--ink2);margin:0}
+.sum th:first-child,.sum td:first-child{width:11em}
+footer{margin-top:50px;padding-top:14px;border-top:1px solid var(--hair2);font-size:12.5px;color:var(--ink3)}
+@media (max-width:640px){.kv{grid-template-columns:1fr}.kv dt{margin-top:6px}}
+</style>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">ドローンの構造 3D · 行政利用に向けた追加案 A</p>
+  <h1>制度と結びつける層（制度レイヤー）の設計案</h1>
+  <p class="lead">3Dで見ている部品や場面に、日本の無人航空機の制度で「どこに関わるか」を一行で重ねる案です。教材はこれまでどおり判定をせず、根拠と確認先を示すところまでにとどめます。実施するかどうかの判断材料としてまとめました。</p>
+  <div class="meta"><span>作成 2026-09-12</span><span>対象: 国・地方の無人航空機担当職員、登録講習機関、講師</span><span>状態: 草案（未実装）</span></div>
+</header>
+
+<div class="note"><b>共通の決まり（6項目すべてに適用）</b><br>
+① 教材は「該当する・しない」を判定しない。「求められている」「確認する」の言い方で止め、確認先を必ず併記する。<br>
+② 制度の記述には基準日を付ける（例: 2026年9月時点）。法改正が多いため、常設のバナーで「最新は国土交通省の案内で確認」を出す。<br>
+③ 数値・条文・章番号には出典を付け、出典一覧ページに集約する。<br>
+④ 制度タグの文言は data.js の1か所（<code>REG</code> 表）に置き、画面側は表示するだけにする。改正時の直しを1か所で済ませるため。</div>
+
+<h2><span class="no">A1</span>部品ごとの制度タグ</h2>
+<dl class="kv">
+  <dt>目的</dt><dd>申請書や報告書に出てくる部品名と制度上の要件を、同じ画面で突き合わせられるようにする。新任職員の研修で「この部品はなぜ制度で触れられるのか」を体で覚える。</dd>
+  <dt>見せ方</dt><dd>部品の解説パネルに「制度」の行を1つ足す（アイコン ⚖）。行をタップすると根拠と確認先が開く。設定に「制度の注記を出す」トグルを置き、はじめてモードでは既定オフ、くわしく・専門では既定オン。</dd>
+  <dt>実装のあたり</dt><dd><code>data.js</code> に <code>REG = { 部品キー: [{ text, basis, src, url }] }</code>。<code>ui.js</code> の <code>renderDetail()</code> に行を追加。3Dラベルには出さない（情報量が多すぎるため）。</dd>
+  <dt>規模</dt><dd>小。文言の確定が主作業で、コードは半日。</dd>
+</dl>
+
+<h3>文言案（部品 → 制度タグ → 根拠 → 確認先）</h3>
+<div class="tbl"><table>
+<tr><th>部品</th><th>制度タグ（画面に出す一行）</th><th>根拠のあたり</th><th>確認先</th></tr>
+<tr><td class="part">登録記号</td><td>100g以上の機体は登録が必要。登録記号は機体の見やすい位置に表示する。</td><td>航空法の機体登録制度（2022年6月施行）</td><td>無人航空機登録ポータル、DIPS2.0</td></tr>
+<tr><td class="part">リモートID</td><td>登録機体は搭載が原則。免除は「十分な強度の紐で係留」「立入管理措置」などの前提つきで、事前の届出が要る場合がある。</td><td>機体登録制度のリモートID要件</td><td>国土交通省 無人航空機ポータル</td></tr>
+<tr><td class="part">航法灯（LED）</td><td>夜間に飛ばすときは、機体の向きと姿勢が分かる灯火の装備が求められる。</td><td>夜間飛行の許可承認の審査要領、教則</td><td>国土交通省 審査要領</td></tr>
+<tr><td class="part">映像送信機（VTX）</td><td>5.8GHz帯の映像送信には無線局の免許が必要。2.4GHz帯は技適マークのある機器なら免許不要。</td><td>電波法（無線局免許、技術基準適合証明）</td><td>総務省 電波利用ホームページ「ドローン等に用いられる無線設備」</td></tr>
+<tr><td class="part">受信機・プロポ</td><td>操縦用の電波は技適マークのある機器を使う。海外製は技適の有無を確認する。</td><td>電波法</td><td>総務省 電波利用ホームページ</td></tr>
+<tr><td class="part">頭脳（FC）</td><td>電波が途切れたときの帰還・着陸、低電圧の警告といったフェイルセーフは、機体認証の安全基準と飛行前点検で確認される。</td><td>機体認証の安全基準、飛行前点検（教則）</td><td>国土交通省 機体認証の案内</td></tr>
+<tr><td class="part">GNSS / コンパス</td><td>特定飛行では飛行日誌（飛行記録・日常点検記録・点検整備記録）の作成が義務。飛行ログの保存に役立つ。</td><td>航空法の飛行日誌の義務（2022年12月施行）</td><td>国土交通省 無人航空機ポータル</td></tr>
+<tr><td class="part">バッテリー</td><td>飛行前点検の項目。リチウムポリマー電池は保管・輸送にも注意事項がある（航空機への持ち込みは容量に制限）。</td><td>教則の点検・保管、航空機への危険物持ち込み規則</td><td>教則、各航空会社の案内</td></tr>
+<tr><td class="part">プロペラ・モーター</td><td>飛行前点検で欠け・ゆるみ・異音を確認する。点検の結果は日常点検記録に残す。</td><td>教則の飛行前点検、飛行日誌</td><td>教則</td></tr>
+<tr><td class="part">カメラ・ジンバル</td><td>撮影した映像の公開には、人の顔や表札などプライバシーへの配慮が求められる。</td><td>総務省のガイドライン（ドローンによる撮影映像等の取扱い）</td><td>総務省</td></tr>
+<tr><td class="part">機体全体</td><td>この機体は最大離陸重量25kg未満の区分。25kg以上は許可承認の基準や技能証明の限定が変わる。</td><td>航空法の重量区分、技能証明の限定</td><td>国土交通省 無人航空機ポータル</td></tr>
+</table></div>
+<p class="note">注意: 上の「根拠のあたり」は条文番号を書いていません。条番号は改正で動くため、画面には制度名と施行時期だけを出し、条番号は出典一覧ページに置くのが安全です。免除や例外の細部は書かず、「前提つき」「確認する」で止めます。</p>
+
+<h2><span class="no">A2</span>重量区分のライン</h2>
+<dl class="kv">
+  <dt>目的</dt><dd>制度の説明で最も多く使う数字「100g」「25kg」を、機体の実寸と並べて体感させる。荷物を積むと合計が変わることも同じ画面で見せる。</dd>
+  <dt>見せ方</dt><dd>実寸モードの質量バーに、0・100g・この機体（2.4kg）・25kg の目盛りを重ねる。3Dには「100gの機体（手のひらサイズ）」と「25kgの機体（人の背丈ほどの幅）」の淡いシルエットを並べる。人型モデルがあるので大きさの比較が成立する。</dd>
+  <dt>文言案</dt><dd>100g未満: 航空法の登録対象ではないが、空港周辺や150m以上など一部の規制は適用される。100g以上: 登録と特定飛行の規制の対象。25kg以上: 許可承認の審査基準がより厳しく、技能証明の限定変更が要る。</dd>
+  <dt>実装のあたり</dt><dd><code>scale.js</code> の <code>renderMassBar()</code> に目盛り、<code>buildGhost()</code> の仕組みで2つのシルエット。ペイロードを足したときに区分の目盛りが近づく演出。</dd>
+  <dt>規模</dt><dd>小〜中。</dd>
+</dl>
+
+<h2><span class="no">A3</span>教則の章対応</h2>
+<dl class="kv">
+  <dt>目的</dt><dd>登録講習機関の学科講習の補助教材として、教則のどの項目を扱うのかを明示する。監督する側もカバレッジを一覧で確認できる。</dd>
+  <dt>見せ方</dt><dd>各タブ・各カードに小さなチップ「教則 3.3」を付ける。授業モードの印刷シートに章対応の一覧を載せる。講習機関向けに「教則カバレッジ表」の1ページを用意する。</dd>
+  <dt>実装のあたり</dt><dd><code>data.js</code> の PARTS・QUESTIONS・MISHAPS・WHATIF・LESSONS に <code>kyosoku: '3.3'</code> の項目を足す。チップの表示は <code>renderDetail()</code> と各カードの描画に1行ずつ。</dd>
+  <dt>規模</dt><dd>小。対応表の確定が主作業。</dd>
+</dl>
+<h3>対応表（案）</h3>
+<div class="tbl"><table>
+<tr><th>教材の画面</th><th>教則の章（第3版の構成に基づく案）</th><th>備考</th></tr>
+<tr><td>みる（部品・構造・分解・見え方）</td><td>3.1 機体の特徴、3.3 機体の構成（フライトコントローラ、推進系統、電源系統、通信系統）</td><td>40部品の解説がそのまま対応する</td></tr>
+<tr><td>とばす（飛行原理・スティック・気流）</td><td>3.2 飛行原理と飛行性能、4.2 操縦者に求められる操縦知識</td><td>反トルクとヨーの説明を章に紐づける</td></tr>
+<tr><td>つかう（用途・重さ・お金）</td><td>3.1 機体の種類、5.3 機体の種類に応じた運航リスク</td><td>用途ごとの装備差が教材になる</td></tr>
+<tr><td>こわれる（組み間違い・もしも）</td><td>3.5 機体の整備・点検・保管、4.1 飛行前点検、5.1 リスク評価、2.2 事故等の報告</td><td>A4・A6と連動</td></tr>
+<tr><td>専門（センサー・消耗・設計の計算）</td><td>3.4 機体以外の要素技術（電波、磁気方位センサ、GNSS）、3.5 整備・交換</td><td>コンパスのずれ、電波の形が直接対応</td></tr>
+<tr><td>実寸・重量（A2）</td><td>2.1 航空法全般（登録、重量区分）</td><td></td></tr>
+<tr><td>制度タグ（A1）</td><td>2.1〜2.3 無人航空機に関する規則</td><td></td></tr>
+</table></div>
+<p class="note">章番号は「無人航空機の飛行の安全に関する教則」第3版の構成をもとにした案です。版が変わると番号が動くため、実装時に最新版で照合し、画面には版名も併記します。</p>
+
+<h2><span class="no">A4</span>フェイルセーフの場面と制度の対応</h2>
+<dl class="kv">
+  <dt>目的</dt><dd>「もしも」の5場面は、機体認証の安全基準や許可承認の審査要領がまさに求めている挙動です。場面の最後に「制度ではここが要求されている」を一言足すと、体験が制度理解につながる。</dd>
+  <dt>見せ方</dt><dd>各場面の終わりに出る2欄（機体ができること／人がやること）の下に、3つ目の短い行「制度では」を追加する。タップで確認先。</dd>
+  <dt>実装のあたり</dt><dd><code>data.js</code> の WHATIF 各項目に <code>reg: { text, src }</code>。<code>ui.js</code> の <code>onWhatifChanged</code> のカード描画に1行。</dd>
+  <dt>規模</dt><dd>小。</dd>
+</dl>
+<div class="tbl"><table>
+<tr><th>場面</th><th>「制度では」の文言案</th><th>根拠のあたり</th></tr>
+<tr><td>電波が途切れた</td><td>操縦の電波が途絶したときに帰還・ホバー・着陸のいずれかを自動で行う機能は、機体認証の安全基準と、目視外飛行などの審査で確認される。</td><td>機体認証の安全基準、許可承認の審査要領</td></tr>
+<tr><td>電池が少ない</td><td>飛行前にバッテリー残量を確認することは飛行前点検の項目。低電圧の警告と自動降下は機体側の安全機能として確認される。</td><td>教則の飛行前点検、機体認証</td></tr>
+<tr><td>GPSを見失った</td><td>位置を保てない状態でも姿勢を保って操縦できることが求められる。飛行前に衛星の受信状態を確認する。</td><td>審査要領（安定した飛行の確認）、教則 3.4</td></tr>
+<tr><td>風が強い</td><td>飛行マニュアルでは風速5m/s以上で飛ばさないのが一般的な基準。飛行前に現地の風を測る。</td><td>標準の飛行マニュアル、教則 5.2 気象</td></tr>
+<tr><td>人が近づいた</td><td>第三者や物件から30m未満は特定飛行。第三者の上空を飛ぶにはカテゴリーIIIの要件（一等技能証明・第一種機体認証・許可承認）が要る。立入管理措置で第三者を入れないのがカテゴリーII。</td><td>航空法の特定飛行とカテゴリー区分</td></tr>
+</table></div>
+<p>組み間違いの劇場（プロペラ逆付けなど）には「飛行前点検で見つける項目」であることと、日常点検記録に残す旨を同じ形で添えます。</p>
+
+<h2><span class="no">A5</span>立入管理措置の図解</h2>
+<dl class="kv">
+  <dt>目的</dt><dd>カテゴリーIIとIIIの違いは、言葉より位置関係の絵で伝わる。人型モデルと床のリングがすでにあるので、追加コストが小さい。</dd>
+  <dt>見せ方</dt><dd>新しい場面「人を入れない」を「もしも」に追加。操縦者・補助者・第三者を人型で配置し、床に30mのリングと立入管理区域（コーン・看板のシルエット）を描く。カメラは上から見下ろしと斜めの2段階。<br>段階1: 補助者と看板で第三者が区域の外にいる（カテゴリーII）。段階2: 第三者が区域に入ってくる → 機体は降りる／飛行を中断する。段階3: 「第三者の上を飛ぶなら」として要件を一覧で示す（カテゴリーIII）。</dd>
+  <dt>実装のあたり</dt><dd><code>whatif.js</code> に motion <code>tachiiri</code>。人型は <code>buildPerson()</code> を複製して3体。リングは GPS 場面の <code>whatif.ring</code> と同じ作り。30mは実寸だと巨大なので、縮尺を画面に明記して 1/10 で描く。</dd>
+  <dt>規模</dt><dd>中。1場面の追加と人型の複製。</dd>
+</dl>
+<p class="note">立入管理措置の具体的な方法は審査要領と飛行マニュアルの記述に従います。図は概念を示すものとし、「看板とコーンを置けばよい」と読める表現は避けます。</p>
+
+<h2><span class="no">A6</span>事故報告の記述例</h2>
+<dl class="kv">
+  <dt>目的</dt><dd>事故等の報告制度（2022年12月施行）では、報告義務のある事象と、報告に書く内容が決まっている。受付側の職員と報告する側が、同じ部品名・同じ順序で状況を書けるようにする。</dd>
+  <dt>見せ方</dt><dd>劇場と「もしも」の最終カードに折りたたみ「報告するなら」を追加。①この事象は報告義務にあたるかの目安（人の死傷・第三者の物件損壊・航空機との衝突や接近・重大インシデント）②報告書の記述例（発生日時、場所、機体の登録記号、飛行の区分、損壊した部位、経過、その後の対応）③報告に至らない不具合は点検整備記録へ、の3点。印刷シートに「報告書メモ」の版を足す。</dd>
+  <dt>文言例</dt><dd>
+    <div class="quote">損壊部位: 前右プロペラ（欠け）、前右アーム（根元の白化）、着陸脚（曲がり）。経過: 離陸直後に機体が右へ傾き、高度約1mで横転して着地。第三者・物件への被害なし。対応: 飛行を中止し、プロペラの取り付け向きを確認したところ前右が逆向きだった。</div>
+  </dd>
+  <dt>実装のあたり</dt><dd><code>data.js</code> の MISHAPS・WHATIF に <code>report: { duty, example }</code>。<code>lesson.js</code> の印刷シートに版を1つ。</dd>
+  <dt>規模</dt><dd>小〜中。文例の監修に時間をかける。</dd>
+</dl>
+<p class="note">「報告義務にあたるか」は最終的に制度の定義に従います。教材は「目安」と明記し、判断は国土交通省の案内と報告窓口（DIPS2.0）で確認するよう促します。運輸安全委員会の調査対象になる事故があることも一文で触れます。</p>
+
+<h2><span class="no">まとめ</span>優先度と規模</h2>
+<div class="tbl"><table class="sum">
+<tr><th>項目</th><th>効く場面</th><th>規模</th><th>先に決めること</th></tr>
+<tr><td>A1 制度タグ</td><td>研修、審査の照合</td><td><span class="tag g">小</span></td><td>文言の監修者、基準日の運用</td></tr>
+<tr><td>A2 重量区分のライン</td><td>住民説明、研修</td><td><span class="tag g">小〜中</span></td><td>シルエットの寸法（100g機・25kg機）</td></tr>
+<tr><td>A3 教則の章対応</td><td>講習機関の監督、講師</td><td><span class="tag g">小</span></td><td>参照する教則の版</td></tr>
+<tr><td>A4 場面と制度の対応</td><td>研修、住民説明</td><td><span class="tag g">小</span></td><td>風速などの数値をどこまで出すか</td></tr>
+<tr><td>A5 立入管理措置の図解</td><td>住民説明、研修、講師</td><td><span class="tag w">中</span></td><td>縮尺の表現、段階3の要件一覧の文言</td></tr>
+<tr><td>A6 事故報告の記述例</td><td>報告の受付、講習</td><td><span class="tag g">小〜中</span></td><td>文例の監修、義務の目安の表現</td></tr>
+</table></div>
+
+<div class="grid2">
+  <div class="card"><h4>着手順の案</h4><p>A1とA3を同じ表（REG と kyosoku）で一度に作り、A4はその表を場面側から参照する。次にA6、最後にA2とA5の3D表現。文言の監修を先に走らせると、実装は待ち時間なく進む。</p></div>
+  <div class="card"><h4>確認先の一覧（画面の共通リンク）</h4><p>国土交通省 無人航空機ポータルサイト／DIPS2.0／無人航空機登録ポータル／教則（航空局）／総務省 電波利用ホームページ／運輸安全委員会。URLは実装時に最新を確認して出典一覧ページに置く。</p></div>
+</div>
+
+<footer>この文書は追加案の草案です。制度の記述は2026年9月時点の理解に基づく案文で、実装前に所管の一次資料で照合します。関連: docs/design/2026-09-11-ui-spec.md（排他ルール・B節）、docs/plans/2026-09-11-packages-6-10.md。</footer>
+</div>
