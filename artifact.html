@@ -419,15 +419,17 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
 .fpv-btn.on { background: rgba(239,106,45,.86); border-color: rgba(239,106,45,.9); color: #fff; }
 #fpvOut { margin-left: auto; }
 .fpv-note { margin: 0; font-family: var(--font); font-size: calc(11.5px * var(--fs, 1)); line-height: 1.5; color: rgba(234,242,255,.9); background: rgba(12,16,24,.66); border-left: 2px solid rgba(239,106,45,.9); padding: 5px 10px; border-radius: 0 6px 6px 0; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
-#noteCard[data-kind=descent], #noteCard[data-kind=weather] { display: flex; flex-direction: column; max-height: min(56vh, calc(100vh - var(--dock-h) - 122px - var(--sat))); overflow: hidden; }   /* 「横へ逃がす」が折り返しの外に出ると、渦から逃がせない */
-#noteCard[data-kind=descent] #noteBody, #noteCard[data-kind=weather] #noteBody { flex: 1; min-height: 0; overflow-y: auto; }
-#noteCard[data-kind=descent] #descVals, #noteCard[data-kind=weather] #skyVals { position: sticky; top: 0; z-index: 1; }
-#noteCard[data-kind=descent] .note-actions, #noteCard[data-kind=weather] .note-actions { flex: none; margin: 8px -14px -12px -16px; padding: 8px 14px 12px 16px; border-top: 1px solid var(--hair); background: var(--glass-strong); }
-@media (max-width: 760px) { #noteCard[data-kind=descent], #noteCard[data-kind=weather] { max-height: min(44vh, calc(100vh - var(--dock-h) - 96px - var(--sat) - var(--sab))); } }
+#noteCard[data-kind=descent], #noteCard[data-kind=weather], #noteCard[data-kind=dshow] { display: flex; flex-direction: column; max-height: min(56vh, calc(100vh - var(--dock-h) - 122px - var(--sat))); overflow: hidden; }   /* 「横へ逃がす」が折り返しの外に出ると、渦から逃がせない */
+#noteCard[data-kind=descent] #noteBody, #noteCard[data-kind=weather] #noteBody, #noteCard[data-kind=dshow] #noteBody { flex: 1; min-height: 0; overflow-y: auto; }
+#noteCard[data-kind=descent] #descVals, #noteCard[data-kind=weather] #skyVals, #noteCard[data-kind=dshow] #dshowVals { position: sticky; top: 0; z-index: 1; }
+#noteCard[data-kind=descent] .note-actions, #noteCard[data-kind=weather] .note-actions, #noteCard[data-kind=dshow] .note-actions { flex: none; margin: 8px -14px -12px -16px; padding: 8px 14px 12px 16px; border-top: 1px solid var(--hair); background: var(--glass-strong); }
+@media (max-width: 760px) { #noteCard[data-kind=descent], #noteCard[data-kind=weather], #noteCard[data-kind=dshow] { max-height: min(44vh, calc(100vh - var(--dock-h) - 96px - var(--sat) - var(--sab))); } }
 body.fpv #viewCol { display: none; }   /* 映像に重ねない。戻り道は「外から見る」と Esc */
 body.fpv #noteCard, body.fpv #bigBand { display: none; }
 body.fpv #ctx { display: none; }   /* 操作はHUDに移す。ドックを畳むと映像が広がり、--dock-h も自動で縮む */
+body.dshow #ctx { display: none; }   /* ショーの間も畳む。やめるのは説明カードから */
 body.fpv #inspector, body.fpv #lesson, body.fpv #expert, body.fpv #massBar, body.fpv #badges, body.fpv #leaders, body.fpv #labels { display: none; }   /* 映像は画面いっぱいに見せる */
+body.dshow #badges, body.dshow #leaders, body.dshow #labels { display: none; }   /* 夜空に数字を重ねない */
 /* スティックは送信機と同じく左右のすみへ。広い画面はその間に、狭い画面はその上に注記を置く */
 body.fpv #sticks { left: calc(16px + var(--sal)); right: calc(16px + var(--sar)); bottom: calc(var(--dock-h) + 24px + var(--sab)); transform: none; width: auto; justify-content: space-between; gap: 0; }
 body.fpv #sticks .stick-mid { display: none; }
@@ -628,6 +630,7 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
         <button class="tgl" data-t="sticks" aria-pressed="false"><i></i>スティック</button>
         <button class="tgl" data-t="tilt" id="tiltBtn" hidden aria-pressed="false"><i></i>かたむき</button>
       </div>
+      <div class="dock-group"><span class="dg-label">夜</span><div class="chips"><button id="showBtn" aria-pressed="false">🎆 ドローンショー</button></div></div>
       <div class="dock-group"><span class="dg-label">空もよう</span><div class="chips" id="skyChips" role="group" aria-label="空もよう"></div></div>
       <div class="dock-group"><span class="dg-label">降ろし方</span><div class="chips" id="descChips" role="group" aria-label="降ろし方"><button data-dz="straight" aria-pressed="false">まっすぐ降ろす</button><button data-dz="slide" aria-pressed="false">横に流しながら</button></div></div>
       <div class="dock-group"><label>飛行の原理</label><div class="chips" id="flightChips"><button data-f="hover">ホバリング</button><button data-f="climb" data-full>上昇</button><button data-f="pitch">前進</button><button data-f="roll" data-full>右へ移動</button><button data-f="yaw">右旋回</button></div></div>
@@ -1900,6 +1903,25 @@ const WIND_NOTE = '風向は<b>風が吹いてくる方向</b>（北の風＝北
 const BEAUFORT = [0.3, 1.6, 3.4, 5.5, 8.0, 10.8, 13.9, 17.2, 20.8, 24.5, 28.5, 32.7];
 const beaufort = (v) => { let n = 0; while (n < BEAUFORT.length && v >= BEAUFORT[n]) n++; return n; };
 
+// ===== 夜のドローンショーに関わる制度（教則第5版の原文に基づく） =====
+// 教則は条文番号をほとんど書いていない（催し・夜間の条番号は審査要領が出典）。ここでは条文を引かず、
+// 「教則にこう書かれている」の形で止める。該当の有無は総合的に判断されるので、判定は書かない。
+const DSHOW_REG = {
+  lead: '教則は「多数の者の集合する催し」に<b>該当する例</b>として、祭礼や花火大会と並べて<b>ドローンショー</b>を挙げています。ただし「自社敷地内、無人の競技場内等、第三者の立入管理措置が行われていることが明白である場所での事前練習や企業向けの配信用撮影等を除く」という括弧書きが付きます。該当するかどうかは、人数や規模だけでなく、特定の場所や日時に開催されるかどうかによって総合的に判断されるとされています。',
+  items: [
+    '催し場所上空は<b>カテゴリーⅡA飛行</b>に区分されます。技能証明を受けた者が機体認証を受けた機体を飛行させる場合<b>であっても</b>、運航管理の方法について国土交通大臣の審査を受け、許可・承認を受けることが求められます。',
+    '催しの上空では、<b>風速5m/s以上の場合は飛行を中止すること</b>と、機体が第三者及び物件に接触した場合の<b>危害を軽減する構造</b>を用意していることが必要とされています。',
+    '夜間（日没から日出までの間）に飛行させる場合は<b>承認が必要</b>とされています。日没・日出の時刻は地域により異なるため、事前に確認します。技能証明で飛ばすときは「昼間飛行の限定」の解除も確認します。',
+    '夜間の必須装備は、機体の<b>姿勢及び方向が正確に視認できる灯火</b>です。ただし飛行範囲が照明等で十分照らされている場合はこの限りではない、という但し書きも置かれています。灯火は夜間の要件、危害を軽減する構造は催しの要件で、出どころが違います。',
+    '夜間飛行では<b>原則として目視外飛行は実施せず</b>、機体の向きを視認できる灯火が装備された機体を使用するとされています。離着陸地点や回避すべき障害物には照明が必要です。',
+    '<b>許可・承認の有無によらず</b>、想定していない催しの開催が明らかになり、飛行場所に第三者の立入り又はそのおそれを確認したときは、直ちに飛行を停止し、経路の変更や安全な場所への着陸その他の必要な措置を講じなければならないとされています。',
+    '1人の操縦者が複数機を同時に飛ばすことについて、<b>教則に記述はありません</b>。教則が扱うのは、自動操縦（プログラムにより自動的に操縦を行うこと）と、操縦と安全管理の役割を分ける運航体制までです。',
+    '100グラム以上の機体は1機ずつ国の登録を受け、登録記号を表示し、一部の例外を除きリモートID機能を備えることが求められます。台数分すべてが対象です。',
+  ],
+  src: '教則第5版 3.1.2（催し場所上空・夜間）・4.2.1（夜間の装備）・5.2.5（自動操縦）・6.1（運航体制）・6.4.1（夜間の運航）',
+  outside: '教則の外: 飛行高度に応じた立入禁止区画の表（飛行範囲の外周から30〜70mなど）は、教則ではなく国土交通省の<b>審査要領</b>に置かれています。多数機同時運航のガイドライン（国土交通省）は、ドローンショーを<b>対象外</b>としています。',
+};
+
 // ===== 手続き生成テクスチャと材質 (v2: 製品レンダリング品質) =====
 function makeCanvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
 function mulberry(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -2872,11 +2894,11 @@ const backdropMat = new THREE.ShaderMaterial({
     uLo: { value: new THREE.Color('#8e9cb0') }, uHi: { value: new THREE.Color('#ffffff') },
     uSun: { value: new THREE.Vector3(0.45, 0.55, -0.7).normalize() },
     uT: { value: 0 }, uDrift: { value: new THREE.Vector2(0.02, 0.01) },
-    uHaze: { value: 0 }, uHazeCol: { value: new THREE.Color('#cfdcea') },
+    uHaze: { value: 0 }, uHazeCol: { value: new THREE.Color('#cfdcea') }, uStar: { value: 0 },
   },
   vertexShader: `varying vec3 vDir; void main(){ vDir = normalize((modelMatrix * vec4(position,1.0)).xyz); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
   fragmentShader: `uniform vec3 top, mid, edge, bottom, spotDir, uLo, uHi, uSun, uHazeCol;
-    uniform float uCloud, uWall, uSharp, uScale, uT, uHaze; uniform int uOct; uniform vec2 uDrift;
+    uniform float uCloud, uWall, uSharp, uScale, uT, uHaze, uStar; uniform int uOct; uniform vec2 uDrift;
     varying vec3 vDir;
     float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
     float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
@@ -2886,6 +2908,14 @@ const backdropMat = new THREE.ShaderMaterial({
       vec3 c = y > 0.0 ? mix(edge, top, smoothstep(0.0, 0.9, y)) : mix(edge, bottom, smoothstep(0.0, 0.6, -y));
       float sp = smoothstep(0.45, 1.0, dot(d, spotDir)) * smoothstep(-0.25, 0.35, y);
       c = mix(c, mid, sp * 0.9);
+      float cloudM = 0.0;
+      if (uStar > 0.001 && y > 0.0) {   // 星。方向で決まるので視点を回しても動かない
+        vec3 sp = d * 120.0, ip = floor(sp), fp = fract(sp);
+        float h = fract(sin(dot(ip, vec3(12.9898, 78.233, 37.719))) * 43758.5453);
+        float twinkle = 0.75 + 0.25 * sin(uT * 2.1 + h * 40.0);
+        float st = step(0.9825, h) * smoothstep(0.24, 0.0, length(fp - 0.5)) * (0.35 + 0.65 * fract(h * 91.7)) * twinkle;
+        c += vec3(st) * uStar * smoothstep(-0.02, 0.22, y);
+      }
       if ((uCloud > 0.001 || uWall > 0.001) && y > -0.03) {
         vec2 p = d.xz / (y + 0.26) + uDrift * uT;
         float n = fbm(p * uScale);
@@ -2896,7 +2926,7 @@ const backdropMat = new THREE.ShaderMaterial({
         float sun = smoothstep(-0.1, 0.9, dot(d, uSun));
         vec3 cc = mix(uHi, uLo, thick * (1.0 - 0.35 * sun));
         cc = mix(cc, uHi, pow(1.0 - thick, 3.0) * 0.55);
-        c = mix(c, cc, clamp(m, 0.0, 1.0));
+        c = mix(c, cc, clamp(m, 0.0, 1.0)); cloudM = clamp(m, 0.0, 1.0);
       }
       c = mix(c, uHazeCol, uHaze * (1.0 - smoothstep(0.0, 0.30, abs(y))));
       gl_FragColor = vec4(c, 1.0); }`,
@@ -3134,9 +3164,9 @@ function stepCamera(dt) {
   // 防護: 非有限値や暴走の復帰
   const p = camera.position, t = controls.target;
   if (!Number.isFinite(p.x + p.y + p.z + t.x + t.y + t.z)) { S.camSpring = null; S.camInertia = null; cam.v.set(0, 0, 0); cam.tv.set(0, 0, 0); t.set(0, 0, 0); p.set(0.78, 0.50, -0.82); }
-  const inScene2 = (typeof whatif === 'object' && whatif.active) || (typeof theater === 'object' && theater.active) || (typeof descent === 'object' && descent.active);
+  const inScene2 = (typeof whatif === 'object' && whatif.active) || (typeof theater === 'object' && theater.active) || (typeof descent === 'object' && descent.active) || (typeof dshow === 'object' && dshow.on);
   if (!S.camSpring && !S.camInertia && !inScene2 && controls.maxDistance > camMax()) controls.maxDistance = Math.max(camMax(), controls.maxDistance - (controls.maxDistance - camMax()) * (1 - Math.exp(-dt / 0.5)));   // 場面を抜けたら上限をゆっくり戻す(場面の最中に戻すと、引きが切られて画がじりじり寄る)
-  { const inScene = (typeof whatif === 'object' && whatif.active) || (typeof theater === 'object' && theater.active) || (typeof descent === 'object' && descent.active); const tmax = inScene ? 14 : 3; if (t.length() > tmax) t.clampLength(0, tmax); }   /* 場面では機体が原点から離れる(目視外は9m先)。固定3mだと注視点が引き戻されて画が壊れる */
+  { const inScene = (typeof whatif === 'object' && whatif.active) || (typeof theater === 'object' && theater.active) || (typeof descent === 'object' && descent.active) || (typeof dshow === 'object' && dshow.on); const tmax = inScene ? 14 : 3; if (t.length() > tmax) t.clampLength(0, tmax); }   /* 場面では機体が原点から離れる(目視外は9m先)。固定3mだと注視点が引き戻されて画が壊れる */
   const lim = Math.max(4, controls.maxDistance); const off = tmpV.copy(p).sub(t); if (off.length() > lim) p.copy(t).addScaledVector(off.normalize(), lim);   // 上限は画面の縦横比と台本の引きに合わせる(固定4mだと縦画面で場面が枠に入らない)
 }
 function onCamInterrupt() { if (S.camSpring) { S.camSpring = null; S.camInertia = { v: cam.v.clone().clampLength(0, 2), t: 0.3 }; cam.v.set(0, 0, 0); cam.tv.set(0, 0, 0); } }
@@ -3167,7 +3197,7 @@ function topCover() {
 const bandK = () => narrow() ? 1 / (S.bandFrac || 1) : 1;
 function applyBand(bf) {
   const old = S.bandFrac; S.bandFrac = bf; if (old == null || Math.abs(bf - old) < 0.02) return;
-  if ((typeof theater !== 'undefined' && theater.active) || (typeof whatif !== 'undefined' && whatif.active) || (typeof descent !== 'undefined' && descent.active)) return;   /* 台本が組んだ画には触らない */
+  if ((typeof theater !== 'undefined' && theater.active) || (typeof whatif !== 'undefined' && whatif.active) || (typeof descent !== 'undefined' && descent.active) || (typeof dshow !== 'undefined' && dshow.on)) return;   /* 台本が組んだ画には触らない */
   const k = old / bf;
   if (S.camSpring) { const sp = S.camSpring; sp.p1.sub(sp.q1).multiplyScalar(k).add(sp.q1); controls.maxDistance = Math.max(controls.maxDistance, sp.p1.distanceTo(sp.q1) * 1.02); return; }
   const t = controls.target.clone(), p = camera.position.clone().sub(t).multiplyScalar(k).add(t);
@@ -5723,10 +5753,10 @@ function farGroundBuild() {
   scene.add(m); farGround.mesh = m; farGroundTheme();
 }
 function farGroundOn(on) { farGroundBuild(); if (farGround.mesh.visible !== !!on) { farGround.mesh.visible = !!on; S.shadowDirty = S.csDirty = S.aoDirty = true; } }
-function farGroundTheme() {
+function farGroundTheme(hazeOverride) {
   const far = farGround.mesh; if (!far) return;
   far.material.color.copy(groundMat.color);   // 近くの床と必ず同じ色にする（空もようは床の色も変える）
-  const one = new THREE.Color(1, 1, 1), haze = themeDark ? new THREE.Color(3.1, 3.3, 3.8) : new THREE.Color(0.70, 0.74, 0.83);
+  const one = new THREE.Color(1, 1, 1), haze = hazeOverride || (themeDark ? new THREE.Color(3.1, 3.3, 3.8) : new THREE.Color(0.70, 0.74, 0.83));
   const pos = far.geometry.attributes.position, col = far.geometry.attributes.color, c = new THREE.Color();
   for (let i = 0; i < pos.count; i++) {
     const r = Math.hypot(pos.getX(i), pos.getY(i));
@@ -5903,7 +5933,7 @@ function initFpv() {
   $('#fpvStickBtn').addEventListener('click', () => { setSticks(!S.sticks); updateFpvHud(); });
   $('#fpvCenter').addEventListener('click', () => { fpv.pan = 0; fpv.tilt = fpvTilt0(); updateGimbal(); updateFpvHud(); });
   $('#fpvOut').addEventListener('click', () => { segSet($('#viewCol'), 'v', 'iso'); S.view = 'iso'; fpvOn(false); });
-  window.__fpv = { fpv, fpvOn, updateGimbal, stepFpv, fpvStage, farGround, fpvTilt0 };
+  window.__fpv = { fpv, fpvOn, updateGimbal, stepFpv, fpvStage, farGround, fpvTilt0, groundColor: () => groundMat.color.getHex() };
 }
 
 // ===== 空もよう（教則第5版 6.2 気象）=====
@@ -6180,6 +6210,253 @@ function initWeather() {
   window.__weather = { weather, setWeather, windAt, windMean, beaufort, windName, WEATHER, hasFog: () => !!scene.fog };
 }
 
+// ===== 夜のドローンショー =====
+// 多数の機体が夜空で図形を描く。見世物であると同時に、教則では
+// 「多数の者の集合する催し」の例そのもの（3.1.1）＋夜間飛行（3.1.2 / 6.4）の場面でもある。
+// 1機ずつ手で操縦しているのではなく、あらかじめ決めた経路を自動で飛ばしている、という点も見せる。
+const dshow = {
+  on: false, t: 0, n: 0, pts: null, geo: null, mat: null,
+  pos: null, from: null, to: null, col: null, colFrom: null, colTo: null, lag: null,
+  fig: 0, figT: 0, phase: 'move', saved: null, star: 0, lastVals: 0,
+};
+const DSHOW_N = () => (S.qLevel <= 1 ? 160 : 260);   // 実際のショーは数百〜数千機。箱庭では見える密度に落とす
+const DSHOW_H = 2.25;      // 隊列の中心の高さ(m)
+const DSHOW_R = 1.55;      // 隊列の広がり(m)
+const DSHOW_MOVE = 2.6, DSHOW_HOLD = 3.4;   // 移り変わりと静止の秒数
+// 縦長の画面は説明カードが下半分を覆う。隊列を少し縮めて低くすると、上の帯に全部入る
+const dshowTall = () => innerWidth / Math.max(1, innerHeight) < 1.05;
+function dshowLayout() {
+  const tall = dshowTall();
+  if (dshow.pts) dshow.pts.scale.setScalar(tall ? 0.78 : 1);
+  // 主役の1機は説明カードと部品一覧を避けた位置へ（隊列と重ならないところ）
+  dshow.bodyPos = tall ? [1.15, 1.15, 0.35] : [2.2, 0.45, 0.6];
+}
+
+// ---------- 図形 ----------
+// どれも「輪郭の上に等間隔で並べる」。点の数が変わっても形が保てる
+const DSHOW_FIGS = [
+  { id: 'grid', name: '整列', col: ['#cfe0ff', '#9ec2ff'], note: '離陸して定位置に並びます。1機ずつ手で操縦しているのではなく、あらかじめ決めた経路を自動で飛ばします。教則は自動操縦を「プログラムにより自動的に操縦を行うこと」としています。' },
+  { id: 'ring', name: '輪', col: ['#7fd4ff', '#c9f0ff'], note: '教則は、飛行中の他の無人航空機を確認した場合は安全な間隔を確保し、接近や衝突のおそれがあれば降下させるなどの措置をとるとともに、相手方と飛行日時・経路・高度を調整するとしています。' },
+  { id: 'star', name: '星', col: ['#ffd97a', '#fff3c9'], note: 'ショーの色は演出です。夜間飛行の必須装備は「機体の姿勢及び方向が正確に視認できる灯火」で、こちらは安全のための要件です。' },
+  { id: 'heart', name: 'ハート', col: ['#ff8fb0', '#ffd0dd'], note: 'カテゴリーⅡ飛行は、飛行経路下に操縦者と補助者以外の第三者が立ち入らないよう管理する措置を講じたうえで行うものとされています。看板やコーンによる表示、補助者による監視と口頭警告が例です。' },
+  { id: 'drone', name: '機体のかたち', col: ['#8effc8', '#d8fff0'], note: 'この教材の機体と同じ形です。100グラム以上の機体は1機ずつ登録し、一部の例外を除きリモートID機能を備えることが求められます。台数分すべてが対象です。' },
+  { id: 'sphere', name: '球', col: ['#b79cff', '#e6ddff'], note: '風が強まれば隊列は保てません。催しの上空では、風速5m/s以上の場合は飛行を中止することが必要とされています。' },
+];
+function dshowShape(id, n, out) {
+  const put = (i, x, y, z) => { out[i * 3] = x; out[i * 3 + 1] = y + DSHOW_H; out[i * 3 + 2] = z; };
+  if (id === 'grid') {
+    const cols = Math.max(2, Math.round(Math.sqrt(n * 1.6))), rows = Math.ceil(n / cols);   /* 横長の格子。端数が出ると最終行だけ欠けて左に寄って見える */
+    for (let i = 0; i < n; i++) { const c = i % cols, r = (i / cols) | 0;
+      put(i, (c / (cols - 1) - 0.5) * DSHOW_R * 1.6, (r / Math.max(1, rows - 1) - 0.5) * DSHOW_R * 0.8, 0); }
+  } else if (id === 'ring') {
+    for (let i = 0; i < n; i++) { const k = i % 2, a = (i / n) * Math.PI * 2 * 2, r = DSHOW_R * (k ? 0.62 : 1.0);
+      put(i, Math.cos(a) * r, Math.sin(a) * r, 0); }
+  } else if (id === 'star') {
+    const pts = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = DSHOW_R * (i % 2 ? 0.46 : 1.0); pts.push([Math.cos(a) * r, Math.sin(a) * r]); }
+    dshowAlong(pts, n, put, true);
+  } else if (id === 'heart') {
+    const pts = []; for (let i = 0; i < 140; i++) { const t = (i / 140) * Math.PI * 2, k = DSHOW_R / 17;
+      pts.push([16 * Math.pow(Math.sin(t), 3) * k, (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) * k]); }
+    dshowAlong(pts, n, put, true);
+  } else if (id === 'drone') {
+    // クアッドの平面図: 4つのローター円 + 十字のアーム + 中央の胴
+    const per = Math.floor(n * 0.15), arm = Math.floor(n * 0.07), rest = n - per * 4 - arm * 4;
+    let i = 0; const rr = DSHOW_R * 0.42, off = DSHOW_R * 0.62;
+    for (let q = 0; q < 4; q++) {
+      const cx = (q === 0 || q === 3 ? 1 : -1) * off, cy = (q < 2 ? 1 : -1) * off;
+      for (let j = 0; j < per; j++) { const a = (j / per) * Math.PI * 2; put(i++, cx + Math.cos(a) * rr, cy + Math.sin(a) * rr, 0); }
+      for (let j = 0; j < arm; j++) { const t = 0.18 + (j / Math.max(1, arm - 1)) * 0.72; put(i++, cx * t, cy * t, 0); }
+    }
+    for (let j = 0; j < rest; j++) { const a = (j / rest) * Math.PI * 2, r = DSHOW_R * 0.2 * (0.4 + 0.6 * ((j % 3) / 2)); put(i++, Math.cos(a) * r, Math.sin(a) * r, 0); }
+  } else {   // sphere: フィボナッチ球
+    const g = Math.PI * (3 - Math.sqrt(5));
+    for (let i = 0; i < n; i++) { const y = 1 - (i / (n - 1)) * 2, r = Math.sqrt(Math.max(0, 1 - y * y)), a = g * i;
+      put(i, Math.cos(a) * r * DSHOW_R, y * DSHOW_R, Math.sin(a) * r * DSHOW_R); }
+  }
+}
+// 折れ線の上に等間隔で並べる（頂点の数に関わらず密度が揃う）
+function dshowAlong(pts, n, put, close) {
+  const P = close ? pts.concat([pts[0]]) : pts;
+  const seg = [], L = [];
+  let total = 0;
+  for (let i = 0; i < P.length - 1; i++) { const d = Math.hypot(P[i + 1][0] - P[i][0], P[i + 1][1] - P[i][1]); seg.push(d); total += d; L.push(total); }
+  for (let i = 0; i < n; i++) {
+    const s = (i / n) * total; let k = 0; while (k < L.length - 1 && L[k] < s) k++;
+    const s0 = k ? L[k - 1] : 0, t = seg[k] > 1e-6 ? (s - s0) / seg[k] : 0;
+    put(i, P[k][0] + (P[k + 1][0] - P[k][0]) * t, P[k][1] + (P[k + 1][1] - P[k][1]) * t, 0);
+  }
+}
+
+// ---------- 作る ----------
+function dshowBuild() {
+  if (dshow.pts) return;
+  const n = dshow.n = DSHOW_N();
+  dshow.pos = new Float32Array(n * 3); dshow.from = new Float32Array(n * 3); dshow.to = new Float32Array(n * 3);
+  dshow.col = new Float32Array(n * 3); dshow.colFrom = new Float32Array(n * 3); dshow.colTo = new Float32Array(n * 3);
+  dshow.lag = new Float32Array(n);
+  for (let i = 0; i < n; i++) dshow.lag[i] = Math.random() * 0.35;
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(dshow.pos, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(dshow.col, 3));
+  const mat = new THREE.PointsMaterial({ size: 0.155, map: canvasTex(glowCanvas(true)), vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true, toneMapped: false });
+  const pts = new THREE.Points(geo, mat); pts.frustumCulled = false; pts.renderOrder = 6;
+  pts.userData.noPart = pts.userData.noPick = pts.userData.noShadow = pts.userData.noAO = true;
+  pts.visible = false; scene.add(pts);
+  dshow.geo = geo; dshow.mat = mat; dshow.pts = pts;
+  dshowShape('grid', n, dshow.from); dshow.pos.set(dshow.from); dshow.to.set(dshow.from);
+  dshowSetColor(0, dshow.colFrom); dshow.col.set(dshow.colFrom); dshow.colTo.set(dshow.colFrom);
+}
+function dshowSetColor(fi, out) {
+  const f = DSHOW_FIGS[fi], a = new THREE.Color(f.col[0]), b = new THREE.Color(f.col[1]), c = new THREE.Color();
+  for (let i = 0; i < dshow.n; i++) { c.copy(a).lerp(b, (i * 2654435761 % 1000) / 1000); out[i * 3] = c.r; out[i * 3 + 1] = c.g; out[i * 3 + 2] = c.b; }
+}
+
+// ---------- 入口 ----------
+function dshowOn(on) {
+  on = !!on;
+  if (on === dshow.on) return;
+  if (on) {
+    stopOthers('dshow');
+    dshowBuild();
+    dshow.on = true; dshow.t = 0; dshow.fig = 0; dshow.figT = 0; dshow.phase = 'hold'; dshow.star = 0;
+    document.body.classList.add('dshow'); syncDockH();   /* 操作列を畳んで夜空を広くとる */
+    dshow.saved = { power: S.power, labels: S.labelsSuppressed, air: S.air };
+    S.labelsSuppressed = true; buildLabels();
+    S.air = false; for (const x of $$('.tgl[data-t=air]')) x.classList.remove('on');
+    if (S.explode > 0.02) setExplode(0); if (S.mode === 'cut') setMode('normal');
+    dshow.pts.visible = true;
+    farGroundOn(true);
+    if (S.power === 0) setPower(0.5, true);
+    // 主役の1機は隊列の手前に浮かべる。「あの光の点ひとつが、この機体」と分かるように
+    setBodyMode('theater');
+    const bp = dshow.bodyPos || [2.2, 0.45, 0.6];
+    body.px = bp[0]; body.py = bp[1]; body.pz = bp[2]; body.tx = body.tz = body.wx = body.wz = 0; body.yaw = 0; body.mult = [1, 1, 1, 1];
+    dshowSky();
+    dshowLayout();
+    { const tall = dshowTall();
+      const dir = new THREE.Vector3(0.32, 0.40, 1).normalize(), aim = new THREE.Vector3(0, tall ? 1.25 : 1.45, 0);   /* 見上げるほど空が広い */   /* 観客の位置から見上げる。隊列と地上の機体を1枚に入れる */
+      flyTo(aim.clone().addScaledVector(dir, (tall ? 9.2 : 10.6) * viewScale()), aim, 1100, false); }
+    renderDshow();
+    if (!store.get('dshowSeen')) { store.set('dshowSeen', '1'); showToast('図形は自動で切り替わります。1機ずつ操縦しているのではありません', 4600); }
+  } else {
+    dshow.on = false;
+    document.body.classList.remove('dshow'); syncDockH();
+    if (dshow.pts) dshow.pts.visible = false;
+    const s = dshow.saved || {};
+    S.labelsSuppressed = !!s.labels; buildLabels();
+    S.air = !!s.air; for (const x of $$('.tgl[data-t=air]')) x.classList.toggle('on', S.air);
+    if (!(typeof fpv === 'object' && fpv.on)) farGroundOn(false);
+    backdropMat.uniforms.uStar.value = 0;
+    if (typeof weather === 'object' && weather.on) weatherSky(); else applyTheme();
+    body.px = body.pz = 0; body.py = 0; body.tx = body.tz = 0;
+    if (s.power === 0 && S.power > 0) setPower(0, true);
+    setBodyMode('idle'); syncBodyMode();
+    if ($('#noteCard').dataset.kind === 'dshow') renderNote(null);
+    camHome();
+  }
+  const b = $('#showBtn'); if (b) { b.classList.toggle('on', dshow.on); b.setAttribute('aria-pressed', String(dshow.on)); }
+}
+// 夜空。空もようの仕組みをそのまま使い、星だけ足す
+function dshowSky() {
+  const u = backdropMat.uniforms;
+  u.top.value.set('#050a16'); u.mid.value.set('#0b1526'); u.edge.value.set('#131c2e'); u.bottom.value.set('#05080f');
+  u.uCloud.value = 0.10; u.uWall.value = 0.10; u.uSharp.value = 0.35; u.uScale.value = 1.4;
+  u.uLo.value.set('#0f1722'); u.uHi.value.set('#2a3446'); u.uHaze.value = 0.10; u.uHazeCol.value.set('#131c2e');
+  u.uDrift.value.set(0.006, 0.003); u.uOct.value = S.qLevel <= 1 ? 3 : 5;
+  key.color.set('#9fb6e8'); key.intensity = 0.55;
+  rim.color.set('#8fb0ff'); rim.intensity = 1.5;
+  kick.color.set('#7f9ee0'); kick.intensity = 0.35;
+  scene.environmentIntensity = 0.5 * S.envMul;
+  renderer.toneMappingExposure = 1.12 * S.exposureMul;
+  groundMat.color.set('#070b12');
+  // 夜間の灯火。機体がどこにいるか、向きがどちらかを光で見せる（教則が夜間の必須装備に挙げているもの）
+  D.parts.filter(p => p.key === 'led').forEach(p => { if (p.obj.userData.halo) p.obj.userData.halo.material.opacity = 0.42; });
+  farGroundTheme(new THREE.Color(1.25, 1.3, 1.6));   /* 夜は遠くをほんの少しだけ持ち上げる。上げすぎると地面が昼のように光る */
+  S.shadowDirty = S.csDirty = S.aoDirty = true;
+}
+
+// ---------- 毎フレーム ----------
+function stepDshow(dtReal) {
+  if (!dshow.on) return;
+  dshow.t += dtReal; dshow.figT += dtReal;
+  dshow.star += (1 - dshow.star) * (1 - Math.exp(-dtReal / 1.6));
+  backdropMat.uniforms.uStar.value = dshow.star;
+  backdropMat.uniforms.uT.value = dshow.t;
+  const n = dshow.n, pos = dshow.pos, from = dshow.from, to = dshow.to;
+  if (dshow.phase === 'hold' && dshow.figT > DSHOW_HOLD) {
+    from.set(pos); dshow.colFrom.set(dshow.col);
+    dshow.fig = (dshow.fig + 1) % DSHOW_FIGS.length;
+    dshowShape(DSHOW_FIGS[dshow.fig].id, n, to);
+    dshowSetColor(dshow.fig, dshow.colTo);
+    dshow.phase = 'move'; dshow.figT = 0; renderDshow();
+  } else if (dshow.phase === 'move' && dshow.figT > DSHOW_MOVE) {
+    dshow.phase = 'hold'; dshow.figT = 0; pos.set(to); dshow.col.set(dshow.colTo);
+  }
+  const wave = reduceMotion ? 0 : 1;
+  if (dshow.phase === 'move') {
+    for (let i = 0; i < n; i++) {
+      const lag = dshow.lag[i];
+      const u = clamp((dshow.figT / DSHOW_MOVE - lag) / (1 - lag), 0, 1);
+      const e = u * u * (3 - 2 * u);            // なめらかに出て、なめらかに止まる
+      const bow = Math.sin(Math.PI * e) * 0.16 * wave;   // まっすぐ飛ばず、少し膨らむ
+      for (let k = 0; k < 3; k++) {
+        const a = from[i * 3 + k], b = to[i * 3 + k];
+        pos[i * 3 + k] = a + (b - a) * e + (k === 1 ? bow : 0);
+        dshow.col[i * 3 + k] = dshow.colFrom[i * 3 + k] + (dshow.colTo[i * 3 + k] - dshow.colFrom[i * 3 + k]) * e;
+      }
+    }
+  } else if (wave) {
+    for (let i = 0; i < n; i++) pos[i * 3 + 1] = to[i * 3 + 1] + Math.sin(dshow.t * 1.7 + dshow.lag[i] * 18) * 0.012;   // 静止中もわずかに揺れる
+  }
+  // 主役の1機もホバリングらしく、わずかに上下する
+  { const bp = dshow.bodyPos || [2.2, 0.45, 0.6];
+    body.px = bp[0]; body.pz = bp[2];
+    body.py = bp[1] + (reduceMotion ? 0 : Math.sin(dshow.t * 1.3) * 0.018);
+    if (!reduceMotion) { body.tz = Math.sin(dshow.t * 0.9) * 0.012; body.tx = Math.sin(dshow.t * 1.1 + 2) * 0.010; } }
+  dshow.geo.attributes.position.needsUpdate = true;
+  dshow.geo.attributes.color.needsUpdate = true;
+  if (dshow.t - dshow.lastVals > 0.25) { dshow.lastVals = dshow.t; updateDshowVals(); }
+}
+
+// ---------- 説明カード ----------
+function updateDshowVals() {
+  const el = $('#dshowVals'); if (!el) return;
+  const f = DSHOW_FIGS[dshow.fig];
+  el.innerHTML = `<i class="dot" aria-hidden="true"></i><span>いま <b>${f.name}</b></span><span>${dshow.n} 機</span><span>高さ ${(DSHOW_H - 0.158).toFixed(1)} m</span><span>${dshow.phase === 'move' ? '移動中' : '静止中'}</span>`;
+}
+function renderDshow() {
+  if (!dshow.on) return;
+  const card = $('#noteCard');
+  if (card.hidden && card.dataset.kind === 'dshow') return;   /* 一度閉じたら、図形が変わっても開き直さない */
+  const f = DSHOW_FIGS[dshow.fig];
+  // 図形が変わるたびに作り直すと、制度の折りたたみが閉じてしまう。変わるところだけ差し替える
+  if (card.dataset.kind === 'dshow' && $('#dshowBody')) {
+    $('#dshowBody').innerHTML = f.note; $('#noteBadge').textContent = f.name; updateDshowVals(); return;
+  }
+  renderNote({
+    kind: 'dshow', title: '夜のドローンショー', badge: f.name,
+    html: `<div id="dshowVals" class="vals live" aria-live="off"><i class="dot" aria-hidden="true"></i></div>
+      <p id="dshowBody">${f.note}</p>
+      ${dshowRegHtml()}`,
+    actions: [{ label: 'やめる', fn: () => dshowOn(false) }],
+  });
+  updateDshowVals();
+}
+// 制度。ショーは教則が「多数の者の集合する催し」の例に挙げている場面そのもの
+function dshowRegHtml() {
+  return `<details open><summary>この場面にかかわる制度</summary>
+    <p class="caveat">${DSHOW_REG.lead}</p>
+    <ul class="check">${DSHOW_REG.items.map(x => `<li>${x}</li>`).join('')}</ul>
+    <p class="hint">${DSHOW_REG.outside}</p>
+    <small class="ky-src">${DSHOW_REG.src}</small></details>`;
+}
+function onResizedDshow() { if (dshow.on) dshowLayout(); }
+function initDshow() {
+  const b = $('#showBtn');
+  if (b) b.addEventListener('click', () => dshowOn(!dshow.on));
+  window.__dshow = { dshow, dshowOn, DSHOW_FIGS, dshowShape };
+}
+
 // ===== 共有リンク（いま見えている画面をURLにする） =====
 // 方針: 既定と違うものだけを短いキーで載せる。読み戻しの途中はトーストを出さず、最後に「どこを開いたか」を1回だけ伝える。
 // 授業モードの lesson / step は lesson.js が自分で書くのでここでは触らない（消さない）。
@@ -6367,11 +6644,13 @@ function stopOthers(keep, arg) {
   if (keep !== 'expert' && S.expert && typeof expertStop === 'function') expertStop();
   if (keep !== 'descent' && descent.active) stopDescent(true);
   if (keep !== 'fpv' && typeof fpv === 'object' && fpv.on) fpvExit();
+  if (keep !== 'dshow' && typeof dshow === 'object' && dshow.on) dshowOn(false);
   if (keep !== 'weather' && keep !== 'fpv' && typeof weather === 'object' && weather.on) setWeather(null);   /* 場面は自前の空を使う。一人称は空もようのまま入れる */
 }
 function setTab(tab) {
   $('#coach').hidden = true;
   fpvExit();   /* 操作列を畳んだまま電源だけ切れると、映像の中から戻れなくなる */
+  if (typeof dshow === 'object' && dshow.on) dshowOn(false);   /* ショーも同じ。操作列を畳んでいる */
   if ((theater.active || theater.done) && tab !== 'theater') { stopTheaterUI(); }
   if (whatif.active && tab !== 'theater') { stopWhatifUI(); }
   S.tab = tab; segSet($('#tabs'), 'tab', tab);
@@ -6837,7 +7116,7 @@ document.addEventListener('keydown', e => {
   if (e.target.matches && e.target.matches('input, textarea, select')) return; const k = e.key.toLowerCase();
   if (S.lesson && lessonKey(e)) return;
   if (quiz.active && e.key === 'Escape') { quizStop(); return; }
-  if ((theater.active || whatif.active || descent.active) && k !== 'escape') return;   // 再生中は表示モード等のキーを受けない
+  if ((theater.active || whatif.active || descent.active || dshow.on) && k !== 'escape') return;   // 再生中は表示モード等のキーを受けない
   if ((S.scale || S.expert) && (k === 'e' || /^[1-4]$/.test(k))) return;
   if (k === 'escape' && (!$('#askPop').hidden || !$('#settings').hidden)) { $('#askPop').hidden = true; $('#settings').hidden = true; return; }
   if (e.key === '/' && $('#partFind')) { e.preventDefault(); $('#inspector').classList.add('open'); if (S.selected) select(null); $('#partFind').focus(); $('#partFind').select(); return; }
@@ -6850,7 +7129,7 @@ document.addEventListener('keydown', e => {
   else if (k === ' ') { e.preventDefault(); if (fpv.on) return; if (S.tab !== 'fly') setTab('fly'); setPower(S.power === 0 ? 0.5 : 0); }
   else if (k === 'r') { segSet($('#viewCol'), 'v', 'iso'); S.view = 'iso'; setView('iso'); }
   else if (k === 'f' && S.selected) focusOn(S.selAll ? partsOf(S.selected.key).map(x => x.obj) : [S.selected.obj]);
-  else if (k === 'escape') { if (fpv.on) fpvExit(); else if (descent.active) stopDescent(); else if (theater.active) stopTheaterUI(); else if (S.question) { clearQuestion(); renderNote(null); } else if (S.flight) setFlight(null); else if (S.selected) select(null); else $('#inspector').classList.remove('open'); }
+  else if (k === 'escape') { if (fpv.on) fpvExit(); else if (dshow.on) dshowOn(false); else if (descent.active) stopDescent(); else if (theater.active) stopTheaterUI(); else if (S.question) { clearQuestion(); renderNote(null); } else if (S.flight) setFlight(null); else if (S.selected) select(null); else $('#inspector').classList.remove('open'); }
 });
 
 // ---------- 設定 ----------
@@ -6905,6 +7184,7 @@ function onQualityChanged(level) { if (air.mesh && air.N !== Q.particles) rebuil
   for (const el of watch) { mo.observe(el, { attributes: true, attributeFilter: ['class', 'hidden', 'style'] }); el.addEventListener('transitionend', e => { if (e.propertyName === 'transform' || e.propertyName === 'height') kick(); }); }
 }
 function onResized() {
+  if (typeof onResizedDshow === 'function') onResizedDshow();
   if (S.scale) { if (D.personGroup) D.personGroup.visible = !compact(); renderMassBar(S.selected && S.selected.key); } for (const L of labelEls) L.w = 0; if (!S.labelsTouched) { S.labels = !narrow(); for (const x of $$('.tgl[data-t=labels]')) x.classList.toggle('on', S.labels); } }
 function initUI() {
   buildUseChips(); buildAsk(); buildMishapCards(); buildWhatifCards(); labelSticks(); segSet($('#modeSeg2'), 'm', stickMode);
@@ -6938,7 +7218,7 @@ function tick(now) {
   if (S.scale) stepScale();
   if (S.explodeFrame && Math.abs(S.explode - S.explodeT) < 0.01 && performance.now() - (S.explodeAt || 0) > 350) { S.explodeFrame = false; D.root.updateWorldMatrix(true, true); focusOn(D.parts.filter(p => partVisible(p) && effVisible(p.obj)).map(p => p.obj), { pull: true }); }   // 分解が落ち着いたら全体をフレーミング
   // 機体
-  stepAlive(dt); stepBody(dtSim, dt); if (theater.active) stepTheater(dtSim, dt); if (whatif.active) stepWhatif(dtSim, dt); if (descent.active) stepDescent(dtSim); if (weather.on) stepWeather(dtSim, dt); applyBody(dt);
+  stepAlive(dt); stepBody(dtSim, dt); if (theater.active) stepTheater(dtSim, dt); if (whatif.active) stepWhatif(dtSim, dt); if (descent.active) stepDescent(dtSim); if (weather.on) stepWeather(dtSim, dt); if (dshow.on) stepDshow(dt); applyBody(dt);
   updateGimbal();   /* ジンバルは外から見ているときも傾きを打ち消す。本体の姿勢を当てた後に回す */
   if (fpv.on) stepFpv(dt);   /* カメラの姿勢は本体の姿勢が決まってから写す(1コマ遅れると水平が残る) */
   updateMotors(dtSim, dt); updateMoveArrow(); updateAirflow(dtSim, dt);
@@ -6978,7 +7258,7 @@ window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: sca
   $('#loadMsg').textContent = '照明と材質を準備しています…';
   buildList(); applyTheme(); resize();
   applyQuality(isMobile ? (HF ? 1 : 0) : 3);
-  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif(); initLive(); initLesson(); initExpert(); initReg(); initPreflight(); initDescent(); initFpv(); initWeather(); initShare();
+  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif(); initLive(); initLesson(); initExpert(); initReg(); initPreflight(); initDescent(); initFpv(); initWeather(); initDshow(); initShare();
   { const vs = viewScale(); if (vs > 1) camera.position.multiplyScalar(vs); }
   renderer.setClearColor(0x000000, 1);
   $('#loadMsg').textContent = 'シェーダーをコンパイルしています…'; mark('setup');

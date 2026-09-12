@@ -49,10 +49,10 @@ function farGroundBuild() {
   scene.add(m); farGround.mesh = m; farGroundTheme();
 }
 function farGroundOn(on) { farGroundBuild(); if (farGround.mesh.visible !== !!on) { farGround.mesh.visible = !!on; S.shadowDirty = S.csDirty = S.aoDirty = true; } }
-function farGroundTheme() {
+function farGroundTheme(hazeOverride) {
   const far = farGround.mesh; if (!far) return;
   far.material.color.copy(groundMat.color);   // 近くの床と必ず同じ色にする（空もようは床の色も変える）
-  const one = new THREE.Color(1, 1, 1), haze = themeDark ? new THREE.Color(3.1, 3.3, 3.8) : new THREE.Color(0.70, 0.74, 0.83);
+  const one = new THREE.Color(1, 1, 1), haze = hazeOverride || (themeDark ? new THREE.Color(3.1, 3.3, 3.8) : new THREE.Color(0.70, 0.74, 0.83));
   const pos = far.geometry.attributes.position, col = far.geometry.attributes.color, c = new THREE.Color();
   for (let i = 0; i < pos.count; i++) {
     const r = Math.hypot(pos.getX(i), pos.getY(i));
@@ -229,5 +229,5 @@ function initFpv() {
   $('#fpvStickBtn').addEventListener('click', () => { setSticks(!S.sticks); updateFpvHud(); });
   $('#fpvCenter').addEventListener('click', () => { fpv.pan = 0; fpv.tilt = fpvTilt0(); updateGimbal(); updateFpvHud(); });
   $('#fpvOut').addEventListener('click', () => { segSet($('#viewCol'), 'v', 'iso'); S.view = 'iso'; fpvOn(false); });
-  window.__fpv = { fpv, fpvOn, updateGimbal, stepFpv, fpvStage, farGround, fpvTilt0 };
+  window.__fpv = { fpv, fpvOn, updateGimbal, stepFpv, fpvStage, farGround, fpvTilt0, groundColor: () => groundMat.color.getHex() };
 }

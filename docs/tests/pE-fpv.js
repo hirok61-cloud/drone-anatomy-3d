@@ -103,12 +103,11 @@ document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: tr
 d.step(1.2, 30);
 A(!F.fpv.on, 'Esc: 出られる');
 
-// テーマを変えても地面の色が付け直される
-const c0 = F.farGround.mesh.material.color.getHex();
-document.querySelector('#themeSeg [data-th=light]').click(); d.step(0.4, 30);
-const c1 = F.farGround.mesh.material.color.getHex();
-document.querySelector('#themeSeg [data-th=dark]').click(); d.step(0.4, 30);
-A(c0 !== c1 && F.farGround.mesh.material.color.getHex() === c0, 'テーマ: 地面の色が追従する', c0.toString(16), c1.toString(16));
+// 遠くの地面は、どのテーマでも近くの床と同じ色でなければ継ぎ目が出る
+for (const th of ['dark', 'light']) {
+  document.querySelector(`#themeSeg [data-th=${th}]`).click(); d.step(0.5, 30);
+  A(F.farGround.mesh.material.color.getHex() === F.groundColor(), `テーマ(${th}): 地平線と床が同じ色`, F.farGround.mesh.material.color.getHexString(), F.groundColor().toString(16));
+}
 document.querySelector('#themeSeg [data-th=auto]').click(); d.step(0.3, 30);
 if (d.S.sticks) document.querySelector('.tgl[data-t=sticks]').click();
 d.noRender = false;

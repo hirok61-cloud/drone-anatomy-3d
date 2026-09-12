@@ -48,11 +48,13 @@ function stopOthers(keep, arg) {
   if (keep !== 'expert' && S.expert && typeof expertStop === 'function') expertStop();
   if (keep !== 'descent' && descent.active) stopDescent(true);
   if (keep !== 'fpv' && typeof fpv === 'object' && fpv.on) fpvExit();
+  if (keep !== 'dshow' && typeof dshow === 'object' && dshow.on) dshowOn(false);
   if (keep !== 'weather' && keep !== 'fpv' && typeof weather === 'object' && weather.on) setWeather(null);   /* 場面は自前の空を使う。一人称は空もようのまま入れる */
 }
 function setTab(tab) {
   $('#coach').hidden = true;
   fpvExit();   /* 操作列を畳んだまま電源だけ切れると、映像の中から戻れなくなる */
+  if (typeof dshow === 'object' && dshow.on) dshowOn(false);   /* ショーも同じ。操作列を畳んでいる */
   if ((theater.active || theater.done) && tab !== 'theater') { stopTheaterUI(); }
   if (whatif.active && tab !== 'theater') { stopWhatifUI(); }
   S.tab = tab; segSet($('#tabs'), 'tab', tab);
@@ -518,7 +520,7 @@ document.addEventListener('keydown', e => {
   if (e.target.matches && e.target.matches('input, textarea, select')) return; const k = e.key.toLowerCase();
   if (S.lesson && lessonKey(e)) return;
   if (quiz.active && e.key === 'Escape') { quizStop(); return; }
-  if ((theater.active || whatif.active || descent.active) && k !== 'escape') return;   // 再生中は表示モード等のキーを受けない
+  if ((theater.active || whatif.active || descent.active || dshow.on) && k !== 'escape') return;   // 再生中は表示モード等のキーを受けない
   if ((S.scale || S.expert) && (k === 'e' || /^[1-4]$/.test(k))) return;
   if (k === 'escape' && (!$('#askPop').hidden || !$('#settings').hidden)) { $('#askPop').hidden = true; $('#settings').hidden = true; return; }
   if (e.key === '/' && $('#partFind')) { e.preventDefault(); $('#inspector').classList.add('open'); if (S.selected) select(null); $('#partFind').focus(); $('#partFind').select(); return; }
@@ -531,7 +533,7 @@ document.addEventListener('keydown', e => {
   else if (k === ' ') { e.preventDefault(); if (fpv.on) return; if (S.tab !== 'fly') setTab('fly'); setPower(S.power === 0 ? 0.5 : 0); }
   else if (k === 'r') { segSet($('#viewCol'), 'v', 'iso'); S.view = 'iso'; setView('iso'); }
   else if (k === 'f' && S.selected) focusOn(S.selAll ? partsOf(S.selected.key).map(x => x.obj) : [S.selected.obj]);
-  else if (k === 'escape') { if (fpv.on) fpvExit(); else if (descent.active) stopDescent(); else if (theater.active) stopTheaterUI(); else if (S.question) { clearQuestion(); renderNote(null); } else if (S.flight) setFlight(null); else if (S.selected) select(null); else $('#inspector').classList.remove('open'); }
+  else if (k === 'escape') { if (fpv.on) fpvExit(); else if (dshow.on) dshowOn(false); else if (descent.active) stopDescent(); else if (theater.active) stopTheaterUI(); else if (S.question) { clearQuestion(); renderNote(null); } else if (S.flight) setFlight(null); else if (S.selected) select(null); else $('#inspector').classList.remove('open'); }
 });
 
 // ---------- 設定 ----------
@@ -586,6 +588,7 @@ function onQualityChanged(level) { if (air.mesh && air.N !== Q.particles) rebuil
   for (const el of watch) { mo.observe(el, { attributes: true, attributeFilter: ['class', 'hidden', 'style'] }); el.addEventListener('transitionend', e => { if (e.propertyName === 'transform' || e.propertyName === 'height') kick(); }); }
 }
 function onResized() {
+  if (typeof onResizedDshow === 'function') onResizedDshow();
   if (S.scale) { if (D.personGroup) D.personGroup.visible = !compact(); renderMassBar(S.selected && S.selected.key); } for (const L of labelEls) L.w = 0; if (!S.labelsTouched) { S.labels = !narrow(); for (const x of $$('.tgl[data-t=labels]')) x.classList.toggle('on', S.labels); } }
 function initUI() {
   buildUseChips(); buildAsk(); buildMishapCards(); buildWhatifCards(); labelSticks(); segSet($('#modeSeg2'), 'm', stickMode);

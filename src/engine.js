@@ -93,11 +93,11 @@ const backdropMat = new THREE.ShaderMaterial({
     uLo: { value: new THREE.Color('#8e9cb0') }, uHi: { value: new THREE.Color('#ffffff') },
     uSun: { value: new THREE.Vector3(0.45, 0.55, -0.7).normalize() },
     uT: { value: 0 }, uDrift: { value: new THREE.Vector2(0.02, 0.01) },
-    uHaze: { value: 0 }, uHazeCol: { value: new THREE.Color('#cfdcea') },
+    uHaze: { value: 0 }, uHazeCol: { value: new THREE.Color('#cfdcea') }, uStar: { value: 0 },
   },
   vertexShader: `varying vec3 vDir; void main(){ vDir = normalize((modelMatrix * vec4(position,1.0)).xyz); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
   fragmentShader: `uniform vec3 top, mid, edge, bottom, spotDir, uLo, uHi, uSun, uHazeCol;
-    uniform float uCloud, uWall, uSharp, uScale, uT, uHaze; uniform int uOct; uniform vec2 uDrift;
+    uniform float uCloud, uWall, uSharp, uScale, uT, uHaze, uStar; uniform int uOct; uniform vec2 uDrift;
     varying vec3 vDir;
     float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
     float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
@@ -107,6 +107,14 @@ const backdropMat = new THREE.ShaderMaterial({
       vec3 c = y > 0.0 ? mix(edge, top, smoothstep(0.0, 0.9, y)) : mix(edge, bottom, smoothstep(0.0, 0.6, -y));
       float sp = smoothstep(0.45, 1.0, dot(d, spotDir)) * smoothstep(-0.25, 0.35, y);
       c = mix(c, mid, sp * 0.9);
+      float cloudM = 0.0;
+      if (uStar > 0.001 && y > 0.0) {   // 星。方向で決まるので視点を回しても動かない
+        vec3 sp = d * 120.0, ip = floor(sp), fp = fract(sp);
+        float h = fract(sin(dot(ip, vec3(12.9898, 78.233, 37.719))) * 43758.5453);
+        float twinkle = 0.75 + 0.25 * sin(uT * 2.1 + h * 40.0);
+        float st = step(0.9825, h) * smoothstep(0.24, 0.0, length(fp - 0.5)) * (0.35 + 0.65 * fract(h * 91.7)) * twinkle;
+        c += vec3(st) * uStar * smoothstep(-0.02, 0.22, y);
+      }
       if ((uCloud > 0.001 || uWall > 0.001) && y > -0.03) {
         vec2 p = d.xz / (y + 0.26) + uDrift * uT;
         float n = fbm(p * uScale);
@@ -117,7 +125,7 @@ const backdropMat = new THREE.ShaderMaterial({
         float sun = smoothstep(-0.1, 0.9, dot(d, uSun));
         vec3 cc = mix(uHi, uLo, thick * (1.0 - 0.35 * sun));
         cc = mix(cc, uHi, pow(1.0 - thick, 3.0) * 0.55);
-        c = mix(c, cc, clamp(m, 0.0, 1.0));
+        c = mix(c, cc, clamp(m, 0.0, 1.0)); cloudM = clamp(m, 0.0, 1.0);
       }
       c = mix(c, uHazeCol, uHaze * (1.0 - smoothstep(0.0, 0.30, abs(y))));
       gl_FragColor = vec4(c, 1.0); }`,
@@ -355,9 +363,9 @@ function stepCamera(dt) {
   // 防護: 非有限値や暴走の復帰
   const p = camera.position, t = controls.target;
   if (!Number.isFinite(p.x + p.y + p.z + t.x + t.y + t.z)) { S.camSpring = null; S.camInertia = null; cam.v.set(0, 0, 0); cam.tv.set(0, 0, 0); t.set(0, 0, 0); p.set(0.78, 0.50, -0.82); }
-  const inScene2 = (typeof whatif === 'object' && whatif.active) || (typeof theater === 'object' && theater.active) || (typeof descent === 'object' && descent.active);
+  const inScene2 = (typeof whatif === 'object' && whatif.active) || (typeof theater === 'object' && theater.active) || (typeof descent === 'object' && descent.active) || (typeof dshow === 'object' && dshow.on);
   if (!S.camSpring && !S.camInertia && !inScene2 && controls.maxDistance > camMax()) controls.maxDistance = Math.max(camMax(), controls.maxDistance - (controls.maxDistance - camMax()) * (1 - Math.exp(-dt / 0.5)));   // 場面を抜けたら上限をゆっくり戻す(場面の最中に戻すと、引きが切られて画がじりじり寄る)
-  { const inScene = (typeof whatif === 'object' && whatif.active) || (typeof theater === 'object' && theater.active) || (typeof descent === 'object' && descent.active); const tmax = inScene ? 14 : 3; if (t.length() > tmax) t.clampLength(0, tmax); }   /* 場面では機体が原点から離れる(目視外は9m先)。固定3mだと注視点が引き戻されて画が壊れる */
+  { const inScene = (typeof whatif === 'object' && whatif.active) || (typeof theater === 'object' && theater.active) || (typeof descent === 'object' && descent.active) || (typeof dshow === 'object' && dshow.on); const tmax = inScene ? 14 : 3; if (t.length() > tmax) t.clampLength(0, tmax); }   /* 場面では機体が原点から離れる(目視外は9m先)。固定3mだと注視点が引き戻されて画が壊れる */
   const lim = Math.max(4, controls.maxDistance); const off = tmpV.copy(p).sub(t); if (off.length() > lim) p.copy(t).addScaledVector(off.normalize(), lim);   // 上限は画面の縦横比と台本の引きに合わせる(固定4mだと縦画面で場面が枠に入らない)
 }
 function onCamInterrupt() { if (S.camSpring) { S.camSpring = null; S.camInertia = { v: cam.v.clone().clampLength(0, 2), t: 0.3 }; cam.v.set(0, 0, 0); cam.tv.set(0, 0, 0); } }
@@ -388,7 +396,7 @@ function topCover() {
 const bandK = () => narrow() ? 1 / (S.bandFrac || 1) : 1;
 function applyBand(bf) {
   const old = S.bandFrac; S.bandFrac = bf; if (old == null || Math.abs(bf - old) < 0.02) return;
-  if ((typeof theater !== 'undefined' && theater.active) || (typeof whatif !== 'undefined' && whatif.active) || (typeof descent !== 'undefined' && descent.active)) return;   /* 台本が組んだ画には触らない */
+  if ((typeof theater !== 'undefined' && theater.active) || (typeof whatif !== 'undefined' && whatif.active) || (typeof descent !== 'undefined' && descent.active) || (typeof dshow !== 'undefined' && dshow.on)) return;   /* 台本が組んだ画には触らない */
   const k = old / bf;
   if (S.camSpring) { const sp = S.camSpring; sp.p1.sub(sp.q1).multiplyScalar(k).add(sp.q1); controls.maxDistance = Math.max(controls.maxDistance, sp.p1.distanceTo(sp.q1) * 1.02); return; }
   const t = controls.target.clone(), p = camera.position.clone().sub(t).multiplyScalar(k).add(t);
