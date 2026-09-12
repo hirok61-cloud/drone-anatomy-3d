@@ -182,6 +182,12 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 .tgl i { width: 8px; height: 8px; border-radius: 50%; background: var(--hair2); transition: background .15s, box-shadow .15s; }
 .tgl.on { background: var(--accent-soft) !important; color: var(--accent-text) !important; } .tgl.on i { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); position: relative; } .tgl.on i::after { content: ''; position: absolute; left: 2px; top: 1.5px; width: 3px; height: 1.5px; border: solid #fff; border-width: 0 0 1.5px 1.5px; transform: rotate(-45deg) scale(1.1); }
 .cards { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; } .cards::-webkit-scrollbar { display: none; }
+/* もしもは3種で16枚。並べると1組あたり2枚しか見えないので、種類を選んで1組ずつ全幅で出す */
+.ctx-row[data-tab=mishap] .dock-group[data-mg] { display: none; }
+.ctx-row[data-tab=mishap][data-sel=mis] .dock-group[data-mg=mis],
+.ctx-row[data-tab=mishap][data-sel=craft] .dock-group[data-mg=craft],
+.ctx-row[data-tab=mishap][data-sel=site] .dock-group[data-mg=site] { display: flex; }
+#mishapSeg { align-self: center; flex: none; }
 .cards button { flex: none; width: 150px; padding: 8px 10px; border-radius: 12px; background: var(--seg-bg); text-align: left; font-size: 12.5px; line-height: 1.35; min-height: 52px; transition: background .15s; }
 .cards button b { display: block; font-size: 13px; margin-bottom: 2px; } .cards button:hover { background: var(--hair2); } .cards button.on { background: var(--accent-soft); color: var(--accent-text); }
 .cards button { min-height: 64px; } #whatifCards button { border-left: 3px solid var(--cw); border-radius: 6px 12px 12px 6px; }   /* 外の状況 = 青の帯（⑤の組み間違いは無印） */
@@ -240,12 +246,7 @@ button, .tabs, .seg, .chips { touch-action: manipulation; -webkit-user-select: n
   .popover { position: fixed; left: calc(10px + var(--sal)); right: calc(10px + var(--sar)); top: auto; bottom: calc(10px + var(--sab)); width: auto; max-height: 60vh; }
   #dock { left: calc(10px + var(--sal)); right: calc(10px + var(--sar)); bottom: calc(10px + var(--sab)); }
   .ctx { padding: 8px 10px 6px; } .ctx-row[data-tab=mishap] { flex-wrap: wrap; overflow-x: hidden; mask-image: none; -webkit-mask-image: none; padding-right: 0; gap: 6px; } .ctx-row[data-tab=mishap] .dock-group.grow { width: 100%; flex: none; }
-  /* もしもは3種で18枚。スマホは種類を選んで1組だけ出す(3組を積むとドックが画面の半分を覆う) */
-  .phone-only { display: flex; } #mishapSeg { width: 100%; }
-  .ctx-row[data-tab=mishap] .dock-group[data-mg] { display: none; } .ctx-row[data-tab=mishap] .dock-group[data-mg] > label { display: none; }
-  .ctx-row[data-tab=mishap][data-sel=mis] .dock-group[data-mg=mis],
-  .ctx-row[data-tab=mishap][data-sel=craft] .dock-group[data-mg=craft],
-  .ctx-row[data-tab=mishap][data-sel=site] .dock-group[data-mg=site] { display: flex; }
+  #mishapSeg { width: 100%; } .ctx-row[data-tab=mishap] .dock-group[data-mg] > label { display: none; }   /* スマホはセグメントが名前を兼ねる */
   .ctx-row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; align-items: flex-end; gap: 12px; padding-right: 24px; mask-image: linear-gradient(to right, #000 88%, transparent); -webkit-mask-image: linear-gradient(to right, #000 88%, transparent); } .ctx-row::-webkit-scrollbar { display: none; }
   .dock-group { flex: none; } .dock-group.grow { flex: none; width: 150px; } .chips { flex-wrap: nowrap; }
   .tabs button span { font-size: 11px; } .tabs button { flex-direction: column; gap: 2px; padding: 6px 4px; }
@@ -376,7 +377,7 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
 
 /* ---------- 第3ラウンド UI/UX 反映 ---------- */
 .pill-btn.on, .pill-btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-text); box-shadow: inset 0 0 0 1.5px var(--accent); }
-.mobile-only { display: none; } .phone-only { display: none; }
+.mobile-only { display: none; }
 body.big #sticks { bottom: calc(var(--dock-h) + 104px); }
 #massBar { overflow: hidden; } .mb-main { flex: 1; min-height: 0; overflow: auto; }
 body.scale #noteCard { left: calc(14px + 212px + 12px); width: min(420px, calc(100vw - var(--insp-w) - 60px - 224px)); }

@@ -205,6 +205,12 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 .tgl i { width: 8px; height: 8px; border-radius: 50%; background: var(--hair2); transition: background .15s, box-shadow .15s; }
 .tgl.on { background: var(--accent-soft) !important; color: var(--accent-text) !important; } .tgl.on i { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); position: relative; } .tgl.on i::after { content: ''; position: absolute; left: 2px; top: 1.5px; width: 3px; height: 1.5px; border: solid #fff; border-width: 0 0 1.5px 1.5px; transform: rotate(-45deg) scale(1.1); }
 .cards { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; } .cards::-webkit-scrollbar { display: none; }
+/* もしもは3種で16枚。並べると1組あたり2枚しか見えないので、種類を選んで1組ずつ全幅で出す */
+.ctx-row[data-tab=mishap] .dock-group[data-mg] { display: none; }
+.ctx-row[data-tab=mishap][data-sel=mis] .dock-group[data-mg=mis],
+.ctx-row[data-tab=mishap][data-sel=craft] .dock-group[data-mg=craft],
+.ctx-row[data-tab=mishap][data-sel=site] .dock-group[data-mg=site] { display: flex; }
+#mishapSeg { align-self: center; flex: none; }
 .cards button { flex: none; width: 150px; padding: 8px 10px; border-radius: 12px; background: var(--seg-bg); text-align: left; font-size: 12.5px; line-height: 1.35; min-height: 52px; transition: background .15s; }
 .cards button b { display: block; font-size: 13px; margin-bottom: 2px; } .cards button:hover { background: var(--hair2); } .cards button.on { background: var(--accent-soft); color: var(--accent-text); }
 .cards button { min-height: 64px; } #whatifCards button { border-left: 3px solid var(--cw); border-radius: 6px 12px 12px 6px; }   /* 外の状況 = 青の帯（⑤の組み間違いは無印） */
@@ -263,12 +269,7 @@ button, .tabs, .seg, .chips { touch-action: manipulation; -webkit-user-select: n
   .popover { position: fixed; left: calc(10px + var(--sal)); right: calc(10px + var(--sar)); top: auto; bottom: calc(10px + var(--sab)); width: auto; max-height: 60vh; }
   #dock { left: calc(10px + var(--sal)); right: calc(10px + var(--sar)); bottom: calc(10px + var(--sab)); }
   .ctx { padding: 8px 10px 6px; } .ctx-row[data-tab=mishap] { flex-wrap: wrap; overflow-x: hidden; mask-image: none; -webkit-mask-image: none; padding-right: 0; gap: 6px; } .ctx-row[data-tab=mishap] .dock-group.grow { width: 100%; flex: none; }
-  /* もしもは3種で18枚。スマホは種類を選んで1組だけ出す(3組を積むとドックが画面の半分を覆う) */
-  .phone-only { display: flex; } #mishapSeg { width: 100%; }
-  .ctx-row[data-tab=mishap] .dock-group[data-mg] { display: none; } .ctx-row[data-tab=mishap] .dock-group[data-mg] > label { display: none; }
-  .ctx-row[data-tab=mishap][data-sel=mis] .dock-group[data-mg=mis],
-  .ctx-row[data-tab=mishap][data-sel=craft] .dock-group[data-mg=craft],
-  .ctx-row[data-tab=mishap][data-sel=site] .dock-group[data-mg=site] { display: flex; }
+  #mishapSeg { width: 100%; } .ctx-row[data-tab=mishap] .dock-group[data-mg] > label { display: none; }   /* スマホはセグメントが名前を兼ねる */
   .ctx-row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; align-items: flex-end; gap: 12px; padding-right: 24px; mask-image: linear-gradient(to right, #000 88%, transparent); -webkit-mask-image: linear-gradient(to right, #000 88%, transparent); } .ctx-row::-webkit-scrollbar { display: none; }
   .dock-group { flex: none; } .dock-group.grow { flex: none; width: 150px; } .chips { flex-wrap: nowrap; }
   .tabs button span { font-size: 11px; } .tabs button { flex-direction: column; gap: 2px; padding: 6px 4px; }
@@ -399,7 +400,7 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
 
 /* ---------- 第3ラウンド UI/UX 反映 ---------- */
 .pill-btn.on, .pill-btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-text); box-shadow: inset 0 0 0 1.5px var(--accent); }
-.mobile-only { display: none; } .phone-only { display: none; }
+.mobile-only { display: none; }
 body.big #sticks { bottom: calc(var(--dock-h) + 104px); }
 #massBar { overflow: hidden; } .mb-main { flex: 1; min-height: 0; overflow: auto; }
 body.scale #noteCard { left: calc(14px + 212px + 12px); width: min(420px, calc(100vw - var(--insp-w) - 60px - 224px)); }
@@ -570,7 +571,7 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
       <button id="scaleBtn" class="pill-btn" aria-pressed="false">重さ・お金</button>
     </div>
     <div class="ctx-row" data-tab="mishap" data-sel="mis" hidden>
-      <div class="seg small phone-only" id="mishapSeg" role="radiogroup" aria-label="もしもの種類"><button data-mg="mis" class="on">まちがえ</button><button data-mg="craft">機体</button><button data-mg="site">場所・時間</button></div>
+      <div class="seg small" id="mishapSeg" role="radiogroup" aria-label="もしもの種類"><button data-mg="mis" class="on">まちがえ</button><button data-mg="craft">機体</button><button data-mg="site">場所・時間</button></div>
       <div class="dock-group grow" data-mg="mis"><label>もしも、まちがえたら</label><div class="cards" id="mishapCards"></div></div>
       <div class="dock-group grow" data-mg="craft"><label>もしも、機体がこうなったら</label><div class="cards" id="whatifCards"></div></div>
       <div class="dock-group grow" data-mg="site"><label>もしも、こんな場所・時間なら</label><div class="cards" id="whatifSiteCards"></div></div>
@@ -1348,34 +1349,34 @@ const WHATIF = [
     intro: '日の入りを過ぎて、まわりが暗くなった。機体の姿も、機首がどちらを向いているかも、肉眼では分からなくなる。',
     reaction: '機体は暗さを気にしない。姿勢も位置もこれまでどおり保つ。変わるのは人のほうで、頼れるのは灯火だけになる。',
     motion: 'night', parts: ['led', 'fc', 'gps', 'camera'],
-    partNotes: { led: '姿勢と方向が正確に分かる灯火。前と後ろで色を変え、どちらを向いているかを地上に伝える', fc: '暗さは姿勢の制御に関係しない。ジャイロと加速度で水平を保ち続ける', gps: '衛星の電波は夜でも届く。位置の保持は昼と同じように働く', camera: '暗いと映らない。障害物を避けるビジョンセンサーも、夜に対応していなければ働かない' },
+    partNotes: { led: '姿勢と方向が正確に視認できる灯火。前後で色を変えるのが一般的で、どちらを向いているかを地上に伝える', fc: '暗さは姿勢の制御に関係しない。ジャイロと加速度で水平を保ち続ける', gps: '衛星の電波は夜でも届く。位置の保持は昼と同じように働く', camera: '暗いと映らない。障害物を避けるビジョンセンサーも、夜に対応していなければ働かない' },
     can: ['暗くても姿勢と位置を保つ', '灯火で自分の位置と向きを知らせる', '設定どおりのフェイルセーフは夜でも働く'],
-    human: ['日の入りの時刻を調べる。日没後から日出前は夜間飛行として扱う', '灯火が点いているか、飛行前に確かめる', '明るいうちに現地を下見し、障害物と着陸地点を覚えておく', '離着陸地点と緊急着陸地点は地上の照明で照らす', '補助者を置き、機体を見失ったらすぐ止める'],
-    caveat: '夜間飛行は特定飛行で、承認の対象。二等の技能証明は既定で昼間に限定されているので、夜に飛ばすには「昼間飛行の限定解除」が要る。灯火は機体を見つけるためのもので、地上の障害物を照らすものではない。飛行範囲が照明で十分に照らされている場合は灯火を要しないとされているが、その判断は現場任せにしない。' },
+    human: ['日の入りの時刻を調べる。日没後から日出前は夜間飛行として扱う', '灯火が点いているか、飛行前に確かめる', '明るいうちに現地を下見し、障害物と着陸地点を覚えておく', '離着陸地点と緊急着陸地点は地上の照明で照らす', '補助者を置き、機体を見失ったらすぐ止める', '夜間と目視外を同時には行わない（標準の飛行マニュアルの条件。両方やるなら個別のマニュアルが要る）'],
+    caveat: '夜間飛行は特定飛行で、原則は承認の対象。承認によらずに飛ばせるのは、機体認証を受けた機体を、昼間飛行の限定を解除した技能証明を持つ人が、立入管理措置を講じて飛ばす場合に限られる。技能証明の限定は等級を問わず既定で「昼間」「目視内」に付いていて、外すには限定変更の手続きをとる。この教材の機体は機体認証を前提にしていないので、承認の側で確かめることになる。灯火は機体の姿勢と方向を地上から見るためのもので、地上の障害物を照らすものではない。飛行範囲が照明等で十分に照らされている場合は灯火を要しないとされているが、その判断は現場任せにせず、承認の条件と飛行マニュアルで確かめる。' },
   { id: 'bvlos', name: '見えなくなる', icon: '👁️', short: '目視外飛行', grp: 'site',
     intro: '機体が遠ざかり、肉眼では姿勢も向きも分からなくなった。',
     reaction: '機体は変わらず飛ぶ。変わるのは人の情報源で、カメラの映像と、機体が送ってくる数値だけになる。',
     motion: 'bvlos', parts: ['camera', 'vtx', 'telemetry', 'rx', 'gps'],
     partNotes: { camera: '機体のカメラが外の様子を見る。視野は狭く、真横や真下は映らない', vtx: '映像を地上へ送る。距離や向きによって、操縦の電波より先に映像が乱れる', telemetry: '位置・高度・速度・電池を数値で送る。不時着したあとも位置が分かることが大切', rx: '操縦の電波は映像より遠くまで届くことが多いが、限界はある', gps: '機体は自分の位置を知っている。人が知るのは、送られてきた数値だけ' },
-    can: ['映像と数値を地上へ送り続ける', '電波が切れれば自動で帰る、またはその場で止まる', '見えなくても位置と姿勢は保つ'],
-    human: ['飛行経路を先に決め、途中の障害物と着陸地点を地図で確かめる', '補助者を置くか、立入管理措置を講じる', '映像が途切れたときの手順を決めておく', '電波が届く範囲を実際に測っておく。カタログの値は目安', '不時着したときに位置が分かるようにしておく'],
-    caveat: '目視外飛行は特定飛行で、承認の対象。二等の技能証明は既定で目視内に限定されているので、「目視内飛行の限定解除」が要る。双眼鏡やモニター（カメラの映像を含む）で見ることは、法令上の「目視」に含まれない。補助者を置かない目視外飛行は、装備も場所の条件もさらに厳しくなる。' },
+    can: ['あらかじめ決めた経路を自動で飛ぶ（自動操縦システムは目視外の装備として挙げられている）', '映像と数値を地上へ送り続ける', '電波が切れれば自動で帰る、またはその場で止まる', '見えなくても位置と姿勢は保つ'],
+    human: ['飛行経路を先に決め、途中の障害物と着陸地点を地図で確かめる', '補助者の配置は承認の条件と飛行マニュアルに従う', '立入管理措置はそれとは別に講じる。第三者の上空を飛ばないため', '映像が途切れたときの手順を決めておく', '電波が届く範囲を実際に測っておく。カタログの値は目安', '不時着したときに位置が分かるようにしておく'],
+    caveat: '目視外飛行は特定飛行で、原則は承認の対象。承認によらずに飛ばせるのは、機体認証を受けた機体を、目視内飛行の限定を解除した技能証明を持つ人が、立入管理措置を講じて飛ばす場合に限られる。技能証明の限定は等級を問わず既定で「昼間」「目視内」に付いている。双眼鏡やモニター（カメラの映像を含む）で見ることは、法令上の「目視」に含まれない（眼鏡やコンタクトレンズは含まれる）。補助者を置く場合でも、自動操縦システム、機体のカメラ等で外の様子を監視できること、地上で位置と異常の有無（不時着した場合を含む）を把握できること、フェイルセーフが正常に働くことが、装備として挙げられている。補助者を置かない場合は、装備も場所の条件もさらに厳しくなる。' },
   { id: 'airport', name: '空港が近い', icon: '✈️', short: '制限表面のある空域', grp: 'site',
-    intro: '近くに空港がある。空港のまわりには、滑走路から斜めに立ち上がる面が広がっていて、その面より上は飛ばせない。',
+    intro: '近くに空港がある。空港のまわりには、滑走路から斜めに立ち上がる面が広がっていて、その面の上空は飛行禁止空域になっている。',
     reaction: '機体は空域を知らない。高度の上限を入れていなければ、そのまま面を越えて上がってしまう。',
     motion: 'airport', parts: ['gps', 'fc', 'telemetry', 'remoteId'],
     partNotes: { gps: '機体は自分の緯度経度と高度を知っている。どこが空域かは知らない', fc: '入れておいた高度の上限で止まる。入れていなければ止まらない', telemetry: '高度を地上へ送る。判断するのは人', remoteId: '飛んでいることを電波で知らせる。空港のまわりでは特に意味を持つ' },
     can: ['設定した高度の上限で止まる', 'いまの高度を地上へ知らせる'],
-    human: ['地図で空港等の周辺かどうかを確かめる', '空港等の周辺と地表から150m以上は、空域を管理する者と事前に調整し、許可を受ける', '飛行計画を通報し、航空情報のための通知を前日までに出す', '機体側にも高度の上限を設定しておく', '有人機の音が聞こえたら、ただちに降下させる'],
-    caveat: '図の斜めの面は考え方を示す模式図で、実際の高さや角度ではない。空港等の周辺は「承認」ではなく「許可」の対象。150m以上かどうかは海抜ではなく直下の地表からの高度差で見る。主要な空港では、進入表面や転移表面の下の空域と敷地の上空も飛行禁止。小型無人機等飛行禁止法の対象空港では、2026年7月14日からその周囲おおむね1,000mが対象になった。' },
+    human: ['地図で空港等の周辺かどうかを確かめる', '空港等の周辺と地表から150m以上は、空域を管理する者と事前に調整し、許可を受ける', '飛行計画をドローン情報基盤システムに通報する。航空情報のための通知は許可書の条件に従って出す（前日までとされることが多い）', '機体側にも高度の上限を設定しておく', '有人機の音が聞こえたら、ただちに降下させる'],
+    caveat: '図の斜めの面は考え方を示す模式図で、実際の高さや角度ではなく、面の種類（進入表面・転移表面・水平表面など）も1枚に省いている。空港等の周辺は「承認」ではなく「許可」の対象で、カテゴリーⅡA。機体認証と技能証明があっても許可は免除されない。技能証明の限定変更（昼間・目視内）は、この空域の話とは関係がない。150m以上かどうかは海抜ではなく直下の地表からの高度差で見る。主要な空港では、進入表面や転移表面の下の空域と敷地の上空も飛行禁止。小型無人機等飛行禁止法の対象空港では、2026年7月14日からその周囲おおむね1,000mが対象になった。' },
   { id: 'crowd', name: '落ちる範囲', icon: '🎯', short: '第三者の上空とは', grp: 'site',
     intro: '人から離れた場所で飛ばしている。安全のつもりで高度を上げていくと、落ちたときに届く範囲が広がっていく。',
     reaction: '機体は落下の範囲を知らない。上げろと言われれば上がる。広がった円の中に人が入った時点で、その人の「上空」を飛んでいることになる。',
     motion: 'crowd', parts: ['prop', 'battery', 'fc', 'led'],
     partNotes: { prop: '回っているプロペラは、落ちたときにいちばん危ない部分', battery: '落下の衝撃でつぶれると発火することがある', fc: '高さは知っているが、落ちる範囲に人がいるかは知らない', led: '灯火で存在は知らせるが、それで人が避けてくれるとは限らない' },
     can: ['言われた高さと位置を保つ', '灯火と音で存在を知らせる'],
-    human: ['飛行経路を決めるとき、人がいる場所を最初から外す', '高度を上げるほど落下の範囲が広がることを頭に入れる', '立入管理措置を講じて、人が入らない区画の中で飛ばす', '人が入ってきたら、ただちに飛行を止める'],
-    caveat: '「第三者の上空」は真上だけを指すのではなく、製造者等が保証した落下距離を踏まえて落ちる可能性のある領域をいう。立入管理措置を講じずにそこを飛ぶのがカテゴリーⅢで、第一種機体認証と一等の技能証明、運航管理の許可・承認まで求められる。この教材の550クラスの機体では、制度上そこへは進めない。人や物件から30m未満の飛行も特定飛行で、承認の対象。図の円は考え方を示すもので、実際の落下距離ではない。' },
+    human: ['飛行経路を決めるとき、人がいる場所を最初から外す', '高度を上げるほど落下の範囲が広がることを頭に入れる', '落下の範囲に第三者が入らないよう、立入管理措置を講じる', '人が入ってきたら、ただちに飛行を止める'],
+    caveat: '「第三者の上空」は真上だけを指すのではなく、製造者等が保証した落下距離を踏まえて落ちる可能性のある領域をいう。立入管理措置を講じずにそこを飛ぶのがカテゴリーⅢで、第一種機体認証と一等の技能証明、運航管理の許可・承認まで求められる。申請は飛行開始予定日の20開庁日前までに航空局へ出す。この教材の機体は第一種機体認証を前提にしていないので、カテゴリーⅢには進めない前提で見てほしい。人や物件から30m未満の飛行も特定飛行で、承認の対象。図の円は考え方を示すもので、実際の落下距離ではない。区画と補助者の置き方は「人を入れない」の場面で扱う。' },
   { id: 'person', grp: 'site', name: '人が近づいた', icon: '🚶', short: '見物の人が歩いてくる',
     intro: '見物の人が機体のほうへ歩いてきた。',
     reaction: '機体には人を避ける仕組みはない（あっても万能ではない）。できるのは、操縦者と補助者が止めること。',
@@ -1383,7 +1384,7 @@ const WHATIF = [
     partNotes: { led: '灯火で「動いている機体」だと知らせる', buzzer: '音で注意を引く', prop: '回っている間は触れてはいけない部分' },
     can: ['灯火と音で「動いている」ことを知らせる', '操縦者の指示ですぐ離れる・降りる'],
     human: ['補助者が近づく人を止める', '離着陸場所にロープや目印を置く', '人が来たら機体を離す、または降ろして止める', '回っているプロペラに近づかない'],
-    caveat: '第三者の上は原則として飛ばさない（飛ばすには国の許可・承認が必要とされています）。近くを飛ばす場合も、機体の性能ではなく運用（補助者・区画・手順）で守る。' },
+    caveat: '第三者の上は原則として飛ばさない。立入管理措置を講じずに第三者の上空を飛ぶのはカテゴリーⅢで、許可・承認だけでは足りず、第一種機体認証と一等の技能証明も要る（「落ちる範囲」の場面で扱う）。近くを飛ばす場合も、機体の性能ではなく運用（補助者・区画・手順）で守る。' },
   { id: 'tachiiri', grp: 'site', name: '人を入れない', icon: '🚧', short: '補助者と区画で第三者を止める',
     intro: '離着陸する場所のまわりに「立入管理区画」を決め、境目に補助者を置いた。見物の人が区画の外から歩いてくる。',
     reaction: '機体は区画の中でホバーを続ける。人を止めるのは機体ではなく補助者。区画に入りそうなら操縦者に合図し、操縦者は機体をその場に降ろす。',
@@ -1698,12 +1699,12 @@ const WHATIF_REG = {
   battery:  { text: '飛行前点検でバッテリー残量を確認する。フェールセーフ中に残量が足りなくなると、機体は着陸動作に移る。', ky: '2.2 / 5.2', src: 'license' },
   gps:      { text: 'GNSS異常時の空中停止や安全な自動着陸は目視外飛行の装備として挙げられている。GNSSや電子コンパスが機能不全になったときは手動操縦での危険回避が求められる。', ky: '4.2 / 5.2', src: 'license' },
   wind:     { text: '多数の人が集まる催し場所の上空では、風速5m/s以上のときは飛行を中止することが必要とされている。天候・風速・視程は飛行前に確認する項目。', ky: '3.1 / 6.2', src: 'permit' },
-  night:    { text: '夜間（日没後から日出前まで）の飛行は特定飛行で、承認の対象。姿勢と方向が正確に視認できる灯火を備えることが求められる（飛行範囲が照明等で十分に照らされている場合を除く）。二等の技能証明は既定で昼間に限定され、夜に飛ばすには「昼間飛行の限定解除」が要る。', ky: '3.1 / 4.2', src: 'permit' },
-  bvlos:    { text: '目視外飛行は特定飛行で、承認の対象。双眼鏡やモニターによる監視は法令上の「目視」に含まれない。機体のカメラで外の様子を監視でき、地上で位置と異常（不時着した場合を含む）を把握できることなどが装備として挙げられている。二等の技能証明は既定で目視内に限定され、「目視内飛行の限定解除」が要る。', ky: '3.1 / 4.2', src: 'permit' },
-  airport:  { text: '空港等の周辺の空域と、地表から150m以上の空域は飛行禁止空域で、飛ばすには「許可」が要る（承認ではない）。空域を管理する者との事前の調整と、航空情報のための通知が求められる。主要な空港では、進入表面等の下の空域や敷地の上空も飛ばせない。', ky: '3.1', src: 'permit' },
-  crowd:    { text: '「第三者の上空」は真上だけでなく、落下する可能性のある領域を指す。立入管理措置を講じずにそこを飛ぶのがカテゴリーⅢで、第一種機体認証・一等の技能証明・運航管理の許可承認が求められる。人または物件から30m未満の飛行も特定飛行で、承認の対象。', ky: '3.1', src: 'permit' },
+  night:    { text: '夜間（日没後から日出前まで）の飛行は特定飛行で、原則は承認の対象。姿勢と方向が正確に視認できる灯火を備えることが求められる（飛行範囲が照明等で十分に照らされている場合を除く）。機体認証を受けた機体を、昼間飛行の限定を解除した技能証明を持つ人が、立入管理措置を講じて飛ばす場合は承認を要しない。技能証明の限定は等級を問わず既定で「昼間」「目視内」。', ky: '3.1 / 4.2 / 6.4', src: 'permit' },
+  bvlos:    { text: '目視外飛行は特定飛行で、原則は承認の対象。双眼鏡やモニターによる監視は法令上の「目視」に含まれない。自動操縦システム、機体のカメラ等による監視、地上で位置と異常（不時着した場合を含む）を把握できること、フェイルセーフの正常な作動が装備として挙げられている。機体認証を受けた機体を、目視内飛行の限定を解除した技能証明を持つ人が、立入管理措置を講じて飛ばす場合は承認を要しない。', ky: '3.1 / 4.2 / 6.4', src: 'permit' },
+  airport:  { text: '空港等の周辺の空域と、地表から150m以上の空域は飛行禁止空域で、飛ばすには「許可」が要る（承認ではない）。空域を管理する者との事前の調整と、航空情報のための通知が求められる。主要な空港では、進入表面等の下の空域や敷地の上空も飛ばせない。', ky: '3.1 / 6.1', src: 'permit' },
+  crowd:    { text: '「第三者の上空」は真上だけでなく、製造者等が保証した落下距離を踏まえて落ちる可能性のある領域を指す。立入管理措置を講じずにそこを飛ぶのがカテゴリーⅢで、第一種機体認証・一等の技能証明・運航管理の許可承認が求められる。人または物件から30m未満の飛行も特定飛行で、承認の対象。', ky: '3.1 / 6.1', src: 'permit' },
   person:   { text: '第三者の立入りを管理する措置を講じて行う特定飛行がカテゴリーⅡ。講じないで第三者の上空を飛ぶのがカテゴリーⅢで、最も厳格な手続きが要る。人や物件から30m未満の飛行は特定飛行で、承認の対象。', ky: '3.1', src: 'permit' },
-  tachiiri: { text: '立入管理措置とは、補助者の配置や、立入りを制限する区画（立入管理区画・立入禁止区画）の設定などをいう。この措置を講じた特定飛行がカテゴリーⅡ、25kg以上・催し上空・150m以上などはカテゴリーⅡAとしてより厳格に審査される。', ky: '3.1', src: 'permit' },
+  tachiiri: { text: '立入管理措置とは、補助者の配置や、立入りを制限する区画（立入管理区画・立入禁止区画）の設定などをいう。この措置を講じた特定飛行がカテゴリーⅡ。空港等の周辺・150m以上・催し場所上空・危険物の輸送・物件の投下・25kg以上はカテゴリーⅡAで、より厳格に審査される。', ky: '3.1', src: 'permit' },
 };
 // 事故等の報告（要領 令和4年11月4日制定 国空無機第223052号、航空法第132条の90・91）
 // 飛行前点検チェックリスト（印刷）。部品の check[] を飛行前の動線の順に並べ替えるための骨組み。
