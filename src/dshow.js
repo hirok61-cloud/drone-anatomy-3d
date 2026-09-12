@@ -1,6 +1,6 @@
 // ===== 夜のドローンショー =====
 // 多数の機体が夜空で図形を描く。見世物であると同時に、教則では
-// 「多数の者の集合する催し」の例そのもの（3.1.1）＋夜間飛行（3.1.2 / 6.4）の場面でもある。
+// 「多数の者の集合する催し」の該当する例そのもの（3.1.2(2)2)d.）＋夜間飛行（3.1.2(2)2)a. / 4.2.1 / 6.4.1）の場面でもある。
 // 1機ずつ手で操縦しているのではなく、あらかじめ決めた経路を自動で飛ばしている、という点も見せる。
 const dshow = {
   on: false, t: 0, n: 0, pts: null, geo: null, mat: null,
@@ -128,6 +128,7 @@ function dshowOn(on) {
       const dir = new THREE.Vector3(0.32, 0.40, 1).normalize(), aim = new THREE.Vector3(0, tall ? 1.25 : 1.45, 0);   /* 見上げるほど空が広い */   /* 観客の位置から見上げる。隊列と地上の機体を1枚に入れる */
       flyTo(aim.clone().addScaledVector(dir, (tall ? 9.2 : 10.6) * viewScale()), aim, 1100, false); }
     renderDshow();
+    { const b = $('#noteCard .note-actions button'); if (b) b.focus({ preventScroll: true }); }   /* 押したボタンは畳まれて消えるので、行き先を渡す */
     if (!store.get('dshowSeen')) { store.set('dshowSeen', '1'); showToast('図形は自動で切り替わります。1機ずつ操縦しているのではありません', 4600); }
   } else {
     dshow.on = false;
@@ -144,6 +145,7 @@ function dshowOn(on) {
     setBodyMode('idle'); syncBodyMode();
     if ($('#noteCard').dataset.kind === 'dshow') renderNote(null);
     camHome();
+    { const b = $('#showBtn'); if (b) b.focus({ preventScroll: true }); }
   }
   const b = $('#showBtn'); if (b) { b.classList.toggle('on', dshow.on); b.setAttribute('aria-pressed', String(dshow.on)); }
 }
@@ -166,6 +168,16 @@ function dshowSky() {
   S.shadowDirty = S.csDirty = S.aoDirty = true;
 }
 
+// 次の図形へ。位置と色の「行き先」を差し替えるだけで、動かすのは stepDshow
+function dshowAdvance() {
+  const n = dshow.n;
+  dshow.from.set(dshow.pos); dshow.colFrom.set(dshow.col);
+  dshow.fig = (dshow.fig + 1) % DSHOW_FIGS.length;
+  dshowShape(DSHOW_FIGS[dshow.fig].id, n, dshow.to);
+  dshowSetColor(dshow.fig, dshow.colTo);
+  dshow.phase = 'move'; dshow.figT = 0; renderDshow();
+}
+
 // ---------- 毎フレーム ----------
 function stepDshow(dtReal) {
   if (!dshow.on) return;
@@ -174,12 +186,7 @@ function stepDshow(dtReal) {
   backdropMat.uniforms.uStar.value = dshow.star;
   backdropMat.uniforms.uT.value = dshow.t;
   const n = dshow.n, pos = dshow.pos, from = dshow.from, to = dshow.to;
-  if (dshow.phase === 'hold' && dshow.figT > DSHOW_HOLD) {
-    from.set(pos); dshow.colFrom.set(dshow.col);
-    dshow.fig = (dshow.fig + 1) % DSHOW_FIGS.length;
-    dshowShape(DSHOW_FIGS[dshow.fig].id, n, to);
-    dshowSetColor(dshow.fig, dshow.colTo);
-    dshow.phase = 'move'; dshow.figT = 0; renderDshow();
+  if (dshow.phase === 'hold' && dshow.figT > DSHOW_HOLD && !reduceMotion) { dshowAdvance();
   } else if (dshow.phase === 'move' && dshow.figT > DSHOW_MOVE) {
     dshow.phase = 'hold'; dshow.figT = 0; pos.set(to); dshow.col.set(dshow.colTo);
   }
@@ -210,6 +217,12 @@ function stepDshow(dtReal) {
 }
 
 // ---------- 説明カード ----------
+// つぎの図形へ（自動送りと同じ手順。動きを減らす設定の人はこれで進める）
+function dshowNext() {
+  if (!dshow.on || dshow.phase !== 'hold') return;
+  dshow.figT = DSHOW_HOLD + 1;
+  const rm = reduceMotion; if (rm) { dshowAdvance(); }
+}
 function updateDshowVals() {
   const el = $('#dshowVals'); if (!el || $('#noteCard').hidden) return;
   const f = DSHOW_FIGS[dshow.fig];
@@ -227,23 +240,23 @@ function renderDshow() {
   renderNote({
     kind: 'dshow', title: '夜のドローンショー', badge: f.name,
     html: `<div id="dshowVals" class="vals live" aria-live="off"><i class="dot" aria-hidden="true"></i></div>
-      <p id="dshowBody">${f.note}</p>
+      <p id="dshowBody" aria-live="off">${f.note}</p>
       ${dshowRegHtml()}`,
-    actions: [{ label: 'やめる', fn: () => dshowOn(false) }],
+    actions: [{ label: 'つぎの図形 ›', fn: () => dshowNext() }, { label: 'やめる', fn: () => dshowOn(false) }],
   });
   updateDshowVals();
 }
 // 制度。ショーは教則が「多数の者の集合する催し」の例に挙げている場面そのもの
 function dshowRegHtml() {
-  return `<details open><summary>この場面にかかわる制度</summary>
+  return `<details${regOn() && innerWidth > 760 ? ' open' : ''}><summary>この場面にかかわる制度（${DSHOW_REG.items.length}項目）</summary>
     <p class="caveat">${DSHOW_REG.lead}</p>
     <ul class="check">${DSHOW_REG.items.map(x => `<li>${x}</li>`).join('')}</ul>
     <p class="hint">${DSHOW_REG.outside}</p>
-    <small class="ky-src">${DSHOW_REG.src}</small></details>`;
+    <small class="ky-src">この教材の隊列は箱庭の広さに合わせて縮めています（実際のショーは数百〜数千機で、高度も桁が違います）／${DSHOW_REG.src}</small></details>`;
 }
 function onResizedDshow() { if (dshow.on) dshowLayout(); }
 function initDshow() {
   const b = $('#showBtn');
   if (b) b.addEventListener('click', () => dshowOn(!dshow.on));
-  window.__dshow = { dshow, dshowOn, DSHOW_FIGS, dshowShape, skyUniforms: () => { const u = backdropMat.uniforms; return { star: u.uStar.value, cloud: u.uCloud.value, wall: u.uWall.value, haze: u.uHaze.value }; } };
+  window.__dshow = { dshow, dshowOn, dshowNext, DSHOW_FIGS, dshowShape, skyUniforms: () => { const u = backdropMat.uniforms; return { star: u.uStar.value, cloud: u.uCloud.value, wall: u.uWall.value, haze: u.uHaze.value }; } };
 }

@@ -243,7 +243,7 @@ function weatherStateText() {
   const at = windAt(Math.max(body.py, 0.05), body.px, body.pz);
   const bits = [
     `<span>風向 ${windName(m.dir)}（${m.dir.toFixed(0)}°）</span>`,
-    `<span>風速 ${m.spd.toFixed(1)} m/s・風力${beaufort(m.spd)}</span>`,
+    `<span>風速（高さ1m） ${m.spd.toFixed(1)} m/s・風力${beaufort(m.spd)}</span>`,
     `<span>瞬間 ${gustV.toFixed(1)} m/s</span>`,
     `<span>機体の高さ ${body.py.toFixed(2)} m で ${at.spd.toFixed(1)} m/s</span>`,
   ];
@@ -262,8 +262,9 @@ function renderWeather() {
     html: `<div id="skyVals" class="vals live" aria-live="off"><i class="dot" aria-hidden="true"></i></div>
       <p>${w.note}</p>
       <p class="caveat">${w.caution}</p>
+      <p class="hint">${WIND_LEAD}</p>
       <p class="hint" data-full>${WIND_NOTE}</p>
-      <small class="ky-src">教則${KYOSOKU.ver} 6.2 気象／この教材の風は、箱庭の広さに合わせて縮めています</small>`,
+      <small class="ky-src">教則${KYOSOKU.ver} 6.2 気象／この教材の風は箱庭の広さに合わせて縮めてあり、風速は高さ1mの値です</small>`,
     actions: [{ label: '空をもどす', fn: () => setWeather(null) }],
   });   /* ✕ ではカードだけ閉じる。空は「場」なので、戻すのはチップかこのボタンで */
   updateWeatherVals();
@@ -272,7 +273,7 @@ function renderWeather() {
 function initWeather() {
   const chips = $('#skyChips');
   if (chips) {
-    chips.innerHTML = WEATHER.map(w => `<button data-sky="${w.id}" aria-pressed="false" title="${w.short}">${w.icon} ${w.name}</button>`).join('');
+    chips.innerHTML = WEATHER.map(w => `<button data-sky="${w.id}" aria-pressed="false" title="${w.short}" aria-label="${w.name}（${w.short}）"><span aria-hidden="true">${w.icon}</span> ${w.name}</button>`).join('');
     chips.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; setWeather(b.dataset.sky); });
   }
   window.__weather = { weather, setWeather, windAt, windMean, beaufort, windName, WEATHER, hasFog: () => !!scene.fog };

@@ -26,8 +26,8 @@
   --ink: #1b1f27; --ink2: #4b5260; --ink3: #6b7280;
   --glass: rgba(255,255,255,0.70); --glass-strong: rgba(255,255,255,0.88); --glass-border: rgba(255,255,255,0.7);
   --glass-shadow: 0 12px 40px rgba(20,26,40,0.12), 0 1px 2px rgba(20,26,40,0.08);
-  --accent: #ef6a2d; --accent-text: #c9501a; --accent-soft: rgba(239,106,45,0.14);
-  --cw: #3b7df7; --ccw: #14b8a6; --ok: #16a34a; --warn: #b45309; --red: #ff3b30;
+  --accent: #ef6a2d; --accent-text: #b8460f; --accent-soft: rgba(239,106,45,0.14);
+  --cw: #3b7df7; --ccw: #14b8a6; --ok: #16a34a; --warn: #9a4708; --red: #ff3b30;
   --hair: rgba(20,26,40,0.08); --hair2: rgba(20,26,40,0.14); --row-hover: rgba(20,26,40,0.05); --seg-bg: rgba(20,26,40,0.07);
   --radius: 16px; --tap: 32px; --insp-w: 344px; --dock-h: 96px; --fs: 1;
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
@@ -112,11 +112,17 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 
 /* ---- note card ---- */
 #noteCard { position: fixed; left: calc(14px + var(--sal)); bottom: calc(var(--dock-h) + 30px); z-index: 9; width: min(420px, calc(100vw - var(--insp-w) - 60px - var(--sal) - var(--sar))); padding: 12px 14px 12px 16px; max-height: min(46vh, calc(100vh - var(--dock-h) - 122px - var(--sat))); overflow-y: auto; }   /* 操作列が2段になっても、タイトルバーの裏に回らない高さに抑える */
-.note-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.note-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+.note-head h3 { min-width: 9em; }
+@media (max-width: 400px) { .note-head h3 { flex: 1 1 100%; } #noteBadge { order: 3; } }
 .note-head h3 { font-size: calc(15px * var(--fs, 1)); font-weight: 700; letter-spacing: -0.005em; flex: 1; }
-.badge { font: 600 11px/1.4 var(--mono); padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.badge { font: 600 11px/1.4 var(--mono); padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-text); }   /* --accent は明るいテーマのガラスの上で 1.4:1 */
 #noteBody { font-size: calc(13.5px * var(--fs, 1)); line-height: 1.6; }
 #noteBody p + p { margin-top: 6px; }
+#noteBody details { margin-top: 10px; border-top: 1px solid var(--hair); padding-top: 6px; }
+#noteBody summary { font-size: calc(12.5px * var(--fs, 1)); font-weight: 700; color: var(--ink3); cursor: pointer; min-height: var(--tap); display: flex; align-items: center; }
+#noteBody ul.check { margin: 6px 0 0; padding-left: 1.15em; font-size: calc(12.5px * var(--fs, 1)); line-height: 1.6; }
+#noteBody ul.check li { margin: 6px 0; }
 .note-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
 .note-actions button { padding: 6px 12px; border-radius: 999px; font-size: calc(12.5px * var(--fs, 1)); font-weight: 600; background: var(--seg-bg); min-height: 30px; }
 .note-actions button.primary { background: var(--accent); color: #fff; }
@@ -438,13 +444,19 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
 .fpv-note { margin: 0; font-family: var(--font); font-size: calc(11.5px * var(--fs, 1)); line-height: 1.5; color: rgba(234,242,255,.9); background: rgba(12,16,24,.66); border-left: 2px solid rgba(239,106,45,.9); padding: 5px 10px; border-radius: 0 6px 6px 0; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 #noteCard[data-kind=descent], #noteCard[data-kind=weather], #noteCard[data-kind=dshow] { display: flex; flex-direction: column; max-height: min(56vh, calc(100vh - var(--dock-h) - 122px - var(--sat))); overflow: hidden; }   /* 「横へ逃がす」が折り返しの外に出ると、渦から逃がせない */
 #noteCard[data-kind=descent] #noteBody, #noteCard[data-kind=weather] #noteBody, #noteCard[data-kind=dshow] #noteBody { flex: 1; min-height: 0; overflow-y: auto; }
-#noteCard[data-kind=descent] #descVals, #noteCard[data-kind=weather] #skyVals, #noteCard[data-kind=dshow] #dshowVals { position: sticky; top: 0; z-index: 1; }
+#noteCard[data-kind=descent] #descVals, #noteCard[data-kind=weather] #skyVals, #noteCard[data-kind=dshow] #dshowVals { position: sticky; top: 0; z-index: 1; background: var(--glass-strong); box-shadow: inset 0 0 0 99px var(--seg-bg), 0 6px 8px -8px var(--hair2); }   /* 半透明のままだと、送った本文が値の裏に透ける */
 #noteCard[data-kind=descent] .note-actions, #noteCard[data-kind=weather] .note-actions, #noteCard[data-kind=dshow] .note-actions { flex: none; margin: 8px -14px -12px -16px; padding: 8px 14px 12px 16px; border-top: 1px solid var(--hair); background: var(--glass-strong); }
-@media (max-width: 760px) { #noteCard[data-kind=descent], #noteCard[data-kind=weather], #noteCard[data-kind=dshow] { max-height: min(44vh, calc(100vh - var(--dock-h) - 96px - var(--sat) - var(--sab))); } }
+@media (max-height: 480px) {
+  #noteCard[data-kind=descent], #noteCard[data-kind=weather], #noteCard[data-kind=dshow] { width: min(360px, 52vw); max-height: calc(100vh - var(--dock-h) - 20px - var(--sat) - var(--sab)); }   /* 横向きは高さが足りない。横幅は余っているので縦長にする */
+  #noteCard .note-actions { margin-top: 6px; padding-top: 6px; padding-bottom: 8px; }
+  #noteCard .note-head { margin-bottom: 2px; }
+}
+@media (max-width: 760px) and (min-height: 481px) { #noteCard[data-kind=descent], #noteCard[data-kind=weather], #noteCard[data-kind=dshow] { max-height: min(44vh, calc(100vh - var(--dock-h) - 96px - var(--sat) - var(--sab))); } }
 body.fpv #viewCol { display: none; }   /* 映像に重ねない。戻り道は「外から見る」と Esc */
 body.fpv #noteCard, body.fpv #bigBand { display: none; }
 body.fpv #ctx { display: none; }   /* 操作はHUDに移す。ドックを畳むと映像が広がり、--dock-h も自動で縮む */
-body.dshow #ctx { display: none; }   /* ショーの間も畳む。やめるのは説明カードから */
+body.dshow #ctx .ctx-row > * { display: none; }
+body.dshow #ctx .ctx-row > .dshow-keep { display: flex; }   /* ショーの間もこのボタンだけ残す（カードを閉じても戻れるように） */
 body.fpv #inspector, body.fpv #lesson, body.fpv #expert, body.fpv #massBar, body.fpv #badges, body.fpv #leaders, body.fpv #labels { display: none; }   /* 映像は画面いっぱいに見せる */
 body.dshow #badges, body.dshow #leaders, body.dshow #labels { display: none; }   /* 夜空に数字を重ねない */
 /* スティックは送信機と同じく左右のすみへ。広い画面はその間に、狭い画面はその上に注記を置く */
@@ -569,7 +581,7 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
 /* 教則の逆引き（章 → 出せる画面） */
 #noteCard[data-kind=kyosoku] { max-height: 58vh; }
 @media (max-width: 760px) { #noteCard[data-kind=kyosoku] { max-height: 44vh; } }   /* スマホは 34vh の既定を上書きしてしまうので、ここで抑える */
-#noteBody .hint { font-size: calc(11.5px * var(--fs, 1)); color: var(--ink3); line-height: 1.55; margin-top: 6px; }
+#noteBody .hint { font-size: calc(11.5px * var(--fs, 1)); color: var(--ink2); line-height: 1.55; margin-top: 6px; }   /* --ink3 はガラスの上で 3.8:1 */
 .ky-seg { margin-bottom: 8px; }
 .ky-chap { margin: 8px 0 4px; flex-wrap: wrap; position: sticky; top: 0; z-index: 2; }   /* 節を読み進めても章を変えられるように貼り付ける */
 .ky-lead { color: var(--ink2); }
@@ -640,6 +652,8 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
     <div class="ctx-row" data-tab="fly" hidden>
       <button id="powerBtn" class="pill-btn primary">▶ プロペラを回す</button>
       <div class="seg small" id="powerSeg" data-full><button data-p="0.2">低速</button><button data-p="0.5" class="on">ホバー</button><button data-p="1">全開</button></div>
+      <div class="dock-group"><span class="dg-label">空もよう</span><div class="chips" id="skyChips" role="group" aria-label="空もよう"></div></div>
+      <div class="dock-group dshow-keep"><span class="dg-label">夜</span><div class="chips"><button id="showBtn" aria-pressed="false" aria-label="夜のドローンショー"><span aria-hidden="true">🎆</span> ドローンショー</button></div></div>
       <div class="chips">
         <button class="tgl" data-t="slow" aria-pressed="false"><i></i>ゆっくり</button>
         <button class="tgl" data-t="air" aria-pressed="false"><i></i>風をみる</button>
@@ -647,8 +661,6 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
         <button class="tgl" data-t="sticks" aria-pressed="false"><i></i>スティック</button>
         <button class="tgl" data-t="tilt" id="tiltBtn" hidden aria-pressed="false"><i></i>かたむき</button>
       </div>
-      <div class="dock-group"><span class="dg-label">夜</span><div class="chips"><button id="showBtn" aria-pressed="false">🎆 ドローンショー</button></div></div>
-      <div class="dock-group"><span class="dg-label">空もよう</span><div class="chips" id="skyChips" role="group" aria-label="空もよう"></div></div>
       <div class="dock-group"><span class="dg-label">降ろし方</span><div class="chips" id="descChips" role="group" aria-label="降ろし方"><button data-dz="straight" aria-pressed="false">まっすぐ降ろす</button><button data-dz="slide" aria-pressed="false">横に流しながら</button></div></div>
       <div class="dock-group"><label>飛行の原理</label><div class="chips" id="flightChips"><button data-f="hover">ホバリング</button><button data-f="climb" data-full>上昇</button><button data-f="pitch">前進</button><button data-f="roll" data-full>右へ移動</button><button data-f="yaw">右旋回</button></div></div>
     </div>
@@ -1879,7 +1891,7 @@ const WEATHER = [
     light: { key: ['#f2f2f4', 1.15], rim: ['#e8ecf4', 1.5], kick: ['#e4eaf4', 0.4], env: 1.5, exposure: 0.98, ground: { dark: 0x262a31, light: 0xcbcfd5 } },
     wind: { dir: 45, spd: 3.0, gust: 0.3, alpha: 0.2 },
     cloudName: '高層雲から乱層雲（中層雲）',
-    note: '層状の厚い雲が段々と広がり、気温と湿度が次第に高くなります。弱い雨が絶え間なく降ります。層雲系の雲では連続的な降水になります。北東の風が、前線の通過後は南寄りに変わります。',
+    note: '層状の厚い雲が段々と広がり、気温と湿度が次第に高くなります。弱い雨が絶え間なく降り、層雲系の雲では連続的な降水になる傾向があります。時には雷雨を伴うこともあります。北東の風が、前線の通過後は南寄りに変わります。',
     caution: '視程が落ちます。雲の中や濃霧では機体を目視できません。降雨時は飛行の延期や中止が望ましいとされています。' },
 
   { id: 'cold', name: '寒冷前線', title: '寒冷前線が通る', icon: '⛈', short: '積乱雲・突風・雷、通過後は北西風',
@@ -1887,7 +1899,7 @@ const WEATHER = [
     light: { key: ['#eef0f6', 1.5], rim: ['#dfe8ff', 1.9], kick: ['#dde8ff', 0.5], env: 1.25, exposure: 0.95, ground: { dark: 0x232830, light: 0xc2c7cf } },
     wind: { dir: 160, spd: 4.2, gust: 0.75, alpha: 0.26 },
     cloudName: '積乱雲（下層から発達する雲）',
-    note: '発達した積乱雲により、突風や雷を伴い、短時間で断続的に強い雨が降ります。積雲系の雲は、しゅう雨性の降水です。接近してくると南から南東よりの風、通過後は西から北西よりに風向が急変し、気温が下がります。',
+    note: '発達した積乱雲により、突風や雷を伴い、短時間で断続的に強い雨が降ります。積雲系の雲では、断続的でしゅう雨性の降水になる傾向があります。接近してくると南から南東よりの風、通過後は西から北西よりに風向が急変し、気温が下がります。',
     caution: '雷鳴が聞こえるときは飛行の延期や中止が望ましいとされています。日本付近では天気は西から東へ変わるので、西から寒冷前線を伴う低気圧が近づくときは、突風が発生する時間帯をある程度予測できます。' },
 
   { id: 'sea', name: '海風', title: '海風と夕凪', icon: '🌊', short: '昼は海から、夜は陸から。入れ替わりは凪',
@@ -1904,18 +1916,19 @@ const WEATHER = [
     wind: { dir: 200, spd: 1.2, gust: 0.2, alpha: 0.2, burst: true },
     cloudName: '積乱雲（下層から発達する雲）',
     note: '積乱雲や積雲の中に発生した強烈な下降流が地表にぶつかり、水平方向にドーナツ状に渦を巻きながら四方に広がります。機体から見ると、向かい風が急に追い風へ変わり、高度を保てなくなります。',
-    caution: '大きさは数百mから10kmにおよびます。直径4km程度以下のものをマイクロバーストといい、範囲は小さいぶん下降流はより強烈なことがあります。発生時間は数分から10分程度で、通常の観測網では探知されない局地的なものです。' },
+    caution: '大きさは数百mから10kmにおよびます。直径4km程度以下のものをマイクロバーストといい、範囲は小さいものの、下降流はダウンバーストより強烈なものがあるとされています。発生時間は数分から10分程度のものが多く、通常の観測網では探知されない局地的なものです。' },
 
   { id: 'fog', name: '霧', title: '霧', icon: '🌁', short: '視程が落ち、機体を目視できない',
     sky: { bg: ['#c6cbd2', '#d2d7dd', '#d8dce1', '#c2c6cc'], cloud: 0, sharp: 0.5, scale: 1, lo: '#c8ccd2', hi: '#e2e5ea', haze: 0.95, hazeCol: '#d9dde2', drift: [0.006, 0.003] },
     light: { key: ['#f4f5f7', 0.9], rim: ['#eef1f6', 1.4], kick: ['#eef1f6', 0.35], env: 1.7, exposure: 1.0, ground: { dark: 0x3a4049, light: 0xdcdfe4 } },
     wind: { dir: 20, spd: 1.0, gust: 0.15, alpha: 0.1, fog: 9 },
     cloudName: '層雲（下層雲）',
-    note: '霧の中では機体を目視できません。目視とは自分の目で機体と周囲を常に監視することで、双眼鏡やモニターは含まれません。',
-    caution: '霧の発生時は飛行の延期や中止が望ましいとされています。' },
+    note: '霧の中では機体を目視できません。教則のいう「目視」は飛行させる者が自分の目で見ることで、双眼鏡やモニター（FPVを含む）による監視も、補助者による監視も含みません（眼鏡・コンタクトレンズの使用は含みます）。',
+    caution: '教則は、飛行状況や物件との安全な距離を目視で確認できない<b>雲中や濃霧等の気象状態では飛行させてはならない</b>としています。あわせて、降雨時・降雪時・霧の発生時・雷鳴が聞こえるときは飛行の延期や中止が望ましい、ともされています。' },
 ];
 // 風の読み方（どの空でも同じ注記）
-const WIND_NOTE = '風向は<b>風が吹いてくる方向</b>（北の風＝北から南へ吹く風）。風速は<b>観測時の前10分間の平均</b>で、平均風速の最大値が最大風速、瞬間風速の最大値が最大瞬間風速です。風力は気象庁風力階級表（ビューフォート風力階級）で0〜12の13階級。風は地面の摩擦を受けるため、一般に上空では強く、地表に近づくほど弱くなります。地表の粗度が大きいほど、高さによる風速の変化は大きくなります。';
+const WIND_LEAD = '風向は<b>風が吹いてくる方向</b>（北の風＝北から南へ吹く風）。風速は<b>観測時の前10分間の平均</b>です。';
+const WIND_NOTE = '平均風速の最大値が最大風速、瞬間風速の最大値が最大瞬間風速です。風力は気象庁風力階級表（ビューフォート風力階級）で0〜12の13階級。風は地面の摩擦を受けるため、一般に上空では強く、地表に近づくほど弱くなります。変化の度合いは地表の粗度や風速の大きさによって異なり、一般に地表の粗度が大きいほど、高さによる風速の変化は大きくなります。';
 // ビューフォート風力階級（教則の「0〜12の13階級」。境界は気象庁の表）
 const BEAUFORT = [0.3, 1.6, 3.4, 5.5, 8.0, 10.8, 13.9, 17.2, 20.8, 24.5, 28.5, 32.7];
 const beaufort = (v) => { let n = 0; while (n < BEAUFORT.length && v >= BEAUFORT[n]) n++; return n; };
@@ -1924,19 +1937,19 @@ const beaufort = (v) => { let n = 0; while (n < BEAUFORT.length && v >= BEAUFORT
 // 教則は条文番号をほとんど書いていない（催し・夜間の条番号は審査要領が出典）。ここでは条文を引かず、
 // 「教則にこう書かれている」の形で止める。該当の有無は総合的に判断されるので、判定は書かない。
 const DSHOW_REG = {
-  lead: '教則は「多数の者の集合する催し」に<b>該当する例</b>として、祭礼や花火大会と並べて<b>ドローンショー</b>を挙げています。ただし「自社敷地内、無人の競技場内等、第三者の立入管理措置が行われていることが明白である場所での事前練習や企業向けの配信用撮影等を除く」という括弧書きが付きます。該当するかどうかは、人数や規模だけでなく、特定の場所や日時に開催されるかどうかによって総合的に判断されるとされています。',
+  lead: '教則は「多数の者の集合する催し」に<b>該当する例</b>として、祭礼や花火大会と並べて<b>ドローンショー</b>を挙げています。ただし「自社敷地内、無人の競技場内等、第三者の立入管理措置が行われていることが明白である場所での事前練習や企業向けの配信用撮影等を除く」という括弧書きが付きます。該当するかどうかは、催し場所上空で機体が落下することにより地上等の人に危害を及ぼすことを防止するという趣旨に照らし、人数や規模だけでなく、特定の場所や日時に開催されるかどうかによって総合的に判断されるとされています。',
   items: [
-    '催し場所上空は<b>カテゴリーⅡA飛行</b>に区分されます。技能証明を受けた者が機体認証を受けた機体を飛行させる場合<b>であっても</b>、運航管理の方法について国土交通大臣の審査を受け、許可・承認を受けることが求められます。',
+    '催し場所上空の飛行は、<b>立入管理措置を講じたうえで行う場合</b>、リスクの高いものとして<b>カテゴリーⅡA飛行</b>に位置づけられます（立入管理措置を講じない第三者上空の飛行はカテゴリーⅢです）。ⅡAでは、技能証明を受けた者が機体認証を受けた機体を飛行させる場合<b>であっても</b>、あらかじめ運航管理の方法について国土交通大臣の審査を受け、飛行の許可・承認を受けることが求められます。',
     '催しの上空では、<b>風速5m/s以上の場合は飛行を中止すること</b>と、機体が第三者及び物件に接触した場合の<b>危害を軽減する構造</b>を用意していることが必要とされています。',
-    '夜間（日没から日出までの間）に飛行させる場合は<b>承認が必要</b>とされています。日没・日出の時刻は地域により異なるため、事前に確認します。技能証明で飛ばすときは「昼間飛行の限定」の解除も確認します。',
+    '夜間（日没から日出までの間）の飛行は特定飛行で、原則は<b>承認</b>の対象です。日出・日没は国立天文台が発表する時刻で、地域により異なるため事前に確認します。この場面は催し場所上空でもあるため、いずれにせよ運航管理の方法の審査を受けて許可・承認を受けることになります。なお教則は、技能証明の限定（昼間（日中）飛行／目視内飛行）について「飛行の許可・承認を受けて特定飛行を行う場合を除く」としています。',
     '夜間の必須装備は、機体の<b>姿勢及び方向が正確に視認できる灯火</b>です。ただし飛行範囲が照明等で十分照らされている場合はこの限りではない、という但し書きも置かれています。灯火は夜間の要件、危害を軽減する構造は催しの要件で、出どころが違います。',
-    '夜間飛行では<b>原則として目視外飛行は実施せず</b>、機体の向きを視認できる灯火が装備された機体を使用するとされています。離着陸地点や回避すべき障害物には照明が必要です。',
+    '夜間飛行では<b>原則として目視外飛行は実施せず</b>、機体の向きを視認できる灯火が装備された機体を使用するとされています。操縦者は事前に、第三者の立入りの無い安全な場所で<b>訓練を実施すること</b>、離着陸地点を含め回避すべき障害物などには安全確保のため照明が必要であることも挙げられています。',
     '<b>許可・承認の有無によらず</b>、想定していない催しの開催が明らかになり、飛行場所に第三者の立入り又はそのおそれを確認したときは、直ちに飛行を停止し、経路の変更や安全な場所への着陸その他の必要な措置を講じなければならないとされています。',
     '1人の操縦者が複数機を同時に飛ばすことについて、<b>教則に記述はありません</b>。教則が扱うのは、自動操縦（プログラムにより自動的に操縦を行うこと）と、操縦と安全管理の役割を分ける運航体制までです。',
     '100グラム以上の機体は1機ずつ国の登録を受け、登録記号を表示し、一部の例外を除きリモートID機能を備えることが求められます。台数分すべてが対象です。',
   ],
-  src: '教則第5版 3.1.2（催し場所上空・夜間）・4.2.1（夜間の装備）・5.2.5（自動操縦）・6.1（運航体制）・6.4.1（夜間の運航）',
-  outside: '教則の外: 飛行高度に応じた立入禁止区画の表（飛行範囲の外周から30〜70mなど）は、教則ではなく国土交通省の<b>審査要領</b>に置かれています。多数機同時運航のガイドライン（国土交通省）は、ドローンショーを<b>対象外</b>としています。',
+  src: '教則第5版 3.1.1（自動操縦の定義）・3.1.2（催し場所上空・夜間・立入管理措置）・4.2.1（夜間の装備）・5.2.2（手動操縦及び自動操縦）・6.1.1（安全マージン・運航体制）・6.4.1（夜間の運航）',
+  outside: '教則の中: 6.1.1 は、飛行領域に<b>危険半径（高度と同じ数値、または30mのいずれか長い方）</b>を加えた範囲を、立入管理措置を講じて無人地帯としたうえで飛行する、としています。教則の外: 飛行高度に応じた立入禁止区画の表（飛行範囲の外周から30〜70mなど）は、国土交通省の<b>審査要領</b>に置かれています。多数機同時運航のガイドライン（国土交通省）がドローンショーを対象外としている点も、教則の外の資料です。',
 };
 
 // ===== 手続き生成テクスチャと材質 (v2: 製品レンダリング品質) =====
@@ -6201,7 +6214,7 @@ function weatherStateText() {
   const at = windAt(Math.max(body.py, 0.05), body.px, body.pz);
   const bits = [
     `<span>風向 ${windName(m.dir)}（${m.dir.toFixed(0)}°）</span>`,
-    `<span>風速 ${m.spd.toFixed(1)} m/s・風力${beaufort(m.spd)}</span>`,
+    `<span>風速（高さ1m） ${m.spd.toFixed(1)} m/s・風力${beaufort(m.spd)}</span>`,
     `<span>瞬間 ${gustV.toFixed(1)} m/s</span>`,
     `<span>機体の高さ ${body.py.toFixed(2)} m で ${at.spd.toFixed(1)} m/s</span>`,
   ];
@@ -6220,8 +6233,9 @@ function renderWeather() {
     html: `<div id="skyVals" class="vals live" aria-live="off"><i class="dot" aria-hidden="true"></i></div>
       <p>${w.note}</p>
       <p class="caveat">${w.caution}</p>
+      <p class="hint">${WIND_LEAD}</p>
       <p class="hint" data-full>${WIND_NOTE}</p>
-      <small class="ky-src">教則${KYOSOKU.ver} 6.2 気象／この教材の風は、箱庭の広さに合わせて縮めています</small>`,
+      <small class="ky-src">教則${KYOSOKU.ver} 6.2 気象／この教材の風は箱庭の広さに合わせて縮めてあり、風速は高さ1mの値です</small>`,
     actions: [{ label: '空をもどす', fn: () => setWeather(null) }],
   });   /* ✕ ではカードだけ閉じる。空は「場」なので、戻すのはチップかこのボタンで */
   updateWeatherVals();
@@ -6230,7 +6244,7 @@ function renderWeather() {
 function initWeather() {
   const chips = $('#skyChips');
   if (chips) {
-    chips.innerHTML = WEATHER.map(w => `<button data-sky="${w.id}" aria-pressed="false" title="${w.short}">${w.icon} ${w.name}</button>`).join('');
+    chips.innerHTML = WEATHER.map(w => `<button data-sky="${w.id}" aria-pressed="false" title="${w.short}" aria-label="${w.name}（${w.short}）"><span aria-hidden="true">${w.icon}</span> ${w.name}</button>`).join('');
     chips.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; setWeather(b.dataset.sky); });
   }
   window.__weather = { weather, setWeather, windAt, windMean, beaufort, windName, WEATHER, hasFog: () => !!scene.fog };
@@ -6238,7 +6252,7 @@ function initWeather() {
 
 // ===== 夜のドローンショー =====
 // 多数の機体が夜空で図形を描く。見世物であると同時に、教則では
-// 「多数の者の集合する催し」の例そのもの（3.1.1）＋夜間飛行（3.1.2 / 6.4）の場面でもある。
+// 「多数の者の集合する催し」の該当する例そのもの（3.1.2(2)2)d.）＋夜間飛行（3.1.2(2)2)a. / 4.2.1 / 6.4.1）の場面でもある。
 // 1機ずつ手で操縦しているのではなく、あらかじめ決めた経路を自動で飛ばしている、という点も見せる。
 const dshow = {
   on: false, t: 0, n: 0, pts: null, geo: null, mat: null,
@@ -6366,6 +6380,7 @@ function dshowOn(on) {
       const dir = new THREE.Vector3(0.32, 0.40, 1).normalize(), aim = new THREE.Vector3(0, tall ? 1.25 : 1.45, 0);   /* 見上げるほど空が広い */   /* 観客の位置から見上げる。隊列と地上の機体を1枚に入れる */
       flyTo(aim.clone().addScaledVector(dir, (tall ? 9.2 : 10.6) * viewScale()), aim, 1100, false); }
     renderDshow();
+    { const b = $('#noteCard .note-actions button'); if (b) b.focus({ preventScroll: true }); }   /* 押したボタンは畳まれて消えるので、行き先を渡す */
     if (!store.get('dshowSeen')) { store.set('dshowSeen', '1'); showToast('図形は自動で切り替わります。1機ずつ操縦しているのではありません', 4600); }
   } else {
     dshow.on = false;
@@ -6382,6 +6397,7 @@ function dshowOn(on) {
     setBodyMode('idle'); syncBodyMode();
     if ($('#noteCard').dataset.kind === 'dshow') renderNote(null);
     camHome();
+    { const b = $('#showBtn'); if (b) b.focus({ preventScroll: true }); }
   }
   const b = $('#showBtn'); if (b) { b.classList.toggle('on', dshow.on); b.setAttribute('aria-pressed', String(dshow.on)); }
 }
@@ -6404,6 +6420,16 @@ function dshowSky() {
   S.shadowDirty = S.csDirty = S.aoDirty = true;
 }
 
+// 次の図形へ。位置と色の「行き先」を差し替えるだけで、動かすのは stepDshow
+function dshowAdvance() {
+  const n = dshow.n;
+  dshow.from.set(dshow.pos); dshow.colFrom.set(dshow.col);
+  dshow.fig = (dshow.fig + 1) % DSHOW_FIGS.length;
+  dshowShape(DSHOW_FIGS[dshow.fig].id, n, dshow.to);
+  dshowSetColor(dshow.fig, dshow.colTo);
+  dshow.phase = 'move'; dshow.figT = 0; renderDshow();
+}
+
 // ---------- 毎フレーム ----------
 function stepDshow(dtReal) {
   if (!dshow.on) return;
@@ -6412,12 +6438,7 @@ function stepDshow(dtReal) {
   backdropMat.uniforms.uStar.value = dshow.star;
   backdropMat.uniforms.uT.value = dshow.t;
   const n = dshow.n, pos = dshow.pos, from = dshow.from, to = dshow.to;
-  if (dshow.phase === 'hold' && dshow.figT > DSHOW_HOLD) {
-    from.set(pos); dshow.colFrom.set(dshow.col);
-    dshow.fig = (dshow.fig + 1) % DSHOW_FIGS.length;
-    dshowShape(DSHOW_FIGS[dshow.fig].id, n, to);
-    dshowSetColor(dshow.fig, dshow.colTo);
-    dshow.phase = 'move'; dshow.figT = 0; renderDshow();
+  if (dshow.phase === 'hold' && dshow.figT > DSHOW_HOLD && !reduceMotion) { dshowAdvance();
   } else if (dshow.phase === 'move' && dshow.figT > DSHOW_MOVE) {
     dshow.phase = 'hold'; dshow.figT = 0; pos.set(to); dshow.col.set(dshow.colTo);
   }
@@ -6448,6 +6469,12 @@ function stepDshow(dtReal) {
 }
 
 // ---------- 説明カード ----------
+// つぎの図形へ（自動送りと同じ手順。動きを減らす設定の人はこれで進める）
+function dshowNext() {
+  if (!dshow.on || dshow.phase !== 'hold') return;
+  dshow.figT = DSHOW_HOLD + 1;
+  const rm = reduceMotion; if (rm) { dshowAdvance(); }
+}
 function updateDshowVals() {
   const el = $('#dshowVals'); if (!el || $('#noteCard').hidden) return;
   const f = DSHOW_FIGS[dshow.fig];
@@ -6465,25 +6492,25 @@ function renderDshow() {
   renderNote({
     kind: 'dshow', title: '夜のドローンショー', badge: f.name,
     html: `<div id="dshowVals" class="vals live" aria-live="off"><i class="dot" aria-hidden="true"></i></div>
-      <p id="dshowBody">${f.note}</p>
+      <p id="dshowBody" aria-live="off">${f.note}</p>
       ${dshowRegHtml()}`,
-    actions: [{ label: 'やめる', fn: () => dshowOn(false) }],
+    actions: [{ label: 'つぎの図形 ›', fn: () => dshowNext() }, { label: 'やめる', fn: () => dshowOn(false) }],
   });
   updateDshowVals();
 }
 // 制度。ショーは教則が「多数の者の集合する催し」の例に挙げている場面そのもの
 function dshowRegHtml() {
-  return `<details open><summary>この場面にかかわる制度</summary>
+  return `<details${regOn() && innerWidth > 760 ? ' open' : ''}><summary>この場面にかかわる制度（${DSHOW_REG.items.length}項目）</summary>
     <p class="caveat">${DSHOW_REG.lead}</p>
     <ul class="check">${DSHOW_REG.items.map(x => `<li>${x}</li>`).join('')}</ul>
     <p class="hint">${DSHOW_REG.outside}</p>
-    <small class="ky-src">${DSHOW_REG.src}</small></details>`;
+    <small class="ky-src">この教材の隊列は箱庭の広さに合わせて縮めています（実際のショーは数百〜数千機で、高度も桁が違います）／${DSHOW_REG.src}</small></details>`;
 }
 function onResizedDshow() { if (dshow.on) dshowLayout(); }
 function initDshow() {
   const b = $('#showBtn');
   if (b) b.addEventListener('click', () => dshowOn(!dshow.on));
-  window.__dshow = { dshow, dshowOn, DSHOW_FIGS, dshowShape, skyUniforms: () => { const u = backdropMat.uniforms; return { star: u.uStar.value, cloud: u.uCloud.value, wall: u.uWall.value, haze: u.uHaze.value }; } };
+  window.__dshow = { dshow, dshowOn, dshowNext, DSHOW_FIGS, dshowShape, skyUniforms: () => { const u = backdropMat.uniforms; return { star: u.uStar.value, cloud: u.uCloud.value, wall: u.uWall.value, haze: u.uHaze.value }; } };
 }
 
 // ===== 共有リンク（いま見えている画面をURLにする） =====
