@@ -27,7 +27,8 @@ $('#noteClose').addEventListener('click', () => { const c = $('#noteCard'); if (
 // 「同時に1つ」の対象（質問・飛行デモ・用途・重さ・シアター・もしも・クイズ）を、keep 以外すべて止める
 function stopOthers(keep, arg) {
   if (keep !== 'quiz' && typeof quiz !== 'undefined' && quiz.active) quizStop();
-  if (keep !== 'theater' && theater.active) stopTheaterUI();
+  if (typeof codexClearGlow === 'function') codexClearGlow();   // 今日の一部品の光を先に消す(あとから塗る色を消してしまわないように)
+  if (keep !== 'theater' && (theater.active || theater.done)) stopTheaterUI();
   if (keep !== 'whatif' && whatif.active) stopWhatifUI();
   // 質問の act が起こす飛行デモは質問の一部なので、そのときは質問を残す
   const qOwnsFlight = keep === 'flight' && S.question && S.question.act && S.question.act.flight === arg;
@@ -39,7 +40,7 @@ function stopOthers(keep, arg) {
 }
 function setTab(tab) {
   $('#coach').hidden = true;
-  if (theater.active && tab !== 'theater') { stopTheaterUI(); }
+  if ((theater.active || theater.done) && tab !== 'theater') { stopTheaterUI(); }
   if (whatif.active && tab !== 'theater') { stopWhatifUI(); }
   S.tab = tab; segSet($('#tabs'), 'tab', tab);
   for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== tab;
@@ -295,7 +296,7 @@ function setUse(id) {
   applyMode();
   const addKg = num(u.weight), baseKg = 2.4, t0 = 20, t1 = num(u.time);
   const html = `<p><b>${u.tagline}</b></p><p>${u.how}</p>
-    <div class="bar"><span>重さ</span><i class="cmp" style="--w0:${baseKg / (baseKg + addKg) * 100}%;--w:100%"></i><span>${baseKg}kg + ${u.weight}</span></div>
+    <div class="bar"><span>重さ</span><i class="cmp" style="--w0:${baseKg / (baseKg + addKg) * 100}%;--w:100%"></i><span>${baseKg} kg + ${String(u.weight).replace(/^\+/, '')}</span></div>
     <div class="bar"><span>飛べる時間</span><i class="cmp" style="--w0:100%;--w:${t1 / t0 * 100}%"></i><span>${u.time}</span></div>
     <div class="keys"><span><i style="background:var(--ink3)"></i>そのまま</span><span><i style="background:${'#ef6a2d'}"></i>大きく・強く</span><span><i style="background:#3b7df7;opacity:.6"></i>新しく付ける</span>${u.drop ? '<span><i style="background:#9aa0a8"></i>外す</span>' : ''}</div>
     ${S.depth === 'full' ? `<p style="margin-top:8px;font-size:12.5px;color:var(--ink2)">追加: ${u.ghost.filter((g, i, a) => a.findIndex(x => x.name === g.name) === i).map(g => g.name).join('・')}<br>強化: ${u.up.map(k => PARTS[k].name).join('・')}</p>` : ''}`;
@@ -314,7 +315,7 @@ function startWhatifUI(id) {
   for (const b of $$('#whatifCards button')) b.classList.toggle('on', b.dataset.w === id);
 }
 function stopWhatifUI() {
-  stopWhatif(true); document.body.classList.remove('theater'); $('#inspector').inert = false; $('#topbar').inert = false;
+  stopWhatif(true); document.body.classList.remove('theater'); $('#inspector').inert = false; $('#topbar').inert = false; camHome();
   setPower(0, true); renderNote(null); S.tab = 'mishap'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'mishap';
   for (const b of $$('#whatifCards button')) b.classList.remove('on'); syncBodyMode();
 }
@@ -339,7 +340,7 @@ function startTheaterUI(id) {
   $('#coach').hidden = true; startTheater(id); document.body.classList.add('theater'); $('#inspector').inert = true; $('#topbar').inert = true; $('#inspector').classList.remove('open'); S.tab = 'theater'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'theater'; segSet($('#tabs'), 'tab', 'mishap');
   for (const b of $$('#mishapCards button')) b.classList.toggle('on', b.dataset.m === id);
 }
-function stopTheaterUI() { stopTheater(true); document.body.classList.remove('theater'); $('#inspector').inert = false; $('#topbar').inert = false; setPower(0, true); renderNote(null); S.tab = 'mishap'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'mishap'; for (const b of $$('#mishapCards button')) b.classList.remove('on'); syncBodyMode(); }
+function stopTheaterUI() { stopTheater(true); document.body.classList.remove('theater'); $('#inspector').inert = false; $('#topbar').inert = false; camHome(); setPower(0, true); renderNote(null); S.tab = 'mishap'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'mishap'; for (const b of $$('#mishapCards button')) b.classList.remove('on'); syncBodyMode(); }
 $('#thQuit').addEventListener('click', () => { if (whatif.active) stopWhatifUI(); else stopTheaterUI(); });
 $('#thNext').addEventListener('click', () => {
   if (whatif.active) { if (whatif.phase === 3) stopWhatifUI(); else whatifNext(); return; }
@@ -354,13 +355,13 @@ function onTheaterChanged() {
   const d = theater.def; const brokenList = theater.red.length ? `<div class="chips" style="margin-top:8px">${[...new Set(theater.red.map(p => p.key))].map(k => `<button data-bk="${k}">${PARTS[k].name}</button>`).join('')}</div>` : '';
   renderNote({ kind: 'theater', title: d.short, badge: TH_STAGES[si], html: `<p>${theater.subtitle}</p>${theater.phase === 'broken' ? brokenList : ''}${theater.phase === 'prevent' ? `<p style="margin-top:6px;color:var(--ink2)">${d.result}</p>` : ''}`, actions: theater.phase === 'prevent' ? [{ label: `${PARTS[d.checkPart].name}の点検を見る`, fn: () => { setDepth('full'); select(partsOf(d.checkPart)[0], true); } }] : [] });
   for (const b of $$('#noteBody [data-bk]')) b.onclick = () => select(partsOf(b.dataset.bk)[0], true);
-  if (theater.done) { document.body.classList.remove('theater'); }
+  if (theater.done) { document.body.classList.remove('theater'); $('#inspector').inert = false; $('#topbar').inert = false; }
 }
 
 // ---------- 仮想スティック / 傾け ----------
 const STICK_MAP = { 1: { L: { v: 'pitch', h: 'yaw' }, R: { v: 'thr', h: 'roll' } }, 2: { L: { v: 'thr', h: 'yaw' }, R: { v: 'pitch', h: 'roll' } } };
 const AXIS_LBL = { pitch: ['前', '後'], yaw: ['←向き', '向き→'], thr: ['上', '下'], roll: ['←左', '右→'] };
-let stickMode = store.get('stickMode') || '1';
+let stickMode = ['1', '2'].includes(store.get('stickMode')) ? store.get('stickMode') : '1';
 function setSticks(on) { S.sticks = on; for (const x of $$('.tgl[data-t=sticks]')) x.classList.toggle('on', on); $('#sticks').hidden = !on; if (on) { if (S.power === 0) setPower(0.5, true); if (!store.get('stickSeen')) { showToast('スティックをたおすと、4つのモーターがそれぞれ違う速さになります。', 3600); store.set('stickSeen', '1'); } } else { body.stick.active = false; body.stick.x = body.stick.y = body.stick.yaw = body.stick.thr = 0; } labelSticks(); }
 function labelSticks() { for (const side of ['L', 'R']) { const map = STICK_MAP[stickMode][side]; const el = $(side === 'L' ? '#stickL' : '#stickR'); el.querySelector('.lbl.t').textContent = AXIS_LBL[map.v][0]; el.querySelector('.lbl.b').textContent = AXIS_LBL[map.v][1]; el.querySelector('.lbl.l').textContent = AXIS_LBL[map.h][0]; el.querySelector('.lbl.r').textContent = AXIS_LBL[map.h][1]; } }
 $('#modeSeg2').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; stickMode = b.dataset.m; store.set('stickMode', stickMode); segSet($('#modeSeg2'), 'm', stickMode); labelSticks(); });
@@ -482,7 +483,7 @@ $('#expSlider').addEventListener('input', e => { S.exposureMul = e.target.value 
 // モバイルシート
 $('#inspToggle').addEventListener('click', () => (S.lesson ? $('#lesson') : S.expert ? $('#expert') : $('#inspector')).classList.add('open'));
 $('#inspClose').addEventListener('click', () => $('#inspector').classList.remove('open'));
-{ const insp = $('#inspector'), grab = $('.grabber'); let drag = null;
+{ const insp = $('#inspector'), grab = insp.querySelector('.grabber'); let drag = null;   /* $('.grabber') だと DOM 先頭の専門シートのつまみを掴んでしまう */
   grab.addEventListener('pointerdown', e => { drag = { y0: e.clientY, hist: [[e.clientY, performance.now()]] }; grab.setPointerCapture(e.pointerId); insp.classList.add('dragging'); });
   grab.addEventListener('pointermove', e => { if (!drag) return; const dy = Math.max(0, e.clientY - drag.y0); insp.style.transform = `translateY(${dy}px)`; drag.hist.push([e.clientY, performance.now()]); if (drag.hist.length > 6) drag.hist.shift(); });
   const end = e => { if (!drag) return; const dy = Math.max(0, e.clientY - drag.y0); const h0 = drag.hist[0], h1 = drag.hist[drag.hist.length - 1]; const v = (h1[0] - h0[0]) / Math.max(1, h1[1] - h0[1]); insp.classList.remove('dragging'); insp.style.transform = ''; if (v > 0.5 || dy > insp.offsetHeight * 0.4) insp.classList.remove('open'); drag = null; };
@@ -495,6 +496,6 @@ function onResized() {
   if (S.scale) { if (D.personGroup) D.personGroup.visible = !compact(); renderMassBar(S.selected && S.selected.key); } for (const L of labelEls) L.w = 0; if (!S.labelsTouched) { S.labels = !narrow(); for (const x of $$('.tgl[data-t=labels]')) x.classList.toggle('on', S.labels); } }
 function initUI() {
   buildUseChips(); buildAsk(); buildMishapCards(); buildWhatifCards(); labelSticks(); segSet($('#modeSeg2'), 'm', stickMode);
-  const d = store.get('depth') || 'simple'; setDepth(d);
+  const d = store.get('depth') === 'full' ? 'full' : 'simple'; setDepth(d);
   if (d === 'simple' && !store.get('coach')) setTimeout(() => showCoach(FIRST_QUESTION.q, FIRST_QUESTION.hint, () => { store.set('coach', '1'); askQuestion(FIRST_QUESTION.qid); }, () => store.set('coach', '1')), 1200);
 }

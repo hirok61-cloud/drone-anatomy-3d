@@ -254,7 +254,7 @@ function applyMode() {
     const real = S.mode === 'normal' || S.mode === 'cut' || keepReal(m);
     if (!real && S.mode === 'xray') { m.material = xrayMat; m.castShadow = false; }
     else if (!real && isWireMode()) { m.material = paperMat; m.castShadow = false; }
-    else { m.material = m.userData.tint || m.userData.origMat; m.castShadow = m.userData.castShadow && S.shadows; }
+    else { m.material = m.userData.tint || (m.userData.papered ? wearPaper : m.userData.origMat); m.castShadow = m.userData.castShadow && S.shadows; }
     if (m.userData.wireClone) m.userData.wireClone.visible = !real && isWireMode();
   }
   const cutOn = S.mode === 'cut';
@@ -287,7 +287,8 @@ function applyExplode() {
 }
 
 // ---------- 時間伸縮 ----------
-function setTimeScale(ts, tauIn) { S.tsTarget = ts; S.slow = ts < 0.99; S.tsTauIn = tauIn != null ? tauIn : 0.40; }
+function setTimeScale(ts, tauIn) { S.tsTarget = ts; S.slow = ts < 0.99; S.tsTauIn = tauIn != null ? tauIn : 0.40;
+  for (const x of $$('.tgl[data-t=slow]')) { x.classList.toggle('on', S.slow); x.setAttribute('aria-pressed', String(S.slow)); } }   // ボタンの見た目を1か所で合わせる
 function stepTimeScale(dt) {
   const target = Math.log(S.tsTarget), tau = S.tsTarget < S.ts ? (S.tsTauIn || 0.40) : 0.40;
   S.logTs += (target - S.logTs) * (1 - Math.exp(-dt / tau)); if (Math.abs(target - S.logTs) < 0.002) S.logTs = target; S.ts = Math.exp(S.logTs);
@@ -297,6 +298,7 @@ function stepTimeScale(dt) {
 const cam = { v: new THREE.Vector3(), tv: new THREE.Vector3(), last: new THREE.Vector3(), vel: new THREE.Vector3() };
 function flyTo(pos, target, dur = 900, pull = true) {
   controls.autoRotate = false;
+  controls.maxDistance = Math.max(camMax(), pos.distanceTo(target) * 1.02);   // 台本が指定した引きは OrbitControls の上限に切られないようにする
   if (reduceMotion) { camera.position.copy(pos); controls.target.copy(target); controls.update(); return; }
   const d0 = camera.position.distanceTo(controls.target), d1 = pos.distanceTo(target), dq = controls.target.distanceTo(target);
   const doPull = pull && (d0 / d1 < 0.7 || d0 / d1 > 1.6 || dq > 0.10);
@@ -319,10 +321,13 @@ function stepCamera(dt) {
   // 防護: 非有限値や暴走の復帰
   const p = camera.position, t = controls.target;
   if (!Number.isFinite(p.x + p.y + p.z + t.x + t.y + t.z)) { S.camSpring = null; S.camInertia = null; cam.v.set(0, 0, 0); cam.tv.set(0, 0, 0); t.set(0, 0, 0); p.set(0.78, 0.50, -0.82); }
-  if (t.length() > 3) t.clampLength(0, 3); const off = tmpV.copy(p).sub(t); if (off.length() > 4) p.copy(t).addScaledVector(off.normalize(), 4);
+  if (t.length() > 3) t.clampLength(0, 3);
+  const lim = Math.max(4, controls.maxDistance); const off = tmpV.copy(p).sub(t); if (off.length() > lim) p.copy(t).addScaledVector(off.normalize(), lim);   // 上限は画面の縦横比と台本の引きに合わせる(固定4mだと縦画面で場面が枠に入らない)
 }
 function onCamInterrupt() { if (S.camSpring) { S.camSpring = null; S.camInertia = { v: cam.v.clone().clampLength(0, 2), t: 0.3 }; cam.v.set(0, 0, 0); cam.tv.set(0, 0, 0); } }
 function viewScale() { const a = W / H; return a < 1 ? Math.min(2.0, Math.pow(1 / a, 0.9)) : 1; }
+function camMax() { return 3.2 * viewScale(); }   // 縦長の画面ほど引かないと同じ画が入らない
+function camHome() { controls.maxDistance = camMax(); if (camera.position.distanceTo(controls.target) > camMax() * 0.75) focusOn([D.root], { pull: true }); }   // 広い場面(人が近づく等)から戻ったら機体の枠に戻す
 function focusOn(objs, opts = {}) {
   const box = new THREE.Box3(), tb = new THREE.Box3(), pts = [];   // 本体メッシュだけで枠を決める(気流・ゴースト・スプライトは除外)。各メッシュの8隅を集めて実投影で距離を決める
   for (const o of objs) { o.updateWorldMatrix(true, true); o.traverseVisible(c => { if (!c.isMesh || c.userData.noPart || !c.geometry) return; if (!c.geometry.boundingBox) c.geometry.computeBoundingBox(); const b = c.geometry.boundingBox; if (c.isInstancedMesh) { if (!c.boundingBox) c.computeBoundingBox(); tb.copy(c.boundingBox).applyMatrix4(c.matrixWorld); } else tb.copy(b).applyMatrix4(c.matrixWorld); box.union(tb); for (let i = 0; i < 8; i++) pts.push(new THREE.Vector3(i & 1 ? tb.max.x : tb.min.x, i & 2 ? tb.max.y : tb.min.y, i & 4 ? tb.max.z : tb.min.z)); }); } if (box.isEmpty()) return;
@@ -332,7 +337,7 @@ function focusOn(objs, opts = {}) {
   const fwd = dir.clone().negate(), right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize(), up = new THREE.Vector3().crossVectors(right, fwd).normalize();
   const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), tanH = tanV * Math.max(0.6, camera.aspect); let need = 0.05; const rel = new THREE.Vector3();
   for (const q of pts) { rel.copy(q).sub(sph.center); const t = rel.dot(dir); need = Math.max(need, Math.abs(rel.dot(right)) / tanH + t, Math.abs(rel.dot(up)) / tanV + t); }
-  const dist = clamp((need * (opts.margin || 1.18) + 0.02) * viewScale(), 0.12, opts.max || 3.2);
+  const dist = clamp((need * (opts.margin || 1.18) + 0.02) * viewScale(), 0.12, (opts.max || 3.2) * viewScale());
   const dur = 600 + 500 * clamp((camera.position.distanceTo(sph.center.clone().addScaledVector(dir, dist)) + controls.target.distanceTo(sph.center)) / 0.6, 0, 1);
   flyTo(sph.center.clone().addScaledVector(dir, dist), sph.center, dur, opts.pull !== false);
 }
@@ -396,6 +401,7 @@ function resize() {
   renderer.setSize(W, H, false); composer.setSize(W, H);
   if (!narrow()) { const inspW = 344 + 40; camera.aspect = (W - inspW) / H; camera.setViewOffset(W - inspW, H, 0, 0, W, H); } else { camera.clearViewOffset(); camera.aspect = W / H; }
   camera.updateProjectionMatrix();
+  controls.maxDistance = Math.max(camMax(), camera.position.distanceTo(controls.target));
   if (typeof onResized === 'function') onResized();
   S.aoDirty = true;
 }

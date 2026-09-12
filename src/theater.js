@@ -22,7 +22,8 @@ function startTheater(id) {
   if (typeof onTheaterChanged === 'function') onTheaterChanged();
 }
 function stopTheater(silent) {
-  if (!theater.active) return;
+  if (!theater.active && !theater.done) return;   // 完走(done)後も後始末できるようにする
+  theater.done = false;
   for (const p of theater.flagged) setTint(p, RED, 0); for (const p of theater.red) setTint(p, RED, 0);
   for (const p of D.parts) { if (p.anim) { p.anim = null; p.animReset = true; } }
   for (const d of theater.debris) { scene.remove(d.mesh); } theater.debris = [];

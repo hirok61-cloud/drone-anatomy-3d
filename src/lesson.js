@@ -38,6 +38,7 @@ function stopLesson(silent) {
 function resetStage() {
   if (quiz.active) quizStop();
   if (theater.active) stopTheaterUI();
+  if (S.expert && typeof expertStop === 'function') expertStop(true);
   if (whatif.active) stopWhatifUI();
   if (S.question) { clearQuestion(); renderNote(null); }
   if (S.flight) setFlight(null);

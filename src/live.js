@@ -46,7 +46,7 @@ function langEntry(key) { const L = I18N[S.lang]; return L && L.parts ? L.parts[
 function partName(pk) {
   const key = pk && pk.key ? pk.key : pk; const d = PARTS[key]; if (!d) return '';
   const e = langEntry(key);
-  if (S.depth === 'simple') return (e && e.name) || SIMPLE_NAME[key] || d.name;
+  if (S.depth === 'simple') return (e && e.name) || (S.lang === 'en' ? (d.en || d.name) : (SIMPLE_NAME[key] || d.name));
   return S.lang === 'en' ? (d.en || d.name) : d.name;
 }
 function firstSentence(s) { const i = s.indexOf('。'); return i > 0 ? s.slice(0, i + 1) : s; }
@@ -57,7 +57,7 @@ function partRole(key) {
 }
 function partAnalogy(key) { const e = langEntry(key), sd = SIMPLE[key]; return (e && e.analogy) || (sd && sd.analogy) || ''; }
 function qText(q) { const L = I18N[S.lang]; return (L && L.questions && L.questions[q.id]) || q.q; }
-function langNote() { return S.lang === 'en' ? '<p class="lang-note">— Japanese only —</p>' : ''; }
+function langNote() { return S.lang === 'en' ? '<p class="lang-note">— Japanese only —</p>' : S.lang === 'easy' ? '<p class="lang-note">ここは むずかしい ことばの ままです</p>' : ''; }
 function setLastText(el, text) {
   // <i></i>名 のように装飾子を持つボタンは最後のテキストノードだけ差し替える
   let node = null; for (const c of el.childNodes) if (c.nodeType === 3 && c.textContent.trim()) node = c;
@@ -69,6 +69,9 @@ function applyLang() {
   segSet($('#langSeg'), 'lang', S.lang);
   const pb = $('#powerBtn'); if (pb) pb.textContent = S.power > 0 ? t('stop') : t('power');
   buildList(); buildLabels(); buildAsk(); renderDetail(); updateBigBand();
+  buildUseChips(); buildMishapCards(); buildWhatifCards();   // 言語を変えたら、いま開いていない画面も作り直しておく
+  if (S.scale && typeof renderMassBar === 'function') renderMassBar(S.selected && S.selected.key);
+  if (S.expert && typeof renderExpertPanel === 'function') { renderExpertPanel(); renderExpertSel(); }
   if (S.question && $('#noteCard').dataset.kind === 'question') $('#noteTitle').textContent = qText(S.question);
 }
 function setLang(l) { if (!I18N[l]) l = 'ja'; const was = S.lang; S.lang = l; store.set('lang', l); if (hasSpeech) speechSynthesis.cancel(); applyLang();
@@ -121,7 +124,7 @@ function initLive() {
   alive.speakAuto = store.get('speakAuto') === '1';
   for (const x of $$('.tgl[data-t=speakAuto]')) { x.classList.toggle('on', alive.speakAuto); x.setAttribute('aria-pressed', String(alive.speakAuto)); }
   if (!hasSpeech) for (const el of $$('.speak, .pop-row.speakrow')) el.hidden = true;
-  S.lang = I18N[store.get('lang')] ? store.get('lang') : 'ja';
+  S.lang = Object.prototype.hasOwnProperty.call(I18N, store.get('lang')) ? store.get('lang') : 'ja';
   $('#langSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setLang(b.dataset.lang); });
   $('#bigBtn').addEventListener('click', () => setBig(!alive.big));
   $('#bigSpeak').addEventListener('click', () => speakPart(S.selected || S.hovered));

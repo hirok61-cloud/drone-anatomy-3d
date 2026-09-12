@@ -13,6 +13,18 @@ DESC = ('ドローン（550クラスのクアッドコプター）を部品ご�
 
 tpl = (SRC / 'index.html').read_text(encoding='utf-8')
 css = (SRC / 'style.css').read_text(encoding='utf-8')
+# CSS のコメントが閉じているか検査する（閉じ忘れると以降の宣言がまとめて無効になる）
+_i = 0
+while True:
+    _a = css.find('/*', _i)
+    if _a < 0:
+        break
+    _b = css.find('*/', _a + 2)
+    if _b < 0:
+        raise SystemExit('style.css: コメントが閉じていません (行 %d)' % (css[:_a].count(chr(10)) + 1))
+    if css[_a:_b].count(chr(10)) > 2:
+        raise SystemExit('style.css: コメントが %d 行にまたがっています (行 %d) — 閉じ忘れの疑い' % (css[_a:_b].count(chr(10)) + 1, css[:_a].count(chr(10)) + 1))
+    _i = _b + 2
 SOURCES = ['data.js', 'materials.js', 'drone.js', 'engine.js', 'physics.js', 'airflow.js', 'theater.js', 'whatif.js', 'scale.js', 'codex.js', 'live.js', 'lesson.js', 'expert.js', 'ui.js', 'app.js']
 js = '\n'.join((SRC / f).read_text(encoding='utf-8') for f in SOURCES if (SRC / f).exists())
 

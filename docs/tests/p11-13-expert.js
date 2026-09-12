@@ -17,7 +17,7 @@ const esc = d.D.parts.find(p => p.key === 'esc'); A(esc.meshes[0].material !== e
 seg('wear'); A(d.S.expert === 'wear' && d.S.power === 0, 'wear: grounded'); A(X.heat === 0 && !esc.meshes[0].userData.tint, 'wear: heat cleared'); A(esc.meshes[0].material !== esc.meshes[0].userData.origMat, 'wear: robust turned to paper');
 const sl = document.getElementById('xFlights'); sl.value = 120; sl.dispatchEvent(new Event('input')); d.step(0.2, 30);
 const prop = d.D.parts.find(p => p.key === 'prop'), frame = d.D.parts.find(p => p.key === 'frameTop');
-A(prop.meshes[0].material !== prop.meshes[0].userData.origMat, 'wear: prop tinted (must, 120>100)'); A(frame.meshes[0].material === frame.meshes[0].userData.origMat, 'wear: robust untouched');
+A(prop.meshes[0].material !== prop.meshes[0].userData.origMat, 'wear: prop tinted (must, 120>100)'); A(X.papered.length > 100, 'wear: robust is paper', X.papered.length);   // 丈夫な部品は紙色に落ちる(複数材質のメッシュは対象外)
 A(document.querySelector('#expertBody .wr .nm').textContent.includes('プロペラ'), 'wear: prop first'); A(/¥[\d,]+〜¥[\d,]+/.test(document.getElementById('wearCost').textContent), 'wear: cost range');
 // ⑬ 工具箱
 seg('toolbox'); A(d.S.expert === 'toolbox' && prop.meshes[0].material === prop.meshes[0].userData.origMat, 'toolbox: wear cleared');

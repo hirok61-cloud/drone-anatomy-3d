@@ -68,5 +68,6 @@ window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: sca
   S.shadowDirty = S.csDirty = S.aoDirty = true;
   let t = performance.now(); composer.render(); TL.r1 = Math.round(performance.now() - t);
   requestAnimationFrame(frame);
+  setTimeout(() => $('#loading').classList.add('gone'), 8000);   // 背面タブなどで rAF が回らないとき、覆いが残り続けないように
   requestAnimationFrame(() => requestAnimationFrame(() => { mark('first'); $('#loading').classList.add('gone'); window.__droneReady = true; renderer.debug.checkShaderErrors = false; console.log('[drone3d] timeline ms', JSON.stringify(TL)); }));
 })().catch(e => { console.error(e); window.__showErr('初期化エラー: ' + e.message); });

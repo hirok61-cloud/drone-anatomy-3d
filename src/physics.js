@@ -58,7 +58,7 @@ function stepFree(dt) {
   body.vx += (axg * holdK - dragH * body.vx) * dt; body.vz += (azg * holdK - dragH * body.vz) * dt; body.px += body.vx * dt; body.pz += body.vz * dt;
   // 高度: ホバー基準 + 傾きで沈む + スロットル + 押されて沈む
   const thr = st.active ? st.thr : 0; const pyCmd = free.hoverY - 0.2 * (1 - Math.cos(th)) + 0.10 * thr - (body.hold ? 0.010 * (body.hold.th / free.holdMax) : 0);
-  const ay = 36 * (pyCmd - body.py) - 9.6 * body.vyF; body.vyF += ay * dt; body.py += body.vyF * dt;
+  const ay = 36 * (pyCmd - body.py) - 9.6 * body.vyF; body.vyF += ay * dt; body.py += body.vyF * dt; body.vy = body.vyF;   // 上下の速度はセンサー視点でも読む
   // ヨー
   const yawCmd = st.active ? -1.2 * st.yaw : 0; body.yawRate = dl(body.yawRate, yawCmd, dt, 6); body.yaw += body.yawRate * dt;
   if (!st.active) { body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); const look = (S.alive && body.lookYaw != null && !body.hold && !ti.active && !reduceMotion); body.yaw = dl(body.yaw, look ? body.lookYaw : 0, dt, look ? 2.5 : 1.5); }   // ⑧: ポインタの方へ数度だけ向く

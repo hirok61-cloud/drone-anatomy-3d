@@ -37,6 +37,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 .mbadge.up { color: var(--ok); } .mbadge.down { color: var(--warn); }
 .mbadge small { font-family: var(--font); font-weight: 500; color: var(--ink3); margin-left: 4px; }
 
+:root { --sal: env(safe-area-inset-left, 0px); --sar: env(safe-area-inset-right, 0px); --sab: env(safe-area-inset-bottom, 0px); --sat: env(safe-area-inset-top, 0px); }
 .glass { background: var(--glass); backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); border: 1px solid var(--glass-border); border-radius: var(--radius); box-shadow: var(--glass-shadow); }
 @media (prefers-reduced-transparency: reduce) { .glass { background: var(--glass-strong); backdrop-filter: none; -webkit-backdrop-filter: none; } }
 
@@ -116,7 +117,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 .insp-head { display: flex; align-items: center; gap: 8px; padding: 12px 10px 10px 16px; border-bottom: 1px solid var(--hair); flex: none; }
 .insp-head h2 { font-size: 15px; font-weight: 700; letter-spacing: -0.005em; flex: 1; }
 .insp-head .count { font-size: 12px; color: var(--ink3); font-family: var(--mono); }
-#inspClose { display: none; }
+#inspClose, #expertClose { display: none; }
 #inspBody { flex: 1; overflow: hidden; position: relative; }
 #partList, #detail { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; transition: transform .22s cubic-bezier(.32,.72,0,1), opacity .22s; }
 #partList { padding: 8px 8px 12px; }
@@ -127,7 +128,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 .grp i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); display: inline-block; }
 .row { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 8px; padding: 6px 6px 6px 12px; border-radius: 10px; cursor: pointer; min-height: var(--tap); transition: background .12s; }
 .row:hover { background: var(--row-hover); } .row.on { background: var(--accent-soft); } .row.on .nm { color: var(--accent); font-weight: 600; }
-.row .nm { font-size: 13.5px; } .row .cnt { font-size: 11.5px; color: var(--ink3); font-family: var(--mono); }
+.row .nm { font-size: calc(13.5px * var(--fs, 1)); } .row .cnt { font-size: 11.5px; color: var(--ink3); font-family: var(--mono); }
 .row .eye { width: 34px; height: 34px; min-width: var(--tap); min-height: var(--tap); display: grid; place-items: center; border-radius: 8px; color: var(--ink3); opacity: .55; }
 .row:hover .eye, .row.off .eye { opacity: 1; } .row .eye:hover { background: var(--hair); color: var(--ink); } .row.off .nm, .row.off .cnt { opacity: .4; }
 .row.sub { padding-left: 24px; } .row.sub .nm { font-size: 13px; }
@@ -155,7 +156,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 #sticks { position: fixed; left: 50%; bottom: calc(var(--dock-h) + 26px); transform: translateX(-50%); z-index: 9; display: flex; align-items: center; gap: 22px; }
 .stick { position: relative; width: 108px; height: 108px; border-radius: 50%; background: var(--glass); border: 1px solid var(--glass-border); backdrop-filter: blur(16px); box-shadow: var(--glass-shadow); touch-action: none; }
 .stick .knob { position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: var(--glass-strong); border: 1px solid var(--glass-border); box-shadow: 0 3px 10px rgba(20,26,40,.2); will-change: transform; }
-.stick .lbl { position: absolute; transform: none; padding: 0; background: none; border: 0; box-shadow: none; font-size: 10px; font-weight: 600; color: var(--ink3); pointer-events: none; }
+.stick .lbl { position: absolute; transform: none; padding: 0; background: none; border: 0; box-shadow: none; font-size: 11px; font-weight: 600; color: var(--ink3); pointer-events: none; }
 .stick .lbl.t { top: 6px; left: 50%; transform: translateX(-50%); } .stick .lbl.b { bottom: 6px; left: 50%; transform: translateX(-50%); } .stick .lbl.l { left: 6px; top: 50%; transform: translateY(-50%); } .stick .lbl.r { right: 6px; top: 50%; transform: translateY(-50%); }
 .stick-mid { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 
@@ -175,7 +176,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 .cards { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; } .cards::-webkit-scrollbar { display: none; }
 .cards button { flex: none; width: 150px; padding: 8px 10px; border-radius: 12px; background: var(--seg-bg); text-align: left; font-size: 12.5px; line-height: 1.35; min-height: 52px; transition: background .15s; }
 .cards button b { display: block; font-size: 13px; margin-bottom: 2px; } .cards button:hover { background: var(--hair2); } .cards button.on { background: var(--accent-soft); color: var(--accent-text); }
-.cards button { min-height: 64px; } #whatifCards button { border-left: 3px solid var(--cw); border-radius: 6px 12px 12px 6px; }   /* 外の状況 = 青の帯（⑤の組み間違いは無印）
+.cards button { min-height: 64px; } #whatifCards button { border-left: 3px solid var(--cw); border-radius: 6px 12px 12px 6px; }   /* 外の状況 = 青の帯（⑤の組み間違いは無印） */
 .stages { display: flex; align-items: center; gap: 6px; flex: 1; justify-content: center; }
 .stages span { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--ink3); } .stages span::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--hair2); }
 .stages span.done::before { background: var(--accent); opacity: .5; } .stages span.on { color: var(--accent); font-weight: 700; } .stages span.on::before { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
@@ -191,6 +192,9 @@ body:not(.full) [data-full] { display: none !important; }
 [data-fullname] { display: none; } .full [data-fullname] { display: inline; } .full [data-simple] { display: none; }
 .compact-only { display: none; }
 body.theater #topbar, body.theater #viewCol { opacity: .35; pointer-events: none; } body.theater #inspector { visibility: hidden; }
+
+button, .tabs, .seg, .chips { touch-action: manipulation; -webkit-user-select: none; user-select: none; }
+.grabber { touch-action: none; }
 
 /* ---- loading ---- */
 #loading { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: grid; place-content: center; justify-items: center; gap: 14px; transition: opacity .6s; }
@@ -211,18 +215,22 @@ body.theater #topbar, body.theater #viewCol { opacity: .35; pointer-events: none
   #expert { height: min(46vh, 420px); } #expert.tall { height: min(78vh, 640px); } .xsegm { margin: 0 14px 6px; align-self: flex-start; } #expertClose { display: grid; }   /* 専門シートは機体が見える高さに留め、モード切替をシート内にも置く(ドックがシートの下に隠れるため) */
   #dock { right: 14px; margin: 0; } #viewCol { right: 14px; } #noteCard { width: min(420px, calc(100vw - 90px)); }
 }
+@media (max-width: 760px), (max-height: 520px) {
+  #viewCol { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; bottom: auto; top: calc(66px + var(--sat)); right: calc(10px + var(--sar)); max-width: calc(100vw - 20px - var(--sal) - var(--sar)); padding: 4px; }
+  #viewCol hr { display: none; } #viewCol button { width: 38px; height: 38px; }
+}
 @media (max-width: 760px) {
   :root { --dock-h: 118px; }
-  #topbar { left: 10px; right: 10px; top: 10px; padding: 6px 6px 6px 10px; gap: 8px; }
+  #topbar { left: calc(10px + var(--sal)); right: calc(10px + var(--sar)); top: calc(10px + var(--sat)); padding: 6px 6px 6px 10px; gap: 8px; }
   .brand { flex: 1; gap: 6px; min-width: 0; } .brand h1 { font-size: 13px; white-space: nowrap; } .seg.tiny button { padding: 3px 6px; font-size: 11.5px; }
   .top-actions { gap: 4px; } .top-actions .pill-btn { padding: 6px 8px; }
-  .popover { position: fixed; left: 10px; right: 10px; top: auto; bottom: 10px; width: auto; max-height: 60vh; }
-  #dock { left: 10px; right: 10px; bottom: 10px; }
+  .popover { position: fixed; left: calc(10px + var(--sal)); right: calc(10px + var(--sar)); top: auto; bottom: calc(10px + var(--sab)); width: auto; max-height: 60vh; }
+  #dock { left: calc(10px + var(--sal)); right: calc(10px + var(--sar)); bottom: calc(10px + var(--sab)); }
   .ctx { padding: 8px 10px 6px; } .ctx-row[data-tab=mishap] { flex-wrap: wrap; overflow-x: hidden; mask-image: none; -webkit-mask-image: none; padding-right: 0; gap: 6px; } .ctx-row[data-tab=mishap] .dock-group.grow { width: 100%; flex: none; }
   .ctx-row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; align-items: flex-end; gap: 12px; padding-right: 24px; mask-image: linear-gradient(to right, #000 88%, transparent); -webkit-mask-image: linear-gradient(to right, #000 88%, transparent); } .ctx-row::-webkit-scrollbar { display: none; }
   .dock-group { flex: none; } .dock-group.grow { flex: none; width: 150px; } .chips { flex-wrap: nowrap; }
   .tabs button span { font-size: 11px; } .tabs button { flex-direction: column; gap: 2px; padding: 6px 4px; }
-  #viewCol { flex-direction: row; bottom: auto; top: 66px; right: 10px; padding: 4px; } #viewCol hr { display: none; }
+  #viewCol { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; bottom: auto; top: 66px; right: calc(10px + var(--sar)); max-width: calc(100vw - 20px - var(--sal) - var(--sar)); padding: 4px; } #viewCol hr { display: none; }
   #viewCol button { width: 38px; height: 38px; }
   #noteCard { left: 10px; bottom: calc(var(--dock-h) + 8px); width: calc(100vw - 20px); max-height: 34vh; font-size: 13px; }
   #coach { width: calc(100vw - 40px); top: 130px; }
@@ -379,7 +387,6 @@ body.scale #noteCard { left: calc(14px + 212px + 12px); width: min(420px, calc(1
 
 /* ---------- 専門タブ (パッケージ⑪⑫⑬) ---------- */
 .ctx-hint { font-size: 11.5px; color: var(--ink3); margin: 0; max-width: 360px; line-height: 1.4; align-self: center; }
-#expertClose { display: none; }
 #expertBody { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 10px; font-size: calc(12.5px * var(--fs, 1)); }
 #expertSel { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-bottom: 1px solid var(--hair); background: var(--accent-soft); font-size: calc(12.5px * var(--fs, 1)); }
 #expertSel b { color: var(--accent-text); white-space: nowrap; } #expertSel span { flex: 1; min-width: 0; color: var(--ink2); }
@@ -411,5 +418,18 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
 .xlaw summary { font-size: calc(12px * var(--fs, 1)); color: var(--ink3); cursor: pointer; } .xlaw ul { margin: 6px 0 0; padding-left: 1.2em; font-size: calc(11.5px * var(--fs, 1)); color: var(--ink2); line-height: 1.55; }
 @media (max-width: 760px) { .ctx-hint { display: none; } }
 @media (pointer: coarse) { .xctl .tgl, .xctl .pill-btn, .xh-head .pill-btn, .chart-h .tgl.sm, .tbform input, .tbform select, .xctl select { min-height: var(--tap); } .tbform input { padding: 8px 6px; } .chart-h .rng input { height: var(--tap); } }
+
+@media (max-width: 1100px) and (max-height: 520px) {
+  #inspector, #lesson, #expert, #expert.tall { height: calc(100% - 12px); }   /* 横向きは高さが足りないのでシートを深くする */
+  #expert .xsegm { position: sticky; top: 0; z-index: 1; background: var(--glass); }
+}
+@media (max-width: 760px) {
+  body.scale #noteCard { bottom: calc(var(--dock-h) + 16px + var(--massbar-h, 42vh) + var(--sab)); max-height: 26vh; }   /* 重さの帯と重ねない */
+  #noteCard, #massBar { bottom: calc(var(--dock-h) + 8px + var(--sab)); }
+  .tabs button { min-height: var(--tap); }
+}
+@media (pointer: coarse) {
+  .tbform input, .tbform select, .xctl select, .xflights input, #expertBody input[type=number] { font-size: max(16px, calc(12.5px * var(--fs, 1))); }   /* 16px未満だと iOS がページごと拡大する */
+}
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation-duration: .01s !important; } }

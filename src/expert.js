@@ -42,12 +42,13 @@ const legendDots = (items) => items.map(([c, n]) => `<i style="background:${c}">
 // ---------- 入口 ----------
 function expertStart(mode) {
   if (!EXPERT_MODES.includes(mode)) mode = 'sensors';
+  const wasTall = $('#expert') && $('#expert').classList.contains('tall');
   if (expert.mode) expertStop(true);
   if (typeof stopOthers === 'function') stopOthers('expert');
   expert.mode = mode; S.expert = mode; store.set('expertMode', mode);
   segSet($('#expertSeg'), 'x', mode); if ($('#expertSegM')) segSet($('#expertSegM'), 'x', mode);
   $('#inspector').hidden = true; $('#inspector').classList.remove('open');
-  const panel = $('#expert'); panel.hidden = false; if (narrow()) panel.classList.add('open');
+  const panel = $('#expert'); panel.hidden = false; if (narrow()) panel.classList.add('open'); if (wasTall) panel.classList.add('tall');
   document.body.classList.add('expert');
   if (S.selected) select(null);
   if (mode === 'sensors') sensorsEnter(); else if (mode === 'wear') wearEnter(); else toolboxEnter();
@@ -58,7 +59,7 @@ function expertStop(silent) {
   if (!expert.mode) return;
   if (expert.mode === 'sensors') sensorsLeave(); else if (expert.mode === 'wear') wearLeave(); else toolboxLeave();
   expert.mode = null; S.expert = null;
-  $('#expert').hidden = true; $('#expert').classList.remove('open', 'tall'); $('#inspector').hidden = false;
+  $('#expert').hidden = true; $('#expert').classList.remove('open', 'tall'); if (!S.lesson) $('#inspector').hidden = false;
   document.body.classList.remove('expert');
   if (!silent) syncBodyMode();
 }
@@ -83,7 +84,7 @@ function sensorsEnter() {
   showToast('機体はホバー中。はじくとジャイロが振れます', 3000);
 }
 function sensorsLeave() {
-  radioDonut(false); heatApply(0); expert.heatRun = false; expertArrows(false);
+  radioDonut(false); heatApply(0); expert.heatRun = false; expertArrows(false); expert.charts = {};
   if (S.power > 0) setPower(0, true);
 }
 function radioDonut(on) {
@@ -150,7 +151,7 @@ function sensorsStep(dtSim, dtReal) {
   // 傾いて加速しても機体軸の x・y はほぼ 0 g(推力は機体 z 軸方向だけ)。z は 1/cosθ + 上下加速
   const acc = [ax - Math.sin(body.tx) + 0.01 * nz() + 0.12 * vib * nz(), -az + Math.sin(body.tz) + 0.01 * nz() + 0.12 * vib * nz(), 1 / Math.cos(Math.hypot(body.tx, body.tz)) + ay + 0.01 * nz() + 0.18 * vib * nz()];
   // 気圧高度: 天候でどこまでも流れる長期トレンド + 短期ノイズ + 地面近くの吹き下ろし
-  expert.drift += 0.0015 * dt * Math.sin(expert.tsum / 90 + 1.0) + 0.01 * Math.sqrt(dt) * nz();
+  expert.drift = clamp(expert.drift + 0.0015 * dt * Math.sin(expert.tsum / 90 + 1.0) + 0.01 * Math.sqrt(dt) * nz(), -0.6, 0.6);
   const alt = body.py + expert.drift + 0.03 * nz() + (body.py < 0.3 ? 0.04 * spin * nz() : 0);
   // コンパス: 電源線の電流が作る磁界は機体に固定されたベクトル → 機首の向きで誤差が ± に変わる(地磁気水平分力=1 として 60A で 0.36)
   const Bi = 0.006 * expert.current, phi0 = 0.6;
@@ -179,13 +180,13 @@ function wearEnter() {
   // 丈夫な部品は紙色に落として、消耗品だけが色を持つ技術図にする(消耗品の子メッシュは後で塗り直すので除外不要)
   expert.papered = [];
   for (const k in WEAR) { if (WEAR[k].cls !== 'robust') continue; for (const p of partsOf(k)) for (const m of p.meshes) { const o = m.userData.origMat; if (!o || Array.isArray(o) || !o.isMeshStandardMaterial || m.userData.papered) continue; m.userData.papered = true; m.userData.paperShadow = m.castShadow; m.material = wearPaper; expert.papered.push(m); } }
-  wearApply();
+  wearApply(); applyMode();
   showToast('着地して、先にへる部品から色をつけます。スライダーで回数を進めてください', 3200);
 }
 function wearLeave() {
   for (const k in WEAR) for (const p of partsOf(k)) setTint(p, ACCENT, 0);
   for (const m of expert.papered) { m.userData.papered = false; if (m.material === wearPaper) m.material = m.userData.origMat; }
-  expert.papered = []; expert.wearRun = false;
+  expert.papered = []; expert.wearRun = false; applyMode();
 }
 function wearProgress(k) { const w = WEAR[k]; if (!w) return 0; return clamp(expert.flights / w.lo, 0, 1); }
 function paintPart(p, col, k, opts) {
@@ -193,9 +194,11 @@ function paintPart(p, col, k, opts) {
   for (const m of p.meshes) { if (m.userData.tint && m.material !== m.userData.tint && m.userData.origMat && !Array.isArray(m.userData.origMat) && m.userData.origMat.isMeshStandardMaterial) m.material = m.userData.tint; if (k <= 0 && m.userData.papered && m.material === m.userData.origMat) m.material = wearPaper; }
 }
 function wearApply() {
-  const order = { robust: 0, crash: 1, wear: 2, must: 3 };   // 親部品(モーター等・丈夫)を先に塗り、その中の消耗品(プロペラ等)で上書きする
+  const order = { robust: 0, crash: 1, wear: 2, must: 3 };
+  const depth = (k) => { const p = partsOf(k)[0]; if (!p) return 0; let n = 0, o = p.obj.parent; while (o) { if (o.userData.part && WEAR[o.userData.part.key]) n++; o = o.parent; } return n; };
   const blink = 0.5 + 0.5 * Math.sin(expert.pulse * 2 * Math.PI / 0.8);
-  for (const k of Object.keys(WEAR).sort((a, b) => order[WEAR[a].cls] - order[WEAR[b].cls])) {
+  // 外側の部品(モーター)を先に、その中の部品(プロペラ→ナット)を後に塗る。同じ深さなら「丈夫→必ず減る」の順
+  for (const k of Object.keys(WEAR).sort((a, b) => (depth(a) - depth(b)) || (order[WEAR[a].cls] - order[WEAR[b].cls]))) {
     const w = WEAR[k], cls = WEAR_CLASS[w.cls], col = new THREE.Color(cls.color);
     if (w.cls === 'robust') { for (const p of partsOf(k)) paintPart(p, col, 0); continue; }
     const prog = expert.flights / w.lo;   // 1.0 = 交換時期の下限
@@ -204,14 +207,14 @@ function wearApply() {
     const flat = k === 'prop';
     for (const p of partsOf(k)) paintPart(p, col, kk, { lerp: flat ? 0.55 : 0.85, emis: (flat ? 0.2 : 0.06) + (due ? 0.25 * blink : 0) });
   }
-  const bead = $('#wearFlights'); if (bead) bead.textContent = `${expert.flights} 回 ≈ ${(expert.flights / expert.perYear).toFixed(1)} 年（年${expert.perYear}回）`;
+  const bead = $('#wearFlights'); if (bead) bead.textContent = `${Math.round(expert.flights)} 回 ≈ ${(expert.flights / expert.perYear).toFixed(1)} 年（年${expert.perYear}回）`;
   renderWearList();
 }
 function wearStep(dtReal) {
   expert.pulse += dtReal;
   if (expert.wearRun) { expert.flights = Math.min(1000, expert.flights + dtReal * 125); const sl = $('#xFlights'); if (sl) sl.value = Math.round(expert.flights / 10) * 10; if (expert.flights >= 1000) { expert.wearRun = false; const b = $('#xWearPlay'); if (b) b.textContent = '↻ もう一度'; } }
   const due = Object.keys(WEAR).some(k => WEAR[k].cls !== 'robust' && expert.flights / WEAR[k].lo >= 1);
-  if (expert.wearRun || due) { expert.stepT += dtReal; if (expert.stepT > 0.08 || expert.wearRun) { expert.stepT = 0; wearApply(); } }
+  if (expert.wearRun || due) { expert.stepT += dtReal; if (expert.stepT > 0.08) { expert.stepT = 0; wearApply(); } }
 }
 function renderWearList() {
   const box = $('#wearList'); if (!box) return;
@@ -221,8 +224,8 @@ function renderWearList() {
   let lo = 0, hi = 0, crashLo = 0, crashHi = 0; const items = [];
   for (const k in WEAR) { const w = WEAR[k], d = PARTS[k]; if (!d || w.cls === 'robust') continue; const price = (PRICE[k] || 0) * (d.count || 1); const a = price * expert.perYear / w.hi, b = price * expert.perYear / w.lo; lo += a; hi += b; if (w.cls === 'crash') { crashLo += a; crashHi += b; } items.push({ k, a, b }); }
   items.sort((x, y) => y.b - x.b);
-  const yen = (v) => `¥${(Math.round(v / 1000) * 1000).toLocaleString()}`; const man = (v) => `${(v / 10000).toFixed(1)}万`;
-  const c = $('#wearCost'); if (c) c.innerHTML = `年間の維持費（部品代のみ・年${expert.perYear}回）<b>${yen(lo)}〜${yen(hi)}</b><em>1フライトあたり ¥${Math.round(lo / expert.perYear)}〜¥${Math.round(hi / expert.perYear)}</em><span>内訳の大きい順: ${items.slice(0, 3).map(x => `${partName(x.k)} ¥${man(x.a)}〜${man(x.b)}`).join('・')}。うち「事故で壊れやすい」分 ¥${man(crashLo)}〜${man(crashHi)} は事故がなければ 0 円。</span><span>1フライト ≈ 15 分の想定。回数は目安で、時間・温度・扱いで大きく変わります。バッテリーは回数だけでは決まりません（放電率・保管電圧・温度）。</span>`;
+  const yen = (v) => `¥${(Math.round(v / 1000) * 1000).toLocaleString()}`; const man = (v) => `¥${(Math.round(v / 1000) * 1000).toLocaleString()}`;
+  const c = $('#wearCost'); if (c) c.innerHTML = `年間の維持費（部品代のみ・年${expert.perYear}回）<b>${yen(lo)}〜${yen(hi)}</b><em>1フライトあたり ¥${Math.round(lo / expert.perYear)}〜¥${Math.round(hi / expert.perYear)}</em><span>内訳の大きい順: ${items.slice(0, 3).map(x => `${partName(x.k)} ${man(x.a)}〜${man(x.b)}`).join('・')}。うち「事故で壊れやすい」分 ${man(crashLo)}〜${man(crashHi)} は事故がなければ 0 円。</span><span>1フライト ≈ 15 分の想定。回数は目安で、時間・温度・扱いで大きく変わります。バッテリーは回数だけでは決まりません（放電率・保管電圧・温度）。</span>`;
 }
 
 // ---------- ⑬ 設計の計算 ----------
@@ -256,9 +259,10 @@ function bladeDiscs(on) {
       const m = new THREE.Mesh(new THREE.CircleGeometry(0.156, 96), new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.5, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }));
       m.rotation.x = -Math.PI / 2; m.position.set(0, 0.038, 0); m.renderOrder = 5; m.userData.noPart = m.userData.noPick = m.userData.noAO = m.userData.noShadow = true; m.userData.cv = cv; m.userData.tex = tex; mo.group.add(m); expert.bladeDiscs.push(m);
     }
-    for (const mo of D.motors) mo.propMesh.renderOrder = 6;
+    for (const mo of D.motors) { if (mo.propMesh.userData.ro0 == null) mo.propMesh.userData.ro0 = mo.propMesh.renderOrder; mo.propMesh.renderOrder = 6; }
   }
   for (const m of expert.bladeDiscs) m.visible = !!on;
+  if (!on) for (const mo of D.motors) { if (mo.propMesh.userData.ro0 != null) mo.propMesh.renderOrder = mo.propMesh.userData.ro0; }
   expertArrows(!!on || expert.heat > 0.05);
   if (on) { bladePaint(); showToast('4枚の円＝プロペラの周速。内側は遅く、外側ほど速い（青→赤）', 3200); }
 }
@@ -280,7 +284,7 @@ function bladePaint() {
   const lg = $('#bladeBar'); if (lg) { const g = lg.getContext('2d'); const w = lg.width, h = lg.height; const grd = g.createLinearGradient(0, 0, w, 0); for (let i = 0; i <= 8; i++) { const col = rampColor(BLADE_RAMP, i / 8); grd.addColorStop(i / 8, col.getStyle()); } g.fillStyle = grd; g.fillRect(0, 0, w, h); }
 }
 function toolboxStep(dtReal) {
-  expert.stepT += dtReal; if (expert.stepT > 0.25) { expert.stepT = 0; drawStepResponse(); }
+  if (expert.wasDark !== themeDark) { expert.wasDark = themeDark; drawStepResponse(); }   // 応答グラフは入力で決まるので、色が変わるときだけ描き直す
 }
 function drawStepResponse() {
   const c1 = $('#stepChart'), c2 = $('#stepChart2'); if (!c1 || !c2) return;
@@ -316,7 +320,7 @@ function toolboxRender() {
     <div class="kv"><span>飛行時間 目安</span><b>約${r.tmin.toFixed(0)} 分</b><small>ホバー・無風、容量の80%。実飛行は 7〜8 掛け。${r.Itot.toFixed(1)} A（1基 ${r.Iper.toFixed(1)} A）</small></div>
     <div class="kv"><span>先端速度（ホバー）</span><b class="${tp[0]}">${tp[1]} ${r.tipH.toFixed(0)} m/s</b><small>最大 ${r.tipMax.toFixed(0)} m/s＝マッハ ${(r.tipMax / 343).toFixed(2)}（音速 343 m/s・20℃）。0.4 を超えると音と効率が急に悪くなる</small></div>
     <div class="kv"><span>全開の電流</span><b class="${im[0]}">${im[1]} ${r.Imax.toFixed(0)} A</b><small>${r.Crate.toFixed(0)}C 放電。XT60 の定格 60 A・ESC/バッテリーの定格と比べる</small></div>
-    <div class="kv"><span>ホバー効率</span><b>${r.gW.toFixed(1)} g/W</b><small>ディスク荷重 ${(r.DL / 9.81).toFixed(1)} kg/m²。小さいほど静かで長く飛ぶ</small></div>
+    <div class="kv"><span>ホバー効率</span><b>${r.gW.toFixed(1)} g/W</b><small>g/W は大きいほど効率が良い。ディスク荷重 ${(r.DL / 9.81).toFixed(1)} kg/m²（こちらは小さいほど静かで長く飛ぶ）</small></div>
     <div class="kv"><span>重心 x / z</span><b>${typeof scale === 'object' && scale.cg ? `${(scale.cg.x * 1000).toFixed(0)} / ${(scale.cg.z * 1000).toFixed(0)} mm` : '—'}</b><small>「重さ・お金」の配置から</small></div>`);
   drawStepResponse(); if (expert.blade) bladePaint();
   const leg = $('#bladeLegend'); if (leg) leg.innerHTML = expert.blade ? `10区間の周速: 根元 ${(r.tipH * 0.15).toFixed(0)} → 先端 ${r.tipH.toFixed(0)} m/s（色は最大回転時の ${r.tipMax.toFixed(0)} m/s を赤とした相対）。推力の多くは外側の3区間が作る。` : '';
@@ -340,7 +344,7 @@ function renderExpertPanel() {
     body_.innerHTML = `${note}
       <p class="xnote">機体はホバー中。<b>はじく</b>とジャイロが振れ、<b>防振</b>を切ると細かい震えが乗ります。傾いて動いても x・y の加速度計はほぼ 0 g — だから FC はジャイロと融合して姿勢を知ります。</p>
       <div class="chart"><div class="chart-h"><b>ジャイロ <small>°/s（1秒に回る角度）</small></b><span class="lg">${legendDots([[XCOL.p, 'p ロール'], [XCOL.q, 'q ピッチ'], [XCOL.r, 'r ヨー']])}</span><button class="tgl sm ${expert.damper ? 'on' : ''}" id="xDamper" aria-pressed="${expert.damper}"><i></i>防振ゴムで震えを減らす</button></div><canvas id="chGyro" role="img" aria-label="ジャイロの波形"></canvas></div>
-      <div class="chart"><div class="chart-h"><b>加速度 <small>g（重力 9.81 m/s² の何倍か）</small></b><span class="lg">${legendDots([[XCOL.p, 'x 横'], [XCOL.q, 'y 前後'], [XCOL.r, 'z 上下']])}</span></div><canvas id="chAcc" role="img" aria-label="加速度の波形"></canvas></div>
+      <div class="chart"><div class="chart-h"><b>加速度 <small>g（重力 9.81 m/s² の何倍か）</small></b><span class="lg">${legendDots([[XCOL.p, 'x 横（ロールの向き）'], [XCOL.q, 'y 前後（ピッチの向き）'], [XCOL.r, 'z 上下']])}</span></div><canvas id="chAcc" role="img" aria-label="加速度の波形"></canvas></div>
       <div class="chart"><div class="chart-h"><b>気圧高度 <small>m</small></b><span class="lg">天候で流れる。地面近くでは吹き下ろしで乱れる</span></div><canvas id="chBaro" role="img" aria-label="気圧高度の波形"></canvas></div>
       <div class="chart"><div class="chart-h"><b>コンパスのずれ <small>°（真の方位との差）</small></b><label class="rng" for="xCurrent">電源線の電流 <input type="range" id="xCurrent" min="0" max="60" value="${expert.current}"> <b id="xCurrentV">${expert.current} A</b></label></div><canvas id="chMag" role="img" aria-label="コンパスのずれの波形"></canvas><p class="hint">電流に比例・電源線までの距離に反比例。機体に固定された磁界なので、機首の向きで ± が変わる。往復の線をより合わせると打ち消せる — だから GNSS/コンパスはマストの上に。</p></div>
       <div id="sensVals" class="vals"></div>
@@ -373,7 +377,7 @@ function renderExpertPanel() {
       <p class="xnote">KV・プロペラ・重量を変えると、下の数字がすぐ変わります。傾向を見るための簡易モデルです。</p>
       <div class="tbform">
         <label><span>KV <small>1Vあたりの無負荷回転数 rpm/V（キロボルトではない）</small></span><input type="number" id="tbKv" inputmode="numeric" min="200" max="1200" step="10" value="${t.kv}"><small>rpm/V</small></label>
-        <label><span>セル数 <small>直列のセル数。1セル 3.7V</small></span><select id="tbCells">${[4, 6, 8, 12].map(c => `<option value="${c}" ${c === t.cells ? 'selected' : ''}>${c}S</option>`).join('')}</select><small>${(t.cells * 3.7).toFixed(1)} V</small></label>
+        <label><span>セル数 <small>直列のセル数。1セル 3.7V</small></span><select id="tbCells" aria-label="セル数">${[4, 6, 8, 12].map(c => `<option value="${c}" ${c === t.cells ? 'selected' : ''}>${c}S</option>`).join('')}</select><small id="tbCellsV">${(t.cells * 3.7).toFixed(1)} V</small></label>
         <label><span>直径</span><input type="number" id="tbDiam" inputmode="decimal" min="8" max="18" step="0.5" value="${t.diam}"><small>in</small></label>
         <label><span>ピッチ</span><input type="number" id="tbPitch" inputmode="decimal" min="3" max="8" step="0.5" value="${t.pitch}"><small>in</small></label>
         <label><span>全備重量</span><input type="number" id="tbMass" inputmode="decimal" min="0.5" max="15" step="0.1" value="${t.mass}"><small>kg</small></label>
@@ -389,7 +393,7 @@ function renderExpertPanel() {
       <details class="xlaw"><summary>制度の確認先（考え方のみ）</summary><ul><li>機体の改造・重量変更は、登録情報や機体認証の前提が変わることがある。まず所管（国土交通省 無人航空機ポータル／DIPS）で手続きの要否を確認する。</li><li>100 g 以上の機体は登録が必要とされている。飛行の区分（人口集中地区・夜間・目視外など）は飛行ごとに確認する。</li><li>この画面は判定をしない。数値は簡易モデルの目安で、実機の性能表と飛行前点検に置き換わるものではない。</li></ul></details>
       <p class="hint src">モデル: T = Ct·ρ·n²·D⁴、P = Cp·ρ·n³·D⁵（n は毎秒回転数、D は直径 m）。Ct = 0.085√(P/4.5)、Cp = 0.040(P/4.5)^0.9 は 12インチ級の一般値。全開回転は無負荷の 85%、モーター＋ESC の効率 85%、容量の 80% を使う。機種切替（ヘキサ／VTOL）と実ログの再生は未実装。</p>`;
     const num = (id, lo, hi, cur) => { const v = +$(id).value; return isFinite(v) && $(id).value !== '' ? clamp(v, lo, hi) : cur; };
-    const upd = () => { t.kv = num('#tbKv', 200, 1200, t.kv); t.cells = +$('#tbCells').value; t.diam = num('#tbDiam', 8, 18, t.diam); t.pitch = num('#tbPitch', 3, 8, t.pitch); t.mass = num('#tbMass', 0.5, 15, t.mass); t.mah = num('#tbMah', 1000, 30000, t.mah); const vs = $('#tbCells').parentElement.querySelector('small:last-child'); if (vs) vs.textContent = `${(t.cells * 3.7).toFixed(1)} V`; toolboxRender(); if ($('#xPropScale').classList.contains('on')) propScale(t.diam / 12); };
+    const upd = () => { t.kv = num('#tbKv', 200, 1200, t.kv); t.cells = +$('#tbCells').value; t.diam = num('#tbDiam', 8, 18, t.diam); t.pitch = num('#tbPitch', 3, 8, t.pitch); t.mass = num('#tbMass', 0.5, 15, t.mass); t.mah = num('#tbMah', 1000, 30000, t.mah); const vs = $('#tbCellsV'); if (vs) vs.textContent = `${(t.cells * 3.7).toFixed(1)} V`; toolboxRender(); if ($('#xPropScale').classList.contains('on')) propScale(t.diam / 12); };
     for (const id of ['#tbKv', '#tbCells', '#tbDiam', '#tbPitch', '#tbMass', '#tbMah']) $(id).addEventListener('input', upd);
     $('#xBlade').onclick = () => { expert.blade = !expert.blade; $('#xBlade').classList.toggle('on', expert.blade); $('#xBlade').setAttribute('aria-pressed', String(expert.blade)); $('.bladebar').hidden = !expert.blade; bladeDiscs(expert.blade); toolboxRender(); };
     $('#xPropScale').onclick = () => { const b = $('#xPropScale'); const on = !b.classList.contains('on'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); propScale(on ? t.diam / 12 : 1); };
@@ -414,7 +418,7 @@ function initExpert() {
   // シート: 下スワイプで閉じる、上スワイプで高く(2段デテント)
   const el = $('#expert'), grab = el.querySelector('.grabber'); let drag = null;
   grab.addEventListener('pointerdown', e => { drag = { y0: e.clientY, hist: [[e.clientY, performance.now()]] }; grab.setPointerCapture(e.pointerId); el.classList.add('dragging'); });
-  grab.addEventListener('pointermove', e => { if (!drag) return; const dy = e.clientY - drag.y0; el.style.transform = `translateY(${Math.max(0, dy)}px)`; drag.hist.push([e.clientY, performance.now()]); if (drag.hist.length > 6) drag.hist.shift(); });
+  grab.addEventListener('pointermove', e => { if (!drag) return; const dy = e.clientY - drag.y0; el.style.transform = `translateY(${Math.max(-80, dy)}px)`; drag.hist.push([e.clientY, performance.now()]); if (drag.hist.length > 6) drag.hist.shift(); });
   const end = e => { if (!drag) return; const dy = e.clientY - drag.y0; const h0 = drag.hist[0], h1 = drag.hist[drag.hist.length - 1]; const v = (h1[0] - h0[0]) / Math.max(1, h1[1] - h0[1]); el.classList.remove('dragging'); el.style.transform = '';
     if (v < -0.5 || dy < -60) el.classList.add('tall'); else if (el.classList.contains('tall') && (v > 0.5 || dy > 60)) el.classList.remove('tall'); else if (v > 0.5 || dy > el.offsetHeight * 0.4) el.classList.remove('open'); drag = null; };
   grab.addEventListener('pointerup', end); grab.addEventListener('pointercancel', end);

@@ -59,6 +59,7 @@ function setScale(on) {
   if (on && typeof stopOthers === 'function') stopOthers('scale');
   const btn = $('#scaleBtn'); if (btn) { btn.classList.toggle('on', on); btn.setAttribute('aria-pressed', String(on)); }
   $('#massBar').hidden = !on;
+  if (!on) document.documentElement.style.removeProperty('--massbar-h');
   if (on) {
     if (S.use) setUse(null);
     if (S.explode > 0.02) setExplode(0);
@@ -76,6 +77,7 @@ function setScale(on) {
     setPrice(false); scale.batDz = 0; scale.payDz = 0; setPayload('none');
     if (D.cgMarker) D.cgMarker.visible = false;
     if (D.personGroup) { D.personGroup.visible = false; if (D.personGroup.userData.setGhost) D.personGroup.userData.setGhost(false); }
+    camHome();
     for (let i = 0; i < 4; i++) body.mult[i] = 1;
     for (const B of badgeEls) B.el.classList.remove('over');
     if (S.power > 0) setPower(0, true);
@@ -150,6 +152,7 @@ function massRows() {
 
 function renderMassBar(activeKey) {
   if (!$('#massBar') || !scale.on) return;
+  requestAnimationFrame(() => { const el = $('#massBar'); if (el && !el.hidden) document.documentElement.style.setProperty('--massbar-h', el.offsetHeight + 'px'); });   // 説明カードを帯の上に逃がすため実高さを渡す
   const { rows, total } = massRows();
   const act = activeKey && (S.depth === 'simple' ? (SIMPLE_BUCKET[activeKey] || '__etc') : activeKey);
   $('#massStack').innerHTML = rows.map(r => `<i class="seg-i${act && r.key !== act ? ' dim' : ''}" data-key="${r.key}" style="--c:${r.color};--h:${r.pct.toFixed(2)}%" title="${r.name}"></i>`).join('');
@@ -163,7 +166,7 @@ function renderMassBar(activeKey) {
   const yen = rows.reduce((s, r) => s + r.yen, 0);
   $('#massPrice').innerHTML = scale.price ? `<b>¥${yen.toLocaleString()}</b><span>${SCALE_TEXT.priceNote}</span>` : '';
   $('#massPrice').hidden = !scale.price;
-  $('#massNote').textContent = scale.over ? SCALE_TEXT.overNote : '';
+  $('#massNote').textContent = scale.over ? scaleOverText() : '';   // 文言は1か所(stepScale と同じ)に揃える
   $('#massNote').hidden = !scale.over;
 }
 

@@ -43,6 +43,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 .mbadge.up { color: var(--ok); } .mbadge.down { color: var(--warn); }
 .mbadge small { font-family: var(--font); font-weight: 500; color: var(--ink3); margin-left: 4px; }
 
+:root { --sal: env(safe-area-inset-left, 0px); --sar: env(safe-area-inset-right, 0px); --sab: env(safe-area-inset-bottom, 0px); --sat: env(safe-area-inset-top, 0px); }
 .glass { background: var(--glass); backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); border: 1px solid var(--glass-border); border-radius: var(--radius); box-shadow: var(--glass-shadow); }
 @media (prefers-reduced-transparency: reduce) { .glass { background: var(--glass-strong); backdrop-filter: none; -webkit-backdrop-filter: none; } }
 
@@ -122,7 +123,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 .insp-head { display: flex; align-items: center; gap: 8px; padding: 12px 10px 10px 16px; border-bottom: 1px solid var(--hair); flex: none; }
 .insp-head h2 { font-size: 15px; font-weight: 700; letter-spacing: -0.005em; flex: 1; }
 .insp-head .count { font-size: 12px; color: var(--ink3); font-family: var(--mono); }
-#inspClose { display: none; }
+#inspClose, #expertClose { display: none; }
 #inspBody { flex: 1; overflow: hidden; position: relative; }
 #partList, #detail { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; transition: transform .22s cubic-bezier(.32,.72,0,1), opacity .22s; }
 #partList { padding: 8px 8px 12px; }
@@ -133,7 +134,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 .grp i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); display: inline-block; }
 .row { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 8px; padding: 6px 6px 6px 12px; border-radius: 10px; cursor: pointer; min-height: var(--tap); transition: background .12s; }
 .row:hover { background: var(--row-hover); } .row.on { background: var(--accent-soft); } .row.on .nm { color: var(--accent); font-weight: 600; }
-.row .nm { font-size: 13.5px; } .row .cnt { font-size: 11.5px; color: var(--ink3); font-family: var(--mono); }
+.row .nm { font-size: calc(13.5px * var(--fs, 1)); } .row .cnt { font-size: 11.5px; color: var(--ink3); font-family: var(--mono); }
 .row .eye { width: 34px; height: 34px; min-width: var(--tap); min-height: var(--tap); display: grid; place-items: center; border-radius: 8px; color: var(--ink3); opacity: .55; }
 .row:hover .eye, .row.off .eye { opacity: 1; } .row .eye:hover { background: var(--hair); color: var(--ink); } .row.off .nm, .row.off .cnt { opacity: .4; }
 .row.sub { padding-left: 24px; } .row.sub .nm { font-size: 13px; }
@@ -161,7 +162,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 #sticks { position: fixed; left: 50%; bottom: calc(var(--dock-h) + 26px); transform: translateX(-50%); z-index: 9; display: flex; align-items: center; gap: 22px; }
 .stick { position: relative; width: 108px; height: 108px; border-radius: 50%; background: var(--glass); border: 1px solid var(--glass-border); backdrop-filter: blur(16px); box-shadow: var(--glass-shadow); touch-action: none; }
 .stick .knob { position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: var(--glass-strong); border: 1px solid var(--glass-border); box-shadow: 0 3px 10px rgba(20,26,40,.2); will-change: transform; }
-.stick .lbl { position: absolute; transform: none; padding: 0; background: none; border: 0; box-shadow: none; font-size: 10px; font-weight: 600; color: var(--ink3); pointer-events: none; }
+.stick .lbl { position: absolute; transform: none; padding: 0; background: none; border: 0; box-shadow: none; font-size: 11px; font-weight: 600; color: var(--ink3); pointer-events: none; }
 .stick .lbl.t { top: 6px; left: 50%; transform: translateX(-50%); } .stick .lbl.b { bottom: 6px; left: 50%; transform: translateX(-50%); } .stick .lbl.l { left: 6px; top: 50%; transform: translateY(-50%); } .stick .lbl.r { right: 6px; top: 50%; transform: translateY(-50%); }
 .stick-mid { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 
@@ -181,7 +182,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 .cards { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; } .cards::-webkit-scrollbar { display: none; }
 .cards button { flex: none; width: 150px; padding: 8px 10px; border-radius: 12px; background: var(--seg-bg); text-align: left; font-size: 12.5px; line-height: 1.35; min-height: 52px; transition: background .15s; }
 .cards button b { display: block; font-size: 13px; margin-bottom: 2px; } .cards button:hover { background: var(--hair2); } .cards button.on { background: var(--accent-soft); color: var(--accent-text); }
-.cards button { min-height: 64px; } #whatifCards button { border-left: 3px solid var(--cw); border-radius: 6px 12px 12px 6px; }   /* 外の状況 = 青の帯（⑤の組み間違いは無印）
+.cards button { min-height: 64px; } #whatifCards button { border-left: 3px solid var(--cw); border-radius: 6px 12px 12px 6px; }   /* 外の状況 = 青の帯（⑤の組み間違いは無印） */
 .stages { display: flex; align-items: center; gap: 6px; flex: 1; justify-content: center; }
 .stages span { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--ink3); } .stages span::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--hair2); }
 .stages span.done::before { background: var(--accent); opacity: .5; } .stages span.on { color: var(--accent); font-weight: 700; } .stages span.on::before { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
@@ -197,6 +198,9 @@ body:not(.full) [data-full] { display: none !important; }
 [data-fullname] { display: none; } .full [data-fullname] { display: inline; } .full [data-simple] { display: none; }
 .compact-only { display: none; }
 body.theater #topbar, body.theater #viewCol { opacity: .35; pointer-events: none; } body.theater #inspector { visibility: hidden; }
+
+button, .tabs, .seg, .chips { touch-action: manipulation; -webkit-user-select: none; user-select: none; }
+.grabber { touch-action: none; }
 
 /* ---- loading ---- */
 #loading { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: grid; place-content: center; justify-items: center; gap: 14px; transition: opacity .6s; }
@@ -217,18 +221,22 @@ body.theater #topbar, body.theater #viewCol { opacity: .35; pointer-events: none
   #expert { height: min(46vh, 420px); } #expert.tall { height: min(78vh, 640px); } .xsegm { margin: 0 14px 6px; align-self: flex-start; } #expertClose { display: grid; }   /* 専門シートは機体が見える高さに留め、モード切替をシート内にも置く(ドックがシートの下に隠れるため) */
   #dock { right: 14px; margin: 0; } #viewCol { right: 14px; } #noteCard { width: min(420px, calc(100vw - 90px)); }
 }
+@media (max-width: 760px), (max-height: 520px) {
+  #viewCol { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; bottom: auto; top: calc(66px + var(--sat)); right: calc(10px + var(--sar)); max-width: calc(100vw - 20px - var(--sal) - var(--sar)); padding: 4px; }
+  #viewCol hr { display: none; } #viewCol button { width: 38px; height: 38px; }
+}
 @media (max-width: 760px) {
   :root { --dock-h: 118px; }
-  #topbar { left: 10px; right: 10px; top: 10px; padding: 6px 6px 6px 10px; gap: 8px; }
+  #topbar { left: calc(10px + var(--sal)); right: calc(10px + var(--sar)); top: calc(10px + var(--sat)); padding: 6px 6px 6px 10px; gap: 8px; }
   .brand { flex: 1; gap: 6px; min-width: 0; } .brand h1 { font-size: 13px; white-space: nowrap; } .seg.tiny button { padding: 3px 6px; font-size: 11.5px; }
   .top-actions { gap: 4px; } .top-actions .pill-btn { padding: 6px 8px; }
-  .popover { position: fixed; left: 10px; right: 10px; top: auto; bottom: 10px; width: auto; max-height: 60vh; }
-  #dock { left: 10px; right: 10px; bottom: 10px; }
+  .popover { position: fixed; left: calc(10px + var(--sal)); right: calc(10px + var(--sar)); top: auto; bottom: calc(10px + var(--sab)); width: auto; max-height: 60vh; }
+  #dock { left: calc(10px + var(--sal)); right: calc(10px + var(--sar)); bottom: calc(10px + var(--sab)); }
   .ctx { padding: 8px 10px 6px; } .ctx-row[data-tab=mishap] { flex-wrap: wrap; overflow-x: hidden; mask-image: none; -webkit-mask-image: none; padding-right: 0; gap: 6px; } .ctx-row[data-tab=mishap] .dock-group.grow { width: 100%; flex: none; }
   .ctx-row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; align-items: flex-end; gap: 12px; padding-right: 24px; mask-image: linear-gradient(to right, #000 88%, transparent); -webkit-mask-image: linear-gradient(to right, #000 88%, transparent); } .ctx-row::-webkit-scrollbar { display: none; }
   .dock-group { flex: none; } .dock-group.grow { flex: none; width: 150px; } .chips { flex-wrap: nowrap; }
   .tabs button span { font-size: 11px; } .tabs button { flex-direction: column; gap: 2px; padding: 6px 4px; }
-  #viewCol { flex-direction: row; bottom: auto; top: 66px; right: 10px; padding: 4px; } #viewCol hr { display: none; }
+  #viewCol { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; bottom: auto; top: 66px; right: calc(10px + var(--sar)); max-width: calc(100vw - 20px - var(--sal) - var(--sar)); padding: 4px; } #viewCol hr { display: none; }
   #viewCol button { width: 38px; height: 38px; }
   #noteCard { left: 10px; bottom: calc(var(--dock-h) + 8px); width: calc(100vw - 20px); max-height: 34vh; font-size: 13px; }
   #coach { width: calc(100vw - 40px); top: 130px; }
@@ -385,7 +393,6 @@ body.scale #noteCard { left: calc(14px + 212px + 12px); width: min(420px, calc(1
 
 /* ---------- 専門タブ (パッケージ⑪⑫⑬) ---------- */
 .ctx-hint { font-size: 11.5px; color: var(--ink3); margin: 0; max-width: 360px; line-height: 1.4; align-self: center; }
-#expertClose { display: none; }
 #expertBody { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 10px; font-size: calc(12.5px * var(--fs, 1)); }
 #expertSel { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-bottom: 1px solid var(--hair); background: var(--accent-soft); font-size: calc(12.5px * var(--fs, 1)); }
 #expertSel b { color: var(--accent-text); white-space: nowrap; } #expertSel span { flex: 1; min-width: 0; color: var(--ink2); }
@@ -417,6 +424,19 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
 .xlaw summary { font-size: calc(12px * var(--fs, 1)); color: var(--ink3); cursor: pointer; } .xlaw ul { margin: 6px 0 0; padding-left: 1.2em; font-size: calc(11.5px * var(--fs, 1)); color: var(--ink2); line-height: 1.55; }
 @media (max-width: 760px) { .ctx-hint { display: none; } }
 @media (pointer: coarse) { .xctl .tgl, .xctl .pill-btn, .xh-head .pill-btn, .chart-h .tgl.sm, .tbform input, .tbform select, .xctl select { min-height: var(--tap); } .tbform input { padding: 8px 6px; } .chart-h .rng input { height: var(--tap); } }
+
+@media (max-width: 1100px) and (max-height: 520px) {
+  #inspector, #lesson, #expert, #expert.tall { height: calc(100% - 12px); }   /* 横向きは高さが足りないのでシートを深くする */
+  #expert .xsegm { position: sticky; top: 0; z-index: 1; background: var(--glass); }
+}
+@media (max-width: 760px) {
+  body.scale #noteCard { bottom: calc(var(--dock-h) + 16px + var(--massbar-h, 42vh) + var(--sab)); max-height: 26vh; }   /* 重さの帯と重ねない */
+  #noteCard, #massBar { bottom: calc(var(--dock-h) + 8px + var(--sab)); }
+  .tabs button { min-height: var(--tap); }
+}
+@media (pointer: coarse) {
+  .tbform input, .tbform select, .xctl select, .xflights input, #expertBody input[type=number] { font-size: max(16px, calc(12.5px * var(--fs, 1))); }   /* 16px未満だと iOS がページごと拡大する */
+}
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation-duration: .01s !important; } }
 
@@ -497,7 +517,7 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
   <div class="pop-row speakrow"><span>読み上げ</span><button class="tgl speak" data-t="speakAuto" aria-pressed="false"><i></i>部品を選ぶと読み上げる</button></div>
   <div class="pop-row"><span>テーマ</span><div class="seg small" id="themeSeg" role="radiogroup" aria-label="テーマ"><button data-th="auto" class="on">システム</button><button data-th="light">ライト</button><button data-th="dark">ダーク</button></div></div>
   <div class="pop-row"><span>動き</span><button class="tgl on" data-t="alive" aria-pressed="true"><i></i>機体を浮かせておく</button></div>
-  <p class="pop-foot" id="aliveNote" hidden>軽量画質では浮かせられません（品質を「標準」以上に）</p>
+  <p class="pop-foot" id="aliveNote" hidden>軽量・標準の画質では浮かせられません（品質を「高」以上に）</p>
   <details class="pop-more"><summary>詳細</summary>
     <div class="pop-row"><span>文字の大きさ</span><div class="seg small" id="fontSeg" role="radiogroup" aria-label="文字の大きさ"><button data-f="1" class="on">標準</button><button data-f="1.18">大</button></div></div>
     <div class="pop-row"><span>品質</span><div class="seg small" id="qualitySeg" role="radiogroup" aria-label="品質"><button data-q="auto" class="on">自動</button><button data-q="3">最高</button><button data-q="2">高</button><button data-q="1">標準</button><button data-q="0">軽量</button></div></div>
@@ -704,15 +724,15 @@ const PARTS = {
   },
   stator: {
     name: 'ステーター(固定子)', en: 'Stator', group: 'prop', count: 4,
-    role: 'コイルを巻いた12極の鉄心。ESCが順番に電流を流すと回転磁界ができ、ローターを引き回す。',
+    role: 'コイルを巻いた12スロット（12ティース）の鉄心。ESCが順番に電流を流すと回転磁界ができ、ローターを引き回す。',
     structure: ['0.2mm厚のケイ素鋼板を積層(渦電流損を減らす)', '各極の先端は「シュー」と呼ばれる広がりで磁束を集める'],
-    spec: [['極数', '12'], ['積層', 'ケイ素鋼板 0.2mm']],
+    spec: [['スロット数', '12 (ティース)'], ['磁極数', '14 (ローター側)'], ['積層', 'ケイ素鋼板 0.2mm']],
     check: ['絶縁被膜の傷(短絡の原因)'],
   },
   winding: {
     name: '巻線(コイル)', en: 'Windings', group: 'prop', count: 4,
     role: 'エナメル被覆の銅線。U・V・Wの3相に分けて巻かれ、順に通電されて回転磁界を作る。',
-    structure: ['3相 × 4極 = 12極。相ごとに結線(スター結線)', '線径が太いほど大電流に耐え、巻数が少ないほどKV値が上がる'],
+    structure: ['3相 × 4スロット = 12スロット。相ごとに結線(スター結線)', '線径が太いほど大電流に耐え、巻数が少ないほどKV値が上がる'],
     spec: [['線材', 'エナメル銅線'], ['相数', '3相 (U/V/W)']],
     check: ['焦げ・変色(過熱)', 'エナメルのはがれ'],
     tip: 'モーターの発熱の大半はここ。長時間のホバリング後は触って温度を確かめる習慣を。',
@@ -908,7 +928,7 @@ const PARTS = {
     structure: ['小型の樹脂ケースに無線モジュールとアンテナ', 'FCから電源と位置情報を受ける'],
     spec: [['方式', 'Bluetooth 5 / Wi-Fi Beacon'], ['発信間隔', '1 秒']],
     check: ['発信状態のLED', 'アプリで受信できるか', '登録記号との紐づけ'],
-    tip: '内蔵型の機体は別売りの外付けモジュールが不要。搭載免除の条件（係留飛行・登録講習機関の講習など）もある。',
+    tip: '内蔵型の機体は別売りの外付けモジュールが不要。搭載免除の条件もあるが、いずれも「十分な強度のひもで係留する」「立入管理措置を講じる」などの前提が付く。当てはまるかは国土交通省の案内で必ず確認する。',
   },
   regMark: {
     name: '登録記号の表示', en: 'Registration mark', group: 'frame', count: 1,
@@ -982,7 +1002,7 @@ const USES = [
       { id: 'light', name: '投光器', shape: 'cyl', size: [0.03, 0.05], pos: [-0.06, -0.06, -0.06], note: '夜間の捜索・作業の照明' },
       { id: 'chute', name: 'パラシュート', shape: 'cyl', size: [0.045, 0.06], pos: [0, 0.075, 0.0], note: '人の上を飛ぶための安全装備' },
     ],
-    weight: '+1.0 kg', time: '約20分 → 約12分', how: '機体は同じ設計のまま、装備を足す。夜や煙の中で働くので灯火と赤外線が要る。' },
+    weight: '+1.0 kg', time: '約15分 → 約9分', how: '機体は同じ設計のまま、装備を足す。夜や煙の中で働くので灯火と赤外線が要る。' },
   { id: 'farm', name: '農業', tagline: '田畑に薬剤や肥料をまく',
     up: ['arm', 'motor', 'prop', 'battery', 'frameBottom', 'landingGear', 'esc', 'pdb', 'wiring'],
     ghost: [
@@ -991,7 +1011,7 @@ const USES = [
       { id: 'nozzleR', name: 'ノズル', shape: 'cyl', size: [0.012, 0.04], pos: [-0.19, -0.02, -0.19], note: 'アーム先端から噴霧' },
       { id: 'pump', name: 'ポンプ', shape: 'box', size: [0.05, 0.04, 0.05], pos: [0, -0.17, 0.0], note: '流量を調節する' },
     ],
-    weight: '+10〜15 kg（機体ごと大型化）', time: '約20分 → 約8分（散布中）', how: '原理は同じだが、6〜8ローターの大型機として別に設計される。ジンバルとカメラは外す。' , drop: ['gimbal', 'camera', 'damper'] },
+    weight: '+10〜15 kg（機体ごと大型化）', time: '約15分 → 約6分（散布中）', how: '原理は同じだが、6〜8ローターの大型機として別に設計される。ジンバルとカメラは外す。' , drop: ['gimbal', 'camera', 'damper'] },
   { id: 'inspect', name: '点検', tagline: '橋やビルの壁を近くで撮る',
     up: ['gimbal', 'camera', 'gps', 'led', 'fc'],
     ghost: [
@@ -1002,14 +1022,14 @@ const USES = [
       { id: 'upcam', name: '上向きカメラ', shape: 'box', size: [0.04, 0.03, 0.04], pos: [0.03, 0.055, -0.03], note: '橋の裏側を見る' },
       { id: 'sensor', name: '障害物センサー', shape: 'box', size: [0.03, 0.02, 0.02], pos: [0, 0.02, -0.10], note: '壁との距離を測って止まる' },
     ],
-    weight: '+0.6 kg', time: '約20分 → 約15分', how: '橋の下ではGPSが届かないので、センサーとガードで壁に寄れるようにする。' },
+    weight: '+0.6 kg', time: '約15分 → 約11分', how: '橋の下ではGPSが届かないので、センサーとガードで壁に寄れるようにする。' },
   { id: 'photo', name: '空撮', tagline: '映像作品や測量の写真を撮る',
     up: ['gimbal', 'camera', 'damper', 'vtx'],
     ghost: [
       { id: 'bigcam', name: '大型カメラ（1インチ以上）', shape: 'box', size: [0.06, 0.05, 0.06], pos: [0, -0.095, -0.085], note: '画質のためにセンサーが大きい' },
       { id: 'nd', name: 'NDフィルター', shape: 'cyl', size: [0.02, 0.006], pos: [0, -0.085, -0.125], note: '明るすぎる昼間の光を減らす' },
     ],
-    weight: '+0.3 kg', time: '約20分 → 約17分', how: '揺れを消すジンバルと、重いカメラを支えるダンパーが主役。機体そのものは今のまま。' },
+    weight: '+0.3 kg', time: '約15分 → 約13分', how: '揺れを消すジンバルと、重いカメラを支えるダンパーが主役。機体そのものは今のまま。' },
   { id: 'school', name: '教育', tagline: '安全に練習して、仕組みを学ぶ',
     up: ['landingGear', 'led'],
     ghost: [
@@ -1018,7 +1038,7 @@ const USES = [
       { id: 'guardRR', name: 'プロペラガード', shape: 'ring', size: [0.17, 0.006], pos: [0.194, 0.045, 0.194], note: '' },
       { id: 'guardRL', name: 'プロペラガード', shape: 'ring', size: [0.17, 0.006], pos: [-0.194, 0.045, 0.194], note: '' },
     ],
-    weight: '+0.2 kg', time: '約20分 → 約19分', how: 'カメラとジンバルは外して軽くし、ガードを付ける。中身はこの教材の機体そのもの。', drop: ['gimbal', 'camera', 'damper'] },
+    weight: '+0.2 kg', time: '約15分 → 約14分', how: 'カメラとジンバルは外して軽くし、ガードを付ける。中身はこの教材の機体そのもの。', drop: ['gimbal', 'camera', 'damper'] },
   { id: 'delivery', name: '配送', tagline: '荷物を運んで届ける',
     up: ['motor', 'prop', 'battery', 'frameBottom', 'arm', 'esc'],
     ghost: [
@@ -1027,7 +1047,7 @@ const USES = [
       { id: 'chute', name: 'パラシュート', shape: 'cyl', size: [0.045, 0.06], pos: [0, 0.075, 0.0], note: '人や家の上を飛ぶための安全装備' },
       { id: 'sensor', name: '障害物センサー', shape: 'box', size: [0.03, 0.02, 0.02], pos: [0, 0.02, -0.10], note: '電線や木を避ける' },
     ],
-    weight: '+2.5 kg', time: '約20分 → 約9分', how: '荷物の分だけ推力と電池が要る。人の上を飛ぶので安全装備が増える。', drop: ['gimbal', 'camera', 'damper'] },
+    weight: '+2.5 kg', time: '約15分 → 約7分', how: '荷物の分だけ推力と電池が要る。人の上を飛ぶので安全装備が増える。', drop: ['gimbal', 'camera', 'damper'] },
 ];
 
 // ===== 素朴な質問 =====
@@ -1040,7 +1060,7 @@ const QUESTIONS = [
   { id: 'ccw', q: 'なぜ4枚とも同じ向きに回さないの？', parts: ['prop'], act: { power: 0.5, slow: true, arrows: true },
     a: 'プロペラを回すと、機体は反対向きに回されようとします。隣同士を逆向きにすると、その力が打ち消し合って機体は回りません。ゆっくり回して見ると、隣が逆向きなのがわかります。' },
   { id: 'time', q: '何分飛べる？', parts: ['battery'],
-    a: 'この機体の例では、荷物なしで約20分です。バッテリーは機体で一番重い部品で、その重さを持ち上げるためにも電気を使います。だから電池を大きくしても、飛べる時間はそれほど伸びません。' },
+    a: 'この機体の例では、荷物なしで約15分です（風がなく、その場に浮いているだけの場合）。バッテリーは機体で一番重い部品で、その重さを持ち上げるためにも電気を使います。だから電池を大きくしても、飛べる時間はそれほど伸びません。' },
   { id: 'rain', q: '雨の日は飛べる？', parts: ['fc', 'esc', 'battery'],
     a: '多くの機体は防水ではありません。基板や配線に水が入ると故障し、落ちることがあります。防滴の機体もありますが、風雨で姿勢も乱れやすいので、雨の日は飛ばさないのが基本です。' },
   { id: 'radio', q: '電波が切れたら？', parts: ['rx', 'gps', 'fc'],
@@ -1117,7 +1137,7 @@ const PRICE = { frameTop: 6000, frameBottom: 8000, arm: 3200, armClamp: 900, mot
 const SCALE_TEXT = { bottle: '500mlペットボトル', bottleG: 500, person: '幅は、大人が両手を広げた半分くらい（約85cm）',
   priceNote: '参考価格（2026年時点・国内通販の目安）。機種・時期で大きく変わります',
   overNote: 'モーターに余裕がありません。前に進む・風に逆らう余力が減ります',
-  energyNote: '電池1本 ≒ スマホ約8台分の電気。飛べば約20分でなくなる',
+  energyNote: '電池1本 ≒ スマホ約8台分の電気。その場に浮いているだけでも約15分でなくなる',
   perMotor: (g) => `モーター1つが約 ${g} g（ペットボトル${(g / 500).toFixed(1)}本分）を持ち上げている` };
 const PAYLOADS = [
   { id: 'none', name: 'なし', g: 0, pos: [0, 0, 0] },
@@ -1176,7 +1196,7 @@ const WHATIF = [
     intro: '送信機との電波が届かなくなった。操縦の指示が機体に届かない。',
     reaction: '機体は「指示が来ない」ことを自分で検知し、あらかじめ決めた動き（多くの機種では、離陸した場所へ帰って降りる）に切り替える。',
     motion: 'rth', parts: ['rx', 'fc', 'gps', 'motor'],
-    partNotes: { rx: '受信機が「電波が途切れた」と判断する', fc: 'FC（頭脳）が、覚えていた離陸地点へ戻るフェイルセーフに切り替える', gps: '今いる場所を測り、離陸地点までの向きと距離がわかる', motor: '帰る向きへ機体を進める' },
+    partNotes: { rx: '受信機が「電波が途切れた」と判断する', fc: '頭脳（FC）が、覚えていた離陸地点へ戻るフェイルセーフに切り替える', gps: '今いる場所を測り、離陸地点までの向きと距離がわかる', motor: '帰る向きへ機体を進める' },
     can: ['電波が切れたことを自分で検知する', '設定に従い、離陸地点へ戻る／その場で降りる', '電波が戻れば操縦を受け付ける'],
     human: ['飛ばす前にフェイルセーフの設定を確認する', '目視で機体を追い続ける', '周囲の人に「戻ってきます」と声をかける', '帰還経路に人や障害物がないか見る'],
     caveat: '帰還の動きは機種と設定で異なり、GPSが使えないと働かない。「設定と点検が前提」で、万能ではない。' },
@@ -1184,7 +1204,7 @@ const WHATIF = [
     intro: '飛行中に電池の残りが減ってきた。',
     reaction: '機体は電圧を常に測っていて、決めた値を下回ると警告する。多くの機種では、さらに下がると自動で降下を始める。',
     motion: 'landSlow', parts: ['battery', 'pdb', 'fc', 'buzzer', 'telemetry'],
-    partNotes: { battery: '電圧が下がる', pdb: '電圧を測る回路が値を FC（頭脳）へ送る', fc: 'FC（頭脳）が警告と自動降下を判断する', buzzer: '音で知らせる', telemetry: '地上局（送信機や画面）に残量を知らせる' },
+    partNotes: { battery: '電圧が下がる', pdb: '電圧を測る回路が値を 頭脳（FC）へ送る', fc: '頭脳（FC）が警告と自動降下を判断する', buzzer: '音で知らせる', telemetry: '地上局（送信機や画面）に残量を知らせる' },
     can: ['電圧を常に測って残量を推定する', '決めた値で警告を出す', 'さらに下がれば自動で降下・着陸する'],
     human: ['飛ばす前に満充電と電圧差を確認する', '警告が出たらすぐ戻す（粘らない）。目安は残量 30% で着陸', '着陸できる場所を常に把握しておく'],
     caveat: '寒い日にスマホが急に切れるのと同じで、寒い日や古い電池は残量表示より早く落ちる。自動降下は「安全な場所」を選んでくれるわけではない。' },
@@ -1192,7 +1212,7 @@ const WHATIF = [
     intro: '建物の陰や橋の下で、衛星の電波が届かなくなった。',
     reaction: '位置は分からなくなるが、傾きは分かる。機体は水平を保ったまま、風に少しずつ流される。',
     motion: 'driftHold', parts: ['gps', 'fc', 'motor'],
-    partNotes: { gps: '衛星が見えなくなる', fc: 'FC（頭脳）が位置の保持をあきらめ、姿勢の保持だけ続ける', motor: '傾きを直す動きは続く' },
+    partNotes: { gps: '衛星が見えなくなる', fc: '頭脳（FC）が位置の保持をあきらめ、姿勢の保持だけ続ける', motor: '傾きを直す動きは続く' },
     can: ['姿勢（傾き）を保ち続ける', '位置が保てないことを画面に知らせる', 'GPSが戻れば位置の保持に復帰する'],
     human: ['流される方向を見て、手で位置を直す', '建物・橋の近くでは最初から手動の練習をしておく', '無理をせず、開けた場所へ戻して降ろす'],
     caveat: 'GPSなしでも飛べるかは機種と設定次第。屋内や高い建物の間では最初から「位置保持は効かない」前提で計画する。' },
@@ -1200,7 +1220,7 @@ const WHATIF = [
     intro: '急に風が強くなった。',
     reaction: '機体は流されないように風上へ傾いて踏ん張る。傾きを作る一瞬は風下側を強く回し、傾いたままの間は4つ全部が少しずつ余分に働く。その分、電池の減りが早くなる。',
     motion: 'wind', parts: ['fc', 'motor', 'prop', 'battery'],
-    partNotes: { fc: 'FC（頭脳）が流されたぶんを検知して傾きを命じる', motor: '傾きを保つために4つとも少し余分に回る', prop: '傾けたぶんの推力で風に逆らう', battery: '踏ん張る分だけ消費が増える' },
+    partNotes: { fc: '頭脳（FC）が流されたぶんを検知して傾きを命じる', motor: '傾きを保つために4つとも少し余分に回る', prop: '傾けたぶんの推力で風に逆らう', battery: '踏ん張る分だけ消費が増える' },
     can: ['ある程度の風なら位置を保つ', '傾いて踏ん張る（合計の力を増やす）'],
     human: ['飛ばす前に風速を確認し、機体の限界の6〜7割で判断する', '風が強まったら風下に人がいない場所へ移す', '早めに降ろす。粘ると電池が先に尽きる'],
     caveat: '耐風性能は機種ごとに決まっていて、突風はその値を超えることがある。上空は地上より風が強い。' },
@@ -1277,7 +1297,7 @@ const LESSONS = [
     review: ['ドローンが「落ちにくい」ための仕組みを 1 つ挙げてください。', '飛行中に電波が切れたとき、機体は何をするように設定されていますか。', '私たちが安全のためにお願いしたいことは何でしたか。'],
     steps: [
       { t: 0, title: 'これが飛ぶ機体です', min: 2, view: 'iso', act: { alive: true },
-        say: 'この地域で飛ばすドローン（機体）と同じ型です。重さは約 2.4 kg、500ml のペットボトル約 5 本分。落ちれば人にけがをさせる重さです。回っているプロペラの先端はホバリング中でも時速約 260 km（新幹線並み）。だからこそ、どう落ちにくくしているか、落ちないためにどう備えるかをお話しします。',
+        say: 'この地域で飛ばすドローン（機体）と同じ型です。重さは約 2.4 kg、500ml のペットボトル約 5 本分。落ちれば人にけがをさせる重さです。回っているプロペラの先端はホバリング中でも秒速約 78 m（時速約 280 km・新幹線並み）。だからこそ、どう落ちにくくしているか、落ちないためにどう備えるかをお話しします。',
         ask: '（問いかけなし。眺めてもらう）', expect: '' },
       { t: 2, title: 'なぜ落ちにくいのか', min: 3, view: 'iso', act: { power: 0.5, coach: '機体を指ではじいてみよう' },
         say: '傾いても、頭脳がモーターの速さを変えて自分で直します。指ではじいても戻ります。ただし機械ですので「絶対に落ちない」とは言えません。だから次の 2 つを必ずしています。',
@@ -1313,10 +1333,10 @@ const WEAR = {
   shaft:       { cls: 'wear',  lo: 300,  hi: 600,  effect: 'ベアリングのガタ・異音' },
   damper:      { cls: 'wear',  lo: 200,  hi: 500,  effect: 'ゴムは1〜2年で硬くなる（回数より年数）' },
   strap:       { cls: 'wear',  lo: 150,  hi: 400,  effect: '面ファスナーが甘くなる' },
-  screws:      { cls: 'robust', lo: 2000, hi: 5000, effect: 'ゆるみ点検は50回ごと（交換ではない）' },
+  screws:      { cls: 'robust', lo: 2000, hi: 5000, effect: '50回ごとにゆるみ点検（交換ではなく増し締め）' },
   propNut:     { cls: 'wear',  lo: 300,  hi: 600,  effect: 'ねじ山の摩耗' },
   balance:     { cls: 'wear',  lo: 300,  hi: 800,  effect: '接触不良' },
-  capacitor:   { cls: 'robust', lo: 2000, hi: 5000, effect: '脚の振動疲労' },
+  capacitor:   { cls: 'robust', lo: 2000, hi: 5000, effect: 'まれに脚が振動で疲労する' },
   wiring:      { cls: 'wear',  lo: 600,  hi: 1200, effect: '曲げ疲労で芯線が切れる' },
   landingGear: { cls: 'crash', lo: 200,  hi: 600,  effect: '着陸の衝撃で曲がる' },
   arm:         { cls: 'crash', lo: 400,  hi: 1000, effect: '根元の白化（層間はく離）' },
@@ -2135,14 +2155,14 @@ function buildDrone(M) {
 function buildPerson() {
   // 建築模型のスケールフィギュア: 身長1.70m・8頭身。温白のマット樹脂。手足はカプセル(関節に継ぎ目が出ない)で、
   // 股・膝・肩・肘にピボットを持ち、歩行(walk: 進んだ距離で位相を進める)・向き(face)・立ち姿へ戻る(rest: 減衰)ができる。
-  const g = new THREE.Group(); g.visible = false; g.position.set(-0.50, -0.158, -0.48);
+  const g = new THREE.Group(); g.rotation.order = 'YXZ'; g.visible = false; g.position.set(-0.50, -0.158, -0.48);   // 向き(Y)を先に、前傾(X)を後に掛ける
   const mat = new THREE.MeshPhysicalMaterial({ color: 0xd6d3cc, roughness: 0.62, metalness: 0, clearcoat: 0.12, clearcoatRoughness: 0.5 });
   const V = (a) => new THREE.Vector3(a[0], a[1], a[2]);
   const along = (geo, a, b) => { const A = V(a), B = V(b); geo.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), B.clone().sub(A).normalize())); const m = A.clone().add(B).multiplyScalar(0.5); geo.translate(m.x, m.y, m.z); return geo; };
   // 骨: 端の球を関節にした太さ一定のカプセル。太さが変わる骨は「側面だけの円錐台 + 両端の球」(平らな蓋を作らないので継ぎ目のリングが出ない)
   const bone = (a, b, r1, r2 = r1, seg = 28) => {
     const len = V(a).distanceTo(V(b));
-    if (r1 === r2) return along(new THREE.CapsuleGeometry(r1, len, 6, seg), a, b);
+    if (r1 === r2) return along(new THREE.CapsuleGeometry(r1, Math.max(1e-4, len - 2 * r1), 6, seg), a, b);   // カプセルの全長は length + 2r
     const side = along(new THREE.CylinderGeometry(r2, r1, len, seg, 1, true), a, b);
     const s1 = new THREE.SphereGeometry(r1, seg, 18); s1.translate(a[0], a[1], a[2]); const s2 = new THREE.SphereGeometry(r2, seg, 18); s2.translate(b[0], b[1], b[2]);
     return mergeGeometries([side.toNonIndexed(), s1.toNonIndexed(), s2.toNonIndexed()], false);
@@ -2154,7 +2174,7 @@ function buildPerson() {
   const torso = new THREE.LatheGeometry([[0.0, 0.795], [0.06, 0.80], [0.165, 0.86], [0.175, 0.96], [0.14, 1.06], [0.135, 1.16], [0.16, 1.27], [0.20, 1.37], [0.195, 1.42], [0.10, 1.455], [0.0, 1.46]].map(q => new THREE.Vector2(q[0], q[1])), 48);
   torso.scale(1, 1, 0.62);
   g.add(meshOf([torso,
-    bone([0, 1.43, 0], [0, 1.52, 0.010], 0.056),                       // 首
+    bone([0, 1.425, 0], [0, 1.525, 0.010], 0.044),                     // 首
     ball([0, 1.585, 0.012], 0.096, 0.86, 1.18, 1.02),                  // 頭 (top ≒ 1.70)
   ]));
   const limbs = {};
@@ -2468,7 +2488,7 @@ function applyMode() {
     const real = S.mode === 'normal' || S.mode === 'cut' || keepReal(m);
     if (!real && S.mode === 'xray') { m.material = xrayMat; m.castShadow = false; }
     else if (!real && isWireMode()) { m.material = paperMat; m.castShadow = false; }
-    else { m.material = m.userData.tint || m.userData.origMat; m.castShadow = m.userData.castShadow && S.shadows; }
+    else { m.material = m.userData.tint || (m.userData.papered ? wearPaper : m.userData.origMat); m.castShadow = m.userData.castShadow && S.shadows; }
     if (m.userData.wireClone) m.userData.wireClone.visible = !real && isWireMode();
   }
   const cutOn = S.mode === 'cut';
@@ -2501,7 +2521,8 @@ function applyExplode() {
 }
 
 // ---------- 時間伸縮 ----------
-function setTimeScale(ts, tauIn) { S.tsTarget = ts; S.slow = ts < 0.99; S.tsTauIn = tauIn != null ? tauIn : 0.40; }
+function setTimeScale(ts, tauIn) { S.tsTarget = ts; S.slow = ts < 0.99; S.tsTauIn = tauIn != null ? tauIn : 0.40;
+  for (const x of $$('.tgl[data-t=slow]')) { x.classList.toggle('on', S.slow); x.setAttribute('aria-pressed', String(S.slow)); } }   // ボタンの見た目を1か所で合わせる
 function stepTimeScale(dt) {
   const target = Math.log(S.tsTarget), tau = S.tsTarget < S.ts ? (S.tsTauIn || 0.40) : 0.40;
   S.logTs += (target - S.logTs) * (1 - Math.exp(-dt / tau)); if (Math.abs(target - S.logTs) < 0.002) S.logTs = target; S.ts = Math.exp(S.logTs);
@@ -2511,6 +2532,7 @@ function stepTimeScale(dt) {
 const cam = { v: new THREE.Vector3(), tv: new THREE.Vector3(), last: new THREE.Vector3(), vel: new THREE.Vector3() };
 function flyTo(pos, target, dur = 900, pull = true) {
   controls.autoRotate = false;
+  controls.maxDistance = Math.max(camMax(), pos.distanceTo(target) * 1.02);   // 台本が指定した引きは OrbitControls の上限に切られないようにする
   if (reduceMotion) { camera.position.copy(pos); controls.target.copy(target); controls.update(); return; }
   const d0 = camera.position.distanceTo(controls.target), d1 = pos.distanceTo(target), dq = controls.target.distanceTo(target);
   const doPull = pull && (d0 / d1 < 0.7 || d0 / d1 > 1.6 || dq > 0.10);
@@ -2533,10 +2555,13 @@ function stepCamera(dt) {
   // 防護: 非有限値や暴走の復帰
   const p = camera.position, t = controls.target;
   if (!Number.isFinite(p.x + p.y + p.z + t.x + t.y + t.z)) { S.camSpring = null; S.camInertia = null; cam.v.set(0, 0, 0); cam.tv.set(0, 0, 0); t.set(0, 0, 0); p.set(0.78, 0.50, -0.82); }
-  if (t.length() > 3) t.clampLength(0, 3); const off = tmpV.copy(p).sub(t); if (off.length() > 4) p.copy(t).addScaledVector(off.normalize(), 4);
+  if (t.length() > 3) t.clampLength(0, 3);
+  const lim = Math.max(4, controls.maxDistance); const off = tmpV.copy(p).sub(t); if (off.length() > lim) p.copy(t).addScaledVector(off.normalize(), lim);   // 上限は画面の縦横比と台本の引きに合わせる(固定4mだと縦画面で場面が枠に入らない)
 }
 function onCamInterrupt() { if (S.camSpring) { S.camSpring = null; S.camInertia = { v: cam.v.clone().clampLength(0, 2), t: 0.3 }; cam.v.set(0, 0, 0); cam.tv.set(0, 0, 0); } }
 function viewScale() { const a = W / H; return a < 1 ? Math.min(2.0, Math.pow(1 / a, 0.9)) : 1; }
+function camMax() { return 3.2 * viewScale(); }   // 縦長の画面ほど引かないと同じ画が入らない
+function camHome() { controls.maxDistance = camMax(); if (camera.position.distanceTo(controls.target) > camMax() * 0.75) focusOn([D.root], { pull: true }); }   // 広い場面(人が近づく等)から戻ったら機体の枠に戻す
 function focusOn(objs, opts = {}) {
   const box = new THREE.Box3(), tb = new THREE.Box3(), pts = [];   // 本体メッシュだけで枠を決める(気流・ゴースト・スプライトは除外)。各メッシュの8隅を集めて実投影で距離を決める
   for (const o of objs) { o.updateWorldMatrix(true, true); o.traverseVisible(c => { if (!c.isMesh || c.userData.noPart || !c.geometry) return; if (!c.geometry.boundingBox) c.geometry.computeBoundingBox(); const b = c.geometry.boundingBox; if (c.isInstancedMesh) { if (!c.boundingBox) c.computeBoundingBox(); tb.copy(c.boundingBox).applyMatrix4(c.matrixWorld); } else tb.copy(b).applyMatrix4(c.matrixWorld); box.union(tb); for (let i = 0; i < 8; i++) pts.push(new THREE.Vector3(i & 1 ? tb.max.x : tb.min.x, i & 2 ? tb.max.y : tb.min.y, i & 4 ? tb.max.z : tb.min.z)); }); } if (box.isEmpty()) return;
@@ -2546,7 +2571,7 @@ function focusOn(objs, opts = {}) {
   const fwd = dir.clone().negate(), right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize(), up = new THREE.Vector3().crossVectors(right, fwd).normalize();
   const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), tanH = tanV * Math.max(0.6, camera.aspect); let need = 0.05; const rel = new THREE.Vector3();
   for (const q of pts) { rel.copy(q).sub(sph.center); const t = rel.dot(dir); need = Math.max(need, Math.abs(rel.dot(right)) / tanH + t, Math.abs(rel.dot(up)) / tanV + t); }
-  const dist = clamp((need * (opts.margin || 1.18) + 0.02) * viewScale(), 0.12, opts.max || 3.2);
+  const dist = clamp((need * (opts.margin || 1.18) + 0.02) * viewScale(), 0.12, (opts.max || 3.2) * viewScale());
   const dur = 600 + 500 * clamp((camera.position.distanceTo(sph.center.clone().addScaledVector(dir, dist)) + controls.target.distanceTo(sph.center)) / 0.6, 0, 1);
   flyTo(sph.center.clone().addScaledVector(dir, dist), sph.center, dur, opts.pull !== false);
 }
@@ -2610,6 +2635,7 @@ function resize() {
   renderer.setSize(W, H, false); composer.setSize(W, H);
   if (!narrow()) { const inspW = 344 + 40; camera.aspect = (W - inspW) / H; camera.setViewOffset(W - inspW, H, 0, 0, W, H); } else { camera.clearViewOffset(); camera.aspect = W / H; }
   camera.updateProjectionMatrix();
+  controls.maxDistance = Math.max(camMax(), camera.position.distanceTo(controls.target));
   if (typeof onResized === 'function') onResized();
   S.aoDirty = true;
 }
@@ -2690,7 +2716,7 @@ function stepFree(dt) {
   body.vx += (axg * holdK - dragH * body.vx) * dt; body.vz += (azg * holdK - dragH * body.vz) * dt; body.px += body.vx * dt; body.pz += body.vz * dt;
   // 高度: ホバー基準 + 傾きで沈む + スロットル + 押されて沈む
   const thr = st.active ? st.thr : 0; const pyCmd = free.hoverY - 0.2 * (1 - Math.cos(th)) + 0.10 * thr - (body.hold ? 0.010 * (body.hold.th / free.holdMax) : 0);
-  const ay = 36 * (pyCmd - body.py) - 9.6 * body.vyF; body.vyF += ay * dt; body.py += body.vyF * dt;
+  const ay = 36 * (pyCmd - body.py) - 9.6 * body.vyF; body.vyF += ay * dt; body.py += body.vyF * dt; body.vy = body.vyF;   // 上下の速度はセンサー視点でも読む
   // ヨー
   const yawCmd = st.active ? -1.2 * st.yaw : 0; body.yawRate = dl(body.yawRate, yawCmd, dt, 6); body.yaw += body.yawRate * dt;
   if (!st.active) { body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); const look = (S.alive && body.lookYaw != null && !body.hold && !ti.active && !reduceMotion); body.yaw = dl(body.yaw, look ? body.lookYaw : 0, dt, look ? 2.5 : 1.5); }   // ⑧: ポインタの方へ数度だけ向く
@@ -2904,7 +2930,8 @@ function startTheater(id) {
   if (typeof onTheaterChanged === 'function') onTheaterChanged();
 }
 function stopTheater(silent) {
-  if (!theater.active) return;
+  if (!theater.active && !theater.done) return;   // 完走(done)後も後始末できるようにする
+  theater.done = false;
   for (const p of theater.flagged) setTint(p, RED, 0); for (const p of theater.red) setTint(p, RED, 0);
   for (const p of D.parts) { if (p.anim) { p.anim = null; p.animReset = true; } }
   for (const d of theater.debris) { scene.remove(d.mesh); } theater.debris = [];
@@ -3259,6 +3286,7 @@ function setScale(on) {
   if (on && typeof stopOthers === 'function') stopOthers('scale');
   const btn = $('#scaleBtn'); if (btn) { btn.classList.toggle('on', on); btn.setAttribute('aria-pressed', String(on)); }
   $('#massBar').hidden = !on;
+  if (!on) document.documentElement.style.removeProperty('--massbar-h');
   if (on) {
     if (S.use) setUse(null);
     if (S.explode > 0.02) setExplode(0);
@@ -3276,6 +3304,7 @@ function setScale(on) {
     setPrice(false); scale.batDz = 0; scale.payDz = 0; setPayload('none');
     if (D.cgMarker) D.cgMarker.visible = false;
     if (D.personGroup) { D.personGroup.visible = false; if (D.personGroup.userData.setGhost) D.personGroup.userData.setGhost(false); }
+    camHome();
     for (let i = 0; i < 4; i++) body.mult[i] = 1;
     for (const B of badgeEls) B.el.classList.remove('over');
     if (S.power > 0) setPower(0, true);
@@ -3350,6 +3379,7 @@ function massRows() {
 
 function renderMassBar(activeKey) {
   if (!$('#massBar') || !scale.on) return;
+  requestAnimationFrame(() => { const el = $('#massBar'); if (el && !el.hidden) document.documentElement.style.setProperty('--massbar-h', el.offsetHeight + 'px'); });   // 説明カードを帯の上に逃がすため実高さを渡す
   const { rows, total } = massRows();
   const act = activeKey && (S.depth === 'simple' ? (SIMPLE_BUCKET[activeKey] || '__etc') : activeKey);
   $('#massStack').innerHTML = rows.map(r => `<i class="seg-i${act && r.key !== act ? ' dim' : ''}" data-key="${r.key}" style="--c:${r.color};--h:${r.pct.toFixed(2)}%" title="${r.name}"></i>`).join('');
@@ -3363,7 +3393,7 @@ function renderMassBar(activeKey) {
   const yen = rows.reduce((s, r) => s + r.yen, 0);
   $('#massPrice').innerHTML = scale.price ? `<b>¥${yen.toLocaleString()}</b><span>${SCALE_TEXT.priceNote}</span>` : '';
   $('#massPrice').hidden = !scale.price;
-  $('#massNote').textContent = scale.over ? SCALE_TEXT.overNote : '';
+  $('#massNote').textContent = scale.over ? scaleOverText() : '';   // 文言は1か所(stepScale と同じ)に揃える
   $('#massNote').hidden = !scale.over;
 }
 
@@ -3451,7 +3481,7 @@ function codexUnlock() {
 function codexGlowKey() {
   const k = codex.today;
   if (!k || codex.seen.has(k)) return null;
-  if (S.mode !== 'normal' || S.use || S.scale || S.question || theater.active || S.explodeT > 0.05) return null;
+  if (S.mode !== 'normal' || S.use || S.scale || S.question || theater.active || whatif.active || S.lesson || S.expert || (typeof quiz !== 'undefined' && quiz.active) || S.explodeT > 0.05) return null;
   if (S.selected && S.selected.key === k) return null;
   const ps = partsOf(k);
   if (!ps.length || !ps.some(p => partVisible(p) && effVisible(p.obj))) return null;
@@ -3540,6 +3570,8 @@ function initCodex() {
   $('#photoClose').addEventListener('click', () => { $('#photoPop').hidden = true; });
 }
 
+function codexClearGlow() { if (codex.litKey) { for (const p of partsOf(codex.litKey)) setTint(p, ACCENT, 0); codex.litKey = null; } }
+
 // ===== 生きている機体と、みんなの土台 (パッケージ⑧) =====
 // A: 開いた瞬間からホバーし、ポインタの方へ数度だけ向く  B: 大きく読む  C: 日本語／やさしい日本語／English  D: 読み上げ
 const alive = { want: false, since: 0, on: false, forcedOff: false, big: false, speakAuto: false, prevLabels: null, prevFs: null };
@@ -3588,7 +3620,7 @@ function langEntry(key) { const L = I18N[S.lang]; return L && L.parts ? L.parts[
 function partName(pk) {
   const key = pk && pk.key ? pk.key : pk; const d = PARTS[key]; if (!d) return '';
   const e = langEntry(key);
-  if (S.depth === 'simple') return (e && e.name) || SIMPLE_NAME[key] || d.name;
+  if (S.depth === 'simple') return (e && e.name) || (S.lang === 'en' ? (d.en || d.name) : (SIMPLE_NAME[key] || d.name));
   return S.lang === 'en' ? (d.en || d.name) : d.name;
 }
 function firstSentence(s) { const i = s.indexOf('。'); return i > 0 ? s.slice(0, i + 1) : s; }
@@ -3599,7 +3631,7 @@ function partRole(key) {
 }
 function partAnalogy(key) { const e = langEntry(key), sd = SIMPLE[key]; return (e && e.analogy) || (sd && sd.analogy) || ''; }
 function qText(q) { const L = I18N[S.lang]; return (L && L.questions && L.questions[q.id]) || q.q; }
-function langNote() { return S.lang === 'en' ? '<p class="lang-note">— Japanese only —</p>' : ''; }
+function langNote() { return S.lang === 'en' ? '<p class="lang-note">— Japanese only —</p>' : S.lang === 'easy' ? '<p class="lang-note">ここは むずかしい ことばの ままです</p>' : ''; }
 function setLastText(el, text) {
   // <i></i>名 のように装飾子を持つボタンは最後のテキストノードだけ差し替える
   let node = null; for (const c of el.childNodes) if (c.nodeType === 3 && c.textContent.trim()) node = c;
@@ -3611,6 +3643,9 @@ function applyLang() {
   segSet($('#langSeg'), 'lang', S.lang);
   const pb = $('#powerBtn'); if (pb) pb.textContent = S.power > 0 ? t('stop') : t('power');
   buildList(); buildLabels(); buildAsk(); renderDetail(); updateBigBand();
+  buildUseChips(); buildMishapCards(); buildWhatifCards();   // 言語を変えたら、いま開いていない画面も作り直しておく
+  if (S.scale && typeof renderMassBar === 'function') renderMassBar(S.selected && S.selected.key);
+  if (S.expert && typeof renderExpertPanel === 'function') { renderExpertPanel(); renderExpertSel(); }
   if (S.question && $('#noteCard').dataset.kind === 'question') $('#noteTitle').textContent = qText(S.question);
 }
 function setLang(l) { if (!I18N[l]) l = 'ja'; const was = S.lang; S.lang = l; store.set('lang', l); if (hasSpeech) speechSynthesis.cancel(); applyLang();
@@ -3663,7 +3698,7 @@ function initLive() {
   alive.speakAuto = store.get('speakAuto') === '1';
   for (const x of $$('.tgl[data-t=speakAuto]')) { x.classList.toggle('on', alive.speakAuto); x.setAttribute('aria-pressed', String(alive.speakAuto)); }
   if (!hasSpeech) for (const el of $$('.speak, .pop-row.speakrow')) el.hidden = true;
-  S.lang = I18N[store.get('lang')] ? store.get('lang') : 'ja';
+  S.lang = Object.prototype.hasOwnProperty.call(I18N, store.get('lang')) ? store.get('lang') : 'ja';
   $('#langSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setLang(b.dataset.lang); });
   $('#bigBtn').addEventListener('click', () => setBig(!alive.big));
   $('#bigSpeak').addEventListener('click', () => speakPart(S.selected || S.hovered));
@@ -3713,6 +3748,7 @@ function stopLesson(silent) {
 function resetStage() {
   if (quiz.active) quizStop();
   if (theater.active) stopTheaterUI();
+  if (S.expert && typeof expertStop === 'function') expertStop(true);
   if (whatif.active) stopWhatifUI();
   if (S.question) { clearQuestion(); renderNote(null); }
   if (S.flight) setFlight(null);
@@ -3968,12 +4004,13 @@ const legendDots = (items) => items.map(([c, n]) => `<i style="background:${c}">
 // ---------- 入口 ----------
 function expertStart(mode) {
   if (!EXPERT_MODES.includes(mode)) mode = 'sensors';
+  const wasTall = $('#expert') && $('#expert').classList.contains('tall');
   if (expert.mode) expertStop(true);
   if (typeof stopOthers === 'function') stopOthers('expert');
   expert.mode = mode; S.expert = mode; store.set('expertMode', mode);
   segSet($('#expertSeg'), 'x', mode); if ($('#expertSegM')) segSet($('#expertSegM'), 'x', mode);
   $('#inspector').hidden = true; $('#inspector').classList.remove('open');
-  const panel = $('#expert'); panel.hidden = false; if (narrow()) panel.classList.add('open');
+  const panel = $('#expert'); panel.hidden = false; if (narrow()) panel.classList.add('open'); if (wasTall) panel.classList.add('tall');
   document.body.classList.add('expert');
   if (S.selected) select(null);
   if (mode === 'sensors') sensorsEnter(); else if (mode === 'wear') wearEnter(); else toolboxEnter();
@@ -3984,7 +4021,7 @@ function expertStop(silent) {
   if (!expert.mode) return;
   if (expert.mode === 'sensors') sensorsLeave(); else if (expert.mode === 'wear') wearLeave(); else toolboxLeave();
   expert.mode = null; S.expert = null;
-  $('#expert').hidden = true; $('#expert').classList.remove('open', 'tall'); $('#inspector').hidden = false;
+  $('#expert').hidden = true; $('#expert').classList.remove('open', 'tall'); if (!S.lesson) $('#inspector').hidden = false;
   document.body.classList.remove('expert');
   if (!silent) syncBodyMode();
 }
@@ -4009,7 +4046,7 @@ function sensorsEnter() {
   showToast('機体はホバー中。はじくとジャイロが振れます', 3000);
 }
 function sensorsLeave() {
-  radioDonut(false); heatApply(0); expert.heatRun = false; expertArrows(false);
+  radioDonut(false); heatApply(0); expert.heatRun = false; expertArrows(false); expert.charts = {};
   if (S.power > 0) setPower(0, true);
 }
 function radioDonut(on) {
@@ -4076,7 +4113,7 @@ function sensorsStep(dtSim, dtReal) {
   // 傾いて加速しても機体軸の x・y はほぼ 0 g(推力は機体 z 軸方向だけ)。z は 1/cosθ + 上下加速
   const acc = [ax - Math.sin(body.tx) + 0.01 * nz() + 0.12 * vib * nz(), -az + Math.sin(body.tz) + 0.01 * nz() + 0.12 * vib * nz(), 1 / Math.cos(Math.hypot(body.tx, body.tz)) + ay + 0.01 * nz() + 0.18 * vib * nz()];
   // 気圧高度: 天候でどこまでも流れる長期トレンド + 短期ノイズ + 地面近くの吹き下ろし
-  expert.drift += 0.0015 * dt * Math.sin(expert.tsum / 90 + 1.0) + 0.01 * Math.sqrt(dt) * nz();
+  expert.drift = clamp(expert.drift + 0.0015 * dt * Math.sin(expert.tsum / 90 + 1.0) + 0.01 * Math.sqrt(dt) * nz(), -0.6, 0.6);
   const alt = body.py + expert.drift + 0.03 * nz() + (body.py < 0.3 ? 0.04 * spin * nz() : 0);
   // コンパス: 電源線の電流が作る磁界は機体に固定されたベクトル → 機首の向きで誤差が ± に変わる(地磁気水平分力=1 として 60A で 0.36)
   const Bi = 0.006 * expert.current, phi0 = 0.6;
@@ -4105,13 +4142,13 @@ function wearEnter() {
   // 丈夫な部品は紙色に落として、消耗品だけが色を持つ技術図にする(消耗品の子メッシュは後で塗り直すので除外不要)
   expert.papered = [];
   for (const k in WEAR) { if (WEAR[k].cls !== 'robust') continue; for (const p of partsOf(k)) for (const m of p.meshes) { const o = m.userData.origMat; if (!o || Array.isArray(o) || !o.isMeshStandardMaterial || m.userData.papered) continue; m.userData.papered = true; m.userData.paperShadow = m.castShadow; m.material = wearPaper; expert.papered.push(m); } }
-  wearApply();
+  wearApply(); applyMode();
   showToast('着地して、先にへる部品から色をつけます。スライダーで回数を進めてください', 3200);
 }
 function wearLeave() {
   for (const k in WEAR) for (const p of partsOf(k)) setTint(p, ACCENT, 0);
   for (const m of expert.papered) { m.userData.papered = false; if (m.material === wearPaper) m.material = m.userData.origMat; }
-  expert.papered = []; expert.wearRun = false;
+  expert.papered = []; expert.wearRun = false; applyMode();
 }
 function wearProgress(k) { const w = WEAR[k]; if (!w) return 0; return clamp(expert.flights / w.lo, 0, 1); }
 function paintPart(p, col, k, opts) {
@@ -4119,9 +4156,11 @@ function paintPart(p, col, k, opts) {
   for (const m of p.meshes) { if (m.userData.tint && m.material !== m.userData.tint && m.userData.origMat && !Array.isArray(m.userData.origMat) && m.userData.origMat.isMeshStandardMaterial) m.material = m.userData.tint; if (k <= 0 && m.userData.papered && m.material === m.userData.origMat) m.material = wearPaper; }
 }
 function wearApply() {
-  const order = { robust: 0, crash: 1, wear: 2, must: 3 };   // 親部品(モーター等・丈夫)を先に塗り、その中の消耗品(プロペラ等)で上書きする
+  const order = { robust: 0, crash: 1, wear: 2, must: 3 };
+  const depth = (k) => { const p = partsOf(k)[0]; if (!p) return 0; let n = 0, o = p.obj.parent; while (o) { if (o.userData.part && WEAR[o.userData.part.key]) n++; o = o.parent; } return n; };
   const blink = 0.5 + 0.5 * Math.sin(expert.pulse * 2 * Math.PI / 0.8);
-  for (const k of Object.keys(WEAR).sort((a, b) => order[WEAR[a].cls] - order[WEAR[b].cls])) {
+  // 外側の部品(モーター)を先に、その中の部品(プロペラ→ナット)を後に塗る。同じ深さなら「丈夫→必ず減る」の順
+  for (const k of Object.keys(WEAR).sort((a, b) => (depth(a) - depth(b)) || (order[WEAR[a].cls] - order[WEAR[b].cls]))) {
     const w = WEAR[k], cls = WEAR_CLASS[w.cls], col = new THREE.Color(cls.color);
     if (w.cls === 'robust') { for (const p of partsOf(k)) paintPart(p, col, 0); continue; }
     const prog = expert.flights / w.lo;   // 1.0 = 交換時期の下限
@@ -4130,14 +4169,14 @@ function wearApply() {
     const flat = k === 'prop';
     for (const p of partsOf(k)) paintPart(p, col, kk, { lerp: flat ? 0.55 : 0.85, emis: (flat ? 0.2 : 0.06) + (due ? 0.25 * blink : 0) });
   }
-  const bead = $('#wearFlights'); if (bead) bead.textContent = `${expert.flights} 回 ≈ ${(expert.flights / expert.perYear).toFixed(1)} 年（年${expert.perYear}回）`;
+  const bead = $('#wearFlights'); if (bead) bead.textContent = `${Math.round(expert.flights)} 回 ≈ ${(expert.flights / expert.perYear).toFixed(1)} 年（年${expert.perYear}回）`;
   renderWearList();
 }
 function wearStep(dtReal) {
   expert.pulse += dtReal;
   if (expert.wearRun) { expert.flights = Math.min(1000, expert.flights + dtReal * 125); const sl = $('#xFlights'); if (sl) sl.value = Math.round(expert.flights / 10) * 10; if (expert.flights >= 1000) { expert.wearRun = false; const b = $('#xWearPlay'); if (b) b.textContent = '↻ もう一度'; } }
   const due = Object.keys(WEAR).some(k => WEAR[k].cls !== 'robust' && expert.flights / WEAR[k].lo >= 1);
-  if (expert.wearRun || due) { expert.stepT += dtReal; if (expert.stepT > 0.08 || expert.wearRun) { expert.stepT = 0; wearApply(); } }
+  if (expert.wearRun || due) { expert.stepT += dtReal; if (expert.stepT > 0.08) { expert.stepT = 0; wearApply(); } }
 }
 function renderWearList() {
   const box = $('#wearList'); if (!box) return;
@@ -4147,8 +4186,8 @@ function renderWearList() {
   let lo = 0, hi = 0, crashLo = 0, crashHi = 0; const items = [];
   for (const k in WEAR) { const w = WEAR[k], d = PARTS[k]; if (!d || w.cls === 'robust') continue; const price = (PRICE[k] || 0) * (d.count || 1); const a = price * expert.perYear / w.hi, b = price * expert.perYear / w.lo; lo += a; hi += b; if (w.cls === 'crash') { crashLo += a; crashHi += b; } items.push({ k, a, b }); }
   items.sort((x, y) => y.b - x.b);
-  const yen = (v) => `¥${(Math.round(v / 1000) * 1000).toLocaleString()}`; const man = (v) => `${(v / 10000).toFixed(1)}万`;
-  const c = $('#wearCost'); if (c) c.innerHTML = `年間の維持費（部品代のみ・年${expert.perYear}回）<b>${yen(lo)}〜${yen(hi)}</b><em>1フライトあたり ¥${Math.round(lo / expert.perYear)}〜¥${Math.round(hi / expert.perYear)}</em><span>内訳の大きい順: ${items.slice(0, 3).map(x => `${partName(x.k)} ¥${man(x.a)}〜${man(x.b)}`).join('・')}。うち「事故で壊れやすい」分 ¥${man(crashLo)}〜${man(crashHi)} は事故がなければ 0 円。</span><span>1フライト ≈ 15 分の想定。回数は目安で、時間・温度・扱いで大きく変わります。バッテリーは回数だけでは決まりません（放電率・保管電圧・温度）。</span>`;
+  const yen = (v) => `¥${(Math.round(v / 1000) * 1000).toLocaleString()}`; const man = (v) => `¥${(Math.round(v / 1000) * 1000).toLocaleString()}`;
+  const c = $('#wearCost'); if (c) c.innerHTML = `年間の維持費（部品代のみ・年${expert.perYear}回）<b>${yen(lo)}〜${yen(hi)}</b><em>1フライトあたり ¥${Math.round(lo / expert.perYear)}〜¥${Math.round(hi / expert.perYear)}</em><span>内訳の大きい順: ${items.slice(0, 3).map(x => `${partName(x.k)} ${man(x.a)}〜${man(x.b)}`).join('・')}。うち「事故で壊れやすい」分 ${man(crashLo)}〜${man(crashHi)} は事故がなければ 0 円。</span><span>1フライト ≈ 15 分の想定。回数は目安で、時間・温度・扱いで大きく変わります。バッテリーは回数だけでは決まりません（放電率・保管電圧・温度）。</span>`;
 }
 
 // ---------- ⑬ 設計の計算 ----------
@@ -4182,9 +4221,10 @@ function bladeDiscs(on) {
       const m = new THREE.Mesh(new THREE.CircleGeometry(0.156, 96), new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.5, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }));
       m.rotation.x = -Math.PI / 2; m.position.set(0, 0.038, 0); m.renderOrder = 5; m.userData.noPart = m.userData.noPick = m.userData.noAO = m.userData.noShadow = true; m.userData.cv = cv; m.userData.tex = tex; mo.group.add(m); expert.bladeDiscs.push(m);
     }
-    for (const mo of D.motors) mo.propMesh.renderOrder = 6;
+    for (const mo of D.motors) { if (mo.propMesh.userData.ro0 == null) mo.propMesh.userData.ro0 = mo.propMesh.renderOrder; mo.propMesh.renderOrder = 6; }
   }
   for (const m of expert.bladeDiscs) m.visible = !!on;
+  if (!on) for (const mo of D.motors) { if (mo.propMesh.userData.ro0 != null) mo.propMesh.renderOrder = mo.propMesh.userData.ro0; }
   expertArrows(!!on || expert.heat > 0.05);
   if (on) { bladePaint(); showToast('4枚の円＝プロペラの周速。内側は遅く、外側ほど速い（青→赤）', 3200); }
 }
@@ -4206,7 +4246,7 @@ function bladePaint() {
   const lg = $('#bladeBar'); if (lg) { const g = lg.getContext('2d'); const w = lg.width, h = lg.height; const grd = g.createLinearGradient(0, 0, w, 0); for (let i = 0; i <= 8; i++) { const col = rampColor(BLADE_RAMP, i / 8); grd.addColorStop(i / 8, col.getStyle()); } g.fillStyle = grd; g.fillRect(0, 0, w, h); }
 }
 function toolboxStep(dtReal) {
-  expert.stepT += dtReal; if (expert.stepT > 0.25) { expert.stepT = 0; drawStepResponse(); }
+  if (expert.wasDark !== themeDark) { expert.wasDark = themeDark; drawStepResponse(); }   // 応答グラフは入力で決まるので、色が変わるときだけ描き直す
 }
 function drawStepResponse() {
   const c1 = $('#stepChart'), c2 = $('#stepChart2'); if (!c1 || !c2) return;
@@ -4242,7 +4282,7 @@ function toolboxRender() {
     <div class="kv"><span>飛行時間 目安</span><b>約${r.tmin.toFixed(0)} 分</b><small>ホバー・無風、容量の80%。実飛行は 7〜8 掛け。${r.Itot.toFixed(1)} A（1基 ${r.Iper.toFixed(1)} A）</small></div>
     <div class="kv"><span>先端速度（ホバー）</span><b class="${tp[0]}">${tp[1]} ${r.tipH.toFixed(0)} m/s</b><small>最大 ${r.tipMax.toFixed(0)} m/s＝マッハ ${(r.tipMax / 343).toFixed(2)}（音速 343 m/s・20℃）。0.4 を超えると音と効率が急に悪くなる</small></div>
     <div class="kv"><span>全開の電流</span><b class="${im[0]}">${im[1]} ${r.Imax.toFixed(0)} A</b><small>${r.Crate.toFixed(0)}C 放電。XT60 の定格 60 A・ESC/バッテリーの定格と比べる</small></div>
-    <div class="kv"><span>ホバー効率</span><b>${r.gW.toFixed(1)} g/W</b><small>ディスク荷重 ${(r.DL / 9.81).toFixed(1)} kg/m²。小さいほど静かで長く飛ぶ</small></div>
+    <div class="kv"><span>ホバー効率</span><b>${r.gW.toFixed(1)} g/W</b><small>g/W は大きいほど効率が良い。ディスク荷重 ${(r.DL / 9.81).toFixed(1)} kg/m²（こちらは小さいほど静かで長く飛ぶ）</small></div>
     <div class="kv"><span>重心 x / z</span><b>${typeof scale === 'object' && scale.cg ? `${(scale.cg.x * 1000).toFixed(0)} / ${(scale.cg.z * 1000).toFixed(0)} mm` : '—'}</b><small>「重さ・お金」の配置から</small></div>`);
   drawStepResponse(); if (expert.blade) bladePaint();
   const leg = $('#bladeLegend'); if (leg) leg.innerHTML = expert.blade ? `10区間の周速: 根元 ${(r.tipH * 0.15).toFixed(0)} → 先端 ${r.tipH.toFixed(0)} m/s（色は最大回転時の ${r.tipMax.toFixed(0)} m/s を赤とした相対）。推力の多くは外側の3区間が作る。` : '';
@@ -4266,7 +4306,7 @@ function renderExpertPanel() {
     body_.innerHTML = `${note}
       <p class="xnote">機体はホバー中。<b>はじく</b>とジャイロが振れ、<b>防振</b>を切ると細かい震えが乗ります。傾いて動いても x・y の加速度計はほぼ 0 g — だから FC はジャイロと融合して姿勢を知ります。</p>
       <div class="chart"><div class="chart-h"><b>ジャイロ <small>°/s（1秒に回る角度）</small></b><span class="lg">${legendDots([[XCOL.p, 'p ロール'], [XCOL.q, 'q ピッチ'], [XCOL.r, 'r ヨー']])}</span><button class="tgl sm ${expert.damper ? 'on' : ''}" id="xDamper" aria-pressed="${expert.damper}"><i></i>防振ゴムで震えを減らす</button></div><canvas id="chGyro" role="img" aria-label="ジャイロの波形"></canvas></div>
-      <div class="chart"><div class="chart-h"><b>加速度 <small>g（重力 9.81 m/s² の何倍か）</small></b><span class="lg">${legendDots([[XCOL.p, 'x 横'], [XCOL.q, 'y 前後'], [XCOL.r, 'z 上下']])}</span></div><canvas id="chAcc" role="img" aria-label="加速度の波形"></canvas></div>
+      <div class="chart"><div class="chart-h"><b>加速度 <small>g（重力 9.81 m/s² の何倍か）</small></b><span class="lg">${legendDots([[XCOL.p, 'x 横（ロールの向き）'], [XCOL.q, 'y 前後（ピッチの向き）'], [XCOL.r, 'z 上下']])}</span></div><canvas id="chAcc" role="img" aria-label="加速度の波形"></canvas></div>
       <div class="chart"><div class="chart-h"><b>気圧高度 <small>m</small></b><span class="lg">天候で流れる。地面近くでは吹き下ろしで乱れる</span></div><canvas id="chBaro" role="img" aria-label="気圧高度の波形"></canvas></div>
       <div class="chart"><div class="chart-h"><b>コンパスのずれ <small>°（真の方位との差）</small></b><label class="rng" for="xCurrent">電源線の電流 <input type="range" id="xCurrent" min="0" max="60" value="${expert.current}"> <b id="xCurrentV">${expert.current} A</b></label></div><canvas id="chMag" role="img" aria-label="コンパスのずれの波形"></canvas><p class="hint">電流に比例・電源線までの距離に反比例。機体に固定された磁界なので、機首の向きで ± が変わる。往復の線をより合わせると打ち消せる — だから GNSS/コンパスはマストの上に。</p></div>
       <div id="sensVals" class="vals"></div>
@@ -4299,7 +4339,7 @@ function renderExpertPanel() {
       <p class="xnote">KV・プロペラ・重量を変えると、下の数字がすぐ変わります。傾向を見るための簡易モデルです。</p>
       <div class="tbform">
         <label><span>KV <small>1Vあたりの無負荷回転数 rpm/V（キロボルトではない）</small></span><input type="number" id="tbKv" inputmode="numeric" min="200" max="1200" step="10" value="${t.kv}"><small>rpm/V</small></label>
-        <label><span>セル数 <small>直列のセル数。1セル 3.7V</small></span><select id="tbCells">${[4, 6, 8, 12].map(c => `<option value="${c}" ${c === t.cells ? 'selected' : ''}>${c}S</option>`).join('')}</select><small>${(t.cells * 3.7).toFixed(1)} V</small></label>
+        <label><span>セル数 <small>直列のセル数。1セル 3.7V</small></span><select id="tbCells" aria-label="セル数">${[4, 6, 8, 12].map(c => `<option value="${c}" ${c === t.cells ? 'selected' : ''}>${c}S</option>`).join('')}</select><small id="tbCellsV">${(t.cells * 3.7).toFixed(1)} V</small></label>
         <label><span>直径</span><input type="number" id="tbDiam" inputmode="decimal" min="8" max="18" step="0.5" value="${t.diam}"><small>in</small></label>
         <label><span>ピッチ</span><input type="number" id="tbPitch" inputmode="decimal" min="3" max="8" step="0.5" value="${t.pitch}"><small>in</small></label>
         <label><span>全備重量</span><input type="number" id="tbMass" inputmode="decimal" min="0.5" max="15" step="0.1" value="${t.mass}"><small>kg</small></label>
@@ -4315,7 +4355,7 @@ function renderExpertPanel() {
       <details class="xlaw"><summary>制度の確認先（考え方のみ）</summary><ul><li>機体の改造・重量変更は、登録情報や機体認証の前提が変わることがある。まず所管（国土交通省 無人航空機ポータル／DIPS）で手続きの要否を確認する。</li><li>100 g 以上の機体は登録が必要とされている。飛行の区分（人口集中地区・夜間・目視外など）は飛行ごとに確認する。</li><li>この画面は判定をしない。数値は簡易モデルの目安で、実機の性能表と飛行前点検に置き換わるものではない。</li></ul></details>
       <p class="hint src">モデル: T = Ct·ρ·n²·D⁴、P = Cp·ρ·n³·D⁵（n は毎秒回転数、D は直径 m）。Ct = 0.085√(P/4.5)、Cp = 0.040(P/4.5)^0.9 は 12インチ級の一般値。全開回転は無負荷の 85%、モーター＋ESC の効率 85%、容量の 80% を使う。機種切替（ヘキサ／VTOL）と実ログの再生は未実装。</p>`;
     const num = (id, lo, hi, cur) => { const v = +$(id).value; return isFinite(v) && $(id).value !== '' ? clamp(v, lo, hi) : cur; };
-    const upd = () => { t.kv = num('#tbKv', 200, 1200, t.kv); t.cells = +$('#tbCells').value; t.diam = num('#tbDiam', 8, 18, t.diam); t.pitch = num('#tbPitch', 3, 8, t.pitch); t.mass = num('#tbMass', 0.5, 15, t.mass); t.mah = num('#tbMah', 1000, 30000, t.mah); const vs = $('#tbCells').parentElement.querySelector('small:last-child'); if (vs) vs.textContent = `${(t.cells * 3.7).toFixed(1)} V`; toolboxRender(); if ($('#xPropScale').classList.contains('on')) propScale(t.diam / 12); };
+    const upd = () => { t.kv = num('#tbKv', 200, 1200, t.kv); t.cells = +$('#tbCells').value; t.diam = num('#tbDiam', 8, 18, t.diam); t.pitch = num('#tbPitch', 3, 8, t.pitch); t.mass = num('#tbMass', 0.5, 15, t.mass); t.mah = num('#tbMah', 1000, 30000, t.mah); const vs = $('#tbCellsV'); if (vs) vs.textContent = `${(t.cells * 3.7).toFixed(1)} V`; toolboxRender(); if ($('#xPropScale').classList.contains('on')) propScale(t.diam / 12); };
     for (const id of ['#tbKv', '#tbCells', '#tbDiam', '#tbPitch', '#tbMass', '#tbMah']) $(id).addEventListener('input', upd);
     $('#xBlade').onclick = () => { expert.blade = !expert.blade; $('#xBlade').classList.toggle('on', expert.blade); $('#xBlade').setAttribute('aria-pressed', String(expert.blade)); $('.bladebar').hidden = !expert.blade; bladeDiscs(expert.blade); toolboxRender(); };
     $('#xPropScale').onclick = () => { const b = $('#xPropScale'); const on = !b.classList.contains('on'); b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); propScale(on ? t.diam / 12 : 1); };
@@ -4340,7 +4380,7 @@ function initExpert() {
   // シート: 下スワイプで閉じる、上スワイプで高く(2段デテント)
   const el = $('#expert'), grab = el.querySelector('.grabber'); let drag = null;
   grab.addEventListener('pointerdown', e => { drag = { y0: e.clientY, hist: [[e.clientY, performance.now()]] }; grab.setPointerCapture(e.pointerId); el.classList.add('dragging'); });
-  grab.addEventListener('pointermove', e => { if (!drag) return; const dy = e.clientY - drag.y0; el.style.transform = `translateY(${Math.max(0, dy)}px)`; drag.hist.push([e.clientY, performance.now()]); if (drag.hist.length > 6) drag.hist.shift(); });
+  grab.addEventListener('pointermove', e => { if (!drag) return; const dy = e.clientY - drag.y0; el.style.transform = `translateY(${Math.max(-80, dy)}px)`; drag.hist.push([e.clientY, performance.now()]); if (drag.hist.length > 6) drag.hist.shift(); });
   const end = e => { if (!drag) return; const dy = e.clientY - drag.y0; const h0 = drag.hist[0], h1 = drag.hist[drag.hist.length - 1]; const v = (h1[0] - h0[0]) / Math.max(1, h1[1] - h0[1]); el.classList.remove('dragging'); el.style.transform = '';
     if (v < -0.5 || dy < -60) el.classList.add('tall'); else if (el.classList.contains('tall') && (v > 0.5 || dy > 60)) el.classList.remove('tall'); else if (v > 0.5 || dy > el.offsetHeight * 0.4) el.classList.remove('open'); drag = null; };
   grab.addEventListener('pointerup', end); grab.addEventListener('pointercancel', end);
@@ -4376,7 +4416,8 @@ $('#noteClose').addEventListener('click', () => { const c = $('#noteCard'); if (
 // 「同時に1つ」の対象（質問・飛行デモ・用途・重さ・シアター・もしも・クイズ）を、keep 以外すべて止める
 function stopOthers(keep, arg) {
   if (keep !== 'quiz' && typeof quiz !== 'undefined' && quiz.active) quizStop();
-  if (keep !== 'theater' && theater.active) stopTheaterUI();
+  if (typeof codexClearGlow === 'function') codexClearGlow();   // 今日の一部品の光を先に消す(あとから塗る色を消してしまわないように)
+  if (keep !== 'theater' && (theater.active || theater.done)) stopTheaterUI();
   if (keep !== 'whatif' && whatif.active) stopWhatifUI();
   // 質問の act が起こす飛行デモは質問の一部なので、そのときは質問を残す
   const qOwnsFlight = keep === 'flight' && S.question && S.question.act && S.question.act.flight === arg;
@@ -4388,7 +4429,7 @@ function stopOthers(keep, arg) {
 }
 function setTab(tab) {
   $('#coach').hidden = true;
-  if (theater.active && tab !== 'theater') { stopTheaterUI(); }
+  if ((theater.active || theater.done) && tab !== 'theater') { stopTheaterUI(); }
   if (whatif.active && tab !== 'theater') { stopWhatifUI(); }
   S.tab = tab; segSet($('#tabs'), 'tab', tab);
   for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== tab;
@@ -4644,7 +4685,7 @@ function setUse(id) {
   applyMode();
   const addKg = num(u.weight), baseKg = 2.4, t0 = 20, t1 = num(u.time);
   const html = `<p><b>${u.tagline}</b></p><p>${u.how}</p>
-    <div class="bar"><span>重さ</span><i class="cmp" style="--w0:${baseKg / (baseKg + addKg) * 100}%;--w:100%"></i><span>${baseKg}kg + ${u.weight}</span></div>
+    <div class="bar"><span>重さ</span><i class="cmp" style="--w0:${baseKg / (baseKg + addKg) * 100}%;--w:100%"></i><span>${baseKg} kg + ${String(u.weight).replace(/^\+/, '')}</span></div>
     <div class="bar"><span>飛べる時間</span><i class="cmp" style="--w0:100%;--w:${t1 / t0 * 100}%"></i><span>${u.time}</span></div>
     <div class="keys"><span><i style="background:var(--ink3)"></i>そのまま</span><span><i style="background:${'#ef6a2d'}"></i>大きく・強く</span><span><i style="background:#3b7df7;opacity:.6"></i>新しく付ける</span>${u.drop ? '<span><i style="background:#9aa0a8"></i>外す</span>' : ''}</div>
     ${S.depth === 'full' ? `<p style="margin-top:8px;font-size:12.5px;color:var(--ink2)">追加: ${u.ghost.filter((g, i, a) => a.findIndex(x => x.name === g.name) === i).map(g => g.name).join('・')}<br>強化: ${u.up.map(k => PARTS[k].name).join('・')}</p>` : ''}`;
@@ -4663,7 +4704,7 @@ function startWhatifUI(id) {
   for (const b of $$('#whatifCards button')) b.classList.toggle('on', b.dataset.w === id);
 }
 function stopWhatifUI() {
-  stopWhatif(true); document.body.classList.remove('theater'); $('#inspector').inert = false; $('#topbar').inert = false;
+  stopWhatif(true); document.body.classList.remove('theater'); $('#inspector').inert = false; $('#topbar').inert = false; camHome();
   setPower(0, true); renderNote(null); S.tab = 'mishap'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'mishap';
   for (const b of $$('#whatifCards button')) b.classList.remove('on'); syncBodyMode();
 }
@@ -4688,7 +4729,7 @@ function startTheaterUI(id) {
   $('#coach').hidden = true; startTheater(id); document.body.classList.add('theater'); $('#inspector').inert = true; $('#topbar').inert = true; $('#inspector').classList.remove('open'); S.tab = 'theater'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'theater'; segSet($('#tabs'), 'tab', 'mishap');
   for (const b of $$('#mishapCards button')) b.classList.toggle('on', b.dataset.m === id);
 }
-function stopTheaterUI() { stopTheater(true); document.body.classList.remove('theater'); $('#inspector').inert = false; $('#topbar').inert = false; setPower(0, true); renderNote(null); S.tab = 'mishap'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'mishap'; for (const b of $$('#mishapCards button')) b.classList.remove('on'); syncBodyMode(); }
+function stopTheaterUI() { stopTheater(true); document.body.classList.remove('theater'); $('#inspector').inert = false; $('#topbar').inert = false; camHome(); setPower(0, true); renderNote(null); S.tab = 'mishap'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'mishap'; for (const b of $$('#mishapCards button')) b.classList.remove('on'); syncBodyMode(); }
 $('#thQuit').addEventListener('click', () => { if (whatif.active) stopWhatifUI(); else stopTheaterUI(); });
 $('#thNext').addEventListener('click', () => {
   if (whatif.active) { if (whatif.phase === 3) stopWhatifUI(); else whatifNext(); return; }
@@ -4703,13 +4744,13 @@ function onTheaterChanged() {
   const d = theater.def; const brokenList = theater.red.length ? `<div class="chips" style="margin-top:8px">${[...new Set(theater.red.map(p => p.key))].map(k => `<button data-bk="${k}">${PARTS[k].name}</button>`).join('')}</div>` : '';
   renderNote({ kind: 'theater', title: d.short, badge: TH_STAGES[si], html: `<p>${theater.subtitle}</p>${theater.phase === 'broken' ? brokenList : ''}${theater.phase === 'prevent' ? `<p style="margin-top:6px;color:var(--ink2)">${d.result}</p>` : ''}`, actions: theater.phase === 'prevent' ? [{ label: `${PARTS[d.checkPart].name}の点検を見る`, fn: () => { setDepth('full'); select(partsOf(d.checkPart)[0], true); } }] : [] });
   for (const b of $$('#noteBody [data-bk]')) b.onclick = () => select(partsOf(b.dataset.bk)[0], true);
-  if (theater.done) { document.body.classList.remove('theater'); }
+  if (theater.done) { document.body.classList.remove('theater'); $('#inspector').inert = false; $('#topbar').inert = false; }
 }
 
 // ---------- 仮想スティック / 傾け ----------
 const STICK_MAP = { 1: { L: { v: 'pitch', h: 'yaw' }, R: { v: 'thr', h: 'roll' } }, 2: { L: { v: 'thr', h: 'yaw' }, R: { v: 'pitch', h: 'roll' } } };
 const AXIS_LBL = { pitch: ['前', '後'], yaw: ['←向き', '向き→'], thr: ['上', '下'], roll: ['←左', '右→'] };
-let stickMode = store.get('stickMode') || '1';
+let stickMode = ['1', '2'].includes(store.get('stickMode')) ? store.get('stickMode') : '1';
 function setSticks(on) { S.sticks = on; for (const x of $$('.tgl[data-t=sticks]')) x.classList.toggle('on', on); $('#sticks').hidden = !on; if (on) { if (S.power === 0) setPower(0.5, true); if (!store.get('stickSeen')) { showToast('スティックをたおすと、4つのモーターがそれぞれ違う速さになります。', 3600); store.set('stickSeen', '1'); } } else { body.stick.active = false; body.stick.x = body.stick.y = body.stick.yaw = body.stick.thr = 0; } labelSticks(); }
 function labelSticks() { for (const side of ['L', 'R']) { const map = STICK_MAP[stickMode][side]; const el = $(side === 'L' ? '#stickL' : '#stickR'); el.querySelector('.lbl.t').textContent = AXIS_LBL[map.v][0]; el.querySelector('.lbl.b').textContent = AXIS_LBL[map.v][1]; el.querySelector('.lbl.l').textContent = AXIS_LBL[map.h][0]; el.querySelector('.lbl.r').textContent = AXIS_LBL[map.h][1]; } }
 $('#modeSeg2').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; stickMode = b.dataset.m; store.set('stickMode', stickMode); segSet($('#modeSeg2'), 'm', stickMode); labelSticks(); });
@@ -4831,7 +4872,7 @@ $('#expSlider').addEventListener('input', e => { S.exposureMul = e.target.value 
 // モバイルシート
 $('#inspToggle').addEventListener('click', () => (S.lesson ? $('#lesson') : S.expert ? $('#expert') : $('#inspector')).classList.add('open'));
 $('#inspClose').addEventListener('click', () => $('#inspector').classList.remove('open'));
-{ const insp = $('#inspector'), grab = $('.grabber'); let drag = null;
+{ const insp = $('#inspector'), grab = insp.querySelector('.grabber'); let drag = null;   /* $('.grabber') だと DOM 先頭の専門シートのつまみを掴んでしまう */
   grab.addEventListener('pointerdown', e => { drag = { y0: e.clientY, hist: [[e.clientY, performance.now()]] }; grab.setPointerCapture(e.pointerId); insp.classList.add('dragging'); });
   grab.addEventListener('pointermove', e => { if (!drag) return; const dy = Math.max(0, e.clientY - drag.y0); insp.style.transform = `translateY(${dy}px)`; drag.hist.push([e.clientY, performance.now()]); if (drag.hist.length > 6) drag.hist.shift(); });
   const end = e => { if (!drag) return; const dy = Math.max(0, e.clientY - drag.y0); const h0 = drag.hist[0], h1 = drag.hist[drag.hist.length - 1]; const v = (h1[0] - h0[0]) / Math.max(1, h1[1] - h0[1]); insp.classList.remove('dragging'); insp.style.transform = ''; if (v > 0.5 || dy > insp.offsetHeight * 0.4) insp.classList.remove('open'); drag = null; };
@@ -4844,7 +4885,7 @@ function onResized() {
   if (S.scale) { if (D.personGroup) D.personGroup.visible = !compact(); renderMassBar(S.selected && S.selected.key); } for (const L of labelEls) L.w = 0; if (!S.labelsTouched) { S.labels = !narrow(); for (const x of $$('.tgl[data-t=labels]')) x.classList.toggle('on', S.labels); } }
 function initUI() {
   buildUseChips(); buildAsk(); buildMishapCards(); buildWhatifCards(); labelSticks(); segSet($('#modeSeg2'), 'm', stickMode);
-  const d = store.get('depth') || 'simple'; setDepth(d);
+  const d = store.get('depth') === 'full' ? 'full' : 'simple'; setDepth(d);
   if (d === 'simple' && !store.get('coach')) setTimeout(() => showCoach(FIRST_QUESTION.q, FIRST_QUESTION.hint, () => { store.set('coach', '1'); askQuestion(FIRST_QUESTION.qid); }, () => store.set('coach', '1')), 1200);
 }
 
@@ -4918,6 +4959,7 @@ window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: sca
   S.shadowDirty = S.csDirty = S.aoDirty = true;
   let t = performance.now(); composer.render(); TL.r1 = Math.round(performance.now() - t);
   requestAnimationFrame(frame);
+  setTimeout(() => $('#loading').classList.add('gone'), 8000);   // 背面タブなどで rAF が回らないとき、覆いが残り続けないように
   requestAnimationFrame(() => requestAnimationFrame(() => { mark('first'); $('#loading').classList.add('gone'); window.__droneReady = true; renderer.debug.checkShaderErrors = false; console.log('[drone3d] timeline ms', JSON.stringify(TL)); }));
 })().catch(e => { console.error(e); window.__showErr('初期化エラー: ' + e.message); });
 

@@ -529,14 +529,14 @@ function buildDrone(M) {
 function buildPerson() {
   // 建築模型のスケールフィギュア: 身長1.70m・8頭身。温白のマット樹脂。手足はカプセル(関節に継ぎ目が出ない)で、
   // 股・膝・肩・肘にピボットを持ち、歩行(walk: 進んだ距離で位相を進める)・向き(face)・立ち姿へ戻る(rest: 減衰)ができる。
-  const g = new THREE.Group(); g.visible = false; g.position.set(-0.50, -0.158, -0.48);
+  const g = new THREE.Group(); g.rotation.order = 'YXZ'; g.visible = false; g.position.set(-0.50, -0.158, -0.48);   // 向き(Y)を先に、前傾(X)を後に掛ける
   const mat = new THREE.MeshPhysicalMaterial({ color: 0xd6d3cc, roughness: 0.62, metalness: 0, clearcoat: 0.12, clearcoatRoughness: 0.5 });
   const V = (a) => new THREE.Vector3(a[0], a[1], a[2]);
   const along = (geo, a, b) => { const A = V(a), B = V(b); geo.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), B.clone().sub(A).normalize())); const m = A.clone().add(B).multiplyScalar(0.5); geo.translate(m.x, m.y, m.z); return geo; };
   // 骨: 端の球を関節にした太さ一定のカプセル。太さが変わる骨は「側面だけの円錐台 + 両端の球」(平らな蓋を作らないので継ぎ目のリングが出ない)
   const bone = (a, b, r1, r2 = r1, seg = 28) => {
     const len = V(a).distanceTo(V(b));
-    if (r1 === r2) return along(new THREE.CapsuleGeometry(r1, len, 6, seg), a, b);
+    if (r1 === r2) return along(new THREE.CapsuleGeometry(r1, Math.max(1e-4, len - 2 * r1), 6, seg), a, b);   // カプセルの全長は length + 2r
     const side = along(new THREE.CylinderGeometry(r2, r1, len, seg, 1, true), a, b);
     const s1 = new THREE.SphereGeometry(r1, seg, 18); s1.translate(a[0], a[1], a[2]); const s2 = new THREE.SphereGeometry(r2, seg, 18); s2.translate(b[0], b[1], b[2]);
     return mergeGeometries([side.toNonIndexed(), s1.toNonIndexed(), s2.toNonIndexed()], false);
@@ -548,7 +548,7 @@ function buildPerson() {
   const torso = new THREE.LatheGeometry([[0.0, 0.795], [0.06, 0.80], [0.165, 0.86], [0.175, 0.96], [0.14, 1.06], [0.135, 1.16], [0.16, 1.27], [0.20, 1.37], [0.195, 1.42], [0.10, 1.455], [0.0, 1.46]].map(q => new THREE.Vector2(q[0], q[1])), 48);
   torso.scale(1, 1, 0.62);
   g.add(meshOf([torso,
-    bone([0, 1.43, 0], [0, 1.52, 0.010], 0.056),                       // 首
+    bone([0, 1.425, 0], [0, 1.525, 0.010], 0.044),                     // 首
     ball([0, 1.585, 0.012], 0.096, 0.86, 1.18, 1.02),                  // 頭 (top ≒ 1.70)
   ]));
   const limbs = {};

@@ -41,7 +41,7 @@ function codexUnlock() {
 function codexGlowKey() {
   const k = codex.today;
   if (!k || codex.seen.has(k)) return null;
-  if (S.mode !== 'normal' || S.use || S.scale || S.question || theater.active || S.explodeT > 0.05) return null;
+  if (S.mode !== 'normal' || S.use || S.scale || S.question || theater.active || whatif.active || S.lesson || S.expert || (typeof quiz !== 'undefined' && quiz.active) || S.explodeT > 0.05) return null;
   if (S.selected && S.selected.key === k) return null;
   const ps = partsOf(k);
   if (!ps.length || !ps.some(p => partVisible(p) && effVisible(p.obj))) return null;
@@ -129,3 +129,5 @@ function initCodex() {
   $('#photoBtn').addEventListener('click', photoShare);
   $('#photoClose').addEventListener('click', () => { $('#photoPop').hidden = true; });
 }
+
+function codexClearGlow() { if (codex.litKey) { for (const p of partsOf(codex.litKey)) setTint(p, ACCENT, 0); codex.litKey = null; } }
