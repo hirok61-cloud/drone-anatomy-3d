@@ -42,7 +42,7 @@
       <div class="dock-group grow"><label>もしも、外でこうなったら</label><div class="cards" id="whatifCards"></div></div>
     </div>
     <div class="ctx-row" data-tab="expert" hidden>
-      <div class="dock-group"><label>専門の見え方</label><div class="seg small" id="expertSeg" role="radiogroup" aria-label="専門の見え方"><button data-x="sensors">センサー視点</button><button data-x="wear">1000フライト</button><button data-x="toolbox">工具箱</button></div></div>
+      <div class="dock-group"><label>なにを見る？</label><div class="seg small" id="expertSeg" role="radiogroup" aria-label="なにを見る？"><button data-x="sensors">センサー</button><button data-x="wear">消耗</button><button data-x="toolbox">設計の計算</button></div></div><button id="expertToggle" class="pill-btn compact-only">パネル</button>
       <p class="ctx-hint" data-full>機体が見ている波形・消耗の順番・設計の計算。単位と「簡易モデル」の注記つき</p>
     </div>
     <div class="ctx-row" data-tab="theater" hidden>
@@ -136,7 +136,7 @@
 <aside id="expert" class="glass" hidden aria-label="専門パネル">
   <div class="grabber" aria-hidden="true"></div>
   <div class="insp-head"><h2 id="expertTitle">専門</h2><button id="expertClose" class="icon-btn sm" aria-label="閉じる">✕</button></div>
-  <div class="seg small compact-only xsegm" id="expertSegM" role="radiogroup" aria-label="専門の見え方"><button data-x="sensors">センサー視点</button><button data-x="wear">1000フライト</button><button data-x="toolbox">工具箱</button></div>
+  <div class="seg small compact-only xsegm" id="expertSegM" role="radiogroup" aria-label="なにを見る？"><button data-x="sensors">センサー</button><button data-x="wear">消耗</button><button data-x="toolbox">設計の計算</button></div>
   <div id="expertSel" hidden></div>
   <div id="expertBody"></div>
 </aside>

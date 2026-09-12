@@ -103,9 +103,10 @@ const WHATIF_MOTION = {
     const g = D.personGroup;
     if (g) {   // 機体の前左(画面右・同じ奥行き)から 2.6m → 1.3m に歩いて寄る。歩きの上下 12mm、脚と腕を振る
       g.visible = true; const k = smoothstep(1.0, 3.0, t), dd = 2.6 - 1.3 * k, walking = t > 1.0 && k < 1;
-      g.position.set(-0.707 * dd, -0.158 + (walking ? 0.012 * Math.abs(Math.sin(2 * Math.PI * 1.6 * t)) : 0), -0.707 * dd);
+      const phase = 2 * Math.PI * (1.3 * k) / 1.3;   // 進んだ距離で位相を進める(1周期=2歩=1.3m) → 足が地面を滑らない
+      g.position.set(-0.707 * dd, -0.158 + (walking ? 0.012 * Math.abs(Math.sin(phase)) : 0), -0.707 * dd);
       if (g.userData.face) g.userData.face(0, 0);
-      if (g.userData.walk) { if (walking) g.userData.walk(t, 1); else g.userData.rest(); }
+      if (g.userData.walk) { if (walking) g.userData.walk(phase, 1); else g.userData.rest(dt); }
     }
     if (t > 3.0) { const b = 0.5 + 0.5 * Math.sin((t - 3.0) * 2 * Math.PI / 0.5); for (const p of partsOf('led')) { setTint(p, RED, 0.8 * b); const h = p.obj.userData.halo; if (h) { h.material.color.copy(RED); h.material.opacity = 0.06 + 0.5 * b; } } }
     return t > 4.4;

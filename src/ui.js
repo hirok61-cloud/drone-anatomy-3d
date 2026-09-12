@@ -142,7 +142,7 @@ function select(p, all = false, opts = {}) {
   applyMode();
   for (const row of $$('#partList .row')) row.classList.toggle('on', !!p && row.dataset.key === p.key);
   renderDetail();
-  if (p && narrow() && !opts.quiet && !S.lesson) $('#inspector').classList.add('open');
+  if (p && narrow() && !opts.quiet && !S.lesson) (S.expert ? $('#expert') : $('#inspector')).classList.add('open');
   if (S.lesson) renderLessonSel();
   if (S.expert) renderExpertSel();
   if (S.scale) renderMassBar(p && p.key);

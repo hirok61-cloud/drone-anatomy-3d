@@ -206,11 +206,11 @@ for (const p of D.parts) for (const m of p.meshes) {
 const wireMats = new Set(D.wires.map(w => w.material)); for (const m of wireMats) m.transparent = true;
 function tintMat(m, orig) { const cacheKey = Array.isArray(orig) ? null : orig; if (cacheKey && m.userData.tintMat && m.userData.tintOf === orig) return m.userData.tintMat; if (Array.isArray(orig)) return null; const t = orig.clone(); m.userData.tintMat = t; m.userData.tintOf = orig; return t; }
 // setTint: 部品に色をかぶせる (k=0 で解除)。プログラムを増やさず材質を遅延クローン
-function setTint(part, color, k) {
+function setTint(part, color, k, opts) {
   for (const m of part.meshes) {
     const o = m.userData.origMat; if (Array.isArray(o) || !o.isMeshStandardMaterial) continue;
     if (k <= 0) { m.userData.tint = null; if (m.material === m.userData.tintMat) m.material = o; continue; }
-    const t = tintMat(m, o); t.color.copy(o.color).lerp(color, 0.65 * k); t.emissive.copy(color); t.emissiveIntensity = (o.userData.flatTint ? 0.6 : 0.28) * k; if (o.map && !o.userData.flatTint && 'emissiveMap' in t) t.emissiveMap = o.map; /* 黒いテクスチャ(プロペラ)は模様を掛けると色が消えるので一様に光らせる */ m.userData.tint = t;
+    const t = tintMat(m, o); const lerpK = opts && opts.lerp != null ? opts.lerp : 0.65; t.color.copy(o.color).lerp(color, lerpK * k); t.emissive.copy(color); t.emissiveIntensity = opts && opts.emis != null ? opts.emis : (o.userData.flatTint ? 0.6 : 0.28) * k; if (o.map && !o.userData.flatTint && 'emissiveMap' in t) t.emissiveMap = o.map; /* 黒いテクスチャ(プロペラ)は模様を掛けると色が消えるので一様に光らせる。opts={lerp,emis} で塗り方を上書き */ m.userData.tint = t;
     if (m.material === o) m.material = t;
   }
 }
@@ -327,7 +327,7 @@ function focusOn(objs, opts = {}) {
   const box = new THREE.Box3(), tb = new THREE.Box3(), pts = [];   // 本体メッシュだけで枠を決める(気流・ゴースト・スプライトは除外)。各メッシュの8隅を集めて実投影で距離を決める
   for (const o of objs) { o.updateWorldMatrix(true, true); o.traverseVisible(c => { if (!c.isMesh || c.userData.noPart || !c.geometry) return; if (!c.geometry.boundingBox) c.geometry.computeBoundingBox(); const b = c.geometry.boundingBox; if (c.isInstancedMesh) { if (!c.boundingBox) c.computeBoundingBox(); tb.copy(c.boundingBox).applyMatrix4(c.matrixWorld); } else tb.copy(b).applyMatrix4(c.matrixWorld); box.union(tb); for (let i = 0; i < 8; i++) pts.push(new THREE.Vector3(i & 1 ? tb.max.x : tb.min.x, i & 2 ? tb.max.y : tb.min.y, i & 4 ? tb.max.z : tb.min.z)); }); } if (box.isEmpty()) return;
   const sph = box.getBoundingSphere(new THREE.Sphere());
-  const dir = camera.position.clone().sub(controls.target); if (dir.lengthSq() < 1e-6) dir.set(0.6, 0.4, -0.6); dir.normalize();
+  const dir = opts.dir ? opts.dir.clone() : camera.position.clone().sub(controls.target); if (dir.lengthSq() < 1e-6) dir.set(0.6, 0.4, -0.6); dir.normalize();
   // 箱の8隅を視野に収める距離(球ではなく実際の投影で決める)
   const fwd = dir.clone().negate(), right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize(), up = new THREE.Vector3().crossVectors(right, fwd).normalize();
   const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), tanH = tanV * Math.max(0.6, camera.aspect); let need = 0.05; const rel = new THREE.Vector3();

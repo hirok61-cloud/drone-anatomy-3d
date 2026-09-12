@@ -139,7 +139,7 @@ function updateMotors(dtSim, dtReal) {
     mo.disc.material.opacity = wDisc * 0.85; mo.disc.rotation.z += mo.dir * 4 * dtReal;
     const raw = mo.rpm / HOVER_RPM * 100; mo.pct = raw > mo.pct ? raw : mo.pct + (raw - mo.pct) * (1 - Math.exp(-dtReal / 0.5));
     if (mo.rpm > 50) anySpin = true;
-    const th = D.arrows.thrust[i]; th.visible = (body.mode === 'demo' || body.mode === 'free' || body.mode === 'theater') && partVisible(mo.part) && mo.rpm > 100 && !(typeof alive === 'object' && alive.on && !body.hold && Math.hypot(body.tx, body.tz) < 0.035);   // 生きているだけの間は矢印を出さない
+    const th = D.arrows.thrust[i]; th.visible = !th.userData.forceHide && (body.mode === 'demo' || body.mode === 'free' || body.mode === 'theater') && partVisible(mo.part) && mo.rpm > 100 && !(typeof alive === 'object' && alive.on && !body.hold && Math.hypot(body.tx, body.tz) < 0.035);   // 生きているだけの間は矢印を出さない
     if (th.visible) {
       th.userData.setLength(0.02 + 0.11 * mo.rpm / RPM_MAX);
       const base = S.scale ? D.motors.reduce((a, m) => a + m.rpm, 0) / 4 : Math.max(1, S.power * RPM_MAX);   // 重さモードは4基平均との比
@@ -148,7 +148,7 @@ function updateMotors(dtSim, dtReal) {
       if (mo.rpmTarget === 0) col = arrowNeutral;                                                // 着陸の減速は「遅い」ではない
       th.userData.mat.color.set(col);
     }
-    D.arrows.rot[i].visible = (S.arrows || S.flight === 'yaw') && partVisible(mo.part) && S.explodeT < 0.05;
+    D.arrows.rot[i].visible = !D.arrows.rot[i].userData.forceHide && (S.arrows || S.flight === 'yaw') && partVisible(mo.part) && S.explodeT < 0.05;
   });
   if (anySpin) { shadowTick += dtReal; if (shadowTick > 1 / 30) { shadowTick = 0; S.shadowDirty = true; } S.aoDirty = true; }
 }
