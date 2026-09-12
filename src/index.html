@@ -81,6 +81,8 @@
   <div class="pop-row speakrow"><span>読み上げ</span><button class="tgl speak" data-t="speakAuto" aria-pressed="false"><i></i>部品を選ぶと読み上げる</button></div>
   <div class="pop-row"><span>テーマ</span><div class="seg small" id="themeSeg" role="radiogroup" aria-label="テーマ"><button data-th="auto" class="on">システム</button><button data-th="light">ライト</button><button data-th="dark">ダーク</button></div></div>
   <div class="pop-row"><span>動き</span><button class="tgl on" data-t="alive" aria-pressed="true"><i></i>機体を浮かせておく</button></div>
+  <div class="pop-row"><span>制度</span><button class="tgl" data-t="reg" aria-pressed="false"><i></i>制度の注記を出す（教則の章・法令の要点）</button></div>
+  <details class="pop-more"><summary>制度の出典と基準日</summary><div id="regSources" class="reg-srcs"></div></details>
   <p class="pop-foot" id="aliveNote" hidden>軽量・標準の画質では浮かせられません（品質を「高」以上に）</p>
   <details class="pop-more"><summary>詳細</summary>
     <div class="pop-row"><span>文字の大きさ</span><div class="seg small" id="fontSeg" role="radiogroup" aria-label="文字の大きさ"><button data-f="1" class="on">標準</button><button data-f="1.18">大</button></div></div>
@@ -130,7 +132,7 @@
 <aside id="massBar" class="glass" hidden aria-label="重さの内訳">
   <div class="mb-top"><div class="seg small" id="payloadSeg" role="radiogroup" aria-label="荷物"></div><button id="priceBtn" class="pill-btn" aria-pressed="false" title="参考価格を見る" aria-label="参考価格を表示">¥</button></div>
   <div class="mb-main"><div class="mb-stack" id="massStack"></div><div class="mb-legend" id="massLegend"></div></div>
-  <div class="mb-foot"><b id="massTotal">—</b><span id="massSub" class="mb-sub"></span><div id="massPrice" class="mb-price" hidden></div><p id="massNote" class="mb-note" hidden></p></div>
+  <div class="mb-foot"><b id="massTotal">—</b><span id="massSub" class="mb-sub"></span><div id="massPrice" class="mb-price" hidden></div><div id="massReg" class="mb-reg" hidden></div><p id="massNote" class="mb-note" hidden></p></div>
 </aside>
 
 <aside id="expert" class="glass" hidden aria-label="専門パネル">

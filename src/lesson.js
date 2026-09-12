@@ -195,6 +195,7 @@ async function buildPrintSheet() {
     <section class="ps-fig"><div class="ps-figwrap"><img src="${url}" alt="機体の線画"><svg viewBox="0 0 ${cw} ${ch}" aria-hidden="true">${svg}</svg></div>
       <p class="ps-cap">番号の部品の名前を書こう。</p><ol class="ps-fill">${blanks}</ol></section>
     <section class="ps-review"><h2>ふりかえり</h2><ol>${review}</ol></section>
+    ${regOn() ? kyosokuSheetHtml() + reportSheetHtml() : ''}
     <footer class="ps-foot">${location.origin + location.pathname}${def ? `?lesson=${def.id}` : ''}</footer>`;
   return sheet;
 }

@@ -59,7 +59,7 @@ $('#tabs').addEventListener('click', e => { const b = e.target.closest('button')
 function setDepth(d) {
   S.depth = d; store.set('depth', d); document.body.classList.toggle('full', d === 'full'); segSet($('#depthSeg'), 'd', d); $('#coach').hidden = true;
   buildList(); renderDetail(); buildLabels(); buildMishapCards(); buildAsk(); updateBigBand(); if (S.scale) renderMassBar(S.selected && S.selected.key);
-  buildWhatifCards();
+  buildWhatifCards(); if (typeof syncRegToggle === 'function') syncRegToggle();
   if (d === 'full') showToast('くわしく: 部品40種の仕様例と点検ポイントも見られます'); 
 }
 $('#depthSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setDepth(b.dataset.d); });
@@ -107,6 +107,7 @@ document.addEventListener('click', e => {
   else if (t === 'alive') setAlive(on);
   else if (t === 'speakAuto') setSpeakAuto(on);
   else if (t === 'big') setBig(on);
+  else if (t === 'reg') setReg(on);
 });
 function showLegend() { if ($('#noteCard').dataset.kind === 'flight' || $('#noteCard').dataset.kind === 'question') return;
   renderNote({ kind: 'legend', title: 'まわる向きのしるし', badge: S.slow ? '1/50のはやさ' : null, html: `<div class="legend"><span class="ccw"><b>↺ 反時計まわり(CCW)</b></span> しま模様の羽・翼端が青緑<br><span class="cw"><b>↻ 時計まわり(CW)</b></span> 無地の羽・翼端が青<br>白い印が上を向いていれば正しい向きに付いています<br><b>灯火</b> 前・左 <span style="color:#ff3b30">●</span>赤 / 前・右 <span style="color:#22c55e">■</span>緑 / 後ろ ◆白</div>` }); }
@@ -156,11 +157,12 @@ function renderDetail() {
   const d = PARTS[p.key], g = GROUPS.find(x => x.id === d.group), simple = S.depth === 'simple', sd = SIMPLE[p.key];
   const inst = PER_MOTOR.has(p.key) && !S.selAll ? ` · ${MOTOR_INFO[p.idx].id}（${MOTOR_INFO[p.idx].pos}・${MOTOR_INFO[p.idx].dir === 'CW' ? '↻' : '↺'}${MOTOR_INFO[p.idx].dir}）` : '';
   const hidden = partsOf(p.key).some(x => x.hidden);
-  let h = `<div class="d-group" style="--c:${g.color}"><i></i>${g.name}</div><div class="d-title"><h3>${partName(p)}</h3>${hasSpeech ? '<button id="detailSpeak" class="icon-btn sm speak" aria-label="読み上げ" title="読み上げ">🔊</button>' : ''}</div><p class="d-en">${S.lang === 'en' ? d.name : d.en}${d.count > 1 ? ` · ×${d.count}` : ''}${inst}</p>`;
+  let h = `<div class="d-group" style="--c:${g.color}"><i></i>${g.name}${partKyChip(p.key)}</div><div class="d-title"><h3>${partName(p)}</h3>${hasSpeech ? '<button id="detailSpeak" class="icon-btn sm speak" aria-label="読み上げ" title="読み上げ">🔊</button>' : ''}</div><p class="d-en">${S.lang === 'en' ? d.name : d.en}${d.count > 1 ? ` · ×${d.count}` : ''}${inst}</p>`;
   h += codexHead(p.key);
   h += `<div class="d-actions"><button id="dFocus" class="primary">${t('ui.focus')}</button>${simple ? '' : `<button id="dIsolate">${S.isolated === p.key ? '単独表示を解除' : '単独表示'}</button><button id="dHide">${hidden ? '表示する' : '非表示'}</button>`}</div>`;
   h += `<section><h4>${t('sec.role')}</h4><p>${simple && sd ? partRole(p.key) : d.role}</p></section>`;
   if (!simple || !langEntry(p.key)) h += langNote();
+  h += regSection(p.key);
   h += codexTriviaRow(p.key);
   if (simple && sd) h += `<div class="analogy"><b>${t('sec.analogy')}</b>${partAnalogy(p.key)}</div>`;
   if (!simple && (p.key === 'motor' || p.key === 'prop' || p.key === 'esc')) h += `<section><h4>配置と回転方向（上から見て）</h4><div class="mtab">${MOTOR_INFO.map(m => `<div class="${m.dir.toLowerCase()}"><b>${m.id} ${m.dir === 'CW' ? '↻' : '↺'}${m.dir}</b>${m.pos}</div>`).join('')}</div></section>`;
@@ -304,9 +306,9 @@ function setUse(id) {
 }
 
 // ---------- もしも(シアター) ----------
-function buildMishapCards() { const list = S.depth === 'simple' ? MISHAPS.filter(m => ['propReverse', 'drop', 'motorOut'].includes(m.id)) : MISHAPS; $('#mishapCards').innerHTML = list.map(m => `<button data-m="${m.id}"><b>${m.short}</b>${m.name}</button>`).join(''); }
+function buildMishapCards() { const list = S.depth === 'simple' ? MISHAPS.filter(m => ['propReverse', 'drop', 'motorOut'].includes(m.id)) : MISHAPS; $('#mishapCards').innerHTML = list.map(m => `<button data-m="${m.id}"><b>${m.short}</b>${m.name}${regOn() ? kyChip('4.6') : ''}</button>`).join(''); }
 $('#mishapCards').addEventListener('click', e => { const b = e.target.closest('button'); if (b) startTheaterUI(b.dataset.m); });
-function buildWhatifCards() { $('#whatifCards').innerHTML = WHATIF.map(w => `<button data-w="${w.id}"><b>${w.icon} ${w.name}</b>${w.short || w.intro.slice(0, 22)}</button>`).join(''); }
+function buildWhatifCards() { $('#whatifCards').innerHTML = WHATIF.map(w => `<button data-w="${w.id}"><b>${w.icon} ${w.name}</b>${w.short || w.intro.slice(0, 22)}${regOn() && WHATIF_REG[w.id] ? kyChip(WHATIF_REG[w.id].ky.split(' ')[0]) : ''}</button>`).join(''); }
 $('#whatifCards').addEventListener('click', e => { const b = e.target.closest('button'); if (b) startWhatifUI(b.dataset.w); });
 function startWhatifUI(id) {
   stopOthers('whatif'); if (S.flight) setFlight(null); clearQuestion(); select(null); setSticks(false); if (S.explode > 0) setExplode(0); if (S.mode !== 'normal') setMode('normal'); if (S.scale) setScale(false); if (S.use) setUse(null);
@@ -330,7 +332,7 @@ function onWhatifChanged() {
   if (whatif.phase === 0) html = `<p>${d.intro}</p>`;
   else if (whatif.phase === 1) html = `<p>${d.reaction}</p>`;
   else if (whatif.phase === 2) html = `<p>${d.reaction}</p><ol class="parts-seq">${whatif.seq.map((k, i) => `<li class="${i === whatif.seq.length - 1 ? 'lit' : ''}"><b>${partName(k)}</b>${d.partNotes[k] || ''}</li>`).join('')}</ol>`;
-  else html = `<div class="two-col"><div><h4>機体ができること</h4><ul>${d.can.map(t => `<li>${t}</li>`).join('')}</ul></div><div><h4>人がやること</h4><ul>${d.human.map(t => `<li>${t}</li>`).join('')}</ul></div></div><p class="caveat">${d.caveat}</p>`;
+  else html = `<div class="two-col"><div><h4>機体ができること</h4><ul>${d.can.map(t => `<li>${t}</li>`).join('')}</ul></div><div><h4>人がやること</h4><ul>${d.human.map(t => `<li>${t}</li>`).join('')}</ul></div></div><p class="caveat">${d.caveat}</p>${regLine(d.id)}${reportFold(WHATIF_REPORT[d.id])}`;
   if (whatif.phase === 3) actions = [{ label: 'もう一度', fn: () => whatifRestart() }];
   renderNote({ kind: 'whatif', title: `${d.icon} ${d.name}`, badge: WHATIF_STAGES[si], html, actions });
 }
@@ -353,7 +355,7 @@ function onTheaterChanged() {
   const nb = $('#thNext'); nb.hidden = !theater.waiting;
   nb.textContent = theater.phase === 'setup' ? 'とばしてみる ▶' : theater.phase === 'broken' ? 'どの点検で防げた？ ›' : theater.phase === 'prevent' ? 'なおして元にもどす ›' : 'とじる';
   const d = theater.def; const brokenList = theater.red.length ? `<div class="chips" style="margin-top:8px">${[...new Set(theater.red.map(p => p.key))].map(k => `<button data-bk="${k}">${PARTS[k].name}</button>`).join('')}</div>` : '';
-  renderNote({ kind: 'theater', title: d.short, badge: TH_STAGES[si], html: `<p>${theater.subtitle}</p>${theater.phase === 'broken' ? brokenList : ''}${theater.phase === 'prevent' ? `<p style="margin-top:6px;color:var(--ink2)">${d.result}</p>` : ''}`, actions: theater.phase === 'prevent' ? [{ label: `${PARTS[d.checkPart].name}の点検を見る`, fn: () => { setDepth('full'); select(partsOf(d.checkPart)[0], true); } }] : [] });
+  renderNote({ kind: 'theater', title: d.short, badge: TH_STAGES[si], html: `<p>${theater.subtitle}</p>${theater.phase === 'broken' ? brokenList : ''}${theater.phase === 'prevent' ? `<p style="margin-top:6px;color:var(--ink2)">${d.result}</p>` : ''}${theater.phase === 'broken' || theater.phase === 'done' ? reportFold(MISHAP_REPORT[d.id]) : ''}`, actions: theater.phase === 'prevent' ? [{ label: `${PARTS[d.checkPart].name}の点検を見る`, fn: () => { setDepth('full'); select(partsOf(d.checkPart)[0], true); } }] : [] });
   for (const b of $$('#noteBody [data-bk]')) b.onclick = () => select(partsOf(b.dataset.bk)[0], true);
   if (theater.done) { document.body.classList.remove('theater'); $('#inspector').inert = false; $('#topbar').inert = false; }
 }

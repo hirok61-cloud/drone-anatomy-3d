@@ -25,7 +25,7 @@ while True:
     if css[_a:_b].count(chr(10)) > 2:
         raise SystemExit('style.css: コメントが %d 行にまたがっています (行 %d) — 閉じ忘れの疑い' % (css[_a:_b].count(chr(10)) + 1, css[:_a].count(chr(10)) + 1))
     _i = _b + 2
-SOURCES = ['data.js', 'materials.js', 'drone.js', 'engine.js', 'physics.js', 'airflow.js', 'theater.js', 'whatif.js', 'scale.js', 'codex.js', 'live.js', 'lesson.js', 'expert.js', 'ui.js', 'app.js']
+SOURCES = ['data.js', 'materials.js', 'drone.js', 'engine.js', 'physics.js', 'airflow.js', 'theater.js', 'whatif.js', 'scale.js', 'codex.js', 'live.js', 'lesson.js', 'expert.js', 'reg.js', 'ui.js', 'app.js']
 js = '\n'.join((SRC / f).read_text(encoding='utf-8') for f in SOURCES if (SRC / f).exists())
 
 frag = tpl.replace('/*INLINE:style.css*/', css).replace('/*INLINE:scripts*/', js)

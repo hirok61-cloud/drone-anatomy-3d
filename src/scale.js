@@ -66,9 +66,9 @@ function setScale(on) {
     if (S.mode === 'cut') setMode('normal');
     if (D.cgMarker) D.cgMarker.visible = true;
     if (D.personGroup) { D.personGroup.visible = !compact(); if (D.personGroup.userData.face) D.personGroup.userData.face(0, 0); if (D.personGroup.userData.rest) D.personGroup.userData.rest(); if (D.personGroup.userData.setGhost) D.personGroup.userData.setGhost(true); }
-    setPayload(scale.payload); renderMassBar(); setPower(0.5, true);
-    // 機体を主役に枠を決め、人型は「物差し」として画面右の端に腰まで入れる
-    focusOn([D.root], { pull: true, margin: 1.75 });
+    setPayload(scale.payload); renderMassBar(); setPower(0.5, true); regGhosts(true);
+    // 機体を主役に枠を決め、人型は「物差し」として画面右の端に腰まで入れる。区分のシルエットが出ていればそれも枠に入れる
+    focusOn(regGhost.grp && regGhost.grp.visible ? [D.root, regGhost.grp] : [D.root], { pull: true, margin: regGhost.grp && regGhost.grp.visible ? 1.6 : 1.75 });
     if (S.camSpring) {
       if (D.personGroup && D.personGroup.visible) { const off = new THREE.Vector3(-0.16, 0.06, -0.15); S.camSpring.p1.add(off); S.camSpring.q1.add(off); }
       if (compact()) S.camSpring.q1.y -= 0.12;   // スマホは下の横バーに隠れないよう機体を上へ
@@ -77,7 +77,7 @@ function setScale(on) {
     setPrice(false); scale.batDz = 0; scale.payDz = 0; setPayload('none');
     if (D.cgMarker) D.cgMarker.visible = false;
     if (D.personGroup) { D.personGroup.visible = false; if (D.personGroup.userData.setGhost) D.personGroup.userData.setGhost(false); }
-    camHome();
+    regGhosts(false); camHome();
     for (let i = 0; i < 4; i++) body.mult[i] = 1;
     for (const B of badgeEls) B.el.classList.remove('over');
     if (S.power > 0) setPower(0, true);
@@ -166,6 +166,7 @@ function renderMassBar(activeKey) {
   const yen = rows.reduce((s, r) => s + r.yen, 0);
   $('#massPrice').innerHTML = scale.price ? `<b>¥${yen.toLocaleString()}</b><span>${SCALE_TEXT.priceNote}</span>` : '';
   $('#massPrice').hidden = !scale.price;
+  const mr = $('#massReg'); if (mr) { const rh = massRegHtml(total); mr.innerHTML = rh; mr.hidden = !rh; }
   $('#massNote').textContent = scale.over ? scaleOverText() : '';   // 文言は1か所(stepScale と同じ)に揃える
   $('#massNote').hidden = !scale.over;
 }

@@ -24,7 +24,8 @@ function startWhatif(id) {
   }
   if (D.personGroup) { whatif.saved.personPos = D.personGroup.position.clone(); whatif.saved.personVis = D.personGroup.visible; }
   const vs = viewScale();
-  if (def.motion === 'person') theaterCamera(new THREE.Vector3(3.2 * vs, 1.6 * vs, -2.6 * vs), new THREE.Vector3(-0.35, 0.72, -0.35), 900);   // 人型(1.7m)が全身で入る引き(約4.4m)
+  if (def.motion === 'tachiiri') { tachiiriSetup(); const dv = vs > 1 ? 1.35 : 1; theaterCamera(new THREE.Vector3(4.6 * dv, 4.4 * dv, 4.6 * dv), new THREE.Vector3(-1.4, 0.2, -1.4), 900); }   // 近づく向きに沿って奥を見る俯瞰。区画(直径6m)と3人が縦にも横にも入る
+  else if (def.motion === 'person') theaterCamera(new THREE.Vector3(3.2 * vs, 1.6 * vs, -2.6 * vs), new THREE.Vector3(-0.35, 0.72, -0.35), 900);   // 人型(1.7m)が全身で入る引き(約4.4m)
   else theaterCamera(new THREE.Vector3(1.05 * vs, 0.55 * vs, -1.05 * vs), new THREE.Vector3(0, 0.03, 0), 800);
   if (typeof onWhatifChanged === 'function') onWhatifChanged();
 }
@@ -38,6 +39,7 @@ function stopWhatif(silent) {
   for (let i = 0; i < 4; i++) body.mult[i] = 1;
   air.windOverride = null; S.air = whatif.saved.air; for (const x of $$('.tgl[data-t=air]')) x.classList.toggle('on', S.air);
   if (D.personGroup) { if (whatif.saved.personPos) D.personGroup.position.copy(whatif.saved.personPos); D.personGroup.visible = whatif.saved.personVis; if (D.personGroup.userData.rest) D.personGroup.userData.rest(); if (D.personGroup.userData.face) D.personGroup.userData.face(0, 0); }
+  if (whatif.people) for (const g of whatif.people) g.visible = false; if (whatif.ring2) whatif.ring2.visible = false;
   S.labelsSuppressed = false; S.labelOnly = null; buildLabels();
   whatif.active = false; whatif.def = null; whatif.phase = 0; S.whatif = null;
   S.power = 0; setBodyMode('idle');
@@ -97,6 +99,19 @@ const WHATIF_MOTION = {
     body.mult[0] = 1 + 0.12 * tr + coll; body.mult[1] = 1 + 0.12 * tr + coll; body.mult[2] = 1 - 0.12 * tr + coll; body.mult[3] = 1 - 0.12 * tr + coll;
     return t > 4.5;
   },
+  // 人を入れない → 第三者は補助者の手前で止まり、機体はその場に降りる
+  tachiiri(t, dt) {
+    const P = whatif.people; if (!P) return t > 5.0;
+    const th = P[2]; const k = smoothstep(1.0, 3.6, t), dd = 6.0 - 2.2 * k, walking = t > 1.0 && k < 1;   // 半径6.0m → 3.8m（区画の外で止まる）
+    const phase = 2 * Math.PI * (2.2 * k) / 1.3;
+    th.position.set(-0.894 * dd, -0.158 + (walking ? 0.012 * Math.abs(Math.sin(phase)) : 0), -0.447 * dd);
+    th.userData.face(P[1].position.x, P[1].position.z);
+    if (walking) th.userData.walk(phase, 1); else th.userData.rest(dt);
+    if (t < 3.8) body.py = free.hoverY + 0.03;
+    else { const k2 = smoothstep(3.8, 5.0, t); body.py = (free.hoverY + 0.03) * (1 - k2); if (t > 4.6) D.motors.forEach(mo => { mo.rpmTarget = 0; }); }
+    if (t > 3.6) { const b = 0.5 + 0.5 * Math.sin((t - 3.6) * 2 * Math.PI / 0.6); for (const p of partsOf('led')) { setTint(p, RED, 0.6 * b); const h = p.obj.userData.halo; if (h) { h.material.color.copy(RED); h.material.opacity = 0.06 + 0.4 * b; } } }
+    return t > 5.4;
+  },
   // 人が近づいた → 機体は避けられない。灯火と音で知らせるだけ
   person(t, dt) {
     body.py = free.hoverY + 0.03 * smoothstep(1.0, 1.8, t);
@@ -113,6 +128,19 @@ const WHATIF_MOTION = {
   },
 };
 
+// ---------- 立入管理措置: 操縦者・補助者・第三者と区画の輪 ----------
+function tachiiriSetup() {
+  if (!whatif.people) {
+    whatif.people = [0, 1, 2].map(() => { const g = buildPerson(); g.traverse(o => { o.userData.noPick = true; }); scene.add(g); return g; });
+    const rg = new THREE.Mesh(new THREE.TorusGeometry(3.0, 0.012, 8, 160), new THREE.MeshBasicMaterial({ color: 0xe8a33d, transparent: true, opacity: 0.85, toneMapped: false }));
+    rg.rotation.x = Math.PI / 2; rg.position.y = -0.156; rg.userData.noPart = rg.userData.noPick = rg.userData.noAO = rg.userData.noShadow = true; scene.add(rg); whatif.ring2 = rg;
+  }
+  const [op, as, th] = whatif.people;
+  op.position.set(0.6, -0.158, 1.35); op.userData.face(0, 0); op.userData.rest(); op.visible = true;            // 操縦者: 機体の手前(カメラ側)
+  as.position.set(-2.05, -0.158, -2.05); as.userData.face(-6, -6); as.userData.rest(); as.visible = true;        // 補助者: 区画の境目で外を向く
+  th.position.set(-5.36, -0.158, -2.68); th.userData.face(-2.05, -2.05); th.userData.rest(); th.visible = true;   // 第三者: 補助者の横から近づく(画面上で重ならない向き)
+  whatif.ring2.visible = true;
+}
 function stepWhatif(dtSim, dtReal) {
   if (!whatif.active) return;
   whatif.t += dtSim; const def = whatif.def;
