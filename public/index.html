@@ -144,10 +144,18 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 #inspBody { flex: 1; overflow: hidden; position: relative; }
 #partList, #detail { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; transition: transform .22s cubic-bezier(.32,.72,0,1), opacity .22s; }
 #partList { padding: 8px 8px 12px; }
+/* 部品を探す（くわしくのときだけ出る）。一覧の先頭に貼り付き、見出しはその下で止まる */
+.p-find { position: sticky; top: 0; z-index: 3; margin: -8px -8px 4px; padding: 8px 10px 6px; background: var(--glass-strong); }
+.p-find input { width: 100%; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--hair2); background: var(--seg-bg); color: var(--ink); font-size: max(16px, calc(13px * var(--fs, 1))); min-height: var(--tap); }
+.p-find input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.p-find input::-webkit-search-cancel-button { cursor: pointer; }
+.find-note { margin: 5px 2px 0; font-size: calc(11.5px * var(--fs, 1)); color: var(--ink3); }
+#partList .row[hidden], #partList .grp[hidden] { display: none; }
+.share-url { width: 100%; margin: 6px 0; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--hair2); background: var(--seg-bg); color: var(--ink); font: max(16px, calc(12px * var(--fs, 1)))/1.4 var(--mono); }
 #detail { padding: 14px 18px 22px; }
 #inspBody.detail #partList { transform: translateX(-20%); opacity: 0; pointer-events: none; }
 #inspBody:not(.detail) #detail { transform: translateX(100%); opacity: 0; pointer-events: none; }
-.grp { position: sticky; top: 0; z-index: 1; font-size: calc(12px * var(--fs, 1)); font-weight: 600; color: var(--ink3); padding: 10px 10px 4px; display: flex; align-items: center; gap: 8px; background: var(--glass-strong); }
+.grp { position: sticky; top: 46px;   /* 検索欄の下で止まる */ z-index: 1; font-size: calc(12px * var(--fs, 1)); font-weight: 600; color: var(--ink3); padding: 10px 10px 4px; display: flex; align-items: center; gap: 8px; background: var(--glass-strong); }
 .grp i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); display: inline-block; }
 .row { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 8px; padding: 6px 6px 6px 12px; border-radius: 10px; cursor: pointer; min-height: var(--tap); transition: background .12s; }
 .row:hover { background: var(--row-hover); } .row.on { background: var(--accent-soft); } .row.on .nm { color: var(--accent); font-weight: 600; }
@@ -596,7 +604,7 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
 
 <div id="viewCol" class="glass" aria-label="視点">
   <button data-v="iso" class="on" title="斜め" data-i18n="views.iso">斜</button><button data-v="front" title="前" data-i18n="views.front">前</button><button data-v="top" title="上" data-i18n="views.top">上</button><button data-v="side" title="横" data-full data-i18n="views.side">横</button><button data-v="inside" title="モーター内部" data-full data-i18n="views.inside">内</button>
-  <hr><button class="tgl on" data-t="labels" aria-pressed="true" title="ラベル"><i></i><span data-i18n="views.labels">名</span></button><button id="bigBtn" title="大きく読む" aria-label="大きく読む" aria-pressed="false" data-i18n="big">大</button><button id="photoBtn" title="記念写真" aria-label="記念写真を撮る">📷</button><button id="fsBtn" title="全画面">⤢</button>
+  <hr><button class="tgl on" data-t="labels" aria-pressed="true" title="ラベル"><i></i><span data-i18n="views.labels">名</span></button><button id="bigBtn" title="大きく読む" aria-label="大きく読む" aria-pressed="false" data-i18n="big">大</button><button id="shareBtn" title="この画面のリンク" aria-label="この画面のリンクをコピー">🔗</button><button id="photoBtn" title="記念写真" aria-label="記念写真を撮る">📷</button><button id="fsBtn" title="全画面">⤢</button>
 </div>
 
 <div id="noteCard" class="glass" hidden aria-live="polite">
@@ -1033,6 +1041,26 @@ const SIMPLE = {
 };
 const SIMPLE_KEYS = Object.keys(SIMPLE);
 // ラベル簡略名（はじめて用）
+// 検索の言い換え。画面の名前と、利用者が打ちそうな言葉のずれを埋める（電池→バッテリー など）
+const FIND_ALIAS = {
+  battery: '電池 リポ lipo 6s バッテリ 充電', cells: '電池 セル リポ', xt60: 'コネクタ 端子 プラグ', balance: '充電 バランス 端子',
+  prop: '羽 はね 回転翼 ブレード ペラ blade', propNut: 'ナット ねじ 締める', propAdapter: 'アダプタ 取付',
+  motor: 'モータ 発動機 回す', bell: 'ローター 回転子 かん 缶', stator: '固定子 コイル台 スロット', winding: 'コイル 銅線 巻き線',
+  magnet: 'マグネット 磁石', shaft: '軸 ベアリング 玉軸受', motorBase: '土台 取付',
+  esc: 'アンプ スピードコントローラー 三相 速度制御', pdb: '分配 電源基板 電源',
+  fc: '頭脳 コンピュータ 制御 ジャイロ 加速度 姿勢 flightcontroller autopilot', capacitor: 'コンデンサー キャパシタ ノイズ',
+  buzzer: 'ブザ 音 スピーカー 警報', wiring: 'ケーブル 電線 コード はんだ',
+  gps: 'gps gnss コンパス 方位 衛星 測位 磁気 マスト', rx: 'アンテナ 受信 プロポ 送信機 電波 操縦',
+  vtx: '映像 fpv 電波 送信 カメラ映像', telemetry: '無線 通信 テレメトリ データ 地上局',
+  led: 'ライト 灯火 照明 夜間 発光', remoteId: 'リモートid 発信 識別 broadcast',
+  regMark: '登録記号 機体登録 番号 表示 ju', damper: 'ダンパ ゴム 防振 振動',
+  gimbal: 'ジンバル 手ぶれ 3軸 カメラ台', camera: 'レンズ 撮影 映像 写真',
+  landingGear: '脚 あし スキッド 着陸 降着', batteryTray: 'トレイ 台 電池台', strap: 'ベルト バンド 固定 電池',
+  frameTop: 'フレーム 骨格 板 カーボン 天板', frameBottom: 'フレーム 骨格 板 カーボン 底板',
+  arm: 'うで パイプ カーボン 腕', armClamp: 'クランプ 固定 締結', motorMount: 'マウント 取付台',
+  standoff: '支柱 柱 スペーサー', screws: 'ねじ ボルト ナット 締結 ゆるみ',
+};
+
 const SIMPLE_NAME = { prop: 'プロペラ', motor: 'モーター', arm: 'アーム', frameTop: 'フレーム', battery: 'バッテリー', fc: '頭脳（FC）', landingGear: '脚', camera: 'カメラ' };
 
 // ===== 用途から入る扉: 部品の3分類（共通 / 強化 / 追加） =====
@@ -1288,9 +1316,9 @@ const WHATIF = [
 
 // ===== 言語 (パッケージ⑧): やさしい日本語 / English。段階1 = タブ・主要ボタン・8部品・12質問 =====
 const I18N = {
-  ja: { tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも', expert: '専門' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを回す', stop: '■ 止める', views: { iso: '斜', front: '前', top: '上', side: '横', inside: '内', labels: '名' }, big: '大', speak: '読み上げ',
+  ja: { find: { ph: '部品を探す' }, tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも', expert: '専門' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを回す', stop: '■ 止める', views: { iso: '斜', front: '前', top: '上', side: '横', inside: '内', labels: '名' }, big: '大', speak: '読み上げ',
     ui: { parts: '部品一覧', script: '台本', focus: '注目', more: 'くわしく見る', explode: '分解', look: '見え方', normal: 'ふつう', xray: 'すけて見る', wire: '線だけ', cut: '切って見る' }, sec: { structure: '構造', trivia: '豆知識', role: '役割', analogy: 'たとえるなら' }, parts: {}, questions: {} },
-  easy: { tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも', expert: 'せんもん' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを 回す', stop: '■ とめる', views: { iso: 'ななめ', front: 'まえ', top: 'うえ', side: 'よこ', inside: 'なか', labels: 'なまえ' }, big: 'おおきく', speak: 'よみあげ',
+  easy: { find: { ph: 'ぶひんを さがす' }, tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも', expert: 'せんもん' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを 回す', stop: '■ とめる', views: { iso: 'ななめ', front: 'まえ', top: 'うえ', side: 'よこ', inside: 'なか', labels: 'なまえ' }, big: 'おおきく', speak: 'よみあげ',
     ui: { parts: 'ぶひんの リスト', script: 'だいほん', focus: 'ちゅうもく', more: 'くわしく みる', explode: 'ばらばら', look: 'みえかた', normal: 'ふつう', xray: 'すけて みる', wire: 'せんだけ', cut: 'きって みる' }, sec: { structure: 'つくり', trivia: 'まめちしき', role: 'やくわり', analogy: 'たとえると' },
     parts: {
       prop:        { name: 'プロペラ',           role: 'まわって、空気を 下に おします。おした ぶんだけ、ドローンは 上に おされて うきます。', analogy: 'せんぷうきを 下に むけて、じぶんが ふわっと うくような もの' },
@@ -1303,7 +1331,7 @@ const I18N = {
       camera:      { name: 'カメラ',             role: '上から しゃしんや ビデオを とります。ゆれない ように、ゴムに ぶらさがって います。', analogy: 'スマホの カメラを、ゆれない だいに のせた もの' },
     },
     questions: { lift: 'どうして うくの？', fwd: 'どうして 前に すすむの？', ccw: 'どうして 4まい ぜんぶ おなじ むきに まわさないの？', time: '何分 とべるの？', rain: '雨の日は とべるの？', radio: 'でんぱが きれたら どうなるの？', where: 'どうやって じぶんの ばしょを 知るの？', weight: 'どのくらい おもいの？', crash: 'おちたら どこが こわれるの？', oneout: 'モーターが 1つ とまったら？', shake: 'カメラは どうして ゆれないの？', night: 'よるも とべるの？' } },
-  en: { tabs: { see: 'Look', fly: 'Fly', use: 'Use', mishap: 'What if', expert: 'Expert' }, depth: { simple: 'Basic', full: 'Details' }, ask: 'Ask', power: '▶ Spin props', stop: '■ Stop', views: { iso: '3D', front: 'Front', top: 'Top', side: 'Side', inside: 'Inside', labels: 'Name' }, big: 'Big', speak: 'Read aloud',
+  en: { find: { ph: 'Find a part' }, tabs: { see: 'Look', fly: 'Fly', use: 'Use', mishap: 'What if', expert: 'Expert' }, depth: { simple: 'Basic', full: 'Details' }, ask: 'Ask', power: '▶ Spin props', stop: '■ Stop', views: { iso: '3D', front: 'Front', top: 'Top', side: 'Side', inside: 'Inside', labels: 'Name' }, big: 'Big', speak: 'Read aloud',
     ui: { parts: 'Parts', script: 'Script', focus: 'Focus', more: 'More details', explode: 'Explode', look: 'View', normal: 'Normal', xray: 'X-ray', wire: 'Lines', cut: 'Cut' }, sec: { structure: 'Structure (Japanese)', trivia: 'Fun fact (Japanese)', role: 'Role', analogy: 'Like…' },
     parts: {
       prop:        { name: 'Propeller', role: 'It spins and pushes air down. The air pushes back, and that lifts the drone.', analogy: 'Like pointing a fan at the floor until you float.' },
@@ -2409,7 +2437,7 @@ const T0 = performance.now(); const TL = {}; const mark = k => { TL[k] = Math.ro
 
 const S = {
   mode: 'normal', explode: 0, explodeT: 0, power: 0, flight: null, flightT: 0, depth: 'simple', tab: 'see',
-  labels: true, arrows: false, air: false, autoRotate: !reduceMotion, shadows: true, slow: false, ts: 1, logTs: 0, tsTarget: 1,
+  view: 'iso', labels: true, arrows: false, air: false, autoRotate: !reduceMotion, shadows: true, slow: false, ts: 1, logTs: 0, tsTarget: 1,
   selected: null, selAll: false, hovered: null, isolated: null, quality: 'auto', qLevel: 3, lastInteract: performance.now(), lastSelect: -1e9,
   camSpring: null, camInertia: null, sticks: false, tilt: false, theater: null, overlay: null, question: null, use: null, scale: false, price: false, whatif: null, labelOnly: null, labelsSuppressed: false, expert: null, alive: true, big: false, lang: 'ja', lesson: null,
   aoDirty: true, shadowDirty: true, csDirty: true, envMul: 1, exposureMul: 1,
@@ -2739,6 +2767,7 @@ function bottomCover() {
 // 画面上でタイトルバーや視点バーが覆っている高さ(CSSピクセル)。畳まれている(visibility hidden)ものは数えない
 function topCover() {
   const H2 = window.innerHeight, bc = document.body.classList; let cov = 0;
+  if (bc.contains('theater')) return 0;   /* 場面の再生中は上のバーを薄く畳んでいる。覆いとして数えると画が下がって機体が字幕の裏に入る */
   for (const sel of ['#topbar', '#viewCol']) {
     if (sel === '#viewCol' && bc.contains('sheet-open')) continue; if (sel === '#topbar' && bc.contains('sheet-tall')) continue;   /* 畳まれている途中でも畳んだ後の形で測る(transition 待ちにしない) */
     const el = document.querySelector(sel); if (!el || el.hidden) continue;
@@ -4731,6 +4760,116 @@ function initReg() {
   window.__reg = { regOn, setReg, regGhosts, showKyosokuTable, KY_TAB, REG, WHATIF_REG };
 }
 
+// ===== 共有リンク（いま見えている画面をURLにする） =====
+// 方針: 既定と違うものだけを短いキーで載せる。読み戻しの途中はトーストを出さず、最後に「どこを開いたか」を1回だけ伝える。
+// 授業モードの lesson / step は lesson.js が自分で書くのでここでは触らない（消さない）。
+const SHARE_KEYS = ['p', 'd', 't', 'm', 'e', 'v', 'c', 'u', 'f', 'x', 'w', 'mi', 'mass', 'price', 'iso', 'reg', 'lang'];
+const share = { restoring: false };
+
+// 注視点(3) + 向き(3) + 引き(1)。引きは viewScale()×bandK() で割った相対値なので、受け取った端末の画面に合わせて戻る
+function camParam() {
+  const t = controls.target, dir = camera.position.clone().sub(t); const r = dir.length() / Math.max(1e-3, viewScale() * bandK());
+  dir.normalize(); const n = (x) => +x.toFixed(2);
+  return [n(t.x), n(t.y), n(t.z), n(dir.x), n(dir.y), n(dir.z), n(r)].join(',');
+}
+function applyCam(str) {
+  const a = String(str).split(',').map(Number);
+  if (a.length !== 7 || a.some(x => !isFinite(x))) return false;
+  const t = new THREE.Vector3(a[0], a[1], a[2]), dir = new THREE.Vector3(a[3], a[4], a[5]);
+  if (dir.lengthSq() < 1e-6 || t.length() > 8) return false;
+  const dist = clamp(a[6] * viewScale() * bandK(), 0.08, camMax() * 1.6);
+  flyTo(t.clone().addScaledVector(dir.normalize(), dist), t, 700, false);
+  return true;
+}
+function shareUrl() {
+  const u = new URL(location.href); const q = u.searchParams;
+  for (const k of SHARE_KEYS) q.delete(k);
+  if (S.depth !== 'simple') q.set('d', S.depth);
+  if (S.lang !== 'ja') q.set('lang', S.lang);
+  if (regOn() !== (S.depth === 'full')) q.set('reg', regOn() ? '1' : '0');
+  if (S.tab !== 'see' && S.tab !== 'theater') q.set('t', S.tab);
+  if (S.mode !== 'normal') q.set('m', S.mode);
+  if (S.explode > 0.005) q.set('e', String(Math.round(S.explode * 100)));
+  if (S.view && S.view !== 'iso') q.set('v', S.view);
+  if (!whatif.active && !theater.active) q.set('c', camParam());   /* 視点そのもの。画面の縦横比が違っても同じ画になるよう、引きは相対値で持つ */
+  if (S.selected) q.set('p', S.selected.key);
+  if (S.isolated) q.set('iso', S.isolated);
+  if (S.use) q.set('u', S.use);
+  if (S.flight) q.set('f', S.flight);
+  if (S.expert) q.set('x', S.expert);
+  if (S.scale) { q.set('mass', '1'); if (scale.price) q.set('price', '1'); }
+  if (whatif.active && whatif.def) q.set('w', whatif.def.id);
+  else if ((theater.active || theater.done) && theater.def) q.set('mi', theater.def.id);
+  u.hash = '';
+  return u.toString();
+}
+// トーストと共有シートに出す「この画面はどこか」の短い説明
+function shareSummary() {
+  const bits = [];
+  if (S.selected) bits.push(partName(S.selected));
+  if (whatif.active && whatif.def) bits.push('もしも: ' + whatif.def.short);
+  else if ((theater.active || theater.done) && theater.def) bits.push('もしも: ' + theater.def.short);
+  if (S.mode !== 'normal') bits.push({ xray: 'すけて見る', wire: '線だけ', cut: '切って見る', blueprint: '設計図' }[S.mode] || S.mode);
+  if (S.explode > 0.005) bits.push(`分解 ${Math.round(S.explode * 100)}%`);
+  if (S.use) { const u = USES.find(x => x.id === S.use); if (u) bits.push(u.name); }
+  if (S.flight) bits.push(FLIGHT[S.flight].name);
+  if (S.scale) bits.push('重さ・お金');
+  if (S.expert) bits.push(EXPERT_TITLE[S.expert]);
+  return bits.length ? bits.join('・') : '最初の画面';
+}
+function showShareNote(url) {   // クリップボードが使えないとき（古いSafari・http）は、選んでコピーできる欄を出す
+  renderNote({
+    kind: 'share', title: 'この画面のリンク',
+    html: `<p>${shareSummary()}</p><input class="share-url" id="shareUrlBox" readonly value="${url.replace(/"/g, '&quot;')}"><p class="hint">長押し（PCでは右クリック）でコピーできます。開くと同じ画面が出ます。</p>`,
+    actions: [{ label: '閉じる', fn: () => renderNote(null) }],
+  });
+  const box = $('#shareUrlBox'); if (box) { box.focus(); box.select(); }
+}
+async function shareNow() {
+  const url = shareUrl(), sum = shareSummary();
+  if (narrow() && navigator.share) {
+    try { await navigator.share({ title: 'ドローンの構造', text: sum, url }); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  try { await navigator.clipboard.writeText(url); showToast(`リンクをコピーしました（${sum}）`, 3200); return; } catch (e) { /* 権限なし・非対応 */ }
+  showShareNote(url);
+}
+
+// ---------- 読み戻し ----------
+function applyShare() {
+  const q = new URLSearchParams(location.search);
+  if (!SHARE_KEYS.some(k => q.has(k))) return false;
+  const has = (k, ok) => { const v = q.get(k); return v != null && (!ok || ok.includes(v)) ? v : null; };
+  share.restoring = true;
+  try {
+    const lang = has('lang', ['ja', 'easy', 'en']); if (lang) setLang(lang);
+    const d = has('d', ['simple', 'full']); if (d) setDepth(d);
+    const reg = has('reg', ['0', '1']); if (reg != null) setReg(reg === '1');
+    const t = has('t', ['see', 'fly', 'use', 'mishap', 'expert']); if (t) setTab(t);
+    const m = has('m', ['normal', 'xray', 'wire', 'cut', 'blueprint']); if (m && (m !== 'blueprint' || codex.done)) setMode(m);   /* 設計図は全部品を見た人だけ */
+    const e = q.get('e'); if (e != null && isFinite(+e)) setExplode(clamp(+e / 100, 0, 1));
+    const u = has('u', USES.map(x => x.id)); if (u) { setTab('use'); setUse(u); }
+    if (q.get('mass') === '1') { setTab('use'); setScale(true); if (q.get('price') === '1') setPrice(true); }
+    const f = has('f', Object.keys(FLIGHT)); if (f) { setTab('fly'); setFlight(f); }
+    const x = has('x', EXPERT_MODES); if (x) { setTab('expert'); expertStart(x); }
+    const iso = has('iso', LIST_ORDER); if (iso) { S.isolated = iso; applyVisibility(); }
+    const p = has('p', Object.keys(PARTS)); if (p && partsOf(p).length) select(partsOf(p)[0], true);
+    const v = has('v', ['iso', 'front', 'top', 'side', 'inside']), c = q.get('c');
+    if (v) { S.view = v; segSet($('#viewCol'), 'v', v); if (!c) setView(v); }
+    if (c) applyCam(c);   /* 視点は最後に。部品を選んでもカメラは動かないので、共有した人が見ていた画がそのまま出る */
+    // 場面は絵が出てから始める（起動直後に走らせると最初の1コマを飛ばす）
+    const w = has('w', WHATIF.map(x => x.id)), mi = has('mi', MISHAPS.map(x => x.id));
+    if (w || mi) setTimeout(() => { if (w) startWhatifUI(w); else startTheaterUI(mi); }, 700);
+  } catch (err) { console.warn('[share] 読み戻しに失敗', err); }
+  share.restoring = false;
+  setTimeout(() => showToast(`共有されたリンクで開きました（${shareSummary()}）`, 3600), 900);
+  return true;
+}
+
+function initShare() {
+  const btn = $('#shareBtn'); if (btn) btn.addEventListener('click', shareNow);
+  window.__share = { shareUrl, shareSummary, shareNow, applyShare };
+}
+
 // ===== UI: タブ・扉・解説・ラベル・スティック・入力 =====
 const LIST_ORDER = ['frameTop', 'frameBottom', 'regMark', 'arm', 'armClamp', 'motorMount', 'standoff', 'screws', 'motor', 'bell', 'stator', 'winding', 'magnet', 'shaft', 'motorBase', 'prop', 'propNut', 'propAdapter', 'esc', 'fc', 'pdb', 'capacitor', 'buzzer', 'battery', 'cells', 'batteryTray', 'xt60', 'balance', 'strap', 'wiring', 'gps', 'remoteId', 'rx', 'vtx', 'telemetry', 'led', 'gimbal', 'camera', 'damper', 'landingGear'];
 const SUB = { bell: 'motor', stator: 'motor', winding: 'motor', magnet: 'motor', shaft: 'motor', motorBase: 'motor', cells: 'battery', propNut: 'prop', propAdapter: 'prop' };
@@ -4742,7 +4881,8 @@ const ICON = {
 const ACCENT = new THREE.Color(0xef6a2d), HOVER_L = new THREE.Color(0x1b1f27), HOVER_D = new THREE.Color(0xffffff), UP_COLOR = new THREE.Color(0xef6a2d), DROP_COLOR = new THREE.Color(0x9aa0a8);
 const store = { get: k => { try { return localStorage.getItem('drone3d.' + k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem('drone3d.' + k, v); } catch (e) {} } };
 let toastTimer = 0;
-function showToast(msg, ms = 2500) { const t = $('#toast'); t.textContent = msg; t.hidden = false; t.classList.remove('hide'); clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.classList.add('hide'); setTimeout(() => { t.hidden = true; }, 320); }, ms); }
+function showToast(msg, ms = 2500) { if (share.restoring) return;   /* 共有リンクの読み戻し中は途中経過を出さない */
+  const t = $('#toast'); t.textContent = msg; t.hidden = false; t.classList.remove('hide'); clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.classList.add('hide'); setTimeout(() => { t.hidden = true; }, 320); }, ms); }
 function segSet(seg, attr, val) { for (const b of $$('button', seg)) { const on = b.dataset[attr] === String(val); b.classList.toggle('on', on); if (b.getAttribute('role') === 'tab' || b.parentElement.getAttribute('role') === 'radiogroup') b.setAttribute('aria-selected', on); } }
 
 // ---------- 説明カード ----------
@@ -4846,20 +4986,53 @@ function showLegend() { if ($('#noteCard').dataset.kind === 'flight' || $('#note
   renderNote({ kind: 'legend', title: 'まわる向きのしるし', badge: S.slow ? '1/50のはやさ' : null, html: `<div class="legend"><span class="ccw"><b>↺ 反時計まわり(CCW)</b></span> しま模様の羽・翼端が青緑<br><span class="cw"><b>↻ 時計まわり(CW)</b></span> 無地の羽・翼端が青<br>白い印が上を向いていれば正しい向きに付いています<br><b>灯火</b> 前・左 <span style="color:#ff3b30">●</span>赤 / 前・右 <span style="color:#22c55e">■</span>緑 / 後ろ ◆白</div>` }); }
 
 // ---------- 視点列 ----------
-$('#viewCol').addEventListener('click', e => { const b = e.target.closest('button[data-v]'); if (!b) return; segSet($('#viewCol'), 'v', b.dataset.v); setView(b.dataset.v); });
+$('#viewCol').addEventListener('click', e => { const b = e.target.closest('button[data-v]'); if (!b) return; segSet($('#viewCol'), 'v', b.dataset.v); S.view = b.dataset.v; setView(b.dataset.v); });
 $('#fsBtn').addEventListener('click', () => { const el = document.documentElement; if (document.fullscreenElement) document.exitFullscreen(); else if (el.requestFullscreen) el.requestFullscreen(); else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen(); });
+
+// ---------- 部品を探す（40件を目で追わせない。くわしく のときだけ出す） ----------
+// カタカナ・ひらがな・英語・全角半角のどれで打っても当たるように正規化する
+const findNorm = (t) => (t || '').normalize('NFKC').toLowerCase().replace(/[\u30a1-\u30f6]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60)).replace(/[\s・･]/g, '');
+const findName = (k) => { const d = PARTS[k], g = GROUPS.find(x => x.id === d.group); return findNorm([partName(k), d.name, d.en, SIMPLE_NAME[k] || '', g ? g.name : '', FIND_ALIAS[k] || ''].join(' ')); };
+const findText = (k) => { const d = PARTS[k]; return findNorm([d.role, (d.structure || []).join(' '), (d.check || []).join(' '), d.tip || ''].join(' ')); };
+function applyFind() {
+  const inp = $('#partFind'); if (!inp) return;
+  const q = findNorm(inp.value); const rows = $$('#partList .row');
+  let hit = new Set(), deep = false;
+  if (q) {
+    for (const r of rows) if (findName(r.dataset.key).includes(q)) hit.add(r.dataset.key);
+    if (!hit.size) { deep = true; for (const r of rows) if (findText(r.dataset.key).includes(q)) hit.add(r.dataset.key); }   /* 名前で出なければ説明文からも探す */
+  }
+  for (const r of rows) r.hidden = !!q && !hit.has(r.dataset.key);
+  for (const g of $$('#partList .grp')) { let n = 0; for (let e = g.nextElementSibling; e && e.classList.contains('row'); e = e.nextElementSibling) if (!e.hidden) n++; g.hidden = !n; }
+  const note = $('#findNote');
+  if (note) { note.hidden = !q; note.textContent = !q ? '' : hit.size ? (deep ? `名前では見つかりません。説明文から ${hit.size} 件` : `${hit.size} 件`) : '見つかりません。ちがう言い方で試してください'; }
+  $('#partCount').textContent = q ? `${hit.size} / ${LIST_ORDER.length}` : `${LIST_ORDER.length} 部品`;
+}
+// Enter で開く1件。名前が前方一致するものを一覧の順より優先する（「モーター」でモーターマウントが先に来ないように）
+function findBest() {
+  const inp = $('#partFind'); const q = findNorm(inp ? inp.value : '');
+  const keys = $$('#partList .row').filter(r => !r.hidden).map(r => r.dataset.key); if (!keys.length) return null;
+  const score = (k) => { const n = findNorm(partName(k)), a = findNorm(PARTS[k].name); const inName = n.includes(q) || a.includes(q);
+    if (n === q || a === q) return 0; if (inName && SIMPLE_NAME[k]) return 1;   /* 「モーター」はモーターマウントでなくブラシレスモーター */
+    if (n.startsWith(q) || a.startsWith(q)) return 2; if (inName) return 3; return 4; };
+  return keys.slice().sort((x, y) => score(x) - score(y))[0];
+}
+function findClear() { const inp = $('#partFind'); if (inp) { inp.value = ''; applyFind(); } }
 
 // ---------- 部品一覧 / 解説 ----------
 function buildList() {
-  const list = $('#partList'); let html = '';
+  const list = $('#partList'); const prevFind = $('#partFind') ? $('#partFind').value : ''; let html = '';
   if (S.depth === 'simple') { for (const k of SIMPLE_KEYS) html += `<div class="row" data-key="${k}" tabindex="0" role="button"><span class="nm">${partName(k)}</span><span class="cnt"></span><span></span></div>`; $('#partCount').textContent = `${SIMPLE_KEYS.length} 部品`; }
   else {
+    html += `<div class="p-find"><input id="partFind" type="search" autocomplete="off" spellcheck="false" placeholder="${t('find.ph')}" aria-label="${t('find.ph')}" aria-controls="partList"><p id="findNote" class="find-note" hidden></p></div>`;
     for (const g of GROUPS) { const keys = LIST_ORDER.filter(k => PARTS[k] && PARTS[k].group === g.id); html += `<div class="grp" style="--c:${g.color}"><i></i>${g.name}</div>`;
       for (const k of keys) { const d = PARTS[k]; const hid = partsOf(k).some(p => p.hidden); html += `<div class="row${SUB[k] ? ' sub' : ''}${hid ? ' off' : ''}" data-key="${k}" tabindex="0" role="button"><span class="nm">${partName(k)}</span><span class="cnt">${d.count > 1 ? '×' + d.count : ''}</span><button class="eye" aria-label="${d.name}の表示切替">${hid ? ICON.eyeOff : ICON.eye}</button></div>`; } }
     $('#partCount').textContent = `${LIST_ORDER.length} 部品`;
   }
   list.innerHTML = html;
   for (const row of $$('#partList .row')) row.classList.toggle('on', !!S.selected && row.dataset.key === S.selected.key);
+  const inp = $('#partFind');
+  if (inp) { inp.value = prevFind; applyFind(); inp.addEventListener('input', applyFind); inp.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); if (inp.value) findClear(); else inp.blur(); } else if (e.key === 'Enter') { const best = findBest(); if (best) { inp.blur(); select(partsOf(best)[0], true); } } }); }
 }
 $('#partList').addEventListener('click', e => { const row = e.target.closest('.row'); if (!row) return; const key = row.dataset.key; if (e.target.closest('.eye')) { toggleHidden(key); return; } select(partsOf(key)[0], true); });
 $('#partList').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { const row = e.target.closest('.row'); if (row) { e.preventDefault(); select(partsOf(row.dataset.key)[0], true); } } });
@@ -5196,6 +5369,7 @@ document.addEventListener('keydown', e => {
   if ((theater.active || whatif.active) && k !== 'escape') return;   // 再生中は表示モード等のキーを受けない
   if ((S.scale || S.expert) && (k === 'e' || /^[1-4]$/.test(k))) return;
   if (k === 'escape' && (!$('#askPop').hidden || !$('#settings').hidden)) { $('#askPop').hidden = true; $('#settings').hidden = true; return; }
+  if (e.key === '/' && $('#partFind')) { e.preventDefault(); $('#inspector').classList.add('open'); if (S.selected) select(null); $('#partFind').focus(); $('#partFind').select(); return; }
   if (e.key === '?') { const st = $('#settings'); st.hidden = false; $('#askPop').hidden = true; const dt = st.querySelector('details'); if (dt) dt.open = true; return; }
   if (k === '1') setMode('normal'); else if (k === '2') setMode('xray'); else if (k === '3') setMode('wire'); else if (k === '4') setMode('cut');
   else if (k === 'e') setExplode(S.explode > 0.5 ? 0 : 1);
@@ -5203,7 +5377,7 @@ document.addEventListener('keydown', e => {
   else if (k === 'a') $('.ctx-row .tgl[data-t=air]').click();
   else if (k === 's') $('.ctx-row .tgl[data-t=slow]').click();
   else if (k === ' ') { e.preventDefault(); if (S.tab !== 'fly') setTab('fly'); setPower(S.power === 0 ? 0.5 : 0); }
-  else if (k === 'r') { segSet($('#viewCol'), 'v', 'iso'); setView('iso'); }
+  else if (k === 'r') { segSet($('#viewCol'), 'v', 'iso'); S.view = 'iso'; setView('iso'); }
   else if (k === 'f' && S.selected) focusOn(S.selAll ? partsOf(S.selected.key).map(x => x.obj) : [S.selected.obj]);
   else if (k === 'escape') { if (theater.active) stopTheaterUI(); else if (S.question) { clearQuestion(); renderNote(null); } else if (S.flight) setFlight(null); else if (S.selected) select(null); else $('#inspector').classList.remove('open'); }
 });
@@ -5329,7 +5503,7 @@ window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: sca
   $('#loadMsg').textContent = '照明と材質を準備しています…';
   buildList(); applyTheme(); resize();
   applyQuality(isMobile ? (HF ? 1 : 0) : 3);
-  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif(); initLive(); initLesson(); initExpert(); initReg();
+  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif(); initLive(); initLesson(); initExpert(); initReg(); initShare();
   { const vs = viewScale(); if (vs > 1) camera.position.multiplyScalar(vs); }
   renderer.setClearColor(0x000000, 1);
   $('#loadMsg').textContent = 'シェーダーをコンパイルしています…'; mark('setup');
@@ -5338,6 +5512,7 @@ window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: sca
   let t = performance.now(); composer.render(); TL.r1 = Math.round(performance.now() - t);
   requestAnimationFrame(frame);
   setTimeout(() => $('#loading').classList.add('gone'), 8000);   // 背面タブなどで rAF が回らないとき、覆いが残り続けないように
+  applyShare();   /* 共有リンクの読み戻しは、部品も材質もそろってから */
   requestAnimationFrame(() => requestAnimationFrame(() => { mark('first'); $('#loading').classList.add('gone'); window.__droneReady = true; renderer.debug.checkShaderErrors = false; console.log('[drone3d] timeline ms', JSON.stringify(TL)); }));
 })().catch(e => { console.error(e); window.__showErr('初期化エラー: ' + e.message); });
 

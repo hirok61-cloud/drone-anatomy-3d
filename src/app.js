@@ -62,7 +62,7 @@ window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: sca
   $('#loadMsg').textContent = '照明と材質を準備しています…';
   buildList(); applyTheme(); resize();
   applyQuality(isMobile ? (HF ? 1 : 0) : 3);
-  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif(); initLive(); initLesson(); initExpert(); initReg();
+  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif(); initLive(); initLesson(); initExpert(); initReg(); initShare();
   { const vs = viewScale(); if (vs > 1) camera.position.multiplyScalar(vs); }
   renderer.setClearColor(0x000000, 1);
   $('#loadMsg').textContent = 'シェーダーをコンパイルしています…'; mark('setup');
@@ -71,5 +71,6 @@ window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: sca
   let t = performance.now(); composer.render(); TL.r1 = Math.round(performance.now() - t);
   requestAnimationFrame(frame);
   setTimeout(() => $('#loading').classList.add('gone'), 8000);   // 背面タブなどで rAF が回らないとき、覆いが残り続けないように
+  applyShare();   /* 共有リンクの読み戻しは、部品も材質もそろってから */
   requestAnimationFrame(() => requestAnimationFrame(() => { mark('first'); $('#loading').classList.add('gone'); window.__droneReady = true; renderer.debug.checkShaderErrors = false; console.log('[drone3d] timeline ms', JSON.stringify(TL)); }));
 })().catch(e => { console.error(e); window.__showErr('初期化エラー: ' + e.message); });

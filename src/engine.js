@@ -13,7 +13,7 @@ const T0 = performance.now(); const TL = {}; const mark = k => { TL[k] = Math.ro
 
 const S = {
   mode: 'normal', explode: 0, explodeT: 0, power: 0, flight: null, flightT: 0, depth: 'simple', tab: 'see',
-  labels: true, arrows: false, air: false, autoRotate: !reduceMotion, shadows: true, slow: false, ts: 1, logTs: 0, tsTarget: 1,
+  view: 'iso', labels: true, arrows: false, air: false, autoRotate: !reduceMotion, shadows: true, slow: false, ts: 1, logTs: 0, tsTarget: 1,
   selected: null, selAll: false, hovered: null, isolated: null, quality: 'auto', qLevel: 3, lastInteract: performance.now(), lastSelect: -1e9,
   camSpring: null, camInertia: null, sticks: false, tilt: false, theater: null, overlay: null, question: null, use: null, scale: false, price: false, whatif: null, labelOnly: null, labelsSuppressed: false, expert: null, alive: true, big: false, lang: 'ja', lesson: null,
   aoDirty: true, shadowDirty: true, csDirty: true, envMul: 1, exposureMul: 1,
@@ -343,6 +343,7 @@ function bottomCover() {
 // 画面上でタイトルバーや視点バーが覆っている高さ(CSSピクセル)。畳まれている(visibility hidden)ものは数えない
 function topCover() {
   const H2 = window.innerHeight, bc = document.body.classList; let cov = 0;
+  if (bc.contains('theater')) return 0;   /* 場面の再生中は上のバーを薄く畳んでいる。覆いとして数えると画が下がって機体が字幕の裏に入る */
   for (const sel of ['#topbar', '#viewCol']) {
     if (sel === '#viewCol' && bc.contains('sheet-open')) continue; if (sel === '#topbar' && bc.contains('sheet-tall')) continue;   /* 畳まれている途中でも畳んだ後の形で測る(transition 待ちにしない) */
     const el = document.querySelector(sel); if (!el || el.hidden) continue;

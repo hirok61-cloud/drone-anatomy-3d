@@ -121,10 +121,18 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 #inspBody { flex: 1; overflow: hidden; position: relative; }
 #partList, #detail { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; transition: transform .22s cubic-bezier(.32,.72,0,1), opacity .22s; }
 #partList { padding: 8px 8px 12px; }
+/* 部品を探す（くわしくのときだけ出る）。一覧の先頭に貼り付き、見出しはその下で止まる */
+.p-find { position: sticky; top: 0; z-index: 3; margin: -8px -8px 4px; padding: 8px 10px 6px; background: var(--glass-strong); }
+.p-find input { width: 100%; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--hair2); background: var(--seg-bg); color: var(--ink); font-size: max(16px, calc(13px * var(--fs, 1))); min-height: var(--tap); }
+.p-find input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.p-find input::-webkit-search-cancel-button { cursor: pointer; }
+.find-note { margin: 5px 2px 0; font-size: calc(11.5px * var(--fs, 1)); color: var(--ink3); }
+#partList .row[hidden], #partList .grp[hidden] { display: none; }
+.share-url { width: 100%; margin: 6px 0; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--hair2); background: var(--seg-bg); color: var(--ink); font: max(16px, calc(12px * var(--fs, 1)))/1.4 var(--mono); }
 #detail { padding: 14px 18px 22px; }
 #inspBody.detail #partList { transform: translateX(-20%); opacity: 0; pointer-events: none; }
 #inspBody:not(.detail) #detail { transform: translateX(100%); opacity: 0; pointer-events: none; }
-.grp { position: sticky; top: 0; z-index: 1; font-size: calc(12px * var(--fs, 1)); font-weight: 600; color: var(--ink3); padding: 10px 10px 4px; display: flex; align-items: center; gap: 8px; background: var(--glass-strong); }
+.grp { position: sticky; top: 46px;   /* 検索欄の下で止まる */ z-index: 1; font-size: calc(12px * var(--fs, 1)); font-weight: 600; color: var(--ink3); padding: 10px 10px 4px; display: flex; align-items: center; gap: 8px; background: var(--glass-strong); }
 .grp i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); display: inline-block; }
 .row { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 8px; padding: 6px 6px 6px 12px; border-radius: 10px; cursor: pointer; min-height: var(--tap); transition: background .12s; }
 .row:hover { background: var(--row-hover); } .row.on { background: var(--accent-soft); } .row.on .nm { color: var(--accent); font-weight: 600; }

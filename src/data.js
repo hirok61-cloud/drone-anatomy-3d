@@ -344,6 +344,26 @@ const SIMPLE = {
 };
 const SIMPLE_KEYS = Object.keys(SIMPLE);
 // ラベル簡略名（はじめて用）
+// 検索の言い換え。画面の名前と、利用者が打ちそうな言葉のずれを埋める（電池→バッテリー など）
+const FIND_ALIAS = {
+  battery: '電池 リポ lipo 6s バッテリ 充電', cells: '電池 セル リポ', xt60: 'コネクタ 端子 プラグ', balance: '充電 バランス 端子',
+  prop: '羽 はね 回転翼 ブレード ペラ blade', propNut: 'ナット ねじ 締める', propAdapter: 'アダプタ 取付',
+  motor: 'モータ 発動機 回す', bell: 'ローター 回転子 かん 缶', stator: '固定子 コイル台 スロット', winding: 'コイル 銅線 巻き線',
+  magnet: 'マグネット 磁石', shaft: '軸 ベアリング 玉軸受', motorBase: '土台 取付',
+  esc: 'アンプ スピードコントローラー 三相 速度制御', pdb: '分配 電源基板 電源',
+  fc: '頭脳 コンピュータ 制御 ジャイロ 加速度 姿勢 flightcontroller autopilot', capacitor: 'コンデンサー キャパシタ ノイズ',
+  buzzer: 'ブザ 音 スピーカー 警報', wiring: 'ケーブル 電線 コード はんだ',
+  gps: 'gps gnss コンパス 方位 衛星 測位 磁気 マスト', rx: 'アンテナ 受信 プロポ 送信機 電波 操縦',
+  vtx: '映像 fpv 電波 送信 カメラ映像', telemetry: '無線 通信 テレメトリ データ 地上局',
+  led: 'ライト 灯火 照明 夜間 発光', remoteId: 'リモートid 発信 識別 broadcast',
+  regMark: '登録記号 機体登録 番号 表示 ju', damper: 'ダンパ ゴム 防振 振動',
+  gimbal: 'ジンバル 手ぶれ 3軸 カメラ台', camera: 'レンズ 撮影 映像 写真',
+  landingGear: '脚 あし スキッド 着陸 降着', batteryTray: 'トレイ 台 電池台', strap: 'ベルト バンド 固定 電池',
+  frameTop: 'フレーム 骨格 板 カーボン 天板', frameBottom: 'フレーム 骨格 板 カーボン 底板',
+  arm: 'うで パイプ カーボン 腕', armClamp: 'クランプ 固定 締結', motorMount: 'マウント 取付台',
+  standoff: '支柱 柱 スペーサー', screws: 'ねじ ボルト ナット 締結 ゆるみ',
+};
+
 const SIMPLE_NAME = { prop: 'プロペラ', motor: 'モーター', arm: 'アーム', frameTop: 'フレーム', battery: 'バッテリー', fc: '頭脳（FC）', landingGear: '脚', camera: 'カメラ' };
 
 // ===== 用途から入る扉: 部品の3分類（共通 / 強化 / 追加） =====
@@ -599,9 +619,9 @@ const WHATIF = [
 
 // ===== 言語 (パッケージ⑧): やさしい日本語 / English。段階1 = タブ・主要ボタン・8部品・12質問 =====
 const I18N = {
-  ja: { tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも', expert: '専門' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを回す', stop: '■ 止める', views: { iso: '斜', front: '前', top: '上', side: '横', inside: '内', labels: '名' }, big: '大', speak: '読み上げ',
+  ja: { find: { ph: '部品を探す' }, tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも', expert: '専門' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを回す', stop: '■ 止める', views: { iso: '斜', front: '前', top: '上', side: '横', inside: '内', labels: '名' }, big: '大', speak: '読み上げ',
     ui: { parts: '部品一覧', script: '台本', focus: '注目', more: 'くわしく見る', explode: '分解', look: '見え方', normal: 'ふつう', xray: 'すけて見る', wire: '線だけ', cut: '切って見る' }, sec: { structure: '構造', trivia: '豆知識', role: '役割', analogy: 'たとえるなら' }, parts: {}, questions: {} },
-  easy: { tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも', expert: 'せんもん' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを 回す', stop: '■ とめる', views: { iso: 'ななめ', front: 'まえ', top: 'うえ', side: 'よこ', inside: 'なか', labels: 'なまえ' }, big: 'おおきく', speak: 'よみあげ',
+  easy: { find: { ph: 'ぶひんを さがす' }, tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも', expert: 'せんもん' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを 回す', stop: '■ とめる', views: { iso: 'ななめ', front: 'まえ', top: 'うえ', side: 'よこ', inside: 'なか', labels: 'なまえ' }, big: 'おおきく', speak: 'よみあげ',
     ui: { parts: 'ぶひんの リスト', script: 'だいほん', focus: 'ちゅうもく', more: 'くわしく みる', explode: 'ばらばら', look: 'みえかた', normal: 'ふつう', xray: 'すけて みる', wire: 'せんだけ', cut: 'きって みる' }, sec: { structure: 'つくり', trivia: 'まめちしき', role: 'やくわり', analogy: 'たとえると' },
     parts: {
       prop:        { name: 'プロペラ',           role: 'まわって、空気を 下に おします。おした ぶんだけ、ドローンは 上に おされて うきます。', analogy: 'せんぷうきを 下に むけて、じぶんが ふわっと うくような もの' },
@@ -614,7 +634,7 @@ const I18N = {
       camera:      { name: 'カメラ',             role: '上から しゃしんや ビデオを とります。ゆれない ように、ゴムに ぶらさがって います。', analogy: 'スマホの カメラを、ゆれない だいに のせた もの' },
     },
     questions: { lift: 'どうして うくの？', fwd: 'どうして 前に すすむの？', ccw: 'どうして 4まい ぜんぶ おなじ むきに まわさないの？', time: '何分 とべるの？', rain: '雨の日は とべるの？', radio: 'でんぱが きれたら どうなるの？', where: 'どうやって じぶんの ばしょを 知るの？', weight: 'どのくらい おもいの？', crash: 'おちたら どこが こわれるの？', oneout: 'モーターが 1つ とまったら？', shake: 'カメラは どうして ゆれないの？', night: 'よるも とべるの？' } },
-  en: { tabs: { see: 'Look', fly: 'Fly', use: 'Use', mishap: 'What if', expert: 'Expert' }, depth: { simple: 'Basic', full: 'Details' }, ask: 'Ask', power: '▶ Spin props', stop: '■ Stop', views: { iso: '3D', front: 'Front', top: 'Top', side: 'Side', inside: 'Inside', labels: 'Name' }, big: 'Big', speak: 'Read aloud',
+  en: { find: { ph: 'Find a part' }, tabs: { see: 'Look', fly: 'Fly', use: 'Use', mishap: 'What if', expert: 'Expert' }, depth: { simple: 'Basic', full: 'Details' }, ask: 'Ask', power: '▶ Spin props', stop: '■ Stop', views: { iso: '3D', front: 'Front', top: 'Top', side: 'Side', inside: 'Inside', labels: 'Name' }, big: 'Big', speak: 'Read aloud',
     ui: { parts: 'Parts', script: 'Script', focus: 'Focus', more: 'More details', explode: 'Explode', look: 'View', normal: 'Normal', xray: 'X-ray', wire: 'Lines', cut: 'Cut' }, sec: { structure: 'Structure (Japanese)', trivia: 'Fun fact (Japanese)', role: 'Role', analogy: 'Like…' },
     parts: {
       prop:        { name: 'Propeller', role: 'It spins and pushes air down. The air pushes back, and that lifts the drone.', analogy: 'Like pointing a fan at the floor until you float.' },

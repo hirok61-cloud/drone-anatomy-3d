@@ -9,7 +9,8 @@ const ICON = {
 const ACCENT = new THREE.Color(0xef6a2d), HOVER_L = new THREE.Color(0x1b1f27), HOVER_D = new THREE.Color(0xffffff), UP_COLOR = new THREE.Color(0xef6a2d), DROP_COLOR = new THREE.Color(0x9aa0a8);
 const store = { get: k => { try { return localStorage.getItem('drone3d.' + k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem('drone3d.' + k, v); } catch (e) {} } };
 let toastTimer = 0;
-function showToast(msg, ms = 2500) { const t = $('#toast'); t.textContent = msg; t.hidden = false; t.classList.remove('hide'); clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.classList.add('hide'); setTimeout(() => { t.hidden = true; }, 320); }, ms); }
+function showToast(msg, ms = 2500) { if (share.restoring) return;   /* 共有リンクの読み戻し中は途中経過を出さない */
+  const t = $('#toast'); t.textContent = msg; t.hidden = false; t.classList.remove('hide'); clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.classList.add('hide'); setTimeout(() => { t.hidden = true; }, 320); }, ms); }
 function segSet(seg, attr, val) { for (const b of $$('button', seg)) { const on = b.dataset[attr] === String(val); b.classList.toggle('on', on); if (b.getAttribute('role') === 'tab' || b.parentElement.getAttribute('role') === 'radiogroup') b.setAttribute('aria-selected', on); } }
 
 // ---------- 説明カード ----------
@@ -113,20 +114,53 @@ function showLegend() { if ($('#noteCard').dataset.kind === 'flight' || $('#note
   renderNote({ kind: 'legend', title: 'まわる向きのしるし', badge: S.slow ? '1/50のはやさ' : null, html: `<div class="legend"><span class="ccw"><b>↺ 反時計まわり(CCW)</b></span> しま模様の羽・翼端が青緑<br><span class="cw"><b>↻ 時計まわり(CW)</b></span> 無地の羽・翼端が青<br>白い印が上を向いていれば正しい向きに付いています<br><b>灯火</b> 前・左 <span style="color:#ff3b30">●</span>赤 / 前・右 <span style="color:#22c55e">■</span>緑 / 後ろ ◆白</div>` }); }
 
 // ---------- 視点列 ----------
-$('#viewCol').addEventListener('click', e => { const b = e.target.closest('button[data-v]'); if (!b) return; segSet($('#viewCol'), 'v', b.dataset.v); setView(b.dataset.v); });
+$('#viewCol').addEventListener('click', e => { const b = e.target.closest('button[data-v]'); if (!b) return; segSet($('#viewCol'), 'v', b.dataset.v); S.view = b.dataset.v; setView(b.dataset.v); });
 $('#fsBtn').addEventListener('click', () => { const el = document.documentElement; if (document.fullscreenElement) document.exitFullscreen(); else if (el.requestFullscreen) el.requestFullscreen(); else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen(); });
+
+// ---------- 部品を探す（40件を目で追わせない。くわしく のときだけ出す） ----------
+// カタカナ・ひらがな・英語・全角半角のどれで打っても当たるように正規化する
+const findNorm = (t) => (t || '').normalize('NFKC').toLowerCase().replace(/[\u30a1-\u30f6]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60)).replace(/[\s・･]/g, '');
+const findName = (k) => { const d = PARTS[k], g = GROUPS.find(x => x.id === d.group); return findNorm([partName(k), d.name, d.en, SIMPLE_NAME[k] || '', g ? g.name : '', FIND_ALIAS[k] || ''].join(' ')); };
+const findText = (k) => { const d = PARTS[k]; return findNorm([d.role, (d.structure || []).join(' '), (d.check || []).join(' '), d.tip || ''].join(' ')); };
+function applyFind() {
+  const inp = $('#partFind'); if (!inp) return;
+  const q = findNorm(inp.value); const rows = $$('#partList .row');
+  let hit = new Set(), deep = false;
+  if (q) {
+    for (const r of rows) if (findName(r.dataset.key).includes(q)) hit.add(r.dataset.key);
+    if (!hit.size) { deep = true; for (const r of rows) if (findText(r.dataset.key).includes(q)) hit.add(r.dataset.key); }   /* 名前で出なければ説明文からも探す */
+  }
+  for (const r of rows) r.hidden = !!q && !hit.has(r.dataset.key);
+  for (const g of $$('#partList .grp')) { let n = 0; for (let e = g.nextElementSibling; e && e.classList.contains('row'); e = e.nextElementSibling) if (!e.hidden) n++; g.hidden = !n; }
+  const note = $('#findNote');
+  if (note) { note.hidden = !q; note.textContent = !q ? '' : hit.size ? (deep ? `名前では見つかりません。説明文から ${hit.size} 件` : `${hit.size} 件`) : '見つかりません。ちがう言い方で試してください'; }
+  $('#partCount').textContent = q ? `${hit.size} / ${LIST_ORDER.length}` : `${LIST_ORDER.length} 部品`;
+}
+// Enter で開く1件。名前が前方一致するものを一覧の順より優先する（「モーター」でモーターマウントが先に来ないように）
+function findBest() {
+  const inp = $('#partFind'); const q = findNorm(inp ? inp.value : '');
+  const keys = $$('#partList .row').filter(r => !r.hidden).map(r => r.dataset.key); if (!keys.length) return null;
+  const score = (k) => { const n = findNorm(partName(k)), a = findNorm(PARTS[k].name); const inName = n.includes(q) || a.includes(q);
+    if (n === q || a === q) return 0; if (inName && SIMPLE_NAME[k]) return 1;   /* 「モーター」はモーターマウントでなくブラシレスモーター */
+    if (n.startsWith(q) || a.startsWith(q)) return 2; if (inName) return 3; return 4; };
+  return keys.slice().sort((x, y) => score(x) - score(y))[0];
+}
+function findClear() { const inp = $('#partFind'); if (inp) { inp.value = ''; applyFind(); } }
 
 // ---------- 部品一覧 / 解説 ----------
 function buildList() {
-  const list = $('#partList'); let html = '';
+  const list = $('#partList'); const prevFind = $('#partFind') ? $('#partFind').value : ''; let html = '';
   if (S.depth === 'simple') { for (const k of SIMPLE_KEYS) html += `<div class="row" data-key="${k}" tabindex="0" role="button"><span class="nm">${partName(k)}</span><span class="cnt"></span><span></span></div>`; $('#partCount').textContent = `${SIMPLE_KEYS.length} 部品`; }
   else {
+    html += `<div class="p-find"><input id="partFind" type="search" autocomplete="off" spellcheck="false" placeholder="${t('find.ph')}" aria-label="${t('find.ph')}" aria-controls="partList"><p id="findNote" class="find-note" hidden></p></div>`;
     for (const g of GROUPS) { const keys = LIST_ORDER.filter(k => PARTS[k] && PARTS[k].group === g.id); html += `<div class="grp" style="--c:${g.color}"><i></i>${g.name}</div>`;
       for (const k of keys) { const d = PARTS[k]; const hid = partsOf(k).some(p => p.hidden); html += `<div class="row${SUB[k] ? ' sub' : ''}${hid ? ' off' : ''}" data-key="${k}" tabindex="0" role="button"><span class="nm">${partName(k)}</span><span class="cnt">${d.count > 1 ? '×' + d.count : ''}</span><button class="eye" aria-label="${d.name}の表示切替">${hid ? ICON.eyeOff : ICON.eye}</button></div>`; } }
     $('#partCount').textContent = `${LIST_ORDER.length} 部品`;
   }
   list.innerHTML = html;
   for (const row of $$('#partList .row')) row.classList.toggle('on', !!S.selected && row.dataset.key === S.selected.key);
+  const inp = $('#partFind');
+  if (inp) { inp.value = prevFind; applyFind(); inp.addEventListener('input', applyFind); inp.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); if (inp.value) findClear(); else inp.blur(); } else if (e.key === 'Enter') { const best = findBest(); if (best) { inp.blur(); select(partsOf(best)[0], true); } } }); }
 }
 $('#partList').addEventListener('click', e => { const row = e.target.closest('.row'); if (!row) return; const key = row.dataset.key; if (e.target.closest('.eye')) { toggleHidden(key); return; } select(partsOf(key)[0], true); });
 $('#partList').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { const row = e.target.closest('.row'); if (row) { e.preventDefault(); select(partsOf(row.dataset.key)[0], true); } } });
@@ -463,6 +497,7 @@ document.addEventListener('keydown', e => {
   if ((theater.active || whatif.active) && k !== 'escape') return;   // 再生中は表示モード等のキーを受けない
   if ((S.scale || S.expert) && (k === 'e' || /^[1-4]$/.test(k))) return;
   if (k === 'escape' && (!$('#askPop').hidden || !$('#settings').hidden)) { $('#askPop').hidden = true; $('#settings').hidden = true; return; }
+  if (e.key === '/' && $('#partFind')) { e.preventDefault(); $('#inspector').classList.add('open'); if (S.selected) select(null); $('#partFind').focus(); $('#partFind').select(); return; }
   if (e.key === '?') { const st = $('#settings'); st.hidden = false; $('#askPop').hidden = true; const dt = st.querySelector('details'); if (dt) dt.open = true; return; }
   if (k === '1') setMode('normal'); else if (k === '2') setMode('xray'); else if (k === '3') setMode('wire'); else if (k === '4') setMode('cut');
   else if (k === 'e') setExplode(S.explode > 0.5 ? 0 : 1);
@@ -470,7 +505,7 @@ document.addEventListener('keydown', e => {
   else if (k === 'a') $('.ctx-row .tgl[data-t=air]').click();
   else if (k === 's') $('.ctx-row .tgl[data-t=slow]').click();
   else if (k === ' ') { e.preventDefault(); if (S.tab !== 'fly') setTab('fly'); setPower(S.power === 0 ? 0.5 : 0); }
-  else if (k === 'r') { segSet($('#viewCol'), 'v', 'iso'); setView('iso'); }
+  else if (k === 'r') { segSet($('#viewCol'), 'v', 'iso'); S.view = 'iso'; setView('iso'); }
   else if (k === 'f' && S.selected) focusOn(S.selAll ? partsOf(S.selected.key).map(x => x.obj) : [S.selected.obj]);
   else if (k === 'escape') { if (theater.active) stopTheaterUI(); else if (S.question) { clearQuestion(); renderNote(null); } else if (S.flight) setFlight(null); else if (S.selected) select(null); else $('#inspector').classList.remove('open'); }
 });
