@@ -413,11 +413,11 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
 .fpv-btn.on { background: rgba(239,106,45,.86); border-color: rgba(239,106,45,.9); color: #fff; }
 #fpvOut { margin-left: auto; }
 .fpv-note { margin: 0; font-family: var(--font); font-size: calc(11.5px * var(--fs, 1)); line-height: 1.5; color: rgba(234,242,255,.9); background: rgba(12,16,24,.66); border-left: 2px solid rgba(239,106,45,.9); padding: 5px 10px; border-radius: 0 6px 6px 0; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
-#noteCard[data-kind=descent] { display: flex; flex-direction: column; max-height: min(56vh, calc(100vh - var(--dock-h) - 122px - var(--sat))); overflow: hidden; }   /* 「横へ逃がす」が折り返しの外に出ると、渦から逃がせない */
-#noteCard[data-kind=descent] #noteBody { flex: 1; min-height: 0; overflow-y: auto; }
-#noteCard[data-kind=descent] #descVals { position: sticky; top: 0; z-index: 1; }
-#noteCard[data-kind=descent] .note-actions { flex: none; margin: 8px -14px -12px -16px; padding: 8px 14px 12px 16px; border-top: 1px solid var(--hair); background: var(--glass-strong); }
-@media (max-width: 760px) { #noteCard[data-kind=descent] { max-height: min(44vh, calc(100vh - var(--dock-h) - 96px - var(--sat) - var(--sab))); } }
+#noteCard[data-kind=descent], #noteCard[data-kind=weather] { display: flex; flex-direction: column; max-height: min(56vh, calc(100vh - var(--dock-h) - 122px - var(--sat))); overflow: hidden; }   /* 「横へ逃がす」が折り返しの外に出ると、渦から逃がせない */
+#noteCard[data-kind=descent] #noteBody, #noteCard[data-kind=weather] #noteBody { flex: 1; min-height: 0; overflow-y: auto; }
+#noteCard[data-kind=descent] #descVals, #noteCard[data-kind=weather] #skyVals { position: sticky; top: 0; z-index: 1; }
+#noteCard[data-kind=descent] .note-actions, #noteCard[data-kind=weather] .note-actions { flex: none; margin: 8px -14px -12px -16px; padding: 8px 14px 12px 16px; border-top: 1px solid var(--hair); background: var(--glass-strong); }
+@media (max-width: 760px) { #noteCard[data-kind=descent], #noteCard[data-kind=weather] { max-height: min(44vh, calc(100vh - var(--dock-h) - 96px - var(--sat) - var(--sab))); } }
 body.fpv #viewCol { display: none; }   /* 映像に重ねない。戻り道は「外から見る」と Esc */
 body.fpv #noteCard, body.fpv #bigBand { display: none; }
 body.fpv #ctx { display: none; }   /* 操作はHUDに移す。ドックを畳むと映像が広がり、--dock-h も自動で縮む */

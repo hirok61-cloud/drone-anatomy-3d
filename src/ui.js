@@ -48,6 +48,7 @@ function stopOthers(keep, arg) {
   if (keep !== 'expert' && S.expert && typeof expertStop === 'function') expertStop();
   if (keep !== 'descent' && descent.active) stopDescent(true);
   if (keep !== 'fpv' && typeof fpv === 'object' && fpv.on) fpvExit();
+  if (keep !== 'weather' && keep !== 'fpv' && typeof weather === 'object' && weather.on) setWeather(null);   /* 場面は自前の空を使う。一人称は空もようのまま入れる */
 }
 function setTab(tab) {
   $('#coach').hidden = true;
@@ -567,7 +568,7 @@ $('#previewClose').addEventListener('click', closePreview);
 function syncDockH() { document.documentElement.style.setProperty('--dock-h', $('#dock').offsetHeight + 'px'); }
 new ResizeObserver(syncDockH).observe($('#dock'));
 
-function onThemeChanged(dark) { airflowTheme(dark); fpvStageTheme(); }
+function onThemeChanged(dark) { airflowTheme(dark); fpvStageTheme(); weatherLight(); }
 function onQualityChanged(level) { if (air.mesh && air.N !== Q.particles) rebuildAirflow(); $('#perfInfo').textContent = `品質 ${level}`; }
 { // シートの開閉・カードの出入りで、3Dの見える帯が変わるたびに視錐台を合わせ直す
   const watch = ['#inspector', '#lesson', '#expert', '#noteCard', '#massBar'].map(s => $(s)).filter(Boolean);

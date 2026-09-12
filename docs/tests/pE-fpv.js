@@ -19,11 +19,11 @@ A(Math.abs(d.body.py - 1.05) < 0.06, '入る: 浮いている', d.body.py.toFixe
 A(getComputedStyle(document.getElementById('viewCol')).display === 'none', '入る: 見え方の列は隠す');
 
 // 舞台
-let ground = null, root = ST.far; while (root.parent) root = root.parent;
+let ground = null, root = F.farGround.mesh || ST.grp; while (root.parent) root = root.parent;
 root.traverse(o => { if (o.isMesh && o.geometry && o.geometry.type === 'CircleGeometry' && o.geometry.parameters.radius === 2.8) ground = o; });
-A(ST.far && ST.far.visible && ST.rings.length === 3 && ST.marks.length === 4 && ST.labels.length === 2, '舞台: 地面・輪・コーン・文字');
+A(F.farGround.mesh && F.farGround.mesh.visible && ST.rings.length === 3 && ST.marks.length === 4 && ST.labels.length === 2, '舞台: 地面・輪・コーン・文字');
 A(Math.abs(ground.scale.x - ground.scale.y) < 1e-6 && ground.scale.x > 4, '舞台: 床は円のまま広げる', ground.scale.toArray().join(','));
-A(ST.far.material.vertexColors && ST.far.geometry.attributes.color, '舞台: かすみは頂点色');
+A(F.farGround.mesh.material.vertexColors && F.farGround.mesh.geometry.attributes.color, '舞台: かすみは頂点色');
 
 // HUDの数値
 d.step(0.5, 30);
@@ -74,7 +74,7 @@ A(Math.abs(F.fpv.pan) < 1e-6 && Math.abs(F.fpv.tilt - F.fpvTilt0()) < 1e-6, '戻
 document.getElementById('fpvOut').click(); d.step(1.4, 30);
 A(!F.fpv.on && !document.body.classList.contains('fpv'), '出る: 元に戻る');
 A(d.controls.enabled && Math.abs(d.camera.fov - fov0) < 0.01, '出る: 画角と操作が戻る', d.camera.fov);
-A(!ST.grp.visible && ground.scale.x === 1, '出る: 舞台と床が戻る', ground.scale.x);
+A(!ST.grp.visible && !F.farGround.mesh.visible && ground.scale.x === 1, '出る: 舞台と床が戻る', ground.scale.x);
 A(Math.abs(d.D.personGroup.position.z + 0.48) < 0.01, '出る: 人が元の位置へ', d.D.personGroup.position.z.toFixed(2));
 A(document.getElementById('fpv').hidden, '出る: HUDが消える');
 
@@ -104,11 +104,11 @@ d.step(1.2, 30);
 A(!F.fpv.on, 'Esc: 出られる');
 
 // テーマを変えても地面の色が付け直される
-const c0 = ST.far.material.color.getHex();
+const c0 = F.farGround.mesh.material.color.getHex();
 document.querySelector('#themeSeg [data-th=light]').click(); d.step(0.4, 30);
-const c1 = ST.far.material.color.getHex();
+const c1 = F.farGround.mesh.material.color.getHex();
 document.querySelector('#themeSeg [data-th=dark]').click(); d.step(0.4, 30);
-A(c0 !== c1 && ST.far.material.color.getHex() === c0, 'テーマ: 地面の色が追従する', c0.toString(16), c1.toString(16));
+A(c0 !== c1 && F.farGround.mesh.material.color.getHex() === c0, 'テーマ: 地面の色が追従する', c0.toString(16), c1.toString(16));
 document.querySelector('#themeSeg [data-th=auto]').click(); d.step(0.3, 30);
 if (d.S.sticks) document.querySelector('.tgl[data-t=sticks]').click();
 d.noRender = false;

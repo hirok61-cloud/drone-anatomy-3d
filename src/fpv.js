@@ -31,23 +31,41 @@ function updateGimbal() {
 // 何もない床の上では、ジンバルの働きも視野の狭さも分からない。
 // 広い地面と地平線、離着陸場の印、距離の輪、実寸の人型とコーンを置いて、見えるものと距離の目安をつくる。
 const FPV_FAR = 30;                 // 遠くの地面の半径(m)。カメラのfar=40より内側に収める
+const FPV_FAR_IN = 2.6;             // 内径。床(半径2.8m)と重ねる。離すと隙間から背景の下半分がのぞいて暗い帯になる
 const FPV_RINGS = [3, 10, 20];      // 距離の輪。遠いものほど太くしないと、伏せ角が浅くて線が消える
-const fpvStage = { grp: null, groundWas: null, far: null, rings: [], marks: [], labels: [] };
+const fpvStage = { grp: null, groundWas: null, rings: [], marks: [], labels: [] };
+// 遠くの地面。近くの床(半径2.8m)は縁で消えるので、その外にもう一枚広い円盤を敷く。
+// 地平線ができると、ジンバルを止めたときの傾きも、空もようの雲の下端も読めるようになる。
+// 材質は床と同じにして、遠さは頂点色の掛け算(かすみ)だけで出す。こうすると継ぎ目の色が必ず合う
+const farGround = { mesh: null };
+function farGroundBuild() {
+  if (farGround.mesh) return;
+  const geo = new THREE.RingGeometry(FPV_FAR_IN, FPV_FAR, 72, 16);
+  geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(geo.attributes.position.count * 3), 3));
+  const mat = new THREE.MeshPhysicalMaterial({ color: 0xe4e6ea, roughness: 0.75, metalness: 0, clearcoat: 0.25, clearcoatRoughness: 0.45, vertexColors: true, side: THREE.DoubleSide });
+  const m = new THREE.Mesh(geo, mat);
+  m.rotation.x = -Math.PI / 2; m.position.y = -0.172; m.renderOrder = -2; m.receiveShadow = false; m.visible = false;
+  m.userData.noPart = m.userData.noPick = m.userData.noAO = m.userData.noShadow = true;
+  scene.add(m); farGround.mesh = m; farGroundTheme();
+}
+function farGroundOn(on) { farGroundBuild(); if (farGround.mesh.visible !== !!on) { farGround.mesh.visible = !!on; S.shadowDirty = S.csDirty = S.aoDirty = true; } }
+function farGroundTheme() {
+  const far = farGround.mesh; if (!far) return;
+  far.material.color.copy(groundMat.color);   // 近くの床と必ず同じ色にする（空もようは床の色も変える）
+  const one = new THREE.Color(1, 1, 1), haze = themeDark ? new THREE.Color(3.1, 3.3, 3.8) : new THREE.Color(0.70, 0.74, 0.83);
+  const pos = far.geometry.attributes.position, col = far.geometry.attributes.color, c = new THREE.Color();
+  for (let i = 0; i < pos.count; i++) {
+    const r = Math.hypot(pos.getX(i), pos.getY(i));
+    c.copy(one).lerp(haze, clamp((1 / FPV_FAR_IN - 1 / Math.max(r, FPV_FAR_IN)) / (1 / FPV_FAR_IN - 1 / FPV_FAR), 0, 1));
+    col.setXYZ(i, c.r, c.g, c.b);
+  }
+  col.needsUpdate = true;
+}
 function fpvStageBuild() {
   if (fpvStage.grp) return;
   const g = new THREE.Group(); g.userData.noShadow = true;
   const flat = (mesh, y) => { mesh.rotation.x = -Math.PI / 2; mesh.position.y = y; mesh.userData.noPart = mesh.userData.noPick = mesh.userData.noAO = mesh.userData.noShadow = true; g.add(mesh); return mesh; };
   const line = (col, op) => new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: op, toneMapped: false, side: THREE.DoubleSide });
-  // 遠くの地面。近くの床(半径2.8m×5.2)は縁が透けて消えるので、その下にもう一枚広い円盤を敷く。
-  // 地平線ができると、ジンバルを止めたときに「水平が傾く」のが一目で分かる。
-  // 材質は床と同じにして、遠さは頂点色の掛け算(かすみ)だけで出す。こうすると継ぎ目の色が必ず合う
-  {
-    const geo = new THREE.RingGeometry(4, FPV_FAR, 72, 16);
-    geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(geo.attributes.position.count * 3), 3));
-    const mat = new THREE.MeshPhysicalMaterial({ color: 0xe4e6ea, roughness: 0.75, metalness: 0, clearcoat: 0.25, clearcoatRoughness: 0.45, vertexColors: true, side: THREE.DoubleSide });
-    fpvStage.far = flat(new THREE.Mesh(geo, mat), -0.172);
-    fpvStage.far.renderOrder = -2; fpvStage.far.receiveShadow = false;
-  }
   // 離着陸場: 二重の輪と十字
   flat(new THREE.Mesh(new THREE.RingGeometry(0.78, 0.84, 72), line(0xe8a33d, 0.85)), -0.1548);
   flat(new THREE.Mesh(new THREE.RingGeometry(0.30, 0.33, 48), line(0xe8a33d, 0.6)), -0.1548);
@@ -80,18 +98,8 @@ function fpvStageBuild() {
   scene.add(g); fpvStage.grp = g;
   fpvStageTheme();
 }
-// 遠いほど「かすむ」。暗いテーマでは明るく、明るいテーマでは少し沈めて、空との境目(地平線)を必ず残す
 function fpvStageTheme() {
-  const far = fpvStage.far; if (!far) return;
-  far.material.color.set(themeDark ? 0x171a1f : 0xe4e6ea);   // 床(THEME[].ground)と同じ色
-  const one = new THREE.Color(1, 1, 1), haze = themeDark ? new THREE.Color(3.1, 3.3, 3.8) : new THREE.Color(0.70, 0.74, 0.83);
-  const pos = far.geometry.attributes.position, col = far.geometry.attributes.color, c = new THREE.Color();
-  for (let i = 0; i < pos.count; i++) {
-    const r = Math.hypot(pos.getX(i), pos.getY(i));
-    c.copy(one).lerp(haze, clamp((0.25 - 1 / Math.max(r, 4)) / (0.25 - 1 / FPV_FAR), 0, 1));
-    col.setXYZ(i, c.r, c.g, c.b);
-  }
-  col.needsUpdate = true;
+  farGroundTheme();
   for (const m of fpvStage.rings) m.material.color.set(themeDark ? 0x8b939f : 0x69727f);
 }
 // 立ち位置と目印は画面の形で置き直す。縦長だと横の画角が26°ほどしかなく、外に置くと映らない
@@ -109,6 +117,7 @@ function fpvStageOn(on) {
   if (!fpvStage.grp) return;
   const sceneBusy = theater.active || whatif.active || descent.active;
   fpvStage.grp.visible = on && !sceneBusy;
+  if (!(typeof weather === 'object' && weather.on)) farGroundOn(on && !sceneBusy);   /* 空もようが出しているときは触らない */
   if (on && !sceneBusy) {
     if (fpvStage.groundWas == null) { fpvStage.groundWas = ground.scale.x; groundScale(5.2); }
     if (D.personGroup) { fpvStage.personWas = D.personGroup.visible; D.personGroup.visible = true; fpvPersonPos();   /* 縦長の画面は横の画角が狭い。近いと人だけが大写しになる */ if (D.personGroup.userData.face) D.personGroup.userData.face(0, 0); if (D.personGroup.userData.rest) D.personGroup.userData.rest(); }
@@ -220,5 +229,5 @@ function initFpv() {
   $('#fpvStickBtn').addEventListener('click', () => { setSticks(!S.sticks); updateFpvHud(); });
   $('#fpvCenter').addEventListener('click', () => { fpv.pan = 0; fpv.tilt = fpvTilt0(); updateGimbal(); updateFpvHud(); });
   $('#fpvOut').addEventListener('click', () => { segSet($('#viewCol'), 'v', 'iso'); S.view = 'iso'; fpvOn(false); });
-  window.__fpv = { fpv, fpvOn, updateGimbal, stepFpv, fpvStage, fpvTilt0 };
+  window.__fpv = { fpv, fpvOn, updateGimbal, stepFpv, fpvStage, farGround, fpvTilt0 };
 }

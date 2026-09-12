@@ -44,7 +44,7 @@ function stepFree(dt) {
     const kx = free.Kx * (1 + smoothstep(0.20, 0.32, r));
     const out = r > 1e-6 ? (ex * body.vx + ez * body.vz) / r : 0; const kv = out > 0 ? free.KvBrake : free.Kv;   // ブレーキは硬く、帰りは柔らかく
     cx = -(kx * ex + kv * body.vx); cz = -(kx * ez + kv * body.vz);
-    const cl = Math.hypot(cx, cz), lim = THREE.MathUtils.degToRad(11); if (cl > lim) { cx *= lim / cl; cz *= lim / cl; }
+    const cl = Math.hypot(cx, cz), lim = THREE.MathUtils.degToRad((typeof weather === 'object' && weather.on) ? 22 : 11); if (cl > lim) { cx *= lim / cl; cz *= lim / cl; }   /* 風の中では実機のように踏ん張る。22°で g·tan22°=4.0m/s² まで耐え、5m/s超で流される */
   }
   // 姿勢2次系 (セミインプリシット・オイラー)
   const w = free.wAtt, z = free.zAtt;
@@ -55,13 +55,16 @@ function stepFree(dt) {
   let axg = GRAV * Math.tan(Math.min(th, 1.2)) * (th > 1e-6 ? body.tx / th : 0), azg = GRAV * Math.tan(Math.min(th, 1.2)) * (th > 1e-6 ? body.tz / th : 0);
   const rp = Math.hypot(body.px, body.pz); if (rp > 0.22) { const s = 1 - smoothstep(0.22, 0.32, rp); const nx = body.px / rp, nz = body.pz / rp; const out = axg * nx + azg * nz; if (out > 0) { axg -= out * nx * (1 - s); azg -= out * nz * (1 - s); } }
   const holdK = body.hold ? 0.25 : 1, dragH = body.hold ? 6.0 : drag;   // 指が押さえている間は滑らない
-  body.vx += (axg * holdK - dragH * body.vx) * dt; body.vz += (azg * holdK - dragH * body.vz) * dt; body.px += body.vx * dt; body.pz += body.vz * dt;
+  // 風は「機体と空気の速度差」に効く。制御が定位置を保とうとすると、機体は風上へ傾いて釣り合う（実機と同じ）
+  const W = (typeof windAt === 'function') ? windAt(body.py, body.px, body.pz) : null;
+  const wx = W ? W.x : 0, wz = W ? W.z : 0;
+  body.vx += (axg * holdK - dragH * (body.vx - wx)) * dt; body.vz += (azg * holdK - dragH * (body.vz - wz)) * dt; body.px += body.vx * dt; body.pz += body.vz * dt;
   // 高度: ホバー基準 + 傾きで沈む + スロットル + 押されて沈む
   const thr = st.active ? st.thr : 0;
-  const hov = (typeof fpv === 'object' && fpv.on) ? 1.05 : free.hoverY;   // カメラから見るときは、床すれすれだと何も映らない
+  const hov = (typeof fpv === 'object' && fpv.on) ? 1.05 : (typeof weather === 'object' && weather.on ? 0.50 : free.hoverY);   // カメラから見るとき・空もようのときは、床すれすれだと風の影響が見えない
   const thrK = (typeof fpv === 'object' && fpv.on) ? 0.55 : 0.10;   // カメラから見るときは、高度計が動くだけ上下させる
   const pyCmd = hov - 0.2 * (1 - Math.cos(th)) + thrK * thr - (body.hold ? 0.010 * (body.hold.th / free.holdMax) : 0);
-  const ay = 36 * (pyCmd - body.py) - 9.6 * body.vyF; body.vyF += ay * dt; body.py += body.vyF * dt; body.vy = body.vyF;   // 上下の速度はセンサー視点でも読む
+  const ay = 36 * (pyCmd - body.py) - 9.6 * body.vyF + (W ? W.y * 5.0 : 0); body.vyF += ay * dt; body.py = Math.max(0, body.py + body.vyF * dt); body.vy = body.vyF;   // 上下の速度はセンサー視点でも読む。下降流は高度制御では抑えきれない
   // ヨー
   const yawCmd = st.active ? -1.2 * st.yaw : 0; body.yawRate = dl(body.yawRate, yawCmd, dt, 6); body.yaw += body.yawRate * dt;
   if (!st.active) { body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); const look = (S.alive && body.lookYaw != null && !body.hold && !ti.active && !reduceMotion); body.yaw = dl(body.yaw, look ? body.lookYaw : 0, dt, look ? 2.5 : 1.5); }   // ⑧: ポインタの方へ数度だけ向く

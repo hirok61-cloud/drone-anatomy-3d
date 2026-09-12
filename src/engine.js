@@ -83,14 +83,43 @@ const kick = new THREE.DirectionalLight(0xdde8ff, 0.5); kick.position.set(0.8, 0
 for (const mo of D.motors) for (const o of [mo.mags]) o.castShadow = false;
 
 // ---------- 背景球 (シェーダ) と 床 ----------
+// 背景球。空もよう（weather.js）が雲・かすみ・雲の流れをここに乗せる。
+// 雲の座標は視線を雲底の面と交わらせて作る: 仰角が小さいほど遠くへ引き伸ばされ、地平線に向かって雲が寄る。
+// 厳密な 1/y ではなく (y + 0.26) で割るのは、この教材の視点がほぼ水平で、真の遠近だと地平線際が潰れきってしまうため。
 const backdropMat = new THREE.ShaderMaterial({
-  uniforms: { top: { value: new THREE.Color() }, mid: { value: new THREE.Color() }, edge: { value: new THREE.Color() }, bottom: { value: new THREE.Color() }, spotDir: { value: new THREE.Vector3(0, 0, 1) } },
+  uniforms: {
+    top: { value: new THREE.Color() }, mid: { value: new THREE.Color() }, edge: { value: new THREE.Color() }, bottom: { value: new THREE.Color() }, spotDir: { value: new THREE.Vector3(0, 0, 1) },
+    uCloud: { value: 0 }, uWall: { value: 0 }, uSharp: { value: 0.6 }, uScale: { value: 2.2 }, uOct: { value: 5 },
+    uLo: { value: new THREE.Color('#8e9cb0') }, uHi: { value: new THREE.Color('#ffffff') },
+    uSun: { value: new THREE.Vector3(0.45, 0.55, -0.7).normalize() },
+    uT: { value: 0 }, uDrift: { value: new THREE.Vector2(0.02, 0.01) },
+    uHaze: { value: 0 }, uHazeCol: { value: new THREE.Color('#cfdcea') },
+  },
   vertexShader: `varying vec3 vDir; void main(){ vDir = normalize((modelMatrix * vec4(position,1.0)).xyz); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
-  fragmentShader: `uniform vec3 top, mid, edge, bottom, spotDir; varying vec3 vDir;
+  fragmentShader: `uniform vec3 top, mid, edge, bottom, spotDir, uLo, uHi, uSun, uHazeCol;
+    uniform float uCloud, uWall, uSharp, uScale, uT, uHaze; uniform int uOct; uniform vec2 uDrift;
+    varying vec3 vDir;
+    float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
+    float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+      return mix(mix(hash(i), hash(i + vec2(1,0)), f.x), mix(hash(i + vec2(0,1)), hash(i + vec2(1,1)), f.x), f.y); }
+    float fbm(vec2 p){ float a = 0.5, s = 0.0; for(int i = 0; i < 6; i++){ if(i >= uOct) break; s += a * vn(p); p = p * 2.03 + 17.0; a *= 0.5; } return s; }
     void main(){ vec3 d = normalize(vDir); float y = d.y;
       vec3 c = y > 0.0 ? mix(edge, top, smoothstep(0.0, 0.9, y)) : mix(edge, bottom, smoothstep(0.0, 0.6, -y));
       float sp = smoothstep(0.45, 1.0, dot(d, spotDir)) * smoothstep(-0.25, 0.35, y);
       c = mix(c, mid, sp * 0.9);
+      if ((uCloud > 0.001 || uWall > 0.001) && y > -0.03) {
+        vec2 p = d.xz / (y + 0.26) + uDrift * uT;
+        float n = fbm(p * uScale);
+        float cov = clamp(uCloud + uWall * (1.0 - smoothstep(0.0, 0.24, y)), 0.0, 0.985);
+        float lo = 1.0 - cov, hi = lo + (1.0 - uSharp) * 0.40 + 0.04;
+        float m = smoothstep(lo, hi, n) * smoothstep(-0.012, 0.032, y);
+        float thick = smoothstep(lo, min(1.0, lo + 0.42), n);
+        float sun = smoothstep(-0.1, 0.9, dot(d, uSun));
+        vec3 cc = mix(uHi, uLo, thick * (1.0 - 0.35 * sun));
+        cc = mix(cc, uHi, pow(1.0 - thick, 3.0) * 0.55);
+        c = mix(c, cc, clamp(m, 0.0, 1.0));
+      }
+      c = mix(c, uHazeCol, uHaze * (1.0 - smoothstep(0.0, 0.30, abs(y))));
       gl_FragColor = vec4(c, 1.0); }`,
   side: THREE.BackSide, depthWrite: false, fog: false,
 });
