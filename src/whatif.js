@@ -28,7 +28,7 @@ function startWhatif(id) {
   if (def.motion === 'airport') airportSetup();
   if (def.motion === 'crowd') dropSetup();
   const wide = { tachiiri: 2.6, bvlos: narrow() ? 3.2 : 4.2, airport: 2.4, crowd: 1.5 }[def.motion];   /* 床(半径2.8m)より広い場面は一時的に広げる */
-  if (wide && !whatif.groundScale) { whatif.groundScale = ground.scale.x; ground.scale.set(wide, 1, wide); }
+  if (wide && !whatif.groundScale) { whatif.groundScale = ground.scale.x; groundScale(wide); }
   const vs = viewScale();
   if (def.motion === 'tachiiri') { tachiiriSetup(); const dv = vs > 1 ? 1.3 : 1; theaterCamera(new THREE.Vector3(4.6 * dv, 4.4 * dv, 4.6 * dv), new THREE.Vector3(-1.4, 0.2, -1.4), 900); }   /* 近づく向きに沿って奥を見る俯瞰。3人を奥行き方向に並べるので縦画面でも入る */
   else if (def.motion === 'person') theaterCamera(new THREE.Vector3(3.2 * vs, 1.6 * vs, -2.6 * vs), new THREE.Vector3(-0.35, 0.72, -0.35), 900);   // 人型(1.7m)が全身で入る引き(約4.4m)
@@ -54,7 +54,7 @@ function stopWhatif(silent) {
   if (whatif.apt) whatif.apt.visible = false;
   if (whatif.drop) whatif.drop.visible = false;
   if (whatif.night) { whatif.night = false; nightLevel(0); for (const p of partsOf('led')) { const h = p.obj.userData.halo; if (h) h.scale.setScalar(0.022); } applyTheme(); for (const a of D.arrows.thrust) a.userData.forceHide = false; }
-  if (whatif.groundScale) { ground.scale.set(whatif.groundScale, 1, whatif.groundScale); whatif.groundScale = null; }
+  if (whatif.groundScale) { groundScale(whatif.groundScale); whatif.groundScale = null; }
   S.labelsSuppressed = false; S.labelOnly = null; buildLabels();
   whatif.active = false; whatif.def = null; whatif.phase = 0; S.whatif = null;
   S.power = 0; setBodyMode('idle');
@@ -264,7 +264,7 @@ function tachiiriSetup() {
   as.position.set(-2.05, -0.158, -2.05); as.userData.face(-6, -6); as.userData.rest(); as.visible = true;        /* 補助者: 区画の境目で外を向く */
   th.position.set(-5.36, -0.158, -2.68); th.userData.face(-2.05, -2.05); th.userData.rest(); th.visible = true;   /* 第三者: 補助者の横から近づく(画面上で重ならない向き) */
   whatif.ring2.visible = true;
-  if (!whatif.groundScale) { whatif.groundScale = ground.scale.x; ground.scale.set(2.6, 1, 2.6); }   /* 床(半径2.8m)のままだと区画も人も虚空に立つ */
+  if (!whatif.groundScale) { whatif.groundScale = ground.scale.x; groundScale(2.6); }   /* 床(半径2.8m)のままだと区画も人も虚空に立つ */
   for (const g of whatif.people) if (g.userData.foot) { g.userData.foot.visible = true; g.userData.foot.position.set(g.position.x, -0.1555, g.position.z); }
 }
 function stepWhatif(dtSim, dtReal) {

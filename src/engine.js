@@ -104,6 +104,8 @@ groundMat.onBeforeCompile = sh => {
     .replace('#include <color_fragment>', '#include <color_fragment>\n{ float r = length(vWp.xz); float fade = 1.0 - smoothstep(0.9, 1.8, r); float g = gridLine(vWp.xz, 0.05) * 0.04 + gridLine(vWp.xz, 0.25) * 0.10; diffuseColor.rgb = mix(diffuseColor.rgb, uLine, g * uGrid * fade); }');
 };
 const ground = new THREE.Mesh(new THREE.CircleGeometry(2.8, 96), groundMat); ground.rotation.x = -Math.PI / 2; ground.position.y = -0.158; ground.receiveShadow = true; ground.renderOrder = -1; scene.add(ground);
+// 床を広げる。scale は回転の前(ローカル軸)に効くので、円盤の面は x,y。(k,1,k) と書くと前後だけ伸びない楕円になる
+const groundScale = (k) => ground.scale.set(k, k, 1);
 
 // ---------- 接地影 (下から見た深度をぼかして床に貼る) ----------
 const CS = { size: 1.4, res: 512, height: 0.55 };
@@ -438,6 +440,7 @@ function resize() {
   W = canvas.clientWidth || 1; H = canvas.clientHeight || 1;
   const dpr = dprFor(S.qLevel); if (dpr !== DPR) { DPR = dpr; renderer.setPixelRatio(DPR); composer.setPixelRatio(DPR); }
   renderer.setSize(W, H, false); composer.setSize(W, H);
+  if (typeof fpv === 'object' && fpv.on) { camera.aspect = W / H; camera.clearViewOffset(); camera.updateProjectionMatrix(); S.bandFrac = 1; onResizedFpv(); if (typeof onResized === 'function') onResized(); S.aoDirty = true; return; }   /* カメラの映像は画面いっぱい。帯のずらしはしない */
   camera.aspect = narrow() ? W / H : (W - 384) / H;
   if (!narrow()) camera.setViewOffset(W - 384, H, 0, 0, W, H);   /* 右パネルの分だけ左に寄せる */
   else { const bc = bottomCover(), tc = topCover(), sh = (bc - tc) * 0.5; if (Math.abs(sh) > 12) camera.setViewOffset(W, H, 0, sh, W, H); else camera.clearViewOffset(); applyBand(clamp((H - bc - tc) / H, 0.3, 1)); }   /* 上のバーと下のシートの間の帯に機体が来るようずらし、帯の狭さぶん引く */

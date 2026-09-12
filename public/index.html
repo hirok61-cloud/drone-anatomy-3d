@@ -401,6 +401,63 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
 .ps-review ol { padding-left: 1.2em; } .ps-review li p { margin: 0 0 3pt; } .rv-box { height: 46pt; border: 1pt solid #000; border-radius: 3pt; margin-bottom: 8pt; }
 .ps-foot { margin-top: 8pt; font-size: 7.6pt; line-height: 1.4; color: #444; border-top: 1pt solid #999; padding-top: 3pt; }
 
+/* ---------- 機体のカメラから見る（一人称視点） ---------- */
+/* 数字は上、操作と注記は下。スティックを出しても重ならないよう、上下の帯を変数で揃える */
+#fpv { position: fixed; inset: 0; z-index: 8; pointer-events: none; font-family: var(--mono); color: #eaf2ff; text-shadow: 0 1px 3px rgba(0,0,0,.75);
+  --fpv-t: calc(80px + var(--sat)); --fpv-b: calc(var(--dock-h) + 24px + var(--sab)); }
+#fpv::after { content: ''; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 120px rgba(0,0,0,.26); }
+.fpv-frame i { position: absolute; width: 26px; height: 26px; border: 2px solid rgba(234,242,255,.72); }
+.fpv-frame i:nth-child(1) { top: calc(var(--fpv-t) - 12px); left: calc(16px + var(--sal)); border-right: 0; border-bottom: 0; }
+.fpv-frame i:nth-child(2) { top: calc(var(--fpv-t) - 12px); right: calc(16px + var(--sar)); border-left: 0; border-bottom: 0; }
+.fpv-frame i:nth-child(3) { bottom: calc(var(--fpv-b) + 88px); left: calc(16px + var(--sal)); border-right: 0; border-top: 0; }
+.fpv-frame i:nth-child(4) { bottom: calc(var(--fpv-b) + 88px); right: calc(16px + var(--sar)); border-left: 0; border-top: 0; }
+.fpv-cross { position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; margin: -13px 0 0 -13px; }
+.fpv-cross::before, .fpv-cross::after { content: ''; position: absolute; background: rgba(234,242,255,.7); }
+.fpv-cross::before { left: 50%; top: 0; width: 1.5px; height: 100%; margin-left: -0.75px; }
+.fpv-cross::after { top: 50%; left: 0; height: 1.5px; width: 100%; margin-top: -0.75px; }
+.fpv-head { position: absolute; top: var(--fpv-t); left: calc(18px + var(--sal)); right: calc(18px + var(--sar)); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.fpv-foot { position: absolute; bottom: var(--fpv-b); left: calc(16px + var(--sal)); right: calc(16px + var(--sar)); display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+.fpv-tl, .fpv-tr { display: grid; gap: 0 8px; font-size: 12px; line-height: 1.35; font-variant-numeric: tabular-nums; padding: 7px 11px; border-radius: 12px; background: rgba(8,12,18,.60); backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px); }
+.fpv-tl { grid-template-columns: auto auto; justify-items: start; }
+.fpv-tr { text-align: right; justify-items: end; }
+.fpv-tl b, .fpv-tr b { font-size: 15px; font-weight: 700; }
+.fpv-tl span, .fpv-tr span { color: rgba(234,242,255,.66); font-size: 10.5px; align-self: center; }
+.fpv-tag { grid-column: 1 / -1; justify-self: start; margin-bottom: 5px; font-size: 11px; letter-spacing: .14em; padding: 3px 9px; border: 1px solid rgba(234,242,255,.45); border-radius: 3px; }
+.fpv-tr .fpv-tag { justify-self: end; }
+.fpv-sub { display: block; }
+.fpv-mini { pointer-events: auto; display: block; padding: 2px 6px; margin: 1px -6px 0 0; border-radius: 6px; font-family: var(--mono); font-size: 11px; color: rgba(234,242,255,.8); background: none; border: 0; text-shadow: inherit; }
+.fpv-mini:hover { background: rgba(12,16,24,.6); color: #eaf2ff; }
+.fpv-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.fpv-btn { pointer-events: auto; min-height: var(--tap); padding: 6px 12px; border-radius: 999px; font-family: var(--mono); font-size: 12px; color: #eaf2ff; background: rgba(12,16,24,.68); border: 1px solid rgba(234,242,255,.35); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.fpv-btn:hover { background: rgba(12,16,24,.86); }
+.fpv-btn b { font-weight: 700; }
+.fpv-btn.off { border-color: rgba(239,68,68,.8); color: #ffb4b4; }
+.fpv-btn.on { background: rgba(239,106,45,.86); border-color: rgba(239,106,45,.9); color: #fff; }
+#fpvOut { margin-left: auto; }
+.fpv-note { margin: 0; font-family: var(--font); font-size: 11.5px; line-height: 1.5; color: rgba(234,242,255,.9); background: rgba(12,16,24,.66); border-left: 2px solid rgba(239,106,45,.9); padding: 5px 10px; border-radius: 0 6px 6px 0; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+body.fpv #viewCol { display: none; }   /* 映像に重ねない。戻り道は「外から見る」と Esc */
+body.fpv #noteCard, body.fpv #bigBand { display: none; }
+body.fpv #ctx { display: none; }   /* 操作はHUDに移す。ドックを畳むと映像が広がり、--dock-h も自動で縮む */
+body.fpv #inspector, body.fpv #lesson, body.fpv #expert, body.fpv #massBar, body.fpv #badges, body.fpv #leaders, body.fpv #labels { display: none; }   /* 映像は画面いっぱいに見せる */
+/* スティックは送信機と同じく左右のすみへ。広い画面はその間に、狭い画面はその上に注記を置く */
+body.fpv #sticks { left: calc(16px + var(--sal)); right: calc(16px + var(--sar)); bottom: calc(var(--dock-h) + 24px + var(--sab)); transform: none; width: auto; justify-content: space-between; gap: 0; }
+body.fpv #sticks .stick-mid { display: none; }
+body.fpv .stick { background: rgba(12,16,24,.42); border-color: rgba(234,242,255,.34); box-shadow: 0 6px 22px rgba(0,0,0,.35); }
+body.fpv .stick .knob { background: rgba(234,242,255,.24); border-color: rgba(234,242,255,.5); }
+body.fpv .stick .lbl { color: rgba(234,242,255,.72); text-shadow: 0 1px 3px rgba(0,0,0,.75); font-size: 10px; }
+body.fpv .stick .lbl.l { left: 4px; } body.fpv .stick .lbl.r { right: 4px; }   /* つまみに文字が重ならないよう内側に詰める */
+body.fpv.sticks-on .fpv-foot { left: calc(150px + var(--sal)); right: calc(150px + var(--sar)); }
+body.fpv.sticks-on .fpv-frame { display: none; }
+@media (max-width: 760px) {
+  .fpv-tl, .fpv-tr { font-size: 11px; }
+  .fpv-btn { font-size: 11px; padding: 6px 10px; }   /* 3つを1行に収める */
+  .fpv-tl b, .fpv-tr b { font-size: 13px; }
+  .fpv-note { font-size: 10.5px; }
+  .fpv-frame i { width: 18px; height: 18px; }
+  body.fpv.sticks-on .fpv-foot { left: calc(16px + var(--sal)); right: calc(16px + var(--sar)); bottom: calc(var(--dock-h) + 152px + var(--sab)); }
+}
+@media (prefers-reduced-transparency: reduce) { .fpv-btn, .fpv-note, .fpv-tl, .fpv-tr { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(12,16,24,.9); } }
+
 /* ---------- 第3ラウンド UI/UX 反映 ---------- */
 .pill-btn.on, .pill-btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-text); box-shadow: inset 0 0 0 1.5px var(--accent); }
 .mobile-only { display: none; }
@@ -667,7 +724,7 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
 </div>
 
 <div id="viewCol" class="glass" aria-label="視点">
-  <button data-v="iso" class="on" title="斜め" data-i18n="views.iso">斜</button><button data-v="front" title="前" data-i18n="views.front">前</button><button data-v="top" title="上" data-i18n="views.top">上</button><button data-v="side" title="横" data-full data-i18n="views.side">横</button><button data-v="inside" title="モーター内部" data-full data-i18n="views.inside">内</button>
+  <button data-v="iso" class="on" title="斜め" data-i18n="views.iso">斜</button><button data-v="front" title="前" data-i18n="views.front">前</button><button data-v="top" title="上" data-i18n="views.top">上</button><button data-v="side" title="横" data-full data-i18n="views.side">横</button><button data-v="inside" title="モーター内部" data-full data-i18n="views.inside">内</button><button data-v="fpv" title="機体のカメラから見る" aria-label="機体のカメラから見る">眼</button>
   <hr><button class="tgl on" data-t="labels" aria-pressed="true" title="ラベル"><i></i><span data-i18n="views.labels">名</span></button><button id="bigBtn" title="大きく読む" aria-label="大きく読む" aria-pressed="false" data-i18n="big">大</button><button id="shareBtn" title="この画面のリンク" aria-label="この画面のリンクをコピー">🔗</button><button id="photoBtn" title="記念写真" aria-label="記念写真を撮る">📷</button><button id="fsBtn" title="全画面">⤢</button>
 </div>
 
@@ -728,6 +785,7 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
   <div class="stick" id="stickR"><div class="knob"></div><span class="lbl t"></span><span class="lbl b"></span><span class="lbl l"></span><span class="lbl r"></span></div>
 </div>
 
+<div id="fpv" hidden aria-label="機体のカメラの映像"></div>
 <div id="printSheet" aria-hidden="true"></div>
 <button id="previewClose" class="preview-close" hidden>✕ 画面にもどる</button>
 
@@ -2771,6 +2829,8 @@ groundMat.onBeforeCompile = sh => {
     .replace('#include <color_fragment>', '#include <color_fragment>\n{ float r = length(vWp.xz); float fade = 1.0 - smoothstep(0.9, 1.8, r); float g = gridLine(vWp.xz, 0.05) * 0.04 + gridLine(vWp.xz, 0.25) * 0.10; diffuseColor.rgb = mix(diffuseColor.rgb, uLine, g * uGrid * fade); }');
 };
 const ground = new THREE.Mesh(new THREE.CircleGeometry(2.8, 96), groundMat); ground.rotation.x = -Math.PI / 2; ground.position.y = -0.158; ground.receiveShadow = true; ground.renderOrder = -1; scene.add(ground);
+// 床を広げる。scale は回転の前(ローカル軸)に効くので、円盤の面は x,y。(k,1,k) と書くと前後だけ伸びない楕円になる
+const groundScale = (k) => ground.scale.set(k, k, 1);
 
 // ---------- 接地影 (下から見た深度をぼかして床に貼る) ----------
 const CS = { size: 1.4, res: 512, height: 0.55 };
@@ -3105,6 +3165,7 @@ function resize() {
   W = canvas.clientWidth || 1; H = canvas.clientHeight || 1;
   const dpr = dprFor(S.qLevel); if (dpr !== DPR) { DPR = dpr; renderer.setPixelRatio(DPR); composer.setPixelRatio(DPR); }
   renderer.setSize(W, H, false); composer.setSize(W, H);
+  if (typeof fpv === 'object' && fpv.on) { camera.aspect = W / H; camera.clearViewOffset(); camera.updateProjectionMatrix(); S.bandFrac = 1; onResizedFpv(); if (typeof onResized === 'function') onResized(); S.aoDirty = true; return; }   /* カメラの映像は画面いっぱい。帯のずらしはしない */
   camera.aspect = narrow() ? W / H : (W - 384) / H;
   if (!narrow()) camera.setViewOffset(W - 384, H, 0, 0, W, H);   /* 右パネルの分だけ左に寄せる */
   else { const bc = bottomCover(), tc = topCover(), sh = (bc - tc) * 0.5; if (Math.abs(sh) > 12) camera.setViewOffset(W, H, 0, sh, W, H); else camera.clearViewOffset(); applyBand(clamp((H - bc - tc) / H, 0.3, 1)); }   /* 上のバーと下のシートの間の帯に機体が来るようずらし、帯の狭さぶん引く */
@@ -3190,7 +3251,10 @@ function stepFree(dt) {
   const holdK = body.hold ? 0.25 : 1, dragH = body.hold ? 6.0 : drag;   // 指が押さえている間は滑らない
   body.vx += (axg * holdK - dragH * body.vx) * dt; body.vz += (azg * holdK - dragH * body.vz) * dt; body.px += body.vx * dt; body.pz += body.vz * dt;
   // 高度: ホバー基準 + 傾きで沈む + スロットル + 押されて沈む
-  const thr = st.active ? st.thr : 0; const pyCmd = free.hoverY - 0.2 * (1 - Math.cos(th)) + 0.10 * thr - (body.hold ? 0.010 * (body.hold.th / free.holdMax) : 0);
+  const thr = st.active ? st.thr : 0;
+  const hov = (typeof fpv === 'object' && fpv.on) ? 1.05 : free.hoverY;   // カメラから見るときは、床すれすれだと何も映らない
+  const thrK = (typeof fpv === 'object' && fpv.on) ? 0.55 : 0.10;   // カメラから見るときは、高度計が動くだけ上下させる
+  const pyCmd = hov - 0.2 * (1 - Math.cos(th)) + thrK * thr - (body.hold ? 0.010 * (body.hold.th / free.holdMax) : 0);
   const ay = 36 * (pyCmd - body.py) - 9.6 * body.vyF; body.vyF += ay * dt; body.py += body.vyF * dt; body.vy = body.vyF;   // 上下の速度はセンサー視点でも読む
   // ヨー
   const yawCmd = st.active ? -1.2 * st.yaw : 0; body.yawRate = dl(body.yawRate, yawCmd, dt, 6); body.yaw += body.yawRate * dt;
@@ -3218,6 +3282,7 @@ function stepDemo(dt) {
   }
   if (S.flight !== 'yaw') { body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); body.yaw = dl(body.yaw, 0, dt, 3); }
   const r = 5; body.tx = dl(body.tx, tx, dt, r); body.tz = dl(body.tz, tz, dt, r);
+  if (typeof fpv === 'object' && fpv.on) py += 1.05;   // カメラから見るときは浮かせる(床の上だと印しか映らない)
   const ox = body.px, oy = body.py, oz = body.pz;
   body.px = dl(body.px, px, dt, r); body.py = dl(body.py, py, dt, r); body.pz = dl(body.pz, pz, dt, r);
   const idt = 1 / Math.max(dt, 1e-3); body.vx = (body.px - ox) * idt; body.vy = (body.py - oy) * idt; body.vz = (body.pz - oz) * idt;
@@ -3593,7 +3658,7 @@ function startWhatif(id) {
   if (def.motion === 'airport') airportSetup();
   if (def.motion === 'crowd') dropSetup();
   const wide = { tachiiri: 2.6, bvlos: narrow() ? 3.2 : 4.2, airport: 2.4, crowd: 1.5 }[def.motion];   /* 床(半径2.8m)より広い場面は一時的に広げる */
-  if (wide && !whatif.groundScale) { whatif.groundScale = ground.scale.x; ground.scale.set(wide, 1, wide); }
+  if (wide && !whatif.groundScale) { whatif.groundScale = ground.scale.x; groundScale(wide); }
   const vs = viewScale();
   if (def.motion === 'tachiiri') { tachiiriSetup(); const dv = vs > 1 ? 1.3 : 1; theaterCamera(new THREE.Vector3(4.6 * dv, 4.4 * dv, 4.6 * dv), new THREE.Vector3(-1.4, 0.2, -1.4), 900); }   /* 近づく向きに沿って奥を見る俯瞰。3人を奥行き方向に並べるので縦画面でも入る */
   else if (def.motion === 'person') theaterCamera(new THREE.Vector3(3.2 * vs, 1.6 * vs, -2.6 * vs), new THREE.Vector3(-0.35, 0.72, -0.35), 900);   // 人型(1.7m)が全身で入る引き(約4.4m)
@@ -3619,7 +3684,7 @@ function stopWhatif(silent) {
   if (whatif.apt) whatif.apt.visible = false;
   if (whatif.drop) whatif.drop.visible = false;
   if (whatif.night) { whatif.night = false; nightLevel(0); for (const p of partsOf('led')) { const h = p.obj.userData.halo; if (h) h.scale.setScalar(0.022); } applyTheme(); for (const a of D.arrows.thrust) a.userData.forceHide = false; }
-  if (whatif.groundScale) { ground.scale.set(whatif.groundScale, 1, whatif.groundScale); whatif.groundScale = null; }
+  if (whatif.groundScale) { groundScale(whatif.groundScale); whatif.groundScale = null; }
   S.labelsSuppressed = false; S.labelOnly = null; buildLabels();
   whatif.active = false; whatif.def = null; whatif.phase = 0; S.whatif = null;
   S.power = 0; setBodyMode('idle');
@@ -3829,7 +3894,7 @@ function tachiiriSetup() {
   as.position.set(-2.05, -0.158, -2.05); as.userData.face(-6, -6); as.userData.rest(); as.visible = true;        /* 補助者: 区画の境目で外を向く */
   th.position.set(-5.36, -0.158, -2.68); th.userData.face(-2.05, -2.05); th.userData.rest(); th.visible = true;   /* 第三者: 補助者の横から近づく(画面上で重ならない向き) */
   whatif.ring2.visible = true;
-  if (!whatif.groundScale) { whatif.groundScale = ground.scale.x; ground.scale.set(2.6, 1, 2.6); }   /* 床(半径2.8m)のままだと区画も人も虚空に立つ */
+  if (!whatif.groundScale) { whatif.groundScale = ground.scale.x; groundScale(2.6); }   /* 床(半径2.8m)のままだと区画も人も虚空に立つ */
   for (const g of whatif.people) if (g.userData.foot) { g.userData.foot.visible = true; g.userData.foot.position.set(g.position.x, -0.1555, g.position.z); }
 }
 function stepWhatif(dtSim, dtReal) {
@@ -4223,7 +4288,7 @@ function stepAlive(dtReal) {
   if (w !== alive.want) {
     alive.want = w; alive.since = 0;
     // 他の機能（重さ・シアター・もしも・授業・とばす）が電源を持っているときは切らない。みるタブ内で条件が外れたときだけ着陸させる
-    if (!w && alive.on) { alive.on = false; body.lookYaw = null; if (S.power > 0 && S.tab === 'see' && !S.scale && !theater.active && !whatif.active && !S.lesson) setPower(0, true); else syncBodyMode(); }
+    if (!w && alive.on) { alive.on = false; body.lookYaw = null; if (S.power > 0 && S.tab === 'see' && !S.scale && !theater.active && !whatif.active && !S.lesson && !fpv.on) setPower(0, true); else syncBodyMode(); }
   }
   alive.since += dtReal;
   if (w && !alive.on && alive.since >= 0.8) { alive.on = true; setPower(0.5, true); syncBodyMode(); }
@@ -5511,6 +5576,219 @@ function initDescent() {
   window.__descent = { descent, startDescent, stopDescent, descentEscape, DESC_GE, DESC_TOP };
 }
 
+// ===== 機体のカメラから見る（一人称視点） =====
+// 目的は3つ。①ジンバルが機体の傾きを打ち消していることを見せる ②カメラの視野は狭く、真下と真横は映らないと分からせる
+// ③この映像は法令上の「目視」に含まれない（教則 3.1.2(2)2)b.）ことを、映像の中で言う。
+// 実装はカメラを増やさず、本体のカメラの姿勢を main camera に写す。GTAO・輪郭線・接地影がそのまま効く。
+const fpvTilt0 = () => THREE.MathUtils.degToRad(fpvTall() ? -14 : -12);   // 少し下向き。水平だと空しか映らない。縦長の画面は少しだけ伏せる(伏せすぎると地平線が隠れる)
+const fpv = { on: false, stabilized: true, pan: 0, tilt: 0, drag: null, saved: null, t: 0 };
+const FPV_FOV = 45;              // 縦の画角。機体に積む記録用カメラのおよその値
+const FPV_PAN = THREE.MathUtils.degToRad(95);
+const FPV_TILT_UP = THREE.MathUtils.degToRad(22), FPV_TILT_DOWN = THREE.MathUtils.degToRad(-88);
+const fpvCamObj = () => { const p = partsOf('camera')[0]; return p && p.obj; };
+const fpvTall = () => innerWidth / Math.max(1, innerHeight) < 1.05;   // 縦長の画面は横の画角が狭い
+
+// ジンバルは3軸。機体が傾いても、カメラだけは水平を保つ（止めると機体と一緒に傾く）
+function updateGimbal() {
+  const c = fpvCamObj(); if (!c) return;
+  fpv.pan = clamp(fpv.pan, -FPV_PAN, FPV_PAN); fpv.tilt = clamp(fpv.tilt, FPV_TILT_DOWN, FPV_TILT_UP);   // 可動域はここで一度だけ見る(共有リンクなど、ドラッグ以外から入ることもある)
+  const stab = fpv.stabilized;
+  const ex = (stab ? -body.tz : 0) + fpv.tilt;
+  const ez = stab ? body.tx : 0;
+  c.rotation.set(ex, fpv.pan, ez, 'YXZ');
+}
+
+// ---------- カメラで見るための舞台 ----------
+// 何もない床の上では、ジンバルの働きも視野の狭さも分からない。
+// 広い地面と地平線、離着陸場の印、距離の輪、実寸の人型とコーンを置いて、見えるものと距離の目安をつくる。
+const FPV_FAR = 30;                 // 遠くの地面の半径(m)。カメラのfar=40より内側に収める
+const FPV_RINGS = [3, 10, 20];      // 距離の輪。遠いものほど太くしないと、伏せ角が浅くて線が消える
+const fpvStage = { grp: null, groundWas: null, far: null, rings: [], marks: [], labels: [] };
+function fpvStageBuild() {
+  if (fpvStage.grp) return;
+  const g = new THREE.Group(); g.userData.noShadow = true;
+  const flat = (mesh, y) => { mesh.rotation.x = -Math.PI / 2; mesh.position.y = y; mesh.userData.noPart = mesh.userData.noPick = mesh.userData.noAO = mesh.userData.noShadow = true; g.add(mesh); return mesh; };
+  const line = (col, op) => new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: op, toneMapped: false, side: THREE.DoubleSide });
+  // 遠くの地面。近くの床(半径2.8m×5.2)は縁が透けて消えるので、その下にもう一枚広い円盤を敷く。
+  // 地平線ができると、ジンバルを止めたときに「水平が傾く」のが一目で分かる。
+  // 材質は床と同じにして、遠さは頂点色の掛け算(かすみ)だけで出す。こうすると継ぎ目の色が必ず合う
+  {
+    const geo = new THREE.RingGeometry(4, FPV_FAR, 72, 16);
+    geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(geo.attributes.position.count * 3), 3));
+    const mat = new THREE.MeshPhysicalMaterial({ color: 0xe4e6ea, roughness: 0.75, metalness: 0, clearcoat: 0.25, clearcoatRoughness: 0.45, vertexColors: true, side: THREE.DoubleSide });
+    fpvStage.far = flat(new THREE.Mesh(geo, mat), -0.172);
+    fpvStage.far.renderOrder = -2; fpvStage.far.receiveShadow = false;
+  }
+  // 離着陸場: 二重の輪と十字
+  flat(new THREE.Mesh(new THREE.RingGeometry(0.78, 0.84, 72), line(0xe8a33d, 0.85)), -0.1548);
+  flat(new THREE.Mesh(new THREE.RingGeometry(0.30, 0.33, 48), line(0xe8a33d, 0.6)), -0.1548);
+  for (const a of [0, Math.PI / 2]) { const m = flat(new THREE.Mesh(new THREE.PlaneGeometry(1.40, 0.035), line(0xe8a33d, 0.5)), -0.1547); m.rotation.z = a; }
+  // 距離の輪。見かけの太さ ≒ 幅 × 目の高さ ÷ 距離² なので、幅は距離の2乗で増やす
+  fpvStage.rings = FPV_RINGS.map(r => {
+    const w = 0.04 * (r / 3) ** 2;
+    const m = flat(new THREE.Mesh(new THREE.RingGeometry(r - w / 2, r + w / 2, 160), line(0x8b939f, r > 12 ? 0.22 : 0.34)), -0.1549);
+    m.userData.r = r; return m;
+  });
+  // 距離を床に書く。映像の中で数字が読めると、視野の広さと距離がつかめる。
+  // 伏せ角が浅いほど縦に潰れるので、滑走路の数字と同じように、あらかじめ縦に伸ばして描く。
+  // 真ん中を空けたいので、遠いほうは斜め前に置く
+  for (const r of [3, 10]) {
+    const cv = document.createElement('canvas'); cv.width = 256; cv.height = 128;
+    const c2 = cv.getContext('2d'); c2.fillStyle = '#aab4c4'; c2.font = 'bold 74px ui-monospace, Menlo, monospace'; c2.textAlign = 'center'; c2.textBaseline = 'middle'; c2.fillText(`${r} m`, 128, 68);
+    const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+    const k = r / 3, w = 0.62 * k ** 0.85, h = 0.30 * k ** 1.5, d = r - h / 2 - 0.30;
+    const m = flat(new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.6, toneMapped: false, depthWrite: false })), -0.1546);
+    m.userData.r = r; m.userData.d = d; fpvStage.labels.push(m);
+  }
+  fpvLabelsPos();
+  // 3mの輪の上にコーン。前を向いたまま左右に見える位置に置くと、動かしたときの流れで距離がつかめる
+  for (let i = 0; i < 4; i++) {
+    const cone = new THREE.Mesh(new THREE.ConeGeometry(0.092, 0.26, 20, 1, true), new THREE.MeshStandardMaterial({ color: 0xe8732d, roughness: 0.72, metalness: 0, side: THREE.DoubleSide }));
+    cone.userData.noPart = cone.userData.noPick = cone.userData.noShadow = true; cone.castShadow = false;
+    g.add(cone); fpvStage.marks.push(cone);
+  }
+  fpvMarksPos();
+  scene.add(g); fpvStage.grp = g;
+  fpvStageTheme();
+}
+// 遠いほど「かすむ」。暗いテーマでは明るく、明るいテーマでは少し沈めて、空との境目(地平線)を必ず残す
+function fpvStageTheme() {
+  const far = fpvStage.far; if (!far) return;
+  far.material.color.set(themeDark ? 0x171a1f : 0xe4e6ea);   // 床(THEME[].ground)と同じ色
+  const one = new THREE.Color(1, 1, 1), haze = themeDark ? new THREE.Color(3.1, 3.3, 3.8) : new THREE.Color(0.70, 0.74, 0.83);
+  const pos = far.geometry.attributes.position, col = far.geometry.attributes.color, c = new THREE.Color();
+  for (let i = 0; i < pos.count; i++) {
+    const r = Math.hypot(pos.getX(i), pos.getY(i));
+    c.copy(one).lerp(haze, clamp((r - 4) / (FPV_FAR - 4), 0, 1) ** 0.42);
+    col.setXYZ(i, c.r, c.g, c.b);
+  }
+  col.needsUpdate = true;
+  for (const m of fpvStage.rings) m.material.color.set(themeDark ? 0x8b939f : 0x69727f);
+}
+// 立ち位置と目印は画面の形で置き直す。縦長だと横の画角が26°ほどしかなく、外に置くと映らない
+function fpvPersonPos() { if (D.personGroup) D.personGroup.position.set(fpvTall() ? -0.9 : -1.1, -0.158, fpvTall() ? -9.0 : -5.4); }
+function fpvMarksPos() {
+  const w = fpvTall() ? 11 : 20;
+  fpvStage.marks.forEach((c, i) => { const a = THREE.MathUtils.degToRad([-w, w, -180 + w, 180 - w][i]); c.position.set(Math.sin(a) * 3, -0.158 + 0.13, -Math.cos(a) * 3); });
+}
+function fpvLabelsPos() {
+  fpvStage.labels.forEach(m => { const az = m.userData.r > 5 ? THREE.MathUtils.degToRad(fpvTall() ? 8 : 20) : 0, d = m.userData.d;
+    m.position.set(Math.sin(az) * d, -0.1546, -Math.cos(az) * d); m.rotation.z = -az; });
+}
+function fpvStageOn(on) {
+  if (on) fpvStageBuild();
+  if (!fpvStage.grp) return;
+  const sceneBusy = theater.active || whatif.active || descent.active;
+  fpvStage.grp.visible = on && !sceneBusy;
+  if (on && !sceneBusy) {
+    if (fpvStage.groundWas == null) { fpvStage.groundWas = ground.scale.x; groundScale(5.2); }
+    if (D.personGroup) { fpvStage.personWas = D.personGroup.visible; D.personGroup.visible = true; fpvPersonPos();   /* 縦長の画面は横の画角が狭い。近いと人だけが大写しになる */ if (D.personGroup.userData.face) D.personGroup.userData.face(0, 0); if (D.personGroup.userData.rest) D.personGroup.userData.rest(); }
+  } else {
+    if (fpvStage.groundWas != null) { groundScale(fpvStage.groundWas); fpvStage.groundWas = null; }
+    if (D.personGroup && fpvStage.personWas != null) { D.personGroup.visible = fpvStage.personWas; D.personGroup.position.set(-0.50, -0.158, -0.48); fpvStage.personWas = null; }
+  }
+  S.shadowDirty = S.csDirty = S.aoDirty = true;
+}
+
+function fpvOn(on) {
+  on = !!on;
+  if (on === fpv.on) return;
+  if (on) {
+    fpv.pan = 0; fpv.tilt = fpvTilt0();
+    fpv.saved = { pos: camera.position.clone(), tgt: controls.target.clone(), fov: camera.fov, labels: S.labelsSuppressed, power: S.power, rot: controls.autoRotate };
+    fpv.on = true; S.fpv = true; document.body.classList.add('fpv');
+    S.camSpring = null; S.camInertia = null; controls.enabled = false; controls.autoRotate = false;
+    S.labelsSuppressed = true; buildLabels();
+    camera.fov = FPV_FOV; resize();
+    if (S.power === 0 && !theater.active && !whatif.active && !descent.active) { setPower(0.5, true); syncBodyMode(); }
+    fpvStageOn(true);
+    $('#fpv').hidden = false; syncDockH();   /* 操作列を畳んだ高さをHUDに先に伝える(ResizeObserverは1コマ遅れる) */
+    stepFpv(0);
+    if (!store.get('fpvSeen')) { store.set('fpvSeen', '1'); showToast('画面をドラッグするとジンバルの向きが変わります。床の輪は3m・10m・20mの目安です', 4600); }
+  } else {
+    fpv.on = false; S.fpv = false; document.body.classList.remove('fpv');
+    fpvStageOn(false);
+    $('#fpv').hidden = true; syncDockH();
+    fpv.pan = 0; fpv.tilt = fpvTilt0(); updateGimbal();
+    const s = fpv.saved || {};
+    camera.fov = s.fov || 30; controls.enabled = true;
+    S.labelsSuppressed = !!s.labels; buildLabels();
+    if (s.power === 0 && S.power > 0 && !theater.active && !whatif.active && !descent.active) setPower(0, true);
+    resize();
+    if (s.pos) flyTo(s.pos, s.tgt, 700, false); else camHome();
+  }
+  for (const b of $$('#viewCol button[data-v]')) b.classList.toggle('on', fpv.on ? b.dataset.v === 'fpv' : b.classList.contains('on') && b.dataset.v !== 'fpv');
+  if (fpv.on) segSet($('#viewCol'), 'v', 'fpv');
+}
+
+// 毎フレーム: 本体のカメラの位置と向きを main camera に写す
+function onResizedFpv() { if (fpv.on) { fpvPersonPos(); fpvMarksPos(); fpvLabelsPos(); } }
+function stepFpv(dtReal) {
+  if (!fpv.on) return;
+  const c = fpvCamObj(); if (!c) return;
+  updateGimbal();
+  c.updateWorldMatrix(true, false);
+  const q = c.getWorldQuaternion(new THREE.Quaternion());
+  const p = c.getWorldPosition(new THREE.Vector3());
+  p.addScaledVector(new THREE.Vector3(0, 0, -1).applyQuaternion(q), 0.045);   // レンズの前へ出す(筐体の中から写さない)
+  camera.position.copy(p); camera.quaternion.copy(q);
+  controls.target.copy(p).addScaledVector(new THREE.Vector3(0, 0, -1).applyQuaternion(q), 2);
+  fpv.t += dtReal;
+  if (fpv.t > 0.22) { fpv.t = 0; updateFpvHud(); }
+  S.aoDirty = true;
+}
+function updateFpvHud() {
+  const set = (id, v) => { const el = $(id); if (el) el.textContent = v; };
+  const spd = Math.hypot(body.vx, body.vz);
+  let hd = (-body.yaw * 180 / Math.PI) % 360; if (hd < 0) hd += 360; if (hd >= 359.5) hd = 0;
+  set('#fpvAlt', `${Math.max(0, body.py).toFixed(2)} m`);
+  set('#fpvSpd', `${spd.toFixed(2)} m/s`);
+  set('#fpvHdg', `${hd.toFixed(0)}°`);
+  set('#fpvAtt', `${(body.tz * 180 / Math.PI).toFixed(0)}° / ${(-body.tx * 180 / Math.PI).toFixed(0)}°`);
+  set('#fpvGim', fpv.stabilized ? '水平を保つ' : '止めている');
+  const g = $('#fpvGimBtn'); if (g) { g.classList.toggle('off', !fpv.stabilized); g.setAttribute('aria-pressed', String(!fpv.stabilized)); }
+  const sb = $('#fpvStickBtn'); if (sb) { sb.classList.toggle('on', !!S.sticks); sb.setAttribute('aria-pressed', String(!!S.sticks)); }
+  const pan = $('#fpvPan'); if (pan) pan.textContent = `パン ${(fpv.pan * 180 / Math.PI).toFixed(0)}° / チルト ${(fpv.tilt * 180 / Math.PI).toFixed(0)}°`;
+}
+
+// ---------- 画面をドラッグしてジンバルを振る ----------
+function fpvDrag(e, phase) {
+  if (!fpv.on) return false;
+  if (phase === 'down') { fpv.drag = { id: e.pointerId, x: e.clientX, y: e.clientY }; canvas.setPointerCapture(e.pointerId); canvas.classList.add('push'); return true; }
+  if (!fpv.drag || fpv.drag.id !== e.pointerId) return false;
+  if (phase === 'move') {
+    const k = 0.0042 * (camera.fov / 45);
+    fpv.pan = clamp(fpv.pan - (e.clientX - fpv.drag.x) * k, -FPV_PAN, FPV_PAN);
+    fpv.tilt = clamp(fpv.tilt - (e.clientY - fpv.drag.y) * k, FPV_TILT_DOWN, FPV_TILT_UP);
+    fpv.drag.x = e.clientX; fpv.drag.y = e.clientY; updateFpvHud(); return true;
+  }
+  fpv.drag = null; canvas.classList.remove('push'); return true;
+}
+
+function initFpv() {
+  const el = $('#fpv'); if (!el) return;
+  el.innerHTML = `
+    <div class="fpv-frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <div class="fpv-cross" aria-hidden="true"></div>
+    <div class="fpv-head">
+      <div class="fpv-tl"><span class="fpv-tag">機体のカメラ</span><b id="fpvAlt">—</b><span>対地高度</span><b id="fpvSpd">—</b><span>対地速度</span><b id="fpvHdg">—</b><span>機首の方位</span></div>
+      <div class="fpv-tr"><b id="fpvAtt">—</b><span>ピッチ / ロール</span><button id="fpvCenter" class="fpv-mini" title="ジンバルを正面に戻す"><span id="fpvPan">—</span> ↺</button><span class="fpv-sub">画角 縦${FPV_FOV}°（例）</span></div>
+    </div>
+    <div class="fpv-foot">
+      <div class="fpv-row">
+        <button id="fpvGimBtn" class="fpv-btn" aria-pressed="false">ジンバル <b id="fpvGim">水平を保つ</b></button>
+        <button id="fpvStickBtn" class="fpv-btn" aria-pressed="false">スティックで飛ばす</button>
+        <button id="fpvOut" class="fpv-btn">外から見る</button>
+      </div>
+      <p class="fpv-note"><b>この映像は法令上の「目視」には含まれません</b>。モニターや双眼鏡での監視は目視外飛行にあたります（教則${KYOSOKU.ver} 3.1.2）。</p>
+    </div>`;
+  $('#fpvGimBtn').addEventListener('click', () => { fpv.stabilized = !fpv.stabilized; updateFpvHud(); showToast(fpv.stabilized ? 'ジンバル: 3つのモーターが機体の傾きを打ち消します' : 'ジンバル停止: カメラが機体と一緒に傾きます', 3200); });
+  $('#fpvStickBtn').addEventListener('click', () => { setSticks(!S.sticks); updateFpvHud(); });
+  $('#fpvCenter').addEventListener('click', () => { fpv.pan = 0; fpv.tilt = fpvTilt0(); updateGimbal(); updateFpvHud(); });
+  $('#fpvOut').addEventListener('click', () => { segSet($('#viewCol'), 'v', 'iso'); S.view = 'iso'; fpvOn(false); });
+  window.__fpv = { fpv, fpvOn, updateGimbal, stepFpv, fpvStage, fpvTilt0 };
+}
+
 // ===== 共有リンク（いま見えている画面をURLにする） =====
 // 方針: 既定と違うものだけを短いキーで載せる。読み戻しの途中はトーストを出さず、最後に「どこを開いたか」を1回だけ伝える。
 // 授業モードの lesson / step は lesson.js が自分で書くのでここでは触らない（消さない）。
@@ -5733,7 +6011,7 @@ $('#powerSeg').addEventListener('click', e => { const b = e.target.closest('butt
 function syncBodyMode() {
   if (theater.active || descent.active) return setBodyMode('theater');
   if (S.flight) return setBodyMode('demo');
-  if (S.power > 0 && (S.tab === 'fly' || S.scale || alive.on || (S.lesson && lesson.hover) || S.expert === 'sensors')) return setBodyMode('free');
+  if (S.power > 0 && (S.tab === 'fly' || S.scale || alive.on || fpv.on || (S.lesson && lesson.hover) || S.expert === 'sensors')) return setBodyMode('free');
   setBodyMode('idle');
 }
 // 飛行の原理
@@ -5768,7 +6046,7 @@ function showLegend() { if ($('#noteCard').dataset.kind === 'flight' || $('#note
   renderNote({ kind: 'legend', title: 'まわる向きのしるし', badge: S.slow ? '1/50のはやさ' : null, html: `<div class="legend"><span class="ccw"><b>↺ 反時計まわり(CCW)</b></span> しま模様の羽・翼端が青緑<br><span class="cw"><b>↻ 時計まわり(CW)</b></span> 無地の羽・翼端が青<br>白い印が上を向いていれば正しい向きに付いています<br><b>灯火</b> 前・左 <span style="color:#ff3b30">●</span>赤 / 前・右 <span style="color:#22c55e">■</span>緑 / 後ろ ◆白</div>` }); }
 
 // ---------- 視点列 ----------
-$('#viewCol').addEventListener('click', e => { const b = e.target.closest('button[data-v]'); if (!b) return; segSet($('#viewCol'), 'v', b.dataset.v); S.view = b.dataset.v; setView(b.dataset.v); });
+$('#viewCol').addEventListener('click', e => { const b = e.target.closest('button[data-v]'); if (!b) return; segSet($('#viewCol'), 'v', b.dataset.v); if (b.dataset.v === 'fpv') { fpvOn(true); return; } if (fpv.on) fpvOn(false); S.view = b.dataset.v; setView(b.dataset.v); });
 $('#fsBtn').addEventListener('click', () => { const el = document.documentElement; if (document.fullscreenElement) document.exitFullscreen(); else if (el.requestFullscreen) el.requestFullscreen(); else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen(); });
 
 // ---------- 部品を探す（40件を目で追わせない。くわしく のときだけ出す） ----------
@@ -6061,7 +6339,7 @@ function onTheaterChanged() {
 const STICK_MAP = { 1: { L: { v: 'pitch', h: 'yaw' }, R: { v: 'thr', h: 'roll' } }, 2: { L: { v: 'thr', h: 'yaw' }, R: { v: 'pitch', h: 'roll' } } };
 const AXIS_LBL = { pitch: ['前', '後'], yaw: ['←向き', '向き→'], thr: ['上', '下'], roll: ['←左', '右→'] };
 let stickMode = ['1', '2'].includes(store.get('stickMode')) ? store.get('stickMode') : '1';
-function setSticks(on) { S.sticks = on; for (const x of $$('.tgl[data-t=sticks]')) x.classList.toggle('on', on); $('#sticks').hidden = !on; if (on) { if (S.power === 0) setPower(0.5, true); if (!store.get('stickSeen')) { showToast('スティックをたおすと、4つのモーターがそれぞれ違う速さになります。', 3600); store.set('stickSeen', '1'); } } else { body.stick.active = false; body.stick.x = body.stick.y = body.stick.yaw = body.stick.thr = 0; } labelSticks(); }
+function setSticks(on) { S.sticks = on; for (const x of $$('.tgl[data-t=sticks]')) x.classList.toggle('on', on); $('#sticks').hidden = !on; document.body.classList.toggle('sticks-on', !!on); if (typeof updateFpvHud === 'function') updateFpvHud(); if (on) { if (S.power === 0) setPower(0.5, true); if (!store.get('stickSeen')) { showToast('スティックをたおすと、4つのモーターがそれぞれ違う速さになります。', 3600); store.set('stickSeen', '1'); } } else { body.stick.active = false; body.stick.x = body.stick.y = body.stick.yaw = body.stick.thr = 0; } labelSticks(); }
 function labelSticks() { for (const side of ['L', 'R']) { const map = STICK_MAP[stickMode][side]; const el = $(side === 'L' ? '#stickL' : '#stickR'); el.querySelector('.lbl.t').textContent = AXIS_LBL[map.v][0]; el.querySelector('.lbl.b').textContent = AXIS_LBL[map.v][1]; el.querySelector('.lbl.l').textContent = AXIS_LBL[map.h][0]; el.querySelector('.lbl.r').textContent = AXIS_LBL[map.h][1]; } }
 $('#modeSeg2').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; stickMode = b.dataset.m; store.set('stickMode', stickMode); segSet($('#modeSeg2'), 'm', stickMode); labelSticks(); });
 for (const side of ['L', 'R']) {
@@ -6109,6 +6387,7 @@ function screenToDronePlane(x, y, out) { ptr.set((x / W) * 2 - 1, -(y / H) * 2 +
 let pend = null, hoverAt = null, push = null;
 canvas.addEventListener('pointerdown', e => {
   S.lastInteract = performance.now(); $('#coach').hidden = true;
+  if (fpv.on) { if (fpvDrag(e, 'down')) e.stopImmediatePropagation(); return; }
   if (S.scale && scaleTryDrag(e)) { e.stopImmediatePropagation(); return; }
   const hit = pickAt(e.clientX, e.clientY);
   if (hit && body.mode === 'free' && !theater.active) {
@@ -6120,6 +6399,7 @@ canvas.addEventListener('pointerdown', e => {
   pend = theater.active ? null : { x: e.clientX, y: e.clientY, t: performance.now(), hit };
 }, { capture: true });
 canvas.addEventListener('pointermove', e => {
+  if (fpv.on) { fpvDrag(e, 'move'); return; }
   if (push && e.pointerId === push.id) {
     const w = new THREE.Vector3(); if (!screenToDronePlane(e.clientX, e.clientY, w)) return;
     push.hist.push([w.clone(), performance.now()]); while (push.hist.length > 2 && performance.now() - push.hist[0][1] > 80) push.hist.shift();
@@ -6139,7 +6419,7 @@ const endPush = e => {
   if (!store.get('flicked')) { store.set('flicked', '1'); showToast('押された側のモーターが速くなって、元の姿勢にもどりました。', 3200); }
   push = null; controls.enabled = true; canvas.classList.remove('push');
 };
-canvas.addEventListener('pointerup', e => { endPush(e); if (!pend) return; const moved = Math.hypot(e.clientX - pend.x, e.clientY - pend.y), dt = performance.now() - pend.t; const hit = pend.hit; pend = null; if (moved < 6 && dt < 700) { if (hit) select(hit, false); else if (S.selected) select(null); } });
+canvas.addEventListener('pointerup', e => { if (fpv.on) { fpvDrag(e, 'up'); return; } endPush(e); if (!pend) return; const moved = Math.hypot(e.clientX - pend.x, e.clientY - pend.y), dt = performance.now() - pend.t; const hit = pend.hit; pend = null; if (moved < 6 && dt < 700) { if (hit) select(hit, false); else if (S.selected) select(null); } });
 canvas.addEventListener('pointercancel', endPush);
 canvas.addEventListener('dblclick', e => { if (body.mode === 'free' || theater.active) return; const p = pickAt(e.clientX, e.clientY); if (p) focusOn([p.obj]); });
 canvas.addEventListener('pointerleave', () => { hoverAt = null; if (S.hovered) { setTint(S.hovered, HOVER_L, 0); S.hovered = null; } canvas.classList.remove('pick'); });
@@ -6171,7 +6451,7 @@ document.addEventListener('keydown', e => {
   else if (k === ' ') { e.preventDefault(); if (S.tab !== 'fly') setTab('fly'); setPower(S.power === 0 ? 0.5 : 0); }
   else if (k === 'r') { segSet($('#viewCol'), 'v', 'iso'); S.view = 'iso'; setView('iso'); }
   else if (k === 'f' && S.selected) focusOn(S.selAll ? partsOf(S.selected.key).map(x => x.obj) : [S.selected.obj]);
-  else if (k === 'escape') { if (theater.active) stopTheaterUI(); else if (S.question) { clearQuestion(); renderNote(null); } else if (S.flight) setFlight(null); else if (S.selected) select(null); else $('#inspector').classList.remove('open'); }
+  else if (k === 'escape') { if (fpv.on) { segSet($('#viewCol'), 'v', 'iso'); S.view = 'iso'; fpvOn(false); } else if (theater.active) stopTheaterUI(); else if (S.question) { clearQuestion(); renderNote(null); } else if (S.flight) setFlight(null); else if (S.selected) select(null); else $('#inspector').classList.remove('open'); }
 });
 
 // ---------- 設定 ----------
@@ -6205,9 +6485,10 @@ function bindSheet(el) {
 }
 bindSheet($('#inspector'));
 $('#previewClose').addEventListener('click', closePreview);
-new ResizeObserver(() => document.documentElement.style.setProperty('--dock-h', $('#dock').offsetHeight + 'px')).observe($('#dock'));
+function syncDockH() { document.documentElement.style.setProperty('--dock-h', $('#dock').offsetHeight + 'px'); }
+new ResizeObserver(syncDockH).observe($('#dock'));
 
-function onThemeChanged(dark) { airflowTheme(dark); }
+function onThemeChanged(dark) { airflowTheme(dark); fpvStageTheme(); }
 function onQualityChanged(level) { if (air.mesh && air.N !== Q.particles) rebuildAirflow(); $('#perfInfo').textContent = `品質 ${level}`; }
 { // シートの開閉・カードの出入りで、3Dの見える帯が変わるたびに視錐台を合わせ直す
   const watch = ['#inspector', '#lesson', '#expert', '#noteCard', '#massBar'].map(s => $(s)).filter(Boolean);
@@ -6259,6 +6540,8 @@ function tick(now) {
   if (S.explodeFrame && Math.abs(S.explode - S.explodeT) < 0.01 && performance.now() - (S.explodeAt || 0) > 350) { S.explodeFrame = false; D.root.updateWorldMatrix(true, true); focusOn(D.parts.filter(p => partVisible(p) && effVisible(p.obj)).map(p => p.obj), { pull: true }); }   // 分解が落ち着いたら全体をフレーミング
   // 機体
   stepAlive(dt); stepBody(dtSim, dt); if (theater.active) stepTheater(dtSim, dt); if (whatif.active) stepWhatif(dtSim, dt); if (descent.active) stepDescent(dtSim); applyBody(dt);
+  updateGimbal();   /* ジンバルは外から見ているときも傾きを打ち消す。本体の姿勢を当てた後に回す */
+  if (fpv.on) stepFpv(dt);   /* カメラの姿勢は本体の姿勢が決まってから写す(1コマ遅れると水平が残る) */
   updateMotors(dtSim, dt); updateMoveArrow(); updateAirflow(dtSim, dt);
   if (S.expert) stepExpert(dtSim, dt);
   if (S.mode === 'cut') updateCutPlanes();
@@ -6296,7 +6579,7 @@ window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: sca
   $('#loadMsg').textContent = '照明と材質を準備しています…';
   buildList(); applyTheme(); resize();
   applyQuality(isMobile ? (HF ? 1 : 0) : 3);
-  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif(); initLive(); initLesson(); initExpert(); initReg(); initPreflight(); initDescent(); initShare();
+  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif(); initLive(); initLesson(); initExpert(); initReg(); initPreflight(); initDescent(); initFpv(); initShare();
   { const vs = viewScale(); if (vs > 1) camera.position.multiplyScalar(vs); }
   renderer.setClearColor(0x000000, 1);
   $('#loadMsg').textContent = 'シェーダーをコンパイルしています…'; mark('setup');

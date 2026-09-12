@@ -378,6 +378,63 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
 .ps-review ol { padding-left: 1.2em; } .ps-review li p { margin: 0 0 3pt; } .rv-box { height: 46pt; border: 1pt solid #000; border-radius: 3pt; margin-bottom: 8pt; }
 .ps-foot { margin-top: 8pt; font-size: 7.6pt; line-height: 1.4; color: #444; border-top: 1pt solid #999; padding-top: 3pt; }
 
+/* ---------- 機体のカメラから見る（一人称視点） ---------- */
+/* 数字は上、操作と注記は下。スティックを出しても重ならないよう、上下の帯を変数で揃える */
+#fpv { position: fixed; inset: 0; z-index: 8; pointer-events: none; font-family: var(--mono); color: #eaf2ff; text-shadow: 0 1px 3px rgba(0,0,0,.75);
+  --fpv-t: calc(80px + var(--sat)); --fpv-b: calc(var(--dock-h) + 24px + var(--sab)); }
+#fpv::after { content: ''; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 120px rgba(0,0,0,.26); }
+.fpv-frame i { position: absolute; width: 26px; height: 26px; border: 2px solid rgba(234,242,255,.72); }
+.fpv-frame i:nth-child(1) { top: calc(var(--fpv-t) - 12px); left: calc(16px + var(--sal)); border-right: 0; border-bottom: 0; }
+.fpv-frame i:nth-child(2) { top: calc(var(--fpv-t) - 12px); right: calc(16px + var(--sar)); border-left: 0; border-bottom: 0; }
+.fpv-frame i:nth-child(3) { bottom: calc(var(--fpv-b) + 88px); left: calc(16px + var(--sal)); border-right: 0; border-top: 0; }
+.fpv-frame i:nth-child(4) { bottom: calc(var(--fpv-b) + 88px); right: calc(16px + var(--sar)); border-left: 0; border-top: 0; }
+.fpv-cross { position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; margin: -13px 0 0 -13px; }
+.fpv-cross::before, .fpv-cross::after { content: ''; position: absolute; background: rgba(234,242,255,.7); }
+.fpv-cross::before { left: 50%; top: 0; width: 1.5px; height: 100%; margin-left: -0.75px; }
+.fpv-cross::after { top: 50%; left: 0; height: 1.5px; width: 100%; margin-top: -0.75px; }
+.fpv-head { position: absolute; top: var(--fpv-t); left: calc(18px + var(--sal)); right: calc(18px + var(--sar)); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.fpv-foot { position: absolute; bottom: var(--fpv-b); left: calc(16px + var(--sal)); right: calc(16px + var(--sar)); display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+.fpv-tl, .fpv-tr { display: grid; gap: 0 8px; font-size: 12px; line-height: 1.35; font-variant-numeric: tabular-nums; padding: 7px 11px; border-radius: 12px; background: rgba(8,12,18,.60); backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px); }
+.fpv-tl { grid-template-columns: auto auto; justify-items: start; }
+.fpv-tr { text-align: right; justify-items: end; }
+.fpv-tl b, .fpv-tr b { font-size: 15px; font-weight: 700; }
+.fpv-tl span, .fpv-tr span { color: rgba(234,242,255,.66); font-size: 10.5px; align-self: center; }
+.fpv-tag { grid-column: 1 / -1; justify-self: start; margin-bottom: 5px; font-size: 11px; letter-spacing: .14em; padding: 3px 9px; border: 1px solid rgba(234,242,255,.45); border-radius: 3px; }
+.fpv-tr .fpv-tag { justify-self: end; }
+.fpv-sub { display: block; }
+.fpv-mini { pointer-events: auto; display: block; padding: 2px 6px; margin: 1px -6px 0 0; border-radius: 6px; font-family: var(--mono); font-size: 11px; color: rgba(234,242,255,.8); background: none; border: 0; text-shadow: inherit; }
+.fpv-mini:hover { background: rgba(12,16,24,.6); color: #eaf2ff; }
+.fpv-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.fpv-btn { pointer-events: auto; min-height: var(--tap); padding: 6px 12px; border-radius: 999px; font-family: var(--mono); font-size: 12px; color: #eaf2ff; background: rgba(12,16,24,.68); border: 1px solid rgba(234,242,255,.35); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.fpv-btn:hover { background: rgba(12,16,24,.86); }
+.fpv-btn b { font-weight: 700; }
+.fpv-btn.off { border-color: rgba(239,68,68,.8); color: #ffb4b4; }
+.fpv-btn.on { background: rgba(239,106,45,.86); border-color: rgba(239,106,45,.9); color: #fff; }
+#fpvOut { margin-left: auto; }
+.fpv-note { margin: 0; font-family: var(--font); font-size: 11.5px; line-height: 1.5; color: rgba(234,242,255,.9); background: rgba(12,16,24,.66); border-left: 2px solid rgba(239,106,45,.9); padding: 5px 10px; border-radius: 0 6px 6px 0; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+body.fpv #viewCol { display: none; }   /* 映像に重ねない。戻り道は「外から見る」と Esc */
+body.fpv #noteCard, body.fpv #bigBand { display: none; }
+body.fpv #ctx { display: none; }   /* 操作はHUDに移す。ドックを畳むと映像が広がり、--dock-h も自動で縮む */
+body.fpv #inspector, body.fpv #lesson, body.fpv #expert, body.fpv #massBar, body.fpv #badges, body.fpv #leaders, body.fpv #labels { display: none; }   /* 映像は画面いっぱいに見せる */
+/* スティックは送信機と同じく左右のすみへ。広い画面はその間に、狭い画面はその上に注記を置く */
+body.fpv #sticks { left: calc(16px + var(--sal)); right: calc(16px + var(--sar)); bottom: calc(var(--dock-h) + 24px + var(--sab)); transform: none; width: auto; justify-content: space-between; gap: 0; }
+body.fpv #sticks .stick-mid { display: none; }
+body.fpv .stick { background: rgba(12,16,24,.42); border-color: rgba(234,242,255,.34); box-shadow: 0 6px 22px rgba(0,0,0,.35); }
+body.fpv .stick .knob { background: rgba(234,242,255,.24); border-color: rgba(234,242,255,.5); }
+body.fpv .stick .lbl { color: rgba(234,242,255,.72); text-shadow: 0 1px 3px rgba(0,0,0,.75); font-size: 10px; }
+body.fpv .stick .lbl.l { left: 4px; } body.fpv .stick .lbl.r { right: 4px; }   /* つまみに文字が重ならないよう内側に詰める */
+body.fpv.sticks-on .fpv-foot { left: calc(150px + var(--sal)); right: calc(150px + var(--sar)); }
+body.fpv.sticks-on .fpv-frame { display: none; }
+@media (max-width: 760px) {
+  .fpv-tl, .fpv-tr { font-size: 11px; }
+  .fpv-btn { font-size: 11px; padding: 6px 10px; }   /* 3つを1行に収める */
+  .fpv-tl b, .fpv-tr b { font-size: 13px; }
+  .fpv-note { font-size: 10.5px; }
+  .fpv-frame i { width: 18px; height: 18px; }
+  body.fpv.sticks-on .fpv-foot { left: calc(16px + var(--sal)); right: calc(16px + var(--sar)); bottom: calc(var(--dock-h) + 152px + var(--sab)); }
+}
+@media (prefers-reduced-transparency: reduce) { .fpv-btn, .fpv-note, .fpv-tl, .fpv-tr { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(12,16,24,.9); } }
+
 /* ---------- 第3ラウンド UI/UX 反映 ---------- */
 .pill-btn.on, .pill-btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-text); box-shadow: inset 0 0 0 1.5px var(--accent); }
 .mobile-only { display: none; }

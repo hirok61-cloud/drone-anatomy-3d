@@ -57,7 +57,10 @@ function stepFree(dt) {
   const holdK = body.hold ? 0.25 : 1, dragH = body.hold ? 6.0 : drag;   // 指が押さえている間は滑らない
   body.vx += (axg * holdK - dragH * body.vx) * dt; body.vz += (azg * holdK - dragH * body.vz) * dt; body.px += body.vx * dt; body.pz += body.vz * dt;
   // 高度: ホバー基準 + 傾きで沈む + スロットル + 押されて沈む
-  const thr = st.active ? st.thr : 0; const pyCmd = free.hoverY - 0.2 * (1 - Math.cos(th)) + 0.10 * thr - (body.hold ? 0.010 * (body.hold.th / free.holdMax) : 0);
+  const thr = st.active ? st.thr : 0;
+  const hov = (typeof fpv === 'object' && fpv.on) ? 1.05 : free.hoverY;   // カメラから見るときは、床すれすれだと何も映らない
+  const thrK = (typeof fpv === 'object' && fpv.on) ? 0.55 : 0.10;   // カメラから見るときは、高度計が動くだけ上下させる
+  const pyCmd = hov - 0.2 * (1 - Math.cos(th)) + thrK * thr - (body.hold ? 0.010 * (body.hold.th / free.holdMax) : 0);
   const ay = 36 * (pyCmd - body.py) - 9.6 * body.vyF; body.vyF += ay * dt; body.py += body.vyF * dt; body.vy = body.vyF;   // 上下の速度はセンサー視点でも読む
   // ヨー
   const yawCmd = st.active ? -1.2 * st.yaw : 0; body.yawRate = dl(body.yawRate, yawCmd, dt, 6); body.yaw += body.yawRate * dt;
@@ -85,6 +88,7 @@ function stepDemo(dt) {
   }
   if (S.flight !== 'yaw') { body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); body.yaw = dl(body.yaw, 0, dt, 3); }
   const r = 5; body.tx = dl(body.tx, tx, dt, r); body.tz = dl(body.tz, tz, dt, r);
+  if (typeof fpv === 'object' && fpv.on) py += 1.05;   // カメラから見るときは浮かせる(床の上だと印しか映らない)
   const ox = body.px, oy = body.py, oz = body.pz;
   body.px = dl(body.px, px, dt, r); body.py = dl(body.py, py, dt, r); body.pz = dl(body.pz, pz, dt, r);
   const idt = 1 / Math.max(dt, 1e-3); body.vx = (body.px - ox) * idt; body.vy = (body.py - oy) * idt; body.vz = (body.pz - oz) * idt;

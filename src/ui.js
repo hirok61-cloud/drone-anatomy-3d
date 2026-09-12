@@ -83,7 +83,7 @@ $('#powerSeg').addEventListener('click', e => { const b = e.target.closest('butt
 function syncBodyMode() {
   if (theater.active || descent.active) return setBodyMode('theater');
   if (S.flight) return setBodyMode('demo');
-  if (S.power > 0 && (S.tab === 'fly' || S.scale || alive.on || (S.lesson && lesson.hover) || S.expert === 'sensors')) return setBodyMode('free');
+  if (S.power > 0 && (S.tab === 'fly' || S.scale || alive.on || fpv.on || (S.lesson && lesson.hover) || S.expert === 'sensors')) return setBodyMode('free');
   setBodyMode('idle');
 }
 // 飛行の原理
@@ -118,7 +118,7 @@ function showLegend() { if ($('#noteCard').dataset.kind === 'flight' || $('#note
   renderNote({ kind: 'legend', title: 'まわる向きのしるし', badge: S.slow ? '1/50のはやさ' : null, html: `<div class="legend"><span class="ccw"><b>↺ 反時計まわり(CCW)</b></span> しま模様の羽・翼端が青緑<br><span class="cw"><b>↻ 時計まわり(CW)</b></span> 無地の羽・翼端が青<br>白い印が上を向いていれば正しい向きに付いています<br><b>灯火</b> 前・左 <span style="color:#ff3b30">●</span>赤 / 前・右 <span style="color:#22c55e">■</span>緑 / 後ろ ◆白</div>` }); }
 
 // ---------- 視点列 ----------
-$('#viewCol').addEventListener('click', e => { const b = e.target.closest('button[data-v]'); if (!b) return; segSet($('#viewCol'), 'v', b.dataset.v); S.view = b.dataset.v; setView(b.dataset.v); });
+$('#viewCol').addEventListener('click', e => { const b = e.target.closest('button[data-v]'); if (!b) return; segSet($('#viewCol'), 'v', b.dataset.v); if (b.dataset.v === 'fpv') { fpvOn(true); return; } if (fpv.on) fpvOn(false); S.view = b.dataset.v; setView(b.dataset.v); });
 $('#fsBtn').addEventListener('click', () => { const el = document.documentElement; if (document.fullscreenElement) document.exitFullscreen(); else if (el.requestFullscreen) el.requestFullscreen(); else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen(); });
 
 // ---------- 部品を探す（40件を目で追わせない。くわしく のときだけ出す） ----------
@@ -411,7 +411,7 @@ function onTheaterChanged() {
 const STICK_MAP = { 1: { L: { v: 'pitch', h: 'yaw' }, R: { v: 'thr', h: 'roll' } }, 2: { L: { v: 'thr', h: 'yaw' }, R: { v: 'pitch', h: 'roll' } } };
 const AXIS_LBL = { pitch: ['前', '後'], yaw: ['←向き', '向き→'], thr: ['上', '下'], roll: ['←左', '右→'] };
 let stickMode = ['1', '2'].includes(store.get('stickMode')) ? store.get('stickMode') : '1';
-function setSticks(on) { S.sticks = on; for (const x of $$('.tgl[data-t=sticks]')) x.classList.toggle('on', on); $('#sticks').hidden = !on; if (on) { if (S.power === 0) setPower(0.5, true); if (!store.get('stickSeen')) { showToast('スティックをたおすと、4つのモーターがそれぞれ違う速さになります。', 3600); store.set('stickSeen', '1'); } } else { body.stick.active = false; body.stick.x = body.stick.y = body.stick.yaw = body.stick.thr = 0; } labelSticks(); }
+function setSticks(on) { S.sticks = on; for (const x of $$('.tgl[data-t=sticks]')) x.classList.toggle('on', on); $('#sticks').hidden = !on; document.body.classList.toggle('sticks-on', !!on); if (typeof updateFpvHud === 'function') updateFpvHud(); if (on) { if (S.power === 0) setPower(0.5, true); if (!store.get('stickSeen')) { showToast('スティックをたおすと、4つのモーターがそれぞれ違う速さになります。', 3600); store.set('stickSeen', '1'); } } else { body.stick.active = false; body.stick.x = body.stick.y = body.stick.yaw = body.stick.thr = 0; } labelSticks(); }
 function labelSticks() { for (const side of ['L', 'R']) { const map = STICK_MAP[stickMode][side]; const el = $(side === 'L' ? '#stickL' : '#stickR'); el.querySelector('.lbl.t').textContent = AXIS_LBL[map.v][0]; el.querySelector('.lbl.b').textContent = AXIS_LBL[map.v][1]; el.querySelector('.lbl.l').textContent = AXIS_LBL[map.h][0]; el.querySelector('.lbl.r').textContent = AXIS_LBL[map.h][1]; } }
 $('#modeSeg2').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; stickMode = b.dataset.m; store.set('stickMode', stickMode); segSet($('#modeSeg2'), 'm', stickMode); labelSticks(); });
 for (const side of ['L', 'R']) {
@@ -459,6 +459,7 @@ function screenToDronePlane(x, y, out) { ptr.set((x / W) * 2 - 1, -(y / H) * 2 +
 let pend = null, hoverAt = null, push = null;
 canvas.addEventListener('pointerdown', e => {
   S.lastInteract = performance.now(); $('#coach').hidden = true;
+  if (fpv.on) { if (fpvDrag(e, 'down')) e.stopImmediatePropagation(); return; }
   if (S.scale && scaleTryDrag(e)) { e.stopImmediatePropagation(); return; }
   const hit = pickAt(e.clientX, e.clientY);
   if (hit && body.mode === 'free' && !theater.active) {
@@ -470,6 +471,7 @@ canvas.addEventListener('pointerdown', e => {
   pend = theater.active ? null : { x: e.clientX, y: e.clientY, t: performance.now(), hit };
 }, { capture: true });
 canvas.addEventListener('pointermove', e => {
+  if (fpv.on) { fpvDrag(e, 'move'); return; }
   if (push && e.pointerId === push.id) {
     const w = new THREE.Vector3(); if (!screenToDronePlane(e.clientX, e.clientY, w)) return;
     push.hist.push([w.clone(), performance.now()]); while (push.hist.length > 2 && performance.now() - push.hist[0][1] > 80) push.hist.shift();
@@ -489,7 +491,7 @@ const endPush = e => {
   if (!store.get('flicked')) { store.set('flicked', '1'); showToast('押された側のモーターが速くなって、元の姿勢にもどりました。', 3200); }
   push = null; controls.enabled = true; canvas.classList.remove('push');
 };
-canvas.addEventListener('pointerup', e => { endPush(e); if (!pend) return; const moved = Math.hypot(e.clientX - pend.x, e.clientY - pend.y), dt = performance.now() - pend.t; const hit = pend.hit; pend = null; if (moved < 6 && dt < 700) { if (hit) select(hit, false); else if (S.selected) select(null); } });
+canvas.addEventListener('pointerup', e => { if (fpv.on) { fpvDrag(e, 'up'); return; } endPush(e); if (!pend) return; const moved = Math.hypot(e.clientX - pend.x, e.clientY - pend.y), dt = performance.now() - pend.t; const hit = pend.hit; pend = null; if (moved < 6 && dt < 700) { if (hit) select(hit, false); else if (S.selected) select(null); } });
 canvas.addEventListener('pointercancel', endPush);
 canvas.addEventListener('dblclick', e => { if (body.mode === 'free' || theater.active) return; const p = pickAt(e.clientX, e.clientY); if (p) focusOn([p.obj]); });
 canvas.addEventListener('pointerleave', () => { hoverAt = null; if (S.hovered) { setTint(S.hovered, HOVER_L, 0); S.hovered = null; } canvas.classList.remove('pick'); });
@@ -521,7 +523,7 @@ document.addEventListener('keydown', e => {
   else if (k === ' ') { e.preventDefault(); if (S.tab !== 'fly') setTab('fly'); setPower(S.power === 0 ? 0.5 : 0); }
   else if (k === 'r') { segSet($('#viewCol'), 'v', 'iso'); S.view = 'iso'; setView('iso'); }
   else if (k === 'f' && S.selected) focusOn(S.selAll ? partsOf(S.selected.key).map(x => x.obj) : [S.selected.obj]);
-  else if (k === 'escape') { if (theater.active) stopTheaterUI(); else if (S.question) { clearQuestion(); renderNote(null); } else if (S.flight) setFlight(null); else if (S.selected) select(null); else $('#inspector').classList.remove('open'); }
+  else if (k === 'escape') { if (fpv.on) { segSet($('#viewCol'), 'v', 'iso'); S.view = 'iso'; fpvOn(false); } else if (theater.active) stopTheaterUI(); else if (S.question) { clearQuestion(); renderNote(null); } else if (S.flight) setFlight(null); else if (S.selected) select(null); else $('#inspector').classList.remove('open'); }
 });
 
 // ---------- 設定 ----------
@@ -555,9 +557,10 @@ function bindSheet(el) {
 }
 bindSheet($('#inspector'));
 $('#previewClose').addEventListener('click', closePreview);
-new ResizeObserver(() => document.documentElement.style.setProperty('--dock-h', $('#dock').offsetHeight + 'px')).observe($('#dock'));
+function syncDockH() { document.documentElement.style.setProperty('--dock-h', $('#dock').offsetHeight + 'px'); }
+new ResizeObserver(syncDockH).observe($('#dock'));
 
-function onThemeChanged(dark) { airflowTheme(dark); }
+function onThemeChanged(dark) { airflowTheme(dark); fpvStageTheme(); }
 function onQualityChanged(level) { if (air.mesh && air.N !== Q.particles) rebuildAirflow(); $('#perfInfo').textContent = `品質 ${level}`; }
 { // シートの開閉・カードの出入りで、3Dの見える帯が変わるたびに視錐台を合わせ直す
   const watch = ['#inspector', '#lesson', '#expert', '#noteCard', '#massBar'].map(s => $(s)).filter(Boolean);
