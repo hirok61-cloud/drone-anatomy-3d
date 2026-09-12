@@ -123,7 +123,8 @@ function applyBody(dtReal) {
 
 // ---------- モーター / プロペラ ----------
 for (const mo of D.motors) { mo.rpm = 0; mo.angle = 0; mo.pct = 0; mo.rpmTarget = null; mo.rpmRate = null;
-  mo.propMesh.material = mo.propMesh.material.clone(); mo.hubMesh = mo.prop.children.find(c => c.isMesh && c !== mo.propMesh); if (mo.hubMesh) mo.hubMesh.material = mo.hubMesh.material.clone(); }
+  mo.propMesh.material = mo.propMesh.material.clone(); mo.propMesh.userData.origMat = mo.propMesh.material;
+  mo.hubMesh = mo.prop.children.find(c => c.isMesh && c !== mo.propMesh); if (mo.hubMesh) { mo.hubMesh.material = mo.hubMesh.material.clone(); mo.hubMesh.userData.origMat = mo.hubMesh.material; } }   // 複製を origMat にもしておく(表示モードから戻るときに共有材質へ戻らないように)
 let shadowTick = 0;
 function updateMotors(dtSim, dtReal) {
   let anySpin = false;
@@ -134,7 +135,9 @@ function updateMotors(dtSim, dtReal) {
     mo.angle = (mo.angle + mo.dir * mo.rpm / 60 * Math.PI * 2 * dtSim) % (Math.PI * 2); mo.prop.rotation.y = mo.angle;
     const dpf = mo.rpm * S.ts * 0.1;   // 60fps換算の1フレーム回転角[deg] (fps非依存)
     const wReal = 1 - smoothstep(30, 90, dpf) * 0.85, wGhost = smoothstep(20, 60, dpf) * (1 - smoothstep(60, 120, dpf)), wDisc = smoothstep(24, 72, dpf);
-    for (const m of [mo.propMesh.material, mo.hubMesh && mo.hubMesh.material]) { if (!m) continue; if (wReal >= 0.999) { if (m.transparent) { m.transparent = false; m.opacity = 1; m.needsUpdate = true; } } else { if (!m.transparent) { m.transparent = true; m.needsUpdate = true; } m.opacity = Math.max(0.15, wReal); } }
+    // 残像の薄めはこのプロペラ専用の材質にだけ掛ける。X線・線画では共有材質(xrayMat/paperMat)が割り当たっているので、それを書き換えると機体全体が消える
+    const blurMats = []; for (const mesh of [mo.propMesh, mo.hubMesh]) { if (!mesh) continue; const u = mesh.userData; for (const mm of [u.origMat, u.tintMat]) if (mm && !Array.isArray(mm)) blurMats.push(mm); }
+    for (const m of blurMats) { if (!m) continue; if (wReal >= 0.999) { if (m.transparent) { m.transparent = false; m.opacity = 1; m.needsUpdate = true; } } else { if (!m.transparent) { m.transparent = true; m.needsUpdate = true; } m.opacity = Math.max(0.15, wReal); } }
     mo.ghosts.forEach((gh, k) => { const on = Q.ghosts && wGhost > 0.02 && S.mode === 'normal'; gh.visible = on; if (on) { gh.rotation.y = (k ? 1 : -1) * THREE.MathUtils.degToRad(dpf / 3); gh.material.opacity = 0.35 * wGhost; } });
     mo.disc.material.opacity = wDisc * 0.85; mo.disc.rotation.z += mo.dir * 4 * dtReal;
     const raw = mo.rpm / HOVER_RPM * 100; mo.pct = raw > mo.pct ? raw : mo.pct + (raw - mo.pct) * (1 - Math.exp(-dtReal / 0.5));

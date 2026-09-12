@@ -185,13 +185,16 @@ for (const p of [scenePass, gtao, outlineSel, outputPass, finishPass]) composer.
 // ---------- 表示モード用の材質 / ティント ----------
 const xrayMat = new THREE.ShaderMaterial({
   uniforms: { color: { value: new THREE.Color('#20304a') }, opacity: { value: 0.85 }, power: { value: 2.2 }, base: { value: 0.05 } },
-  vertexShader: `#include <common>
-    varying vec3 vN; varying vec3 vV;
-    void main() { #include <beginnormal_vertex>
-      #include <defaultnormal_vertex>
-      #include <begin_vertex>
-      #include <project_vertex>
-      vN = normalize(transformedNormal); vV = normalize(-mvPosition.xyz); }`,
+  // 法線と位置は自前で組む。three r170 では #include <defaultnormal_vertex> 等のチャンクを並べても何も描かれなくなる（X線が丸ごと消えていた）
+  vertexShader: `varying vec3 vN; varying vec3 vV;
+    void main() {
+      vec3 objN = normal; vec4 mv = vec4(position, 1.0);
+      #ifdef USE_INSTANCING
+        mv = instanceMatrix * mv; objN = mat3(instanceMatrix) * objN;
+      #endif
+      mv = modelViewMatrix * mv;
+      vN = normalize(normalMatrix * objN); vV = normalize(-mv.xyz);
+      gl_Position = projectionMatrix * mv; }`,
   fragmentShader: `uniform vec3 color; uniform float opacity; uniform float power; uniform float base; varying vec3 vN; varying vec3 vV;
     void main() { float f = pow(1.0 - abs(dot(normalize(vN), normalize(vV))), power); gl_FragColor = vec4(color, clamp(base + f * opacity, 0.0, 1.0)); }`,
   transparent: true, depthWrite: false, side: THREE.DoubleSide,
@@ -365,7 +368,7 @@ function applyTheme() {
   groundMat.color.set(T.ground); groundMat.clearcoat = T.gcc; gridU.uLine.value.set(T.grid);
   backdropMat.uniforms.top.value.set(T.bg[0]); backdropMat.uniforms.mid.value.set(T.bg[1]); backdropMat.uniforms.edge.value.set(T.bg[2]); backdropMat.uniforms.bottom.value.set(T.bg[3]);
   finishPass.uniforms.vig.value = T.vig; csPlane.material.opacity = T.cs;
-  xrayMat.uniforms.color.value.set(T.xray); xrayMat.uniforms.opacity.value = themeDark ? 0.75 : 1.0; xrayMat.uniforms.base.value = themeDark ? 0.02 : 0.07; xrayMat.uniforms.power.value = themeDark ? 2.2 : 1.6; xrayMat.blending = themeDark ? THREE.AdditiveBlending : THREE.NormalBlending; xrayMat.needsUpdate = true;
+  xrayMat.uniforms.color.value.set(T.xray); xrayMat.uniforms.opacity.value = themeDark ? 0.75 : 0.72; xrayMat.uniforms.base.value = themeDark ? 0.02 : 0.025; xrayMat.uniforms.power.value = themeDark ? 2.2 : 2.0;   // 明るいテーマは重ねたときに中心が黒く潰れないよう薄く xrayMat.blending = themeDark ? THREE.AdditiveBlending : THREE.NormalBlending; xrayMat.needsUpdate = true;
   wireMat.color.set(T.wire); paperMat.color.set(T.paper);
   arrowNeutral = themeDark ? 0xf2f4f8 : 0x30343c;
   D.parts.filter(p => p.key === 'led').forEach(p => { if (p.obj.userData.halo) p.obj.userData.halo.material.opacity = T.halo; });
