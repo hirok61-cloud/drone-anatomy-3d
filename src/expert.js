@@ -59,7 +59,7 @@ function expertStop(silent) {
   if (!expert.mode) return;
   if (expert.mode === 'sensors') sensorsLeave(); else if (expert.mode === 'wear') wearLeave(); else toolboxLeave();
   expert.mode = null; S.expert = null;
-  $('#expert').hidden = true; $('#expert').classList.remove('open', 'tall'); if (!S.lesson) $('#inspector').hidden = false;
+  $('#expert').hidden = true; $('#expert').classList.remove('open', 'tall', 'peek'); if (!S.lesson) $('#inspector').hidden = false;
   document.body.classList.remove('expert');
   if (!silent) syncBodyMode();
 }
@@ -79,7 +79,7 @@ function expertArrows(hide) {
 // ---------- ⑪ センサー視点 ----------
 function sensorsEnter() {
   setPower(0.5, true); syncBodyMode();
-  expert.prev = { tx: body.tx, tz: body.tz, yaw: body.yaw, vx: 0, vz: 0, vy: 0, t: 0 }; expert.drift = 0; expert.tsum = 0; expert.heat = 0; expert.heatRun = false;
+  expert.prev = { tx: body.tx, tz: body.tz, yaw: body.yaw, vx: 0, vz: 0, vy: 0, t: 0 }; expert.drift = 0; expert.tsum = 0; expert.heat = 0; expert.heatRun = false; expert.acc = null;
   if (expert.radio) radioDonut(true);
   showToast('機体はホバー中。はじくとジャイロが振れます', 3000);
 }
@@ -159,7 +159,15 @@ function sensorsStep(dtSim, dtReal) {
   let hd = (-body.yaw * R2D + dev + 1.0 * nz()) % 360; if (hd < 0) hd += 360;
   const ch = expert.charts;
   if (ch.gyro) { ch.gyro.push(gyro); ch.acc.push(acc); ch.baro.push([alt]); ch.mag.push([dev + 1.0 * nz()]); const dark = themeDark; ch.gyro.draw(dark); ch.acc.draw(dark); ch.baro.draw(dark); ch.mag.draw(dark); }
-  const hv = $('#sensVals'); if (hv) hv.innerHTML = `<span>ジャイロ p ${gyro[0].toFixed(0)} / q ${gyro[1].toFixed(0)} / r ${gyro[2].toFixed(0)} °/s</span><span>加速度 z ${acc[2].toFixed(2)} g</span><span>高度 ${alt.toFixed(2)} m</span><span>方位 ${hd.toFixed(0)}°${Math.abs(dev) >= 0.5 ? ` <b>（電流で ${dev > 0 ? '+' : ''}${dev.toFixed(0)}° ずれ）</b>` : ''}</span>`;
+  // 数値の読み出しは 0.25 秒の平均を 4 回/秒で出す。生の値は毎フレーム±1°/s・±3cm ほど揺れる(それが波形の見どころ)が、数字が毎フレーム踊ると壊れて見える
+  const ac = expert.acc || (expert.acc = { n: 0, t: 0, g: [0, 0, 0], z: 0, alt: 0, hx: 0, hy: 0, dev: 0 });
+  ac.n++; ac.t += dt; ac.g[0] += gyro[0]; ac.g[1] += gyro[1]; ac.g[2] += gyro[2]; ac.z += acc[2]; ac.alt += alt; ac.hx += Math.cos(hd / R2D); ac.hy += Math.sin(hd / R2D); ac.dev += dev;
+  if (ac.t >= 0.25 || ac.n === 1) {
+    const n = ac.n, g = ac.g.map(x => x / n), z = ac.z / n, al = ac.alt / n, d_ = ac.dev / n; let h = Math.atan2(ac.hy, ac.hx) * R2D; if (h < 0) h += 360; if (h >= 359.5) h = 0;
+    const f0 = (x) => (Math.abs(x) < 0.5 ? '0' : x.toFixed(0));   /* -0 を出さない */
+    const hv = $('#sensVals'); if (hv) hv.innerHTML = `<i class="dot" aria-hidden="true"></i><span>ジャイロ p ${f0(g[0])} / q ${f0(g[1])} / r ${f0(g[2])} °/s</span><span>加速度 z ${z.toFixed(2)} g</span><span>高度 ${al.toFixed(2)} m</span><span>方位 ${h.toFixed(0)}°${Math.abs(d_) >= 0.5 ? ` <b>（電流で ${d_ > 0 ? '+' : ''}${d_.toFixed(0)}° ずれ）</b>` : ''}</span><small>0.25 秒の平均。1コマごとのばらつき（ノイズ）は波形のほうで見る</small>`;
+    ac.n = 0; ac.t = 0; ac.g = [0, 0, 0]; ac.z = ac.alt = ac.hx = ac.hy = ac.dev = 0;
+  }
   pv.tx = body.tx; pv.tz = body.tz; pv.yaw = body.yaw; pv.vx = body.vx; pv.vz = body.vz; pv.vy = body.vy || 0;
   if (expert.heatRun) { heatApply(Math.min(1, expert.heat + dtReal / 6)); renderHeatBars(); if (expert.heat >= 1) { expert.heatRun = false; renderHeatBars(); } }
 }
@@ -342,12 +350,12 @@ function renderExpertPanel() {
   const note = typeof langNote === 'function' ? langNote() : '';
   if (m === 'sensors') {
     body_.innerHTML = `${note}
+      <div id="sensVals" class="vals live" aria-live="off"><i class="dot" aria-hidden="true"></i></div>
       <p class="xnote">機体はホバー中。<b>はじく</b>とジャイロが振れ、<b>防振</b>を切ると細かい震えが乗ります。傾いて動いても x・y の加速度計はほぼ 0 g — だから FC はジャイロと融合して姿勢を知ります。</p>
       <div class="chart"><div class="chart-h"><b>ジャイロ <small>°/s（1秒に回る角度）</small></b><span class="lg">${legendDots([[XCOL.p, 'p ロール'], [XCOL.q, 'q ピッチ'], [XCOL.r, 'r ヨー']])}</span><button class="tgl sm ${expert.damper ? 'on' : ''}" id="xDamper" aria-pressed="${expert.damper}"><i></i>防振ゴムで震えを減らす</button></div><canvas id="chGyro" role="img" aria-label="ジャイロの波形"></canvas></div>
       <div class="chart"><div class="chart-h"><b>加速度 <small>g（重力 9.81 m/s² の何倍か）</small></b><span class="lg">${legendDots([[XCOL.p, 'x 横（ロールの向き）'], [XCOL.q, 'y 前後（ピッチの向き）'], [XCOL.r, 'z 上下']])}</span></div><canvas id="chAcc" role="img" aria-label="加速度の波形"></canvas></div>
       <div class="chart"><div class="chart-h"><b>気圧高度 <small>m</small></b><span class="lg">天候で流れる。地面近くでは吹き下ろしで乱れる</span></div><canvas id="chBaro" role="img" aria-label="気圧高度の波形"></canvas></div>
       <div class="chart"><div class="chart-h"><b>コンパスのずれ <small>°（真の方位との差）</small></b><label class="rng" for="xCurrent">電源線の電流 <input type="range" id="xCurrent" min="0" max="60" value="${expert.current}"> <b id="xCurrentV">${expert.current} A</b></label></div><canvas id="chMag" role="img" aria-label="コンパスのずれの波形"></canvas><p class="hint">電流に比例・電源線までの距離に反比例。機体に固定された磁界なので、機首の向きで ± が変わる。往復の線をより合わせると打ち消せる — だから GNSS/コンパスはマストの上に。</p></div>
-      <div id="sensVals" class="vals"></div>
       <div class="xctl"><button class="tgl ${expert.radio ? 'on' : ''}" id="xRadio" aria-pressed="${expert.radio}"><i></i>電波の形を見る（受信アンテナ：2本で1本のダイポール）</button></div>
       <p class="hint">素子の延長方向が弱い。だから機体の真上・真下に穴ができ、2セット付けて互いの穴を埋める機体もある。</p>
       <div class="xheat"><div class="xh-head"><b>ホバー10分の熱</b><span id="heatTime">ホバー 0.0 分</span><button id="xHeat" class="pill-btn">▶ 早送り</button><button id="xHeatReset" class="pill-btn" disabled>もどす</button></div><div id="heatBars"></div><p class="hint">順番と相対量を見るための表示で、絶対温度ではありません。ホバー（低電流）ではモーターが最初に温まり、ESC が熱いのは全開連続・密閉フレームのときです。</p></div>`;
@@ -415,12 +423,6 @@ function initExpert() {
   for (const id of ['#expertSeg', '#expertSegM']) { const el = $(id); if (el) el.addEventListener('click', e => { const b = e.target.closest('button'); if (b) expertStart(b.dataset.x); }); }
   const tg = $('#expertToggle'); if (tg) tg.addEventListener('click', expertOpenSheet);
   $('#expertClose').addEventListener('click', () => { if (narrow()) $('#expert').classList.remove('open'); else setTab('see'); });
-  // シート: 下スワイプで閉じる、上スワイプで高く(2段デテント)
-  const el = $('#expert'), grab = el.querySelector('.grabber'); let drag = null;
-  grab.addEventListener('pointerdown', e => { drag = { y0: e.clientY, hist: [[e.clientY, performance.now()]] }; grab.setPointerCapture(e.pointerId); el.classList.add('dragging'); });
-  grab.addEventListener('pointermove', e => { if (!drag) return; const dy = e.clientY - drag.y0; el.style.transform = `translateY(${Math.max(-80, dy)}px)`; drag.hist.push([e.clientY, performance.now()]); if (drag.hist.length > 6) drag.hist.shift(); });
-  const end = e => { if (!drag) return; const dy = e.clientY - drag.y0; const h0 = drag.hist[0], h1 = drag.hist[drag.hist.length - 1]; const v = (h1[0] - h0[0]) / Math.max(1, h1[1] - h0[1]); el.classList.remove('dragging'); el.style.transform = '';
-    if (v < -0.5 || dy < -60) el.classList.add('tall'); else if (el.classList.contains('tall') && (v > 0.5 || dy > 60)) el.classList.remove('tall'); else if (v > 0.5 || dy > el.offsetHeight * 0.4) el.classList.remove('open'); drag = null; };
-  grab.addEventListener('pointerup', end); grab.addEventListener('pointercancel', end);
+  bindSheet($('#expert'));   /* peek / open / tall の3段(ui.js) */
   window.__expert = expert; window.__toolboxCalc = toolboxCalc;
 }

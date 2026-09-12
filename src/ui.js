@@ -485,11 +485,26 @@ $('#expSlider').addEventListener('input', e => { S.exposureMul = e.target.value 
 // モバイルシート
 $('#inspToggle').addEventListener('click', () => (S.lesson ? $('#lesson') : S.expert ? $('#expert') : $('#inspector')).classList.add('open'));
 $('#inspClose').addEventListener('click', () => $('#inspector').classList.remove('open'));
-{ const insp = $('#inspector'), grab = insp.querySelector('.grabber'); let drag = null;   /* $('.grabber') だと DOM 先頭の専門シートのつまみを掴んでしまう */
-  grab.addEventListener('pointerdown', e => { drag = { y0: e.clientY, hist: [[e.clientY, performance.now()]] }; grab.setPointerCapture(e.pointerId); insp.classList.add('dragging'); });
-  grab.addEventListener('pointermove', e => { if (!drag) return; const dy = Math.max(0, e.clientY - drag.y0); insp.style.transform = `translateY(${dy}px)`; drag.hist.push([e.clientY, performance.now()]); if (drag.hist.length > 6) drag.hist.shift(); });
-  const end = e => { if (!drag) return; const dy = Math.max(0, e.clientY - drag.y0); const h0 = drag.hist[0], h1 = drag.hist[drag.hist.length - 1]; const v = (h1[0] - h0[0]) / Math.max(1, h1[1] - h0[1]); insp.classList.remove('dragging'); insp.style.transform = ''; if (v > 0.5 || dy > insp.offsetHeight * 0.4) insp.classList.remove('open'); drag = null; };
-  grab.addEventListener('pointerup', end); grab.addEventListener('pointercancel', end); }
+// スマホのシートは3段デテント: peek(つまみ+見出しだけ。機体を眺めながら部品を突つく) / open(既定) / tall(読む)。
+// つまみを上下にはじくと1段ずつ移る。peek からさらに下げると閉じる。つまみをタップすると peek と open を行き来する
+function sheetState(el) { return el.classList.contains('tall') ? 2 : el.classList.contains('peek') ? 0 : 1; }
+function setSheetState(el, n) {
+  if (n < 0) { el.classList.remove('open', 'peek'); return; }
+  el.classList.toggle('peek', n === 0); el.classList.toggle('tall', n === 2); el.classList.add('open');
+}
+function bindSheet(el) {
+  const grab = el.querySelector('.grabber'); let drag = null;   /* シートごとに自分のつまみを掴む($('.grabber') だと DOM 先頭のものを掴む) */
+  grab.addEventListener('pointerdown', e => { drag = { y0: e.clientY, t0: performance.now(), hist: [[e.clientY, performance.now()]] }; grab.setPointerCapture(e.pointerId); el.classList.add('dragging'); });
+  grab.addEventListener('pointermove', e => { if (!drag) return; let dy = e.clientY - drag.y0; if (dy < 0) dy = -80 * dy / (dy - 80);   /* 上はゴム状に抵抗 */ el.style.transform = `translateY(${dy}px)`; drag.hist.push([e.clientY, performance.now()]); if (drag.hist.length > 6) drag.hist.shift(); });
+  const end = e => { if (!drag) return; const dy = e.clientY - drag.y0; const h0 = drag.hist[0], h1 = drag.hist[drag.hist.length - 1]; const v = (h1[0] - h0[0]) / Math.max(1, h1[1] - h0[1]); el.classList.remove('dragging'); el.style.transform = '';
+    const n = sheetState(el);
+    if (Math.abs(dy) < 6 && performance.now() - drag.t0 < 350) setSheetState(el, n === 0 ? 1 : 0);   /* タップ: peek ⇄ open */
+    else if (v < -0.4 || dy < -50) setSheetState(el, Math.min(2, n + 1));
+    else if (v > 0.4 || dy > 50 || dy > el.offsetHeight * 0.4) setSheetState(el, n - 1);
+    drag = null; };
+  grab.addEventListener('pointerup', end); grab.addEventListener('pointercancel', end);
+}
+bindSheet($('#inspector'));
 new ResizeObserver(() => document.documentElement.style.setProperty('--dock-h', $('#dock').offsetHeight + 'px')).observe($('#dock'));
 
 function onThemeChanged(dark) { airflowTheme(dark); }
@@ -497,8 +512,13 @@ function onQualityChanged(level) { if (air.mesh && air.N !== Q.particles) rebuil
 { // シートの開閉・カードの出入りで、3Dの見える帯が変わるたびに視錐台を合わせ直す
   const watch = ['#inspector', '#lesson', '#expert', '#noteCard', '#massBar'].map(s => $(s)).filter(Boolean);
   let t = 0; const kick = () => { clearTimeout(t); t = setTimeout(() => { if (narrow()) resize(); }, 60); };   /* シートは .38s かけて動くので、動き終わりにも測り直す */
-  const mo = new MutationObserver(() => { kick(); setTimeout(kick, 420); });
-  for (const el of watch) { mo.observe(el, { attributes: true, attributeFilter: ['class', 'hidden', 'style'] }); el.addEventListener('transitionend', e => { if (e.propertyName === 'transform') kick(); }); }
+  const sheets = ['#inspector', '#lesson', '#expert'].map(s => $(s));
+  const fold = () => {   /* シートが open/tall のときは視点バー(tall ではタイトルバーも)を畳む。peek は機体を見る段なので戻す */
+    const st = sheets.map(el => (el.hidden || !el.classList.contains('open')) ? -1 : sheetState(el)); const mx = Math.max(...st);
+    document.body.classList.toggle('sheet-open', mx >= 1); document.body.classList.toggle('sheet-tall', mx >= 2);
+  };
+  const mo = new MutationObserver(() => { fold(); kick(); setTimeout(kick, 420); });
+  for (const el of watch) { mo.observe(el, { attributes: true, attributeFilter: ['class', 'hidden', 'style'] }); el.addEventListener('transitionend', e => { if (e.propertyName === 'transform' || e.propertyName === 'height') kick(); }); }
 }
 function onResized() {
   if (S.scale) { if (D.personGroup) D.personGroup.visible = !compact(); renderMassBar(S.selected && S.selected.key); } for (const L of labelEls) L.w = 0; if (!S.labelsTouched) { S.labels = !narrow(); for (const x of $$('.tgl[data-t=labels]')) x.classList.toggle('on', S.labels); } }

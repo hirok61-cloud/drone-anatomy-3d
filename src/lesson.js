@@ -218,11 +218,7 @@ function lessonKey(e) {
 }
 function lessonEndAsk() { showCoach('授業モードを終了しますか', '台本を閉じて、ふつうの画面に戻ります', () => stopLesson(), null); $('#coachGo').textContent = '終了する'; }
 function bindLessonSheet() {
-  const el = $('#lesson'), grab = el.querySelector('.grabber'); let drag = null;
-  grab.addEventListener('pointerdown', e => { drag = { y0: e.clientY, hist: [[e.clientY, performance.now()]] }; grab.setPointerCapture(e.pointerId); el.classList.add('dragging'); });
-  grab.addEventListener('pointermove', e => { if (!drag) return; const dy = Math.max(0, e.clientY - drag.y0); el.style.transform = `translateY(${dy}px)`; drag.hist.push([e.clientY, performance.now()]); if (drag.hist.length > 6) drag.hist.shift(); });
-  const end = e => { if (!drag) return; const dy = Math.max(0, e.clientY - drag.y0); const h0 = drag.hist[0], h1 = drag.hist[drag.hist.length - 1]; const v = (h1[0] - h0[0]) / Math.max(1, h1[1] - h0[1]); el.classList.remove('dragging'); el.style.transform = ''; if (v > 0.5 || dy > el.offsetHeight * 0.4) el.classList.remove('open'); drag = null; };
-  grab.addEventListener('pointerup', end); grab.addEventListener('pointercancel', end);
+  bindSheet($('#lesson'));   /* peek / open / tall の3段(ui.js) */
   // 段落リスト上の左右スワイプで前後
   const steps = $('#lessonSteps');
   steps.addEventListener('pointerdown', e => { if (e.pointerType !== 'touch') return; lesson.swipe = { x0: e.clientX, y0: e.clientY, t0: performance.now() }; });

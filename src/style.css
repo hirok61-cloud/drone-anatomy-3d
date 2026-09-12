@@ -206,19 +206,23 @@ button, .tabs, .seg, .chips { touch-action: manipulation; -webkit-user-select: n
 /* ---- responsive ---- */
 @media (max-width: 1100px) {
   :root { --insp-w: 0px; }
-  #inspector, #lesson, #expert { top: auto; right: 0; left: 0; bottom: 0; width: auto; height: min(62vh, 560px);   /* 3Dが3割は見えるように。深く読むときはつまみを上へ */ border-radius: 20px 20px 0 0; transform: translateY(102%); transition: transform .38s cubic-bezier(.32,.72,0,1); will-change: transform; z-index: 14; }
+  #inspector, #lesson, #expert { top: auto; right: 0; left: 0; bottom: 0; width: auto; height: min(56vh, 520px);   /* 3段デテント: peek(名前だけ) / open(既定) / tall(読む)。既定は3Dが4割見える高さ */ border-radius: 20px 20px 0 0; transform: translateY(102%); transition: transform .38s cubic-bezier(.32,.72,0,1), height .3s cubic-bezier(.32,.72,0,1); will-change: transform; z-index: 14; }
   #inspector.open, #lesson.open, #expert.open { transform: translateY(0); } #inspector.dragging, #lesson.dragging, #expert.dragging { transition: none; }
   .grabber { display: block; width: 40px; height: 5px; border-radius: 3px; background: var(--hair2); margin: 8px auto 0; position: relative; }
   .grabber::before { content: ''; position: absolute; inset: -22px -60px; }
   #inspClose { display: grid; }
   .compact-only { display: inline-flex; }
-  #expert { height: min(46vh, 420px); } #expert.tall, #inspector.tall, #lesson.tall { height: min(80vh, 660px); } .xsegm { margin: 0 14px 6px; align-self: flex-start; } #expertClose { display: grid; }   /* 専門シートは機体が見える高さに留め、モード切替をシート内にも置く(ドックがシートの下に隠れるため) */
+  #expert { height: min(46vh, 420px); } #expert.tall, #inspector.tall, #lesson.tall { height: min(80vh, 660px); } #inspector.peek, #lesson.peek, #expert.peek { height: max(150px, 21vh); } .xsegm { margin: 0 14px 6px; align-self: flex-start; } #expertClose { display: grid; }   /* 専門シートは機体が見える高さに留め、モード切替をシート内にも置く(ドックがシートの下に隠れるため) */
   #dock { right: 14px; margin: 0; } #viewCol { right: 14px; } #noteCard { width: min(420px, calc(100vw - 90px)); }
+  /* シートを開いている間は上の操作を畳んで、機体の帯を広くとる(peek では戻す)。tall はタイトルバーまで畳む */
+  #viewCol, #topbar { transition: opacity .25s, transform .25s, visibility .25s; }
+  body.sheet-open #viewCol, body.sheet-tall #topbar { opacity: 0; transform: translateY(-10px); visibility: hidden; pointer-events: none; }
 }
 @media (max-width: 760px), (max-height: 520px) {
-  #viewCol { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; bottom: auto; top: calc(66px + var(--sat)); right: calc(10px + var(--sar)); max-width: calc(100vw - 20px - var(--sal) - var(--sar)); padding: 4px; }
-  #viewCol hr { display: none; } #viewCol button { width: 38px; height: 38px; }
+  #viewCol { flex-direction: row; flex-wrap: nowrap; bottom: auto; top: calc(74px + var(--sat)); left: calc(10px + var(--sal)); right: calc(10px + var(--sar)); max-width: none; padding: 4px; gap: 2px; }   /* 1段に収める(折り返すと空の段が3Dを隠す) */
+  #viewCol hr, #viewCol #fsBtn { display: none; } #viewCol button { flex: 1 1 0; width: auto; min-width: 0; height: 40px; }   /* 全画面ボタンは詳細度を上げて消す(#viewCol button の display:grid に負けない) */
 }
+@media (min-width: 761px) and (max-height: 520px) { #viewCol { left: auto; } #viewCol button { flex: none; width: 40px; } }   /* 横向きの広い画面では右寄せのまま */
 @media (max-width: 760px) {
   :root { --dock-h: 118px; }
   #topbar { left: calc(10px + var(--sal)); right: calc(10px + var(--sar)); top: calc(10px + var(--sat)); padding: 6px 6px 6px 10px; gap: 8px; }
@@ -230,8 +234,6 @@ button, .tabs, .seg, .chips { touch-action: manipulation; -webkit-user-select: n
   .ctx-row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; align-items: flex-end; gap: 12px; padding-right: 24px; mask-image: linear-gradient(to right, #000 88%, transparent); -webkit-mask-image: linear-gradient(to right, #000 88%, transparent); } .ctx-row::-webkit-scrollbar { display: none; }
   .dock-group { flex: none; } .dock-group.grow { flex: none; width: 150px; } .chips { flex-wrap: nowrap; }
   .tabs button span { font-size: 11px; } .tabs button { flex-direction: column; gap: 2px; padding: 6px 4px; }
-  #viewCol { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; bottom: auto; top: 66px; right: calc(10px + var(--sar)); max-width: calc(100vw - 20px - var(--sal) - var(--sar)); padding: 4px; } #viewCol hr { display: none; }
-  #viewCol button { width: 38px; height: 38px; }
   #noteCard { left: 10px; bottom: calc(var(--dock-h) + 8px); width: calc(100vw - 20px); max-height: 34vh; font-size: 13px; }
   #coach { width: calc(100vw - 40px); top: 130px; }
   #sticks { bottom: calc(var(--dock-h) + 10px); gap: 10px; } .stick { width: 112px; height: 112px; }
@@ -395,7 +397,9 @@ body.scale #noteCard { left: calc(14px + 212px + 12px); width: min(420px, calc(1
 .chart-h .lg { font-size: calc(11px * var(--fs, 1)); color: var(--ink3); } .chart-h .lg i, .wr .cls i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 3px; vertical-align: -1px; }
 .chart-h .tgl.sm { min-height: 26px; padding: 2px 8px; font-size: calc(11.5px * var(--fs, 1)); } .chart-h .rng { display: flex; align-items: center; gap: 6px; font-size: calc(11.5px * var(--fs, 1)); color: var(--ink2); } .chart-h .rng input { width: 100px; } .chart-h .rng b { font-variant-numeric: tabular-nums; min-width: 34px; }
 .chart canvas { display: block; width: 100%; height: 72px; border-radius: 8px; background: var(--seg-bg); } .chart.tall canvas { height: 110px; }
-.vals { display: flex; flex-wrap: wrap; gap: 4px 14px; font: calc(11px * var(--fs, 1))/1.5 var(--mono); color: var(--ink2); } .vals b { color: var(--warn); font-weight: 600; }
+.vals { display: flex; flex-wrap: wrap; gap: 4px 14px; font: calc(11px * var(--fs, 1))/1.5 var(--mono); color: var(--ink2); font-variant-numeric: tabular-nums; } .vals b { color: var(--warn); font-weight: 600; }
+.vals.live { align-items: center; gap: 4px 12px; padding: 6px 10px; border-radius: 10px; background: var(--seg-bg); font-size: calc(11.5px * var(--fs, 1)); } .vals.live .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: livePulse 1.6s ease-in-out infinite; } .vals.live small { flex-basis: 100%; font: calc(10.5px * var(--fs, 1))/1.4 var(--sans, inherit); color: var(--ink3); }
+@keyframes livePulse { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
 .xctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; } .xctl label { font-size: calc(12px * var(--fs, 1)); color: var(--ink2); display: flex; align-items: center; gap: 6px; }
 .xctl .tgl, .xctl .pill-btn { min-height: 30px; padding: 4px 10px; font-size: calc(12px * var(--fs, 1)); } .xctl select { padding: 4px 6px; border-radius: 8px; border: 1px solid var(--hair2); background: var(--glass-strong); color: var(--ink); }
 .xheat, .xab { border-top: 1px solid var(--hair); padding-top: 8px; } .xh-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 6px; } .xh-head b { flex: 1; font-size: calc(12.5px * var(--fs, 1)); } .xh-head span { font-size: calc(11px * var(--fs, 1)); color: var(--ink3); font-variant-numeric: tabular-nums; } .xh-head .pill-btn { min-height: 28px; padding: 3px 10px; font-size: calc(11.5px * var(--fs, 1)); }

@@ -339,8 +339,29 @@ function bottomCover() {
   }
   return Math.min(cov, H2 * 0.62);
 }
+// 画面上でタイトルバーや視点バーが覆っている高さ(CSSピクセル)。畳まれている(visibility hidden)ものは数えない
+function topCover() {
+  const H2 = window.innerHeight, bc = document.body.classList; let cov = 0;
+  for (const sel of ['#topbar', '#viewCol']) {
+    if (sel === '#viewCol' && bc.contains('sheet-open')) continue; if (sel === '#topbar' && bc.contains('sheet-tall')) continue;   /* 畳まれている途中でも畳んだ後の形で測る(transition 待ちにしない) */
+    const el = document.querySelector(sel); if (!el || el.hidden) continue;
+    const r = el.getBoundingClientRect(); if (r.height < 4 || r.top > H2 * 0.4) continue;
+    cov = Math.max(cov, r.bottom);
+  }
+  return Math.min(cov, H2 * 0.3);
+}
+// 「帯が画面」の約束: シートやバーで機体の帯が狭まったぶんカメラを引き、帯の中に同じ画を同じ割合で収める(帯が広がれば寄る)
+const bandK = () => narrow() ? 1 / (S.bandFrac || 1) : 1;
+function applyBand(bf) {
+  const old = S.bandFrac; S.bandFrac = bf; if (old == null || Math.abs(bf - old) < 0.02) return;
+  if ((typeof theater !== 'undefined' && theater.active) || (typeof whatif !== 'undefined' && whatif.active)) return;   /* 台本のカメラには触らない */
+  const k = old / bf;
+  if (S.camSpring) { const sp = S.camSpring; sp.p1.sub(sp.q1).multiplyScalar(k).add(sp.q1); controls.maxDistance = Math.max(controls.maxDistance, sp.p1.distanceTo(sp.q1) * 1.02); return; }
+  const t = controls.target.clone(), p = camera.position.clone().sub(t).multiplyScalar(k).add(t);
+  flyTo(p, t, 380, false);
+}
 function viewScale() { const a = W / H; return a < 1 ? Math.min(2.0, Math.pow(1 / a, 0.9)) : 1; }
-function camMax() { return 3.2 * viewScale(); }   // 縦長の画面ほど引かないと同じ画が入らない
+function camMax() { return 3.2 * viewScale() * bandK(); }   // 縦長の画面ほど引かないと同じ画が入らない
 function camHome() { if (camera.position.distanceTo(controls.target) > camMax() * 0.75) focusOn([D.root], { pull: true }); }   // 上限は stepCamera がゆっくり戻す(即座に下げると引きから瞬間移動する)   // 広い場面(人が近づく等)から戻ったら機体の枠に戻す
 function focusOn(objs, opts = {}) {
   const box = new THREE.Box3(), tb = new THREE.Box3(), pts = [];   // 本体メッシュだけで枠を決める(気流・ゴースト・スプライトは除外)。各メッシュの8隅を集めて実投影で距離を決める
@@ -349,9 +370,9 @@ function focusOn(objs, opts = {}) {
   const dir = opts.dir ? opts.dir.clone() : camera.position.clone().sub(controls.target); if (dir.lengthSq() < 1e-6) dir.set(0.6, 0.4, -0.6); dir.normalize();
   // 箱の8隅を視野に収める距離(球ではなく実際の投影で決める)
   const fwd = dir.clone().negate(), right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize(), up = new THREE.Vector3().crossVectors(right, fwd).normalize();
-  const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), tanH = tanV * Math.max(0.6, camera.aspect); let need = 0.05; const rel = new THREE.Vector3();
+  const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / bandK(), tanH = tanV * bandK() * Math.max(0.6, camera.aspect); let need = 0.05; const rel = new THREE.Vector3();   /* 縦はシートに隠れない帯の高さで見る */
   for (const q of pts) { rel.copy(q).sub(sph.center); const t = rel.dot(dir); need = Math.max(need, Math.abs(rel.dot(right)) / tanH + t, Math.abs(rel.dot(up)) / tanV + t); }
-  const dist = clamp((need * (opts.margin || 1.18) + 0.02) * viewScale(), 0.12, (opts.max || 3.2) * viewScale());
+  const dist = clamp((need * (opts.margin || 1.18) + 0.02) * viewScale(), 0.12, (opts.max || 3.2) * viewScale() * bandK());
   const dur = 600 + 500 * clamp((camera.position.distanceTo(sph.center.clone().addScaledVector(dir, dist)) + controls.target.distanceTo(sph.center)) / 0.6, 0, 1);
   flyTo(sph.center.clone().addScaledVector(dir, dist), sph.center, dur, opts.pull !== false);
 }
@@ -416,7 +437,8 @@ function resize() {
   renderer.setSize(W, H, false); composer.setSize(W, H);
   camera.aspect = narrow() ? W / H : (W - 384) / H;
   if (!narrow()) camera.setViewOffset(W - 384, H, 0, 0, W, H);   /* 右パネルの分だけ左に寄せる */
-  else { const cov = bottomCover(); if (cov > 24) camera.setViewOffset(W, H, 0, cov * 0.5, W, H); else camera.clearViewOffset(); }   /* 下のシートに隠れないよう、画を上へずらす(大きさは変えない) */
+  else { const bc = bottomCover(), tc = topCover(), sh = (bc - tc) * 0.5; if (Math.abs(sh) > 12) camera.setViewOffset(W, H, 0, sh, W, H); else camera.clearViewOffset(); applyBand(clamp((H - bc - tc) / H, 0.3, 1)); }   /* 上のバーと下のシートの間の帯に機体が来るようずらし、帯の狭さぶん引く */
+  if (!narrow()) S.bandFrac = 1;
   camera.updateProjectionMatrix();
   controls.maxDistance = Math.max(camMax(), camera.position.distanceTo(controls.target), S.camSpring ? S.camSpring.p1.distanceTo(S.camSpring.q1) * 1.02 : 0);   // 飛行中の目標も含める
   if (typeof onResized === 'function') onResized();

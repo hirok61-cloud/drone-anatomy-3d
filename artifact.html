@@ -212,19 +212,23 @@ button, .tabs, .seg, .chips { touch-action: manipulation; -webkit-user-select: n
 /* ---- responsive ---- */
 @media (max-width: 1100px) {
   :root { --insp-w: 0px; }
-  #inspector, #lesson, #expert { top: auto; right: 0; left: 0; bottom: 0; width: auto; height: min(62vh, 560px);   /* 3Dが3割は見えるように。深く読むときはつまみを上へ */ border-radius: 20px 20px 0 0; transform: translateY(102%); transition: transform .38s cubic-bezier(.32,.72,0,1); will-change: transform; z-index: 14; }
+  #inspector, #lesson, #expert { top: auto; right: 0; left: 0; bottom: 0; width: auto; height: min(56vh, 520px);   /* 3段デテント: peek(名前だけ) / open(既定) / tall(読む)。既定は3Dが4割見える高さ */ border-radius: 20px 20px 0 0; transform: translateY(102%); transition: transform .38s cubic-bezier(.32,.72,0,1), height .3s cubic-bezier(.32,.72,0,1); will-change: transform; z-index: 14; }
   #inspector.open, #lesson.open, #expert.open { transform: translateY(0); } #inspector.dragging, #lesson.dragging, #expert.dragging { transition: none; }
   .grabber { display: block; width: 40px; height: 5px; border-radius: 3px; background: var(--hair2); margin: 8px auto 0; position: relative; }
   .grabber::before { content: ''; position: absolute; inset: -22px -60px; }
   #inspClose { display: grid; }
   .compact-only { display: inline-flex; }
-  #expert { height: min(46vh, 420px); } #expert.tall, #inspector.tall, #lesson.tall { height: min(80vh, 660px); } .xsegm { margin: 0 14px 6px; align-self: flex-start; } #expertClose { display: grid; }   /* 専門シートは機体が見える高さに留め、モード切替をシート内にも置く(ドックがシートの下に隠れるため) */
+  #expert { height: min(46vh, 420px); } #expert.tall, #inspector.tall, #lesson.tall { height: min(80vh, 660px); } #inspector.peek, #lesson.peek, #expert.peek { height: max(150px, 21vh); } .xsegm { margin: 0 14px 6px; align-self: flex-start; } #expertClose { display: grid; }   /* 専門シートは機体が見える高さに留め、モード切替をシート内にも置く(ドックがシートの下に隠れるため) */
   #dock { right: 14px; margin: 0; } #viewCol { right: 14px; } #noteCard { width: min(420px, calc(100vw - 90px)); }
+  /* シートを開いている間は上の操作を畳んで、機体の帯を広くとる(peek では戻す)。tall はタイトルバーまで畳む */
+  #viewCol, #topbar { transition: opacity .25s, transform .25s, visibility .25s; }
+  body.sheet-open #viewCol, body.sheet-tall #topbar { opacity: 0; transform: translateY(-10px); visibility: hidden; pointer-events: none; }
 }
 @media (max-width: 760px), (max-height: 520px) {
-  #viewCol { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; bottom: auto; top: calc(66px + var(--sat)); right: calc(10px + var(--sar)); max-width: calc(100vw - 20px - var(--sal) - var(--sar)); padding: 4px; }
-  #viewCol hr { display: none; } #viewCol button { width: 38px; height: 38px; }
+  #viewCol { flex-direction: row; flex-wrap: nowrap; bottom: auto; top: calc(74px + var(--sat)); left: calc(10px + var(--sal)); right: calc(10px + var(--sar)); max-width: none; padding: 4px; gap: 2px; }   /* 1段に収める(折り返すと空の段が3Dを隠す) */
+  #viewCol hr, #viewCol #fsBtn { display: none; } #viewCol button { flex: 1 1 0; width: auto; min-width: 0; height: 40px; }   /* 全画面ボタンは詳細度を上げて消す(#viewCol button の display:grid に負けない) */
 }
+@media (min-width: 761px) and (max-height: 520px) { #viewCol { left: auto; } #viewCol button { flex: none; width: 40px; } }   /* 横向きの広い画面では右寄せのまま */
 @media (max-width: 760px) {
   :root { --dock-h: 118px; }
   #topbar { left: calc(10px + var(--sal)); right: calc(10px + var(--sar)); top: calc(10px + var(--sat)); padding: 6px 6px 6px 10px; gap: 8px; }
@@ -236,8 +240,6 @@ button, .tabs, .seg, .chips { touch-action: manipulation; -webkit-user-select: n
   .ctx-row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; align-items: flex-end; gap: 12px; padding-right: 24px; mask-image: linear-gradient(to right, #000 88%, transparent); -webkit-mask-image: linear-gradient(to right, #000 88%, transparent); } .ctx-row::-webkit-scrollbar { display: none; }
   .dock-group { flex: none; } .dock-group.grow { flex: none; width: 150px; } .chips { flex-wrap: nowrap; }
   .tabs button span { font-size: 11px; } .tabs button { flex-direction: column; gap: 2px; padding: 6px 4px; }
-  #viewCol { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; bottom: auto; top: 66px; right: calc(10px + var(--sar)); max-width: calc(100vw - 20px - var(--sal) - var(--sar)); padding: 4px; } #viewCol hr { display: none; }
-  #viewCol button { width: 38px; height: 38px; }
   #noteCard { left: 10px; bottom: calc(var(--dock-h) + 8px); width: calc(100vw - 20px); max-height: 34vh; font-size: 13px; }
   #coach { width: calc(100vw - 40px); top: 130px; }
   #sticks { bottom: calc(var(--dock-h) + 10px); gap: 10px; } .stick { width: 112px; height: 112px; }
@@ -401,7 +403,9 @@ body.scale #noteCard { left: calc(14px + 212px + 12px); width: min(420px, calc(1
 .chart-h .lg { font-size: calc(11px * var(--fs, 1)); color: var(--ink3); } .chart-h .lg i, .wr .cls i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 3px; vertical-align: -1px; }
 .chart-h .tgl.sm { min-height: 26px; padding: 2px 8px; font-size: calc(11.5px * var(--fs, 1)); } .chart-h .rng { display: flex; align-items: center; gap: 6px; font-size: calc(11.5px * var(--fs, 1)); color: var(--ink2); } .chart-h .rng input { width: 100px; } .chart-h .rng b { font-variant-numeric: tabular-nums; min-width: 34px; }
 .chart canvas { display: block; width: 100%; height: 72px; border-radius: 8px; background: var(--seg-bg); } .chart.tall canvas { height: 110px; }
-.vals { display: flex; flex-wrap: wrap; gap: 4px 14px; font: calc(11px * var(--fs, 1))/1.5 var(--mono); color: var(--ink2); } .vals b { color: var(--warn); font-weight: 600; }
+.vals { display: flex; flex-wrap: wrap; gap: 4px 14px; font: calc(11px * var(--fs, 1))/1.5 var(--mono); color: var(--ink2); font-variant-numeric: tabular-nums; } .vals b { color: var(--warn); font-weight: 600; }
+.vals.live { align-items: center; gap: 4px 12px; padding: 6px 10px; border-radius: 10px; background: var(--seg-bg); font-size: calc(11.5px * var(--fs, 1)); } .vals.live .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: livePulse 1.6s ease-in-out infinite; } .vals.live small { flex-basis: 100%; font: calc(10.5px * var(--fs, 1))/1.4 var(--sans, inherit); color: var(--ink3); }
+@keyframes livePulse { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
 .xctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; } .xctl label { font-size: calc(12px * var(--fs, 1)); color: var(--ink2); display: flex; align-items: center; gap: 6px; }
 .xctl .tgl, .xctl .pill-btn { min-height: 30px; padding: 4px 10px; font-size: calc(12px * var(--fs, 1)); } .xctl select { padding: 4px 6px; border-radius: 8px; border: 1px solid var(--hair2); background: var(--glass-strong); color: var(--ink); }
 .xheat, .xab { border-top: 1px solid var(--hair); padding-top: 8px; } .xh-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 6px; } .xh-head b { flex: 1; font-size: calc(12.5px * var(--fs, 1)); } .xh-head span { font-size: calc(11px * var(--fs, 1)); color: var(--ink3); font-variant-numeric: tabular-nums; } .xh-head .pill-btn { min-height: 28px; padding: 3px 10px; font-size: calc(11.5px * var(--fs, 1)); }
@@ -2712,8 +2716,29 @@ function bottomCover() {
   }
   return Math.min(cov, H2 * 0.62);
 }
+// 画面上でタイトルバーや視点バーが覆っている高さ(CSSピクセル)。畳まれている(visibility hidden)ものは数えない
+function topCover() {
+  const H2 = window.innerHeight, bc = document.body.classList; let cov = 0;
+  for (const sel of ['#topbar', '#viewCol']) {
+    if (sel === '#viewCol' && bc.contains('sheet-open')) continue; if (sel === '#topbar' && bc.contains('sheet-tall')) continue;   /* 畳まれている途中でも畳んだ後の形で測る(transition 待ちにしない) */
+    const el = document.querySelector(sel); if (!el || el.hidden) continue;
+    const r = el.getBoundingClientRect(); if (r.height < 4 || r.top > H2 * 0.4) continue;
+    cov = Math.max(cov, r.bottom);
+  }
+  return Math.min(cov, H2 * 0.3);
+}
+// 「帯が画面」の約束: シートやバーで機体の帯が狭まったぶんカメラを引き、帯の中に同じ画を同じ割合で収める(帯が広がれば寄る)
+const bandK = () => narrow() ? 1 / (S.bandFrac || 1) : 1;
+function applyBand(bf) {
+  const old = S.bandFrac; S.bandFrac = bf; if (old == null || Math.abs(bf - old) < 0.02) return;
+  if ((typeof theater !== 'undefined' && theater.active) || (typeof whatif !== 'undefined' && whatif.active)) return;   /* 台本のカメラには触らない */
+  const k = old / bf;
+  if (S.camSpring) { const sp = S.camSpring; sp.p1.sub(sp.q1).multiplyScalar(k).add(sp.q1); controls.maxDistance = Math.max(controls.maxDistance, sp.p1.distanceTo(sp.q1) * 1.02); return; }
+  const t = controls.target.clone(), p = camera.position.clone().sub(t).multiplyScalar(k).add(t);
+  flyTo(p, t, 380, false);
+}
 function viewScale() { const a = W / H; return a < 1 ? Math.min(2.0, Math.pow(1 / a, 0.9)) : 1; }
-function camMax() { return 3.2 * viewScale(); }   // 縦長の画面ほど引かないと同じ画が入らない
+function camMax() { return 3.2 * viewScale() * bandK(); }   // 縦長の画面ほど引かないと同じ画が入らない
 function camHome() { if (camera.position.distanceTo(controls.target) > camMax() * 0.75) focusOn([D.root], { pull: true }); }   // 上限は stepCamera がゆっくり戻す(即座に下げると引きから瞬間移動する)   // 広い場面(人が近づく等)から戻ったら機体の枠に戻す
 function focusOn(objs, opts = {}) {
   const box = new THREE.Box3(), tb = new THREE.Box3(), pts = [];   // 本体メッシュだけで枠を決める(気流・ゴースト・スプライトは除外)。各メッシュの8隅を集めて実投影で距離を決める
@@ -2722,9 +2747,9 @@ function focusOn(objs, opts = {}) {
   const dir = opts.dir ? opts.dir.clone() : camera.position.clone().sub(controls.target); if (dir.lengthSq() < 1e-6) dir.set(0.6, 0.4, -0.6); dir.normalize();
   // 箱の8隅を視野に収める距離(球ではなく実際の投影で決める)
   const fwd = dir.clone().negate(), right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize(), up = new THREE.Vector3().crossVectors(right, fwd).normalize();
-  const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), tanH = tanV * Math.max(0.6, camera.aspect); let need = 0.05; const rel = new THREE.Vector3();
+  const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / bandK(), tanH = tanV * bandK() * Math.max(0.6, camera.aspect); let need = 0.05; const rel = new THREE.Vector3();   /* 縦はシートに隠れない帯の高さで見る */
   for (const q of pts) { rel.copy(q).sub(sph.center); const t = rel.dot(dir); need = Math.max(need, Math.abs(rel.dot(right)) / tanH + t, Math.abs(rel.dot(up)) / tanV + t); }
-  const dist = clamp((need * (opts.margin || 1.18) + 0.02) * viewScale(), 0.12, (opts.max || 3.2) * viewScale());
+  const dist = clamp((need * (opts.margin || 1.18) + 0.02) * viewScale(), 0.12, (opts.max || 3.2) * viewScale() * bandK());
   const dur = 600 + 500 * clamp((camera.position.distanceTo(sph.center.clone().addScaledVector(dir, dist)) + controls.target.distanceTo(sph.center)) / 0.6, 0, 1);
   flyTo(sph.center.clone().addScaledVector(dir, dist), sph.center, dur, opts.pull !== false);
 }
@@ -2789,7 +2814,8 @@ function resize() {
   renderer.setSize(W, H, false); composer.setSize(W, H);
   camera.aspect = narrow() ? W / H : (W - 384) / H;
   if (!narrow()) camera.setViewOffset(W - 384, H, 0, 0, W, H);   /* 右パネルの分だけ左に寄せる */
-  else { const cov = bottomCover(); if (cov > 24) camera.setViewOffset(W, H, 0, cov * 0.5, W, H); else camera.clearViewOffset(); }   /* 下のシートに隠れないよう、画を上へずらす(大きさは変えない) */
+  else { const bc = bottomCover(), tc = topCover(), sh = (bc - tc) * 0.5; if (Math.abs(sh) > 12) camera.setViewOffset(W, H, 0, sh, W, H); else camera.clearViewOffset(); applyBand(clamp((H - bc - tc) / H, 0.3, 1)); }   /* 上のバーと下のシートの間の帯に機体が来るようずらし、帯の狭さぶん引く */
+  if (!narrow()) S.bandFrac = 1;
   camera.updateProjectionMatrix();
   controls.maxDistance = Math.max(camMax(), camera.position.distanceTo(controls.target), S.camSpring ? S.camSpring.p1.distanceTo(S.camSpring.q1) * 1.02 : 0);   // 飛行中の目標も含める
   if (typeof onResized === 'function') onResized();
@@ -4131,11 +4157,7 @@ function lessonKey(e) {
 }
 function lessonEndAsk() { showCoach('授業モードを終了しますか', '台本を閉じて、ふつうの画面に戻ります', () => stopLesson(), null); $('#coachGo').textContent = '終了する'; }
 function bindLessonSheet() {
-  const el = $('#lesson'), grab = el.querySelector('.grabber'); let drag = null;
-  grab.addEventListener('pointerdown', e => { drag = { y0: e.clientY, hist: [[e.clientY, performance.now()]] }; grab.setPointerCapture(e.pointerId); el.classList.add('dragging'); });
-  grab.addEventListener('pointermove', e => { if (!drag) return; const dy = Math.max(0, e.clientY - drag.y0); el.style.transform = `translateY(${dy}px)`; drag.hist.push([e.clientY, performance.now()]); if (drag.hist.length > 6) drag.hist.shift(); });
-  const end = e => { if (!drag) return; const dy = Math.max(0, e.clientY - drag.y0); const h0 = drag.hist[0], h1 = drag.hist[drag.hist.length - 1]; const v = (h1[0] - h0[0]) / Math.max(1, h1[1] - h0[1]); el.classList.remove('dragging'); el.style.transform = ''; if (v > 0.5 || dy > el.offsetHeight * 0.4) el.classList.remove('open'); drag = null; };
-  grab.addEventListener('pointerup', end); grab.addEventListener('pointercancel', end);
+  bindSheet($('#lesson'));   /* peek / open / tall の3段(ui.js) */
   // 段落リスト上の左右スワイプで前後
   const steps = $('#lessonSteps');
   steps.addEventListener('pointerdown', e => { if (e.pointerType !== 'touch') return; lesson.swipe = { x0: e.clientX, y0: e.clientY, t0: performance.now() }; });
@@ -4225,7 +4247,7 @@ function expertStop(silent) {
   if (!expert.mode) return;
   if (expert.mode === 'sensors') sensorsLeave(); else if (expert.mode === 'wear') wearLeave(); else toolboxLeave();
   expert.mode = null; S.expert = null;
-  $('#expert').hidden = true; $('#expert').classList.remove('open', 'tall'); if (!S.lesson) $('#inspector').hidden = false;
+  $('#expert').hidden = true; $('#expert').classList.remove('open', 'tall', 'peek'); if (!S.lesson) $('#inspector').hidden = false;
   document.body.classList.remove('expert');
   if (!silent) syncBodyMode();
 }
@@ -4245,7 +4267,7 @@ function expertArrows(hide) {
 // ---------- ⑪ センサー視点 ----------
 function sensorsEnter() {
   setPower(0.5, true); syncBodyMode();
-  expert.prev = { tx: body.tx, tz: body.tz, yaw: body.yaw, vx: 0, vz: 0, vy: 0, t: 0 }; expert.drift = 0; expert.tsum = 0; expert.heat = 0; expert.heatRun = false;
+  expert.prev = { tx: body.tx, tz: body.tz, yaw: body.yaw, vx: 0, vz: 0, vy: 0, t: 0 }; expert.drift = 0; expert.tsum = 0; expert.heat = 0; expert.heatRun = false; expert.acc = null;
   if (expert.radio) radioDonut(true);
   showToast('機体はホバー中。はじくとジャイロが振れます', 3000);
 }
@@ -4325,7 +4347,15 @@ function sensorsStep(dtSim, dtReal) {
   let hd = (-body.yaw * R2D + dev + 1.0 * nz()) % 360; if (hd < 0) hd += 360;
   const ch = expert.charts;
   if (ch.gyro) { ch.gyro.push(gyro); ch.acc.push(acc); ch.baro.push([alt]); ch.mag.push([dev + 1.0 * nz()]); const dark = themeDark; ch.gyro.draw(dark); ch.acc.draw(dark); ch.baro.draw(dark); ch.mag.draw(dark); }
-  const hv = $('#sensVals'); if (hv) hv.innerHTML = `<span>ジャイロ p ${gyro[0].toFixed(0)} / q ${gyro[1].toFixed(0)} / r ${gyro[2].toFixed(0)} °/s</span><span>加速度 z ${acc[2].toFixed(2)} g</span><span>高度 ${alt.toFixed(2)} m</span><span>方位 ${hd.toFixed(0)}°${Math.abs(dev) >= 0.5 ? ` <b>（電流で ${dev > 0 ? '+' : ''}${dev.toFixed(0)}° ずれ）</b>` : ''}</span>`;
+  // 数値の読み出しは 0.25 秒の平均を 4 回/秒で出す。生の値は毎フレーム±1°/s・±3cm ほど揺れる(それが波形の見どころ)が、数字が毎フレーム踊ると壊れて見える
+  const ac = expert.acc || (expert.acc = { n: 0, t: 0, g: [0, 0, 0], z: 0, alt: 0, hx: 0, hy: 0, dev: 0 });
+  ac.n++; ac.t += dt; ac.g[0] += gyro[0]; ac.g[1] += gyro[1]; ac.g[2] += gyro[2]; ac.z += acc[2]; ac.alt += alt; ac.hx += Math.cos(hd / R2D); ac.hy += Math.sin(hd / R2D); ac.dev += dev;
+  if (ac.t >= 0.25 || ac.n === 1) {
+    const n = ac.n, g = ac.g.map(x => x / n), z = ac.z / n, al = ac.alt / n, d_ = ac.dev / n; let h = Math.atan2(ac.hy, ac.hx) * R2D; if (h < 0) h += 360; if (h >= 359.5) h = 0;
+    const f0 = (x) => (Math.abs(x) < 0.5 ? '0' : x.toFixed(0));   /* -0 を出さない */
+    const hv = $('#sensVals'); if (hv) hv.innerHTML = `<i class="dot" aria-hidden="true"></i><span>ジャイロ p ${f0(g[0])} / q ${f0(g[1])} / r ${f0(g[2])} °/s</span><span>加速度 z ${z.toFixed(2)} g</span><span>高度 ${al.toFixed(2)} m</span><span>方位 ${h.toFixed(0)}°${Math.abs(d_) >= 0.5 ? ` <b>（電流で ${d_ > 0 ? '+' : ''}${d_.toFixed(0)}° ずれ）</b>` : ''}</span><small>0.25 秒の平均。1コマごとのばらつき（ノイズ）は波形のほうで見る</small>`;
+    ac.n = 0; ac.t = 0; ac.g = [0, 0, 0]; ac.z = ac.alt = ac.hx = ac.hy = ac.dev = 0;
+  }
   pv.tx = body.tx; pv.tz = body.tz; pv.yaw = body.yaw; pv.vx = body.vx; pv.vz = body.vz; pv.vy = body.vy || 0;
   if (expert.heatRun) { heatApply(Math.min(1, expert.heat + dtReal / 6)); renderHeatBars(); if (expert.heat >= 1) { expert.heatRun = false; renderHeatBars(); } }
 }
@@ -4508,12 +4538,12 @@ function renderExpertPanel() {
   const note = typeof langNote === 'function' ? langNote() : '';
   if (m === 'sensors') {
     body_.innerHTML = `${note}
+      <div id="sensVals" class="vals live" aria-live="off"><i class="dot" aria-hidden="true"></i></div>
       <p class="xnote">機体はホバー中。<b>はじく</b>とジャイロが振れ、<b>防振</b>を切ると細かい震えが乗ります。傾いて動いても x・y の加速度計はほぼ 0 g — だから FC はジャイロと融合して姿勢を知ります。</p>
       <div class="chart"><div class="chart-h"><b>ジャイロ <small>°/s（1秒に回る角度）</small></b><span class="lg">${legendDots([[XCOL.p, 'p ロール'], [XCOL.q, 'q ピッチ'], [XCOL.r, 'r ヨー']])}</span><button class="tgl sm ${expert.damper ? 'on' : ''}" id="xDamper" aria-pressed="${expert.damper}"><i></i>防振ゴムで震えを減らす</button></div><canvas id="chGyro" role="img" aria-label="ジャイロの波形"></canvas></div>
       <div class="chart"><div class="chart-h"><b>加速度 <small>g（重力 9.81 m/s² の何倍か）</small></b><span class="lg">${legendDots([[XCOL.p, 'x 横（ロールの向き）'], [XCOL.q, 'y 前後（ピッチの向き）'], [XCOL.r, 'z 上下']])}</span></div><canvas id="chAcc" role="img" aria-label="加速度の波形"></canvas></div>
       <div class="chart"><div class="chart-h"><b>気圧高度 <small>m</small></b><span class="lg">天候で流れる。地面近くでは吹き下ろしで乱れる</span></div><canvas id="chBaro" role="img" aria-label="気圧高度の波形"></canvas></div>
       <div class="chart"><div class="chart-h"><b>コンパスのずれ <small>°（真の方位との差）</small></b><label class="rng" for="xCurrent">電源線の電流 <input type="range" id="xCurrent" min="0" max="60" value="${expert.current}"> <b id="xCurrentV">${expert.current} A</b></label></div><canvas id="chMag" role="img" aria-label="コンパスのずれの波形"></canvas><p class="hint">電流に比例・電源線までの距離に反比例。機体に固定された磁界なので、機首の向きで ± が変わる。往復の線をより合わせると打ち消せる — だから GNSS/コンパスはマストの上に。</p></div>
-      <div id="sensVals" class="vals"></div>
       <div class="xctl"><button class="tgl ${expert.radio ? 'on' : ''}" id="xRadio" aria-pressed="${expert.radio}"><i></i>電波の形を見る（受信アンテナ：2本で1本のダイポール）</button></div>
       <p class="hint">素子の延長方向が弱い。だから機体の真上・真下に穴ができ、2セット付けて互いの穴を埋める機体もある。</p>
       <div class="xheat"><div class="xh-head"><b>ホバー10分の熱</b><span id="heatTime">ホバー 0.0 分</span><button id="xHeat" class="pill-btn">▶ 早送り</button><button id="xHeatReset" class="pill-btn" disabled>もどす</button></div><div id="heatBars"></div><p class="hint">順番と相対量を見るための表示で、絶対温度ではありません。ホバー（低電流）ではモーターが最初に温まり、ESC が熱いのは全開連続・密閉フレームのときです。</p></div>`;
@@ -4581,13 +4611,7 @@ function initExpert() {
   for (const id of ['#expertSeg', '#expertSegM']) { const el = $(id); if (el) el.addEventListener('click', e => { const b = e.target.closest('button'); if (b) expertStart(b.dataset.x); }); }
   const tg = $('#expertToggle'); if (tg) tg.addEventListener('click', expertOpenSheet);
   $('#expertClose').addEventListener('click', () => { if (narrow()) $('#expert').classList.remove('open'); else setTab('see'); });
-  // シート: 下スワイプで閉じる、上スワイプで高く(2段デテント)
-  const el = $('#expert'), grab = el.querySelector('.grabber'); let drag = null;
-  grab.addEventListener('pointerdown', e => { drag = { y0: e.clientY, hist: [[e.clientY, performance.now()]] }; grab.setPointerCapture(e.pointerId); el.classList.add('dragging'); });
-  grab.addEventListener('pointermove', e => { if (!drag) return; const dy = e.clientY - drag.y0; el.style.transform = `translateY(${Math.max(-80, dy)}px)`; drag.hist.push([e.clientY, performance.now()]); if (drag.hist.length > 6) drag.hist.shift(); });
-  const end = e => { if (!drag) return; const dy = e.clientY - drag.y0; const h0 = drag.hist[0], h1 = drag.hist[drag.hist.length - 1]; const v = (h1[0] - h0[0]) / Math.max(1, h1[1] - h0[1]); el.classList.remove('dragging'); el.style.transform = '';
-    if (v < -0.5 || dy < -60) el.classList.add('tall'); else if (el.classList.contains('tall') && (v > 0.5 || dy > 60)) el.classList.remove('tall'); else if (v > 0.5 || dy > el.offsetHeight * 0.4) el.classList.remove('open'); drag = null; };
-  grab.addEventListener('pointerup', end); grab.addEventListener('pointercancel', end);
+  bindSheet($('#expert'));   /* peek / open / tall の3段(ui.js) */
   window.__expert = expert; window.__toolboxCalc = toolboxCalc;
 }
 
@@ -5174,11 +5198,26 @@ $('#expSlider').addEventListener('input', e => { S.exposureMul = e.target.value 
 // モバイルシート
 $('#inspToggle').addEventListener('click', () => (S.lesson ? $('#lesson') : S.expert ? $('#expert') : $('#inspector')).classList.add('open'));
 $('#inspClose').addEventListener('click', () => $('#inspector').classList.remove('open'));
-{ const insp = $('#inspector'), grab = insp.querySelector('.grabber'); let drag = null;   /* $('.grabber') だと DOM 先頭の専門シートのつまみを掴んでしまう */
-  grab.addEventListener('pointerdown', e => { drag = { y0: e.clientY, hist: [[e.clientY, performance.now()]] }; grab.setPointerCapture(e.pointerId); insp.classList.add('dragging'); });
-  grab.addEventListener('pointermove', e => { if (!drag) return; const dy = Math.max(0, e.clientY - drag.y0); insp.style.transform = `translateY(${dy}px)`; drag.hist.push([e.clientY, performance.now()]); if (drag.hist.length > 6) drag.hist.shift(); });
-  const end = e => { if (!drag) return; const dy = Math.max(0, e.clientY - drag.y0); const h0 = drag.hist[0], h1 = drag.hist[drag.hist.length - 1]; const v = (h1[0] - h0[0]) / Math.max(1, h1[1] - h0[1]); insp.classList.remove('dragging'); insp.style.transform = ''; if (v > 0.5 || dy > insp.offsetHeight * 0.4) insp.classList.remove('open'); drag = null; };
-  grab.addEventListener('pointerup', end); grab.addEventListener('pointercancel', end); }
+// スマホのシートは3段デテント: peek(つまみ+見出しだけ。機体を眺めながら部品を突つく) / open(既定) / tall(読む)。
+// つまみを上下にはじくと1段ずつ移る。peek からさらに下げると閉じる。つまみをタップすると peek と open を行き来する
+function sheetState(el) { return el.classList.contains('tall') ? 2 : el.classList.contains('peek') ? 0 : 1; }
+function setSheetState(el, n) {
+  if (n < 0) { el.classList.remove('open', 'peek'); return; }
+  el.classList.toggle('peek', n === 0); el.classList.toggle('tall', n === 2); el.classList.add('open');
+}
+function bindSheet(el) {
+  const grab = el.querySelector('.grabber'); let drag = null;   /* シートごとに自分のつまみを掴む($('.grabber') だと DOM 先頭のものを掴む) */
+  grab.addEventListener('pointerdown', e => { drag = { y0: e.clientY, t0: performance.now(), hist: [[e.clientY, performance.now()]] }; grab.setPointerCapture(e.pointerId); el.classList.add('dragging'); });
+  grab.addEventListener('pointermove', e => { if (!drag) return; let dy = e.clientY - drag.y0; if (dy < 0) dy = -80 * dy / (dy - 80);   /* 上はゴム状に抵抗 */ el.style.transform = `translateY(${dy}px)`; drag.hist.push([e.clientY, performance.now()]); if (drag.hist.length > 6) drag.hist.shift(); });
+  const end = e => { if (!drag) return; const dy = e.clientY - drag.y0; const h0 = drag.hist[0], h1 = drag.hist[drag.hist.length - 1]; const v = (h1[0] - h0[0]) / Math.max(1, h1[1] - h0[1]); el.classList.remove('dragging'); el.style.transform = '';
+    const n = sheetState(el);
+    if (Math.abs(dy) < 6 && performance.now() - drag.t0 < 350) setSheetState(el, n === 0 ? 1 : 0);   /* タップ: peek ⇄ open */
+    else if (v < -0.4 || dy < -50) setSheetState(el, Math.min(2, n + 1));
+    else if (v > 0.4 || dy > 50 || dy > el.offsetHeight * 0.4) setSheetState(el, n - 1);
+    drag = null; };
+  grab.addEventListener('pointerup', end); grab.addEventListener('pointercancel', end);
+}
+bindSheet($('#inspector'));
 new ResizeObserver(() => document.documentElement.style.setProperty('--dock-h', $('#dock').offsetHeight + 'px')).observe($('#dock'));
 
 function onThemeChanged(dark) { airflowTheme(dark); }
@@ -5186,8 +5225,13 @@ function onQualityChanged(level) { if (air.mesh && air.N !== Q.particles) rebuil
 { // シートの開閉・カードの出入りで、3Dの見える帯が変わるたびに視錐台を合わせ直す
   const watch = ['#inspector', '#lesson', '#expert', '#noteCard', '#massBar'].map(s => $(s)).filter(Boolean);
   let t = 0; const kick = () => { clearTimeout(t); t = setTimeout(() => { if (narrow()) resize(); }, 60); };   /* シートは .38s かけて動くので、動き終わりにも測り直す */
-  const mo = new MutationObserver(() => { kick(); setTimeout(kick, 420); });
-  for (const el of watch) { mo.observe(el, { attributes: true, attributeFilter: ['class', 'hidden', 'style'] }); el.addEventListener('transitionend', e => { if (e.propertyName === 'transform') kick(); }); }
+  const sheets = ['#inspector', '#lesson', '#expert'].map(s => $(s));
+  const fold = () => {   /* シートが open/tall のときは視点バー(tall ではタイトルバーも)を畳む。peek は機体を見る段なので戻す */
+    const st = sheets.map(el => (el.hidden || !el.classList.contains('open')) ? -1 : sheetState(el)); const mx = Math.max(...st);
+    document.body.classList.toggle('sheet-open', mx >= 1); document.body.classList.toggle('sheet-tall', mx >= 2);
+  };
+  const mo = new MutationObserver(() => { fold(); kick(); setTimeout(kick, 420); });
+  for (const el of watch) { mo.observe(el, { attributes: true, attributeFilter: ['class', 'hidden', 'style'] }); el.addEventListener('transitionend', e => { if (e.propertyName === 'transform' || e.propertyName === 'height') kick(); }); }
 }
 function onResized() {
   if (S.scale) { if (D.personGroup) D.personGroup.visible = !compact(); renderMassBar(S.selected && S.selected.key); } for (const L of labelEls) L.w = 0; if (!S.labelsTouched) { S.labels = !narrow(); for (const x of $$('.tgl[data-t=labels]')) x.classList.toggle('on', S.labels); } }
