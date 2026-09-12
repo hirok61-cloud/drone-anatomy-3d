@@ -190,7 +190,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 #mishapSeg { align-self: center; flex: none; }
 .cards button { flex: none; width: 150px; padding: 8px 10px; border-radius: 12px; background: var(--seg-bg); text-align: left; font-size: 12.5px; line-height: 1.35; min-height: 52px; transition: background .15s; }
 .cards button b { display: block; font-size: 13px; margin-bottom: 2px; } .cards button:hover { background: var(--hair2); } .cards button.on { background: var(--accent-soft); color: var(--accent-text); }
-.cards button { min-height: 64px; } #whatifCards button { border-left: 3px solid var(--cw); border-radius: 6px 12px 12px 6px; }   /* 外の状況 = 青の帯（⑤の組み間違いは無印） */
+.cards button { min-height: 64px; } #whatifCards button, #whatifSiteCards button { border-left: 3px solid var(--cw); border-radius: 6px 12px 12px 6px; }   /* 外の状況 = 青の帯（⑤の組み間違いは無印） */
 .stages { display: flex; align-items: center; gap: 6px; flex: 1; justify-content: center; }
 .stages span { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--ink3); } .stages span::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--hair2); }
 .stages span.done::before { background: var(--accent); opacity: .5; } .stages span.on { color: var(--accent); font-weight: 700; } .stages span.on::before { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
@@ -357,11 +357,14 @@ body.big #noteCard { bottom: calc(var(--dock-h) + 104px); }
 /* 印刷ワークシート */
 #printSheet { display: none; }
 @media print {
-  @page { size: A4 portrait; margin: 12mm; }
+  @page { size: A4 portrait; margin: 12mm; @bottom-right { content: counter(page) ' / ' counter(pages); font-size: 8pt; color: #555; } }
   body > *:not(#printSheet) { display: none !important; }
   #printSheet { display: block; }
 }
-body.print-preview > *:not(#printSheet) { display: none !important; }
+body.print-preview > *:not(#printSheet):not(#previewClose) { display: none !important; }
+.preview-close { position: fixed; top: 14px; right: 14px; z-index: 101; display: none; padding: 8px 16px; border-radius: 999px; min-height: var(--tap); background: var(--ink); color: var(--bg); font-size: 13px; font-weight: 600; box-shadow: 0 6px 24px rgba(0,0,0,.28); }
+body.print-preview .preview-close { display: inline-flex; align-items: center; }
+@media print { .preview-close { display: none !important; } }
 body.print-preview #printSheet { display: block; position: fixed; inset: 0; overflow: auto; z-index: 100; padding: 12mm; }
 #printSheet { font: 11pt/1.5 var(--font); color: #000; background: #fff; }
 #printSheet h1 { font-size: 16pt; margin: 0 0 4pt; } #printSheet h2 { font-size: 13pt; margin: 14pt 0 6pt; }
@@ -373,7 +376,7 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
 .fill-num { display: inline-grid; place-items: center; width: 18pt; height: 18pt; border: 1.5pt solid #000; border-radius: 50%; font-weight: 700; font-size: 10pt; }
 .fill-line { flex: 1; border-bottom: 1pt solid #000; height: 14pt; }
 .ps-review ol { padding-left: 1.2em; } .ps-review li p { margin: 0 0 3pt; } .rv-box { height: 46pt; border: 1pt solid #000; border-radius: 3pt; margin-bottom: 8pt; }
-.ps-foot { margin-top: 10pt; font-size: 9pt; color: #444; border-top: 1pt solid #999; padding-top: 4pt; }
+.ps-foot { margin-top: 8pt; font-size: 7.6pt; line-height: 1.4; color: #444; border-top: 1pt solid #999; padding-top: 3pt; }
 
 /* ---------- 第3ラウンド UI/UX 反映 ---------- */
 .pill-btn.on, .pill-btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-text); box-shadow: inset 0 0 0 1.5px var(--accent); }
@@ -385,6 +388,8 @@ body.scale #noteCard { left: calc(14px + 212px + 12px); width: min(420px, calc(1
 #lessonClock { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.25; } #lessonClock b { color: var(--ink); font-weight: 700; } #lessonClock span { font-size: 11px; }
 .lesson-foot #lessonNext { background: var(--accent); color: #fff; border-radius: 999px; min-width: 44px; }
 #lessonPop .course.quiz { border-top: 1px solid var(--hair); margin-top: 10px; border-radius: 12px; }
+#lessonPop .pop-h2 { margin-top: 12px; }
+#lessonPop .pf-course b::before { content: '🖨 '; } #lessonPop .ky-course b::before { content: '⚖ '; }
 @media (max-width: 760px) {
   #lessonBtn { display: none; } .mobile-only { display: flex; }
   #toast { top: 128px; }
@@ -394,6 +399,7 @@ body.scale #noteCard { left: calc(14px + 212px + 12px); width: min(420px, calc(1
   .popover .pop-row { padding: 4px 0; }
 }
 @media (pointer: coarse) {
+  .ky-part, .ky-copy { min-height: var(--tap); display: inline-flex; align-items: center; }
   .seg.tiny button { min-height: 36px; padding: 6px 10px; }
   .icon-btn.sm { min-width: 44px; min-height: 44px; }
   .note-actions button, .d-actions button { min-height: var(--tap); }
@@ -470,7 +476,10 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
 .ky-course b::before { content: '⚖ '; }
 /* 教則の逆引き（章 → 出せる画面） */
 #noteCard[data-kind=kyosoku] { max-height: 58vh; }
-.ky-seg { margin-bottom: 8px; } .ky-chap { margin: 8px 0 4px; flex-wrap: wrap; }
+@media (max-width: 760px) { #noteCard[data-kind=kyosoku] { max-height: 44vh; } }   /* スマホは 34vh の既定を上書きしてしまうので、ここで抑える */
+#noteBody .hint { font-size: calc(11.5px * var(--fs, 1)); color: var(--ink3); line-height: 1.55; margin-top: 6px; }
+.ky-seg { margin-bottom: 8px; }
+.ky-chap { margin: 8px 0 4px; flex-wrap: wrap; position: sticky; top: 0; z-index: 2; }   /* 節を読み進めても章を変えられるように貼り付ける */
 .ky-lead { color: var(--ink2); }
 .ky-sec { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--hair); }
 .ky-sec h4 { display: flex; align-items: baseline; gap: 7px; margin: 0 0 7px; font-size: calc(12.5px * var(--fs, 1)); font-weight: 700; }
@@ -479,7 +488,9 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
 .ky-go button { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 6px 11px; border-radius: 10px; background: var(--accent-soft); color: var(--accent-text); font-size: calc(12.5px * var(--fs, 1)); font-weight: 600; text-align: left; min-height: var(--tap); justify-content: center; }
 .ky-go button:hover { background: var(--accent); color: #fff; } .ky-go button:hover small { color: rgba(255,255,255,.85); }
 .ky-go button small { font-weight: 400; font-size: calc(10.5px * var(--fs, 1)); color: var(--ink3); }
-.ky-parts { margin: 8px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; font-size: calc(11.5px * var(--fs, 1)); color: var(--ink3); }
+.ky-parts { margin: 8px 0 0; font-size: calc(11.5px * var(--fs, 1)); color: var(--ink3); }
+.ky-parts > summary { cursor: pointer; min-height: var(--tap); display: flex; align-items: center; }
+.ky-parts[open] { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; } .ky-parts[open] > summary { flex-basis: 100%; }
 .ky-part { padding: 3px 9px; border-radius: 999px; background: var(--seg-bg); color: var(--ink2); font-size: calc(11.5px * var(--fs, 1)); }
 .ky-part:hover { background: var(--hair2); color: var(--ink); }
 .ky-none { margin: 0; font-size: calc(11.5px * var(--fs, 1)); color: var(--ink3); }
@@ -488,21 +499,24 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
 .ky-src { margin-top: 12px; }
 #noteBody .tbl { overflow-x: auto; margin: 8px 0; } table.ky-tbl { border-collapse: collapse; width: 100%; font-size: calc(12px * var(--fs, 1)); min-width: 360px; } table.ky-tbl th, table.ky-tbl td { text-align: left; vertical-align: top; padding: 5px 8px; border-bottom: 1px solid var(--hair); } table.ky-tbl th { color: var(--ink3); font-weight: 600; } .ky-list { margin: 6px 0 0; padding-left: 1.1em; font-size: calc(12px * var(--fs, 1)); line-height: 1.6; }
 /* 飛行前点検チェックリスト（印刷）: 手に持って上から順に潰せる形にする */
-#printSheet .pf-head { display: grid; grid-template-columns: repeat(2, 1fr); gap: 3pt 16pt; margin: 6pt 0 2pt; }
-#printSheet .pf-head div { display: flex; align-items: flex-end; gap: 5pt; font-size: 10pt; }
+#printSheet .pf-head { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2pt 12pt; margin: 5pt 0 2pt; }
+#printSheet .pf-head div { display: flex; align-items: flex-end; gap: 4pt; font-size: 8.6pt; }
 #printSheet .pf-head span { flex: none; color: #333; } #printSheet .pf-head i { flex: 1; border-bottom: 1pt solid #000; height: 1.15em; }
-#printSheet .pf-lead { font-size: 9.5pt; color: #333; margin: 6pt 0 0; }
+#printSheet .pf-lead { font-size: 8.6pt; line-height: 1.4; color: #333; margin: 4pt 0 0; }
 #printSheet .pf-sec, #printSheet .pf-log, #printSheet .pf-note { break-inside: avoid; page-break-inside: avoid; }
-#printSheet .pf-sec h2, #printSheet .pf-log h2, #printSheet .pf-note h2 { display: flex; align-items: center; gap: 6pt; font-size: 11.5pt; margin: 11pt 0 4pt; padding-bottom: 2pt; border-bottom: 1pt solid #000; }
+#printSheet .pf-sec h2, #printSheet .pf-log h2, #printSheet .pf-note h2 { display: flex; align-items: center; gap: 6pt; font-size: 10.5pt; margin: 7pt 0 3pt; padding-bottom: 1.5pt; border-bottom: 1pt solid #000; }
 #printSheet .pf-n { display: inline-grid; place-items: center; width: 15pt; height: 15pt; border-radius: 50%; background: #000; color: #fff; font-size: 9pt; font-weight: 700; flex: none; }
 #printSheet .pf-sec h2 em { margin-left: auto; font-style: normal; font-size: 8.5pt; font-weight: 400; color: #555; }
 #printSheet .pf-list { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 16pt; }
-#printSheet .pf-list li { display: flex; align-items: flex-start; gap: 5pt; font-size: 9.8pt; line-height: 1.45; margin: 0 0 3pt; break-inside: avoid; page-break-inside: avoid; }
-#printSheet .pf-box { flex: none; width: 9pt; height: 9pt; border: 1pt solid #000; border-radius: 1.5pt; margin-top: 2.5pt; }
+#printSheet .pf-list li { display: flex; align-items: flex-start; gap: 4pt; font-size: 9pt; line-height: 1.35; margin: 0 0 1.8pt; break-inside: avoid; page-break-inside: avoid; }
+#printSheet .pf-box { flex: none; width: 11pt; height: 11pt; border: 1.1pt solid #000; border-radius: 1.5pt; margin-top: 0.8pt; }
 #printSheet .pf-t b { display: inline-block; min-width: 5.5em; margin-right: 4pt; }
-#printSheet .pf-sub { margin: 6pt 0 2pt; font-size: 8.8pt; color: #555; border-left: 2pt solid #bbb; padding-left: 5pt; }
-#printSheet .pf-add .pf-box { border-color: #888; background: #f0f0f0; }
-#printSheet .pf-freebox { height: 58pt; border: 1pt solid #000; border-radius: 3pt; }
+#printSheet .pf-sub { margin: 4pt 0 1.5pt; font-size: 8.4pt; color: #555; border-left: 2pt solid #bbb; padding-left: 5pt; }
+#printSheet .pf-add .pf-box { border-style: dashed; }   /* 灰色の塗りはモノクロ印刷で白と見分けがつかない */
+#printSheet .pf-res { flex: none; width: 24pt; border-bottom: 0.6pt solid #999; align-self: flex-end; height: 1pt; }
+#printSheet .pf-warn { margin: 5pt 0 2pt; padding: 3pt 5pt; border: 1.2pt solid #000; border-radius: 2pt; font-size: 9pt; line-height: 1.35; }
+#printSheet .pf-meas { margin: 5pt 0 0; font-size: 9.8pt; display: flex; gap: 10pt; } #printSheet .pf-meas i { display: inline-block; width: 34pt; border-bottom: 0.8pt solid #000; }
+#printSheet .pf-freebox { height: 92pt; border: 1pt solid #000; border-radius: 3pt; background: repeating-linear-gradient(to bottom, transparent 0, transparent 16pt, #bbb 16pt, #bbb 16.6pt); }
 #printSheet .pf-two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18pt; }
 #printSheet .pf-two h3 { font-size: 10pt; margin: 6pt 0 2pt; }
 #printSheet .pf-two .ps-repl li span:first-child { width: auto; flex: none; }
@@ -510,6 +524,6 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
 .pf-opt { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0 6px; }
 .pf-opt .tgl { min-height: var(--tap); }
 #printSheet .ps-ky, #printSheet .ps-rep, #printSheet .ps-review { break-inside: avoid; page-break-inside: avoid; } #printSheet .ps-rep { break-before: page; page-break-before: always; }
-#printSheet .ps-ky ul, #printSheet .ps-repl { margin: 4pt 0; padding-left: 1.2em; } #printSheet .ps-small { font-size: 9.5pt; color: #333; } #printSheet .ps-repl li { display: flex; gap: 8pt; align-items: flex-end; margin: 6pt 0; } #printSheet .ps-repl li span:first-child { flex: none; width: 12em; } #printSheet .ps-repl .fill-line { flex: 1; border-bottom: 1px solid #000; height: 1.2em; }
+#printSheet .ps-ky ul, #printSheet .ps-repl { margin: 4pt 0; padding-left: 1.2em; } #printSheet .ps-small { font-size: 8.4pt; line-height: 1.4; color: #333; } #printSheet .ps-repl li { display: flex; gap: 8pt; align-items: flex-end; margin: 6pt 0; } #printSheet .ps-repl li span:first-child { flex: none; width: 12em; } #printSheet .ps-repl .fill-line { flex: 1; border-bottom: 1px solid #000; height: 1.2em; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation-duration: .01s !important; } }

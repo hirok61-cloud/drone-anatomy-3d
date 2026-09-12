@@ -226,7 +226,7 @@ function bindLessonSheet() {
 }
 
 function initLesson() {
-  $('#lessonPop').innerHTML = `<h3>授業・説明会</h3>${LESSONS.map(l => `<button class="course" data-l="${l.id}"><b>${l.name}</b><span>${l.audience} · 約${l.total}分 · ${l.steps.length}段落</span></button>`).join('')}<button class="course quiz" id="quizBtn"><b>ふたりクイズだけ</b><span>光った部品の名前を隣の人に説明する。答え合わせは画面がしない</span></button><p class="pop-foot">台本パネルが開き、段落ごとに視点と表示が切り替わります。URL を共有すると同じ段落から開きます。</p>`;
+  $('#lessonPop').innerHTML = `<h3>授業・説明会</h3>${LESSONS.map(l => `<button class="course" data-l="${l.id}"><b>${l.name}</b><span>${l.audience} · 約${l.total}分 · ${l.steps.length}段落</span></button>`).join('')}<button class="course quiz" id="quizBtn"><b>ふたりクイズだけ</b><span>光った部品の名前を隣の人に説明する。答え合わせは画面がしない</span></button><p class="pop-foot">台本パネルが開き、段落ごとに視点と表示が切り替わります。URL を共有すると同じ段落から開きます。</p><h3 class="pop-h2">配る・引く</h3>`;
   const openPop = e => { e.stopPropagation(); $('#settings').hidden = true; $('#askPop').hidden = true; $('#lessonPop').hidden = !$('#lessonPop').hidden; };
   $('#lessonBtn').addEventListener('click', openPop); const lm = $('#lessonBtnM'); if (lm) lm.addEventListener('click', openPop);
   $('#lessonPop').addEventListener('click', e => { const b = e.target.closest('.course'); if (b) { $('#lessonPop').hidden = true; startLesson(b.dataset.l, 0); } });

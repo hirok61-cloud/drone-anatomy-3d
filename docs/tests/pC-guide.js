@@ -11,8 +11,8 @@ A(document.getElementById('pfBtn') && document.getElementById('kyBtn'), '入口:
 document.getElementById('pfBtn').click(); d.step(0.2, 30);
 A(document.getElementById('noteCard').dataset.kind === 'preflight' && document.getElementById('pfLen'), 'PF: 長さを選ぶカード');
 const short = P.preflightCount(false), full = P.preflightCount(true);
-A(short >= 35 && short <= 60, 'PF: みじかい版は現場で潰せる量', short);
-A(full > short * 2, 'PF: くわしい版は全部品ぶん', full);
+A(short >= 45 && short <= 85, 'PF: 現場用は上から潰せる量', short);
+A(full > short * 1.8, 'PF: 全部版は全部品ぶん', full);
 P.preflight.detail = 'short'; await P.buildPreflightSheet();
 { const ps = document.getElementById('printSheet');
   A(ps.querySelectorAll('.pf-sec').length === PREFLIGHT.length, 'PF: 節の数', ps.querySelectorAll('.pf-sec').length);
@@ -20,7 +20,10 @@ P.preflight.detail = 'short'; await P.buildPreflightSheet();
   A(ps.querySelectorAll('.pf-add li').length > 0 && ps.querySelectorAll('.pf-sub').length > 0, 'PF: 追加は別の見出しで分ける');
   A(/様式2/.test(ps.textContent) && /そのものではありません/.test(ps.textContent), 'PF: 様式2との違いを断る');
   A(/第132条の86/.test(ps.textContent) && /236条の77/.test(ps.textContent), 'PF: 根拠条文');
-  A(ps.querySelectorAll('.pf-head i').length === 6, 'PF: 記入欄');
+  A(ps.querySelectorAll('.pf-head i').length === 8, 'PF: 記入欄', ps.querySelectorAll('.pf-head i').length);
+  A(ps.querySelector('.pf-warn') && /様式2/.test(ps.querySelector('.pf-warn').textContent), 'PF: 本文冒頭に様式2の断り');
+  A(ps.querySelectorAll('.pf-res').length === ps.querySelectorAll('.pf-list li').length, 'PF: 結果を書く線');
+  A(P.preflightPages() >= 1 && P.preflightPages() <= 6, 'PF: 枚数の見積り', P.preflightPages());
   A(!/undefined/.test(ps.textContent), 'PF: 未定義の差し込みがない');
 }
 P.preflight.detail = 'full'; await P.buildPreflightSheet();
@@ -37,6 +40,7 @@ for (const c of ['2', '3', '4', '5', '6']) {
   const want = Object.keys(KYOSOKU.chapters).filter(k => k.startsWith(c + '.'));
   A(secs.length === want.length, `逆引き: 第${c}章の節の数 ${secs.length}/${want.length}`);
   A(document.querySelectorAll('#noteBody .ky-go button').length > 0, `逆引き: 第${c}章に飛び先がある`);
+  A(document.querySelector(`#noteBody [data-kc="${c}"]`).getAttribute('aria-selected') === 'true', `逆引き: 第${c}章に aria-selected`);
 }
 // 章の名前と節の見出しが教則の目次どおりか（抜き取り）
 A(KYOSOKU.chapterNames['6'] === '運航上のリスク管理', '教則: 第6章の名称');
@@ -60,7 +64,8 @@ for (const [sec, list] of Object.entries(R.KY_JUMP)) {
 document.querySelector('#noteBody [data-kc="4"]').click(); d.step(0.1, 30);
 { const btn = [...document.querySelectorAll('#noteBody .ky-go button')].find(b => b.textContent.includes('モーターの中身'));
   A(btn, '逆引き: 4.4 にモーターの飛び先'); btn.click(); d.step(0.4, 30);
-  A(d.S.selected && d.S.selected.key === 'motor' && d.S.mode === 'cut' && document.getElementById('noteCard').hidden, '逆引き: 押すとその画面になる'); }
+  A(d.S.selected && d.S.selected.key === 'motor' && d.S.mode === 'cut', '逆引き: 押すとその画面になる');
+  A(document.getElementById('noteCard').dataset.kind === 'kyosoku' && !document.getElementById('noteCard').hidden, '逆引き: 広い画面では対応表が開いたまま'); }
 document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); d.step(0.2, 30);
 document.querySelector('#modeSeg [data-mode=normal]').click(); d.step(0.2, 30);
 

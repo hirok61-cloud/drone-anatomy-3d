@@ -14,8 +14,11 @@ function showToast(msg, ms = 2500) { if (share.restoring) return;   /* 共有リ
 function segSet(seg, attr, val) { for (const b of $$('button', seg)) { const on = b.dataset[attr] === String(val); b.classList.toggle('on', on); if (b.getAttribute('role') === 'tab' || b.parentElement.getAttribute('role') === 'radiogroup') b.setAttribute('aria-selected', on); } }
 
 // ---------- 説明カード ----------
+function openPreview() { document.body.classList.add('print-preview'); $('#printSheet').removeAttribute('aria-hidden'); $('#previewClose').hidden = false; $('#previewClose').focus(); }
+function closePreview() { if (!document.body.classList.contains('print-preview')) return false; document.body.classList.remove('print-preview'); $('#printSheet').setAttribute('aria-hidden', 'true'); $('#previewClose').hidden = true; return true; }
 function renderNote(o) {
-  const card = $('#noteCard'); if (!o) { card.hidden = true; return; }
+  const card = $('#noteCard'); $('#noteBody').onclick = null;   /* 前のカードが張った委譲を残さない */
+  if (!o) { card.hidden = true; return; }
   $('#noteTitle').textContent = o.title || ''; const b = $('#noteBadge'); if (o.badge) { b.textContent = o.badge; b.hidden = false; } else b.hidden = true;
   $('#noteBody').innerHTML = o.html || ''; const acts = $('#noteActions'); acts.innerHTML = '';
   for (const a of (o.actions || [])) { const btn = document.createElement('button'); btn.textContent = a.label; if (a.primary) btn.classList.add('primary'); btn.onclick = a.fn; acts.appendChild(btn); }
@@ -500,6 +503,7 @@ function updateHover() {
 }
 // キーボード
 document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && closePreview()) return;
   if (e.target.matches && e.target.matches('input, textarea, select')) return; const k = e.key.toLowerCase();
   if (S.lesson && lessonKey(e)) return;
   if (quiz.active && e.key === 'Escape') { quizStop(); return; }
@@ -549,6 +553,7 @@ function bindSheet(el) {
   grab.addEventListener('pointerup', end); grab.addEventListener('pointercancel', end);
 }
 bindSheet($('#inspector'));
+$('#previewClose').addEventListener('click', closePreview);
 new ResizeObserver(() => document.documentElement.style.setProperty('--dock-h', $('#dock').offsetHeight + 'px')).observe($('#dock'));
 
 function onThemeChanged(dark) { airflowTheme(dark); }

@@ -44,59 +44,73 @@ function reportFold(example) {
 // ---- A3 教則の対応表（授業・説明会のポップから） ----
 // 2つの向きを持つ: 「画面から引く」= この画面は教則のどこか / 「章から引く」= この章を教えるならどの画面か。
 // 講師はシラバス（章）から準備を始めるので、既定は章から引く向きにする。
-const kyView = { mode: 'chapter', chap: '4' };
+const kyView = { mode: 'chapter', chap: '4', scroll: 0 };
 const kyChapNames = KYOSOKU.chapterNames;
 function kySections(c) { return Object.entries(KYOSOKU.chapters).filter(([k]) => k.startsWith(c + '.')); }
 function kyPartsOf(sec) { return Object.keys(KY_PART).filter(k => KY_PART[k] === sec && PARTS[k]); }
 
-function kyosokuHtml() {
-  const modeSeg = `<div class="seg small ky-seg" role="radiogroup" aria-label="引く向き"><button data-kv="chapter" class="${kyView.mode === 'chapter' ? 'on' : ''}">章から引く</button><button data-kv="screen" class="${kyView.mode === 'screen' ? 'on' : ''}">画面から引く</button></div>`;
-  if (kyView.mode === 'screen') {
-    const rows = KY_TAB.map(r => `<tr><td>${r.screen}</td><td>${r.ky.map(k => kyChip(k)).join(' ')}</td><td>${r.note}</td></tr>`).join('');
-    return `${modeSeg}<p>この教材のどの画面が、教則${KYOSOKU.ver}のどの章にあたるかの一覧です。</p><div class="tbl"><table class="ky-tbl"><tr><th>画面</th><th>教則の章</th><th>備考</th></tr>${rows}</table></div>${kyFoot()}`;
-  }
-  const chapSeg = `<div class="seg small ky-chap" role="radiogroup" aria-label="章">${['2', '3', '4', '5', '6'].map(c => `<button data-kc="${c}" class="${kyView.chap === c ? 'on' : ''}">第${c}章</button>`).join('')}</div>`;
-  const body = kySections(kyView.chap).map(([sec, title]) => {
+function kySectionsHtml() {
+  return kySections(kyView.chap).map(([sec, title]) => {
     const js = KY_JUMP[sec] || [], ps = kyPartsOf(sec);
     return `<section class="ky-sec">
       <h4><i class="ky">教則 ${sec}</i><span>${title}</span></h4>
       ${js.length ? `<div class="ky-go">${js.map((j, i) => `<button data-kg="${sec}" data-ki="${i}" title="${j.note || ''}">${j.label}${j.note ? `<small>${j.note}</small>` : ''}</button>`).join('')}</div>` : '<p class="ky-none">この節にあたる画面はまだありません</p>'}
-      ${ps.length ? `<p class="ky-parts">この節の部品: ${ps.map(k => `<button class="ky-part" data-kp="${k}">${PARTS[k].name}</button>`).join('')}</p>` : ''}
-      ${js.length ? `<button class="ky-copy" data-kcp="${sec}">この節のリンクをコピー</button>` : ''}
+      ${ps.length ? `<details class="ky-parts"><summary>この節の部品 ${ps.length}</summary>${ps.map(k => `<button class="ky-part" data-kp="${k}">${partName(k)}</button>`).join('')}</details>` : ''}
+      ${js.some(j => j.go) ? `<button class="ky-copy" data-kcp="${sec}">この節のリンクをコピー</button>` : ''}
     </section>`;
   }).join('');
-  return `${modeSeg}<p class="ky-lead">第${kyView.chap}章 ${kyChapNames[kyView.chap]}。節を選ぶと、その話をするときに出せる画面が並びます。押すとその画面に切り替わります。</p>${chapSeg}${body}${kyFoot()}`;
 }
-const kyFoot = () => `<p class="ky-src"><a href="${KYOSOKU.url}" target="_blank" rel="noopener">教則${KYOSOKU.ver}（PDF・国土交通省）</a></p>${regDate()}`;
+function kyosokuHtml() {
+  const modeSeg = `<div class="seg small ky-seg" role="radiogroup" aria-label="引く向き"><button data-kv="chapter" class="${kyView.mode === 'chapter' ? 'on' : ''}">章から引く</button><button data-kv="screen" class="${kyView.mode === 'screen' ? 'on' : ''}">画面から引く</button></div>`;
+  if (kyView.mode === 'screen') {
+    const rows = KY_TAB.map(r => `<tr><td>${r.screen}</td><td>${r.ky.map(k => kyChip(k)).join(' ')}</td><td>${r.note}</td></tr>`).join('');
+    return `${modeSeg}${langNote()}<p>この教材のどの画面が、教則${KYOSOKU.ver}のどの章にあたるかの一覧です。</p><div class="tbl"><table class="ky-tbl"><tr><th>画面</th><th>教則の章</th><th>備考</th></tr>${rows}</table></div>${kyFoot()}`;
+  }
+  const chapSeg = `<div class="seg small ky-chap" role="radiogroup" aria-label="章">${['2', '3', '4', '5', '6'].map(c => `<button data-kc="${c}" class="${kyView.chap === c ? 'on' : ''}">第${c}章</button>`).join('')}</div>`;
+  return `${modeSeg}${langNote()}<p class="ky-lead" id="kyLead">第${kyView.chap}章 ${kyChapNames[kyView.chap]}。節を選ぶと、その話をするときに出せる画面が並びます。押すとその画面に切り替わります。</p>${chapSeg}<div id="kySecs">${kySectionsHtml()}</div>${kyFoot()}`;
+}
+const kyFoot = () => `<p class="ky-src"><a href="${KYOSOKU.url}" target="_blank" rel="noopener">教則${KYOSOKU.ver}（PDF・国土交通省）</a>。第1章「はじめに」には節の番号がありません。</p>${regDate()}`;
 
 function showKyosokuTable(mode) {
   if (mode) kyView.mode = mode;
   renderNote({ kind: 'kyosoku', title: `教則${KYOSOKU.ver}との対応`, html: kyosokuHtml(), actions: [{ label: '閉じる', fn: () => renderNote(null) }] });
   bindKyosoku();
+  const card = $('#noteCard'); if (kyView.scroll) card.scrollTop = kyView.scroll;
+}
+// 章の切り替えは節の一覧だけ差し替える。カード全体を作り直すと、押したボタンが消えてフォーカスが落ち、aria-live が全部を読み直す
+function kySetChapter(c, btn) {
+  kyView.chap = c; kyView.scroll = 0;
+  segSet($('#noteBody .ky-chap'), 'kc', c);
+  const lead = $('#kyLead'); if (lead) lead.textContent = `第${c}章 ${kyChapNames[c]}。節を選ぶと、その話をするときに出せる画面が並びます。押すとその画面に切り替わります。`;
+  const box = $('#kySecs'); if (box) box.innerHTML = kySectionsHtml();
+  $('#noteCard').scrollTop = 0;
+  if (btn) btn.focus();
 }
 function bindKyosoku() {
   const box = $('#noteBody'); if (!box) return;
   box.onclick = (e) => {
     const b = e.target.closest('button'); if (!b) return;
-    if (b.dataset.kv) { kyView.mode = b.dataset.kv; showKyosokuTable(); return; }
-    if (b.dataset.kc) { kyView.chap = b.dataset.kc; showKyosokuTable(); return; }
-    if (b.dataset.kp) { renderNote(null); gotoState({ tab: 'see', part: b.dataset.kp, focus: true }); return; }
+    if (b.dataset.kv) { kyView.mode = b.dataset.kv; kyView.scroll = 0; showKyosokuTable(); return; }
+    if (b.dataset.kc) { kySetChapter(b.dataset.kc, b); return; }
+    if (b.dataset.kp) { kyView.scroll = $('#noteCard').scrollTop; renderNote(null); gotoState({ tab: 'see', part: b.dataset.kp, focus: true }); showToast(`${partName(b.dataset.kp)} を開きました`, 2400); return; }
     if (b.dataset.kcp) { kyCopyLinks(b.dataset.kcp, b); return; }
     if (b.dataset.kg) {
       const j = (KY_JUMP[b.dataset.kg] || [])[+b.dataset.ki]; if (!j) return;
-      renderNote(null);
-      if (j.act === 'preflight') { openPreflight(); return; }
+      kyView.scroll = $('#noteCard').scrollTop;
+      if (j.act === 'preflight') { renderNote(null); openPreflight(); return; }
+      if (narrow()) renderNote(null);   /* スマホはカードが画面の半分近くを覆うので閉じる。広い画面は開いたままにして続けて押せるようにする */
       gotoState(j.go || {}, { sceneDelay: 260 });
-      showToast(`教則 ${b.dataset.kg} → ${j.label}`, 2600);
+      showToast(`教則 ${b.dataset.kg}「${KYOSOKU.chapters[b.dataset.kg]}」の画面を開きました`, 2800);
+      if (!narrow() && $('#noteCard').dataset.kind === 'kyosoku') bindKyosoku();   /* 行き先が別のカードを出さなければ、対応表はそのまま */
     }
   };
 }
 async function kyCopyLinks(sec, btn) {
   const list = (KY_JUMP[sec] || []).filter(j => j.go);
   const title = KYOSOKU.chapters[sec] || '';
-  const text = [`教則${KYOSOKU.ver} ${sec} ${title}`, ...list.map(j => `${j.label}\t${stateUrl(j.go)}`)].join('\n');
+  const text = [`教則${KYOSOKU.ver} ${sec} ${title}`, ...list.map(j => `${j.label}\t${stateUrl(j.go)}`), ...(KY_JUMP[sec] || []).filter(j => j.act).map(j => `${j.label}（画面から開く）`)].join('\n');
   try { await navigator.clipboard.writeText(text); btn.textContent = 'コピーしました'; setTimeout(() => { btn.textContent = 'この節のリンクをコピー'; }, 1800); }
-  catch (e) { showToast('コピーできませんでした。共有ボタン（🔗）から1つずつどうぞ', 3200); }
+  catch (e) { showToast('コピーできませんでした。共有ボタン（🔗）から1つずつコピーできます', 3200); }
 }
 
 function kyosokuSheetHtml() {   // 印刷シート用
@@ -142,6 +156,6 @@ function renderRegSources() {
 
 function initReg() {
   syncRegToggle(); renderRegSources();
-  const pop = $('#lessonPop'); if (pop && !$('#kyBtn')) { const b = document.createElement('button'); b.className = 'course ky-course'; b.id = 'kyBtn'; b.innerHTML = `<b>教則${KYOSOKU.ver}との対応表</b><span>登録講習機関・講師向け。章を選ぶと、その話に出せる画面が並びます</span>`; b.addEventListener('click', e => { e.stopPropagation(); pop.hidden = true; showKyosokuTable(); }); const foot = pop.querySelector('.pop-foot'); if (foot) pop.insertBefore(b, foot); else pop.appendChild(b); }
+  const pop = $('#lessonPop'); if (pop && !$('#kyBtn')) { const b = document.createElement('button'); b.className = 'course ky-course'; b.id = 'kyBtn'; b.innerHTML = `<b>教則${KYOSOKU.ver}との対応表</b><span>講師向け · 章から引く · 画面から引く</span>`; b.addEventListener('click', e => { e.stopPropagation(); pop.hidden = true; showKyosokuTable(); }); pop.appendChild(b); }   /* 「配る・引く」の見出しより後ろに積む */
   window.__reg = { regOn, setReg, regGhosts, showKyosokuTable, kyView, KY_TAB, KY_JUMP, KY_PART, KYOSOKU, REG, WHATIF_REG };
 }

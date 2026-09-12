@@ -213,7 +213,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 #mishapSeg { align-self: center; flex: none; }
 .cards button { flex: none; width: 150px; padding: 8px 10px; border-radius: 12px; background: var(--seg-bg); text-align: left; font-size: 12.5px; line-height: 1.35; min-height: 52px; transition: background .15s; }
 .cards button b { display: block; font-size: 13px; margin-bottom: 2px; } .cards button:hover { background: var(--hair2); } .cards button.on { background: var(--accent-soft); color: var(--accent-text); }
-.cards button { min-height: 64px; } #whatifCards button { border-left: 3px solid var(--cw); border-radius: 6px 12px 12px 6px; }   /* 外の状況 = 青の帯（⑤の組み間違いは無印） */
+.cards button { min-height: 64px; } #whatifCards button, #whatifSiteCards button { border-left: 3px solid var(--cw); border-radius: 6px 12px 12px 6px; }   /* 外の状況 = 青の帯（⑤の組み間違いは無印） */
 .stages { display: flex; align-items: center; gap: 6px; flex: 1; justify-content: center; }
 .stages span { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--ink3); } .stages span::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--hair2); }
 .stages span.done::before { background: var(--accent); opacity: .5; } .stages span.on { color: var(--accent); font-weight: 700; } .stages span.on::before { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
@@ -380,11 +380,14 @@ body.big #noteCard { bottom: calc(var(--dock-h) + 104px); }
 /* 印刷ワークシート */
 #printSheet { display: none; }
 @media print {
-  @page { size: A4 portrait; margin: 12mm; }
+  @page { size: A4 portrait; margin: 12mm; @bottom-right { content: counter(page) ' / ' counter(pages); font-size: 8pt; color: #555; } }
   body > *:not(#printSheet) { display: none !important; }
   #printSheet { display: block; }
 }
-body.print-preview > *:not(#printSheet) { display: none !important; }
+body.print-preview > *:not(#printSheet):not(#previewClose) { display: none !important; }
+.preview-close { position: fixed; top: 14px; right: 14px; z-index: 101; display: none; padding: 8px 16px; border-radius: 999px; min-height: var(--tap); background: var(--ink); color: var(--bg); font-size: 13px; font-weight: 600; box-shadow: 0 6px 24px rgba(0,0,0,.28); }
+body.print-preview .preview-close { display: inline-flex; align-items: center; }
+@media print { .preview-close { display: none !important; } }
 body.print-preview #printSheet { display: block; position: fixed; inset: 0; overflow: auto; z-index: 100; padding: 12mm; }
 #printSheet { font: 11pt/1.5 var(--font); color: #000; background: #fff; }
 #printSheet h1 { font-size: 16pt; margin: 0 0 4pt; } #printSheet h2 { font-size: 13pt; margin: 14pt 0 6pt; }
@@ -396,7 +399,7 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
 .fill-num { display: inline-grid; place-items: center; width: 18pt; height: 18pt; border: 1.5pt solid #000; border-radius: 50%; font-weight: 700; font-size: 10pt; }
 .fill-line { flex: 1; border-bottom: 1pt solid #000; height: 14pt; }
 .ps-review ol { padding-left: 1.2em; } .ps-review li p { margin: 0 0 3pt; } .rv-box { height: 46pt; border: 1pt solid #000; border-radius: 3pt; margin-bottom: 8pt; }
-.ps-foot { margin-top: 10pt; font-size: 9pt; color: #444; border-top: 1pt solid #999; padding-top: 4pt; }
+.ps-foot { margin-top: 8pt; font-size: 7.6pt; line-height: 1.4; color: #444; border-top: 1pt solid #999; padding-top: 3pt; }
 
 /* ---------- 第3ラウンド UI/UX 反映 ---------- */
 .pill-btn.on, .pill-btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-text); box-shadow: inset 0 0 0 1.5px var(--accent); }
@@ -408,6 +411,8 @@ body.scale #noteCard { left: calc(14px + 212px + 12px); width: min(420px, calc(1
 #lessonClock { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.25; } #lessonClock b { color: var(--ink); font-weight: 700; } #lessonClock span { font-size: 11px; }
 .lesson-foot #lessonNext { background: var(--accent); color: #fff; border-radius: 999px; min-width: 44px; }
 #lessonPop .course.quiz { border-top: 1px solid var(--hair); margin-top: 10px; border-radius: 12px; }
+#lessonPop .pop-h2 { margin-top: 12px; }
+#lessonPop .pf-course b::before { content: '🖨 '; } #lessonPop .ky-course b::before { content: '⚖ '; }
 @media (max-width: 760px) {
   #lessonBtn { display: none; } .mobile-only { display: flex; }
   #toast { top: 128px; }
@@ -417,6 +422,7 @@ body.scale #noteCard { left: calc(14px + 212px + 12px); width: min(420px, calc(1
   .popover .pop-row { padding: 4px 0; }
 }
 @media (pointer: coarse) {
+  .ky-part, .ky-copy { min-height: var(--tap); display: inline-flex; align-items: center; }
   .seg.tiny button { min-height: 36px; padding: 6px 10px; }
   .icon-btn.sm { min-width: 44px; min-height: 44px; }
   .note-actions button, .d-actions button { min-height: var(--tap); }
@@ -493,7 +499,10 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
 .ky-course b::before { content: '⚖ '; }
 /* 教則の逆引き（章 → 出せる画面） */
 #noteCard[data-kind=kyosoku] { max-height: 58vh; }
-.ky-seg { margin-bottom: 8px; } .ky-chap { margin: 8px 0 4px; flex-wrap: wrap; }
+@media (max-width: 760px) { #noteCard[data-kind=kyosoku] { max-height: 44vh; } }   /* スマホは 34vh の既定を上書きしてしまうので、ここで抑える */
+#noteBody .hint { font-size: calc(11.5px * var(--fs, 1)); color: var(--ink3); line-height: 1.55; margin-top: 6px; }
+.ky-seg { margin-bottom: 8px; }
+.ky-chap { margin: 8px 0 4px; flex-wrap: wrap; position: sticky; top: 0; z-index: 2; }   /* 節を読み進めても章を変えられるように貼り付ける */
 .ky-lead { color: var(--ink2); }
 .ky-sec { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--hair); }
 .ky-sec h4 { display: flex; align-items: baseline; gap: 7px; margin: 0 0 7px; font-size: calc(12.5px * var(--fs, 1)); font-weight: 700; }
@@ -502,7 +511,9 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
 .ky-go button { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: 6px 11px; border-radius: 10px; background: var(--accent-soft); color: var(--accent-text); font-size: calc(12.5px * var(--fs, 1)); font-weight: 600; text-align: left; min-height: var(--tap); justify-content: center; }
 .ky-go button:hover { background: var(--accent); color: #fff; } .ky-go button:hover small { color: rgba(255,255,255,.85); }
 .ky-go button small { font-weight: 400; font-size: calc(10.5px * var(--fs, 1)); color: var(--ink3); }
-.ky-parts { margin: 8px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; font-size: calc(11.5px * var(--fs, 1)); color: var(--ink3); }
+.ky-parts { margin: 8px 0 0; font-size: calc(11.5px * var(--fs, 1)); color: var(--ink3); }
+.ky-parts > summary { cursor: pointer; min-height: var(--tap); display: flex; align-items: center; }
+.ky-parts[open] { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; } .ky-parts[open] > summary { flex-basis: 100%; }
 .ky-part { padding: 3px 9px; border-radius: 999px; background: var(--seg-bg); color: var(--ink2); font-size: calc(11.5px * var(--fs, 1)); }
 .ky-part:hover { background: var(--hair2); color: var(--ink); }
 .ky-none { margin: 0; font-size: calc(11.5px * var(--fs, 1)); color: var(--ink3); }
@@ -511,21 +522,24 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
 .ky-src { margin-top: 12px; }
 #noteBody .tbl { overflow-x: auto; margin: 8px 0; } table.ky-tbl { border-collapse: collapse; width: 100%; font-size: calc(12px * var(--fs, 1)); min-width: 360px; } table.ky-tbl th, table.ky-tbl td { text-align: left; vertical-align: top; padding: 5px 8px; border-bottom: 1px solid var(--hair); } table.ky-tbl th { color: var(--ink3); font-weight: 600; } .ky-list { margin: 6px 0 0; padding-left: 1.1em; font-size: calc(12px * var(--fs, 1)); line-height: 1.6; }
 /* 飛行前点検チェックリスト（印刷）: 手に持って上から順に潰せる形にする */
-#printSheet .pf-head { display: grid; grid-template-columns: repeat(2, 1fr); gap: 3pt 16pt; margin: 6pt 0 2pt; }
-#printSheet .pf-head div { display: flex; align-items: flex-end; gap: 5pt; font-size: 10pt; }
+#printSheet .pf-head { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2pt 12pt; margin: 5pt 0 2pt; }
+#printSheet .pf-head div { display: flex; align-items: flex-end; gap: 4pt; font-size: 8.6pt; }
 #printSheet .pf-head span { flex: none; color: #333; } #printSheet .pf-head i { flex: 1; border-bottom: 1pt solid #000; height: 1.15em; }
-#printSheet .pf-lead { font-size: 9.5pt; color: #333; margin: 6pt 0 0; }
+#printSheet .pf-lead { font-size: 8.6pt; line-height: 1.4; color: #333; margin: 4pt 0 0; }
 #printSheet .pf-sec, #printSheet .pf-log, #printSheet .pf-note { break-inside: avoid; page-break-inside: avoid; }
-#printSheet .pf-sec h2, #printSheet .pf-log h2, #printSheet .pf-note h2 { display: flex; align-items: center; gap: 6pt; font-size: 11.5pt; margin: 11pt 0 4pt; padding-bottom: 2pt; border-bottom: 1pt solid #000; }
+#printSheet .pf-sec h2, #printSheet .pf-log h2, #printSheet .pf-note h2 { display: flex; align-items: center; gap: 6pt; font-size: 10.5pt; margin: 7pt 0 3pt; padding-bottom: 1.5pt; border-bottom: 1pt solid #000; }
 #printSheet .pf-n { display: inline-grid; place-items: center; width: 15pt; height: 15pt; border-radius: 50%; background: #000; color: #fff; font-size: 9pt; font-weight: 700; flex: none; }
 #printSheet .pf-sec h2 em { margin-left: auto; font-style: normal; font-size: 8.5pt; font-weight: 400; color: #555; }
 #printSheet .pf-list { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 16pt; }
-#printSheet .pf-list li { display: flex; align-items: flex-start; gap: 5pt; font-size: 9.8pt; line-height: 1.45; margin: 0 0 3pt; break-inside: avoid; page-break-inside: avoid; }
-#printSheet .pf-box { flex: none; width: 9pt; height: 9pt; border: 1pt solid #000; border-radius: 1.5pt; margin-top: 2.5pt; }
+#printSheet .pf-list li { display: flex; align-items: flex-start; gap: 4pt; font-size: 9pt; line-height: 1.35; margin: 0 0 1.8pt; break-inside: avoid; page-break-inside: avoid; }
+#printSheet .pf-box { flex: none; width: 11pt; height: 11pt; border: 1.1pt solid #000; border-radius: 1.5pt; margin-top: 0.8pt; }
 #printSheet .pf-t b { display: inline-block; min-width: 5.5em; margin-right: 4pt; }
-#printSheet .pf-sub { margin: 6pt 0 2pt; font-size: 8.8pt; color: #555; border-left: 2pt solid #bbb; padding-left: 5pt; }
-#printSheet .pf-add .pf-box { border-color: #888; background: #f0f0f0; }
-#printSheet .pf-freebox { height: 58pt; border: 1pt solid #000; border-radius: 3pt; }
+#printSheet .pf-sub { margin: 4pt 0 1.5pt; font-size: 8.4pt; color: #555; border-left: 2pt solid #bbb; padding-left: 5pt; }
+#printSheet .pf-add .pf-box { border-style: dashed; }   /* 灰色の塗りはモノクロ印刷で白と見分けがつかない */
+#printSheet .pf-res { flex: none; width: 24pt; border-bottom: 0.6pt solid #999; align-self: flex-end; height: 1pt; }
+#printSheet .pf-warn { margin: 5pt 0 2pt; padding: 3pt 5pt; border: 1.2pt solid #000; border-radius: 2pt; font-size: 9pt; line-height: 1.35; }
+#printSheet .pf-meas { margin: 5pt 0 0; font-size: 9.8pt; display: flex; gap: 10pt; } #printSheet .pf-meas i { display: inline-block; width: 34pt; border-bottom: 0.8pt solid #000; }
+#printSheet .pf-freebox { height: 92pt; border: 1pt solid #000; border-radius: 3pt; background: repeating-linear-gradient(to bottom, transparent 0, transparent 16pt, #bbb 16pt, #bbb 16.6pt); }
 #printSheet .pf-two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18pt; }
 #printSheet .pf-two h3 { font-size: 10pt; margin: 6pt 0 2pt; }
 #printSheet .pf-two .ps-repl li span:first-child { width: auto; flex: none; }
@@ -533,7 +547,7 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
 .pf-opt { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0 6px; }
 .pf-opt .tgl { min-height: var(--tap); }
 #printSheet .ps-ky, #printSheet .ps-rep, #printSheet .ps-review { break-inside: avoid; page-break-inside: avoid; } #printSheet .ps-rep { break-before: page; page-break-before: always; }
-#printSheet .ps-ky ul, #printSheet .ps-repl { margin: 4pt 0; padding-left: 1.2em; } #printSheet .ps-small { font-size: 9.5pt; color: #333; } #printSheet .ps-repl li { display: flex; gap: 8pt; align-items: flex-end; margin: 6pt 0; } #printSheet .ps-repl li span:first-child { flex: none; width: 12em; } #printSheet .ps-repl .fill-line { flex: 1; border-bottom: 1px solid #000; height: 1.2em; }
+#printSheet .ps-ky ul, #printSheet .ps-repl { margin: 4pt 0; padding-left: 1.2em; } #printSheet .ps-small { font-size: 8.4pt; line-height: 1.4; color: #333; } #printSheet .ps-repl li { display: flex; gap: 8pt; align-items: flex-end; margin: 6pt 0; } #printSheet .ps-repl li span:first-child { flex: none; width: 12em; } #printSheet .ps-repl .fill-line { flex: 1; border-bottom: 1px solid #000; height: 1.2em; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation-duration: .01s !important; } }
 
@@ -571,10 +585,10 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
       <button id="scaleBtn" class="pill-btn" aria-pressed="false">重さ・お金</button>
     </div>
     <div class="ctx-row" data-tab="mishap" data-sel="mis" hidden>
-      <div class="seg small" id="mishapSeg" role="radiogroup" aria-label="もしもの種類"><button data-mg="mis" class="on">まちがえ</button><button data-mg="craft">機体</button><button data-mg="site">場所・時間</button></div>
+      <div class="dock-group" id="mishapPick"><label>どの もしも？</label><div class="seg small" id="mishapSeg" role="radiogroup" aria-label="もしもの種類"><button data-mg="mis" class="on">まちがい</button><button data-mg="craft">飛行中</button><button data-mg="site">場所と人</button></div></div>
       <div class="dock-group grow" data-mg="mis"><label>もしも、まちがえたら</label><div class="cards" id="mishapCards"></div></div>
-      <div class="dock-group grow" data-mg="craft"><label>もしも、機体がこうなったら</label><div class="cards" id="whatifCards"></div></div>
-      <div class="dock-group grow" data-mg="site"><label>もしも、こんな場所・時間なら</label><div class="cards" id="whatifSiteCards"></div></div>
+      <div class="dock-group grow" data-mg="craft"><label>もしも、飛んでいる最中に</label><div class="cards" id="whatifCards"></div></div>
+      <div class="dock-group grow" data-mg="site"><label>もしも、その場所・その人なら</label><div class="cards" id="whatifSiteCards"></div></div>
     </div>
     <div class="ctx-row" data-tab="expert" hidden>
       <div class="dock-group"><label>なにを見る？</label><div class="seg small" id="expertSeg" role="radiogroup" aria-label="なにを見る？"><button data-x="sensors">センサー</button><button data-x="wear">消耗</button><button data-x="toolbox">設計の計算</button></div></div><button id="expertToggle" class="pill-btn compact-only">パネル</button>
@@ -714,6 +728,7 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
 </div>
 
 <div id="printSheet" aria-hidden="true"></div>
+<button id="previewClose" class="preview-close" hidden>✕ 画面にもどる</button>
 
 <div id="loading"><div class="spinner"></div><p id="loadMsg">3Dモデルを生成しています…</p></div>
 
@@ -917,7 +932,7 @@ const PARTS = {
     role: '全システムの電源。この機体では重量の約4分の1（機種によっては3〜4割）を占め、飛行時間を決める。',
     structure: ['リチウムポリマー(LiPo)セルを6枚直列(6S)', '太い電源線(XT60コネクタ)と、セルごとの電圧を測るバランスコネクタ', '2本のストラップで下部プレートに固定'],
     spec: [['構成', '6S (22.2V, 満充電 25.2V)'], ['容量', '5,000 mAh (111 Wh)'], ['放電レート', '25C (連続 125A)'], ['質量', '約 640 g']],
-    check: ['膨らみ(少しでもあれば使用中止)', '外装の傷・へこみ', 'コネクタの焼け・ゆるみ', 'セル間電圧差(0.05V以上で要注意)', '保管は 3.8V/セル前後で'],
+    check: ['膨らみ（取扱説明書の基準と照らす。少しでもあれば使用を止める）', '外装の傷・へこみ', 'コネクタの焼け・ゆるみ', 'セル間電圧差(0.05V以上で要注意)', '保管は 3.8V/セル前後で'],
     tip: 'セル電圧が3.0Vを下回ると劣化が急速に進む。飛行中は3.5V/セルを目安に着陸する。',
   },
   cells: {
@@ -1560,7 +1575,7 @@ const REG = {
   rx: [
     { text: '操縦用の2.4GHz帯は、技適マーク（Rマーク）のある小電力無線局なら免許も資格も不要。技適のない海外製の送受信機は使えない。', ky: '3.2', src: 'soumu' }],
   fc: [
-    { text: '電波断絶時の自動帰還・空中停止、GNSS異常時の空中停止や自動着陸、電池異常時の対応といったフェールセーフ機能は、目視外飛行の装備として挙げられ、機体認証でも確認される。', ky: '4.2', src: 'cert' },
+    { text: '電波断絶時の自動帰還・空中停止、GNSS異常時の空中停止や自動着陸、電池異常時の対応といったフェイルセーフ機能は、目視外飛行の装備として挙げられ、機体認証でも確認される。', ky: '4.2', src: 'cert' },
     { text: '緊急時は離陸地点へ戻すことを前提とせず、近くの安全な無人地帯へ速やかに不時着させる考え方が示されている。', ky: '5.2', src: 'license' }],
   gps: [
     { text: '特定飛行では飛行日誌（飛行記録・日常点検記録・点検整備記録）を遅滞なく記載し、飛行時に携行する。飛行ログは事故の原因究明にも使う。', ky: '2.2', src: 'log' },
@@ -1588,7 +1603,7 @@ const KY_TAB = [
   { screen: 'みる（部品・構造・分解・見え方）', ky: ['4.1', '4.4'], note: '40部品の解説がそのまま対応する' },
   { screen: 'とばす（飛行原理・スティック・気流）', ky: ['4.3', '5.2'], note: '反トルクとヨー、ホバリングの原理' },
   { screen: 'つかう（用途・重さ・お金）', ky: ['4.1', '6.3', '3.1'], note: '用途ごとの装備差、重量区分' },
-  { screen: 'こわれる（組み間違い・もしも）', ky: ['4.6', '2.2', '5.2', '2.3', '3.1'], note: '飛行前点検、フェールセーフ、事故等の報告' },
+  { screen: 'こわれる（組み間違い・もしも）', ky: ['4.6', '2.2', '5.2', '2.3', '3.1'], note: '飛行前点検、フェイルセーフ、事故等の報告' },
   { screen: '専門（センサー・消耗・設計の計算）', ky: ['4.5', '4.6', '4.3'], note: 'コンパスのずれ、電波の形、消耗と交換' },
   { screen: '実寸・重量区分', ky: ['3.1'], note: '100g・25kgの区分' },
   { screen: '制度タグ', ky: ['3.1', '3.2', '4.2'], note: '登録・リモートID・灯火・電波' },
@@ -1695,8 +1710,8 @@ const KY_JUMP = {
 
 // もしもの場面 → 「制度では」
 const WHATIF_REG = {
-  signal:   { text: '電波断絶時の自動帰還や空中停止といったフェールセーフ機能は、目視外飛行の装備として挙げられている。緊急時は離陸地点へ戻すことを前提とせず、近くの安全な無人地帯へ不時着させる考え方も示されている。', ky: '4.2 / 5.2', src: 'license' },
-  battery:  { text: '飛行前点検でバッテリー残量を確認する。フェールセーフ中に残量が足りなくなると、機体は着陸動作に移る。', ky: '2.2 / 5.2', src: 'license' },
+  signal:   { text: '電波断絶時の自動帰還や空中停止といったフェイルセーフ機能は、目視外飛行の装備として挙げられている。緊急時は離陸地点へ戻すことを前提とせず、近くの安全な無人地帯へ不時着させる考え方も示されている。', ky: '4.2 / 5.2', src: 'license' },
+  battery:  { text: '飛行前点検でバッテリー残量を確認する。フェイルセーフ中に残量が足りなくなると、機体は着陸動作に移る。', ky: '2.2 / 5.2', src: 'license' },
   gps:      { text: 'GNSS異常時の空中停止や安全な自動着陸は目視外飛行の装備として挙げられている。GNSSや電子コンパスが機能不全になったときは手動操縦での危険回避が求められる。', ky: '4.2 / 5.2', src: 'license' },
   wind:     { text: '多数の人が集まる催し場所の上空では、風速5m/s以上のときは飛行を中止することが必要とされている。天候・風速・視程は飛行前に確認する項目。', ky: '3.1 / 6.2', src: 'permit' },
   night:    { text: '夜間（日没後から日出前まで）の飛行は特定飛行で、原則は承認の対象。姿勢と方向が正確に視認できる灯火を備えることが求められる（飛行範囲が照明等で十分に照らされている場合を除く）。機体認証を受けた機体を、昼間飛行の限定を解除した技能証明を持つ人が、立入管理措置を講じて飛ばす場合は承認を要しない。技能証明の限定は等級を問わず既定で「昼間」「目視内」。', ky: '3.1 / 4.2 / 6.4', src: 'permit' },
@@ -1713,34 +1728,37 @@ const WHATIF_REG = {
 // law[] = 法令・教則・様式に列挙されている項目（根拠つき）。extra[] と keys[] = この機体の取扱説明書に由来する追加点検。
 // この2つを混ぜないことが要点。灯火・GNSS・カメラは法令の飛行前点検の列挙項目ではないので、追加の側に置く。
 // 順番は現場の動線（出発前 → 空域 → 気象 → 外部点検 → 作動点検 → 離陸直前 → 飛行後 → 終了後）。根拠は各見出しに添える。
-const PREFLIGHT_LAW = '根拠: 航空法第132条の86第1項第2号（飛行の方法）、同施行規則第236条の77（確認事項・外部点検及び作動点検）、飛行日誌は航空法第132条の89・同施行規則第236条の84。項目の並びは教則第5版 5.1.2（運航時の点検及び確認事項）と様式2（日常点検記録）による。';
-const PREFLIGHT_NOTE = 'この紙は現場で使う手控えで、日常点検記録（様式2）そのものではありません。様式2は「点検項目ごとの結果」を記す法定の様式なので、終わったら下の欄から転記してください。不具合が見つかったときは、その是正の記録は点検整備記録（様式3）に書きます。「この機体の追加」の項目は取扱説明書に基づく例で、法令が列挙している項目ではありません。';
+const PREFLIGHT_LAW = '根拠: 航空法第132条の86第1項第2号（飛行の方法）、同施行規則第236条の77（確認事項・外部点検及び作動点検）。飛行日誌は航空法第132条の89・同施行規則第236条の84。並びは教則第5版 5.1.2（運航時の点検及び確認事項）と様式2（日常点検記録）による。';
+const PREFLIGHT_NOTE = 'この紙は現場で使う手控えです。日常点検記録（様式2）そのものではありません。様式2は「点検項目ごとの結果」を記す法定の様式なので、終わったら様式2へ書き写してください。様式として使えるかどうかは、国土交通省の飛行日誌の取扱いで確かめてください。不具合を直したときは、その記録を点検整備記録（様式3）に書きます。「この機体の追加」は取扱説明書に基づく例で、法令が列挙している項目ではありません。';
+// law[] は法令・教則・様式に列挙されている項目。末尾の〔…〕が根拠。extra[]/keys[] はこの機体の追加。
+// core の 'prop@0,2,1' は、みじかい版でその部品の check[] の 0・2・1 番目だけを採るという意味（先頭1件だと肝心の項目が落ちる）。
 const PREFLIGHT = [
   { id: 'before', name: '出発前（事務所で）', ky: '5.1.2', note: '現場で気づいても直せないもの。機体を積む前に終える',
-    law: ['*機体の登録と有効期間（登録は3年）', '機体認証の有効期間と使用の条件（受けている機体のみ）', '技能証明の等級・限定・条件・有効期間（必要な飛行のみ）', '*飛行の許可・承認書を携行する（必要な飛行のみ）', '*飛行日誌（飛行記録・日常点検記録・点検整備記録）を携行する', '*飛行計画をドローン情報基盤システムに通報した', '他の無人航空機の飛行計画を確認した', '航空法以外の法令の手続き（小型無人機等飛行禁止法・電波・道路・条例など）'],
-    extra: ['*バッテリーを充電し、送信機と表示端末も充電した', '保険の加入と補償の範囲を確認した', '予備のプロペラとネジを積んだ'],
-    keys: ['regMark', 'remoteId'], core: ['regMark'] },
+    law: ['*機体の登録と有効期間（登録は3年）〔法132条の2〕', '*機体認証の有効期間と使用の条件（受けている機体のみ）〔法132条の13〕', '*技能証明の等級・限定・条件・有効期間（必要な飛行のみ）〔法132条の40〕', '*飛行の許可・承認書を携行する（必要な飛行のみ）', '*飛行日誌を備え付ける（特定飛行をするとき）〔法132条の89〕', '*飛行計画をドローン情報基盤システムに通報した（特定飛行をするとき）〔法132条の88〕', '他の無人航空機の飛行計画を確認した', '航空法以外の法令の手続き（小型無人機等飛行禁止法・電波・道路・条例など）'],
+    extra: ['*今日の装備での総重量が最大離陸重量の範囲内か（機体認証を受けた機体は使用の条件も）', '*バッテリーを充電し、送信機と表示端末も充電した', '保険の加入と補償の範囲を確認した', '予備のプロペラとネジを積んだ'] },
   { id: 'site', name: '現場に着いたら — 空域と周囲', ky: '3.1.2 / 5.1.2', note: '組み立てる前に見る。ここで中止を決めれば手戻りが小さい',
-    law: ['*第三者の有無、地上・水上の状況（住宅・学校・病院・道路・鉄道など）', '*航空機や他の無人航空機の飛行状況', '*障害物や安全性に影響する物件（高圧線・変電所・電波塔・無線施設など）', '*緊急用務空域・飛行自粛要請空域に該当しないか（当日あらためて確認）', '*小型無人機等飛行禁止法の飛行禁止空域に該当しないか', '*立入管理措置と安全確保措置の準備（区画・補助者・掲示・緊急着陸地点）'] },
-  { id: 'wx', name: '現場に着いたら — 気象', ky: '3.1.2 / 6.2',
-    law: ['*最新の気象情報（天気・風向・風速・警報・注意報）', '*視程', '*機体の運用限界（風速など）に収まっているか'],
-    extra: ['日没の時刻（日没後は夜間飛行になる）', '気温（低いとバッテリーは表示より早く落ちる）'] },
-  { id: 'ext', name: '機体の外部点検（電源を入れる前）', ky: '規則236条の77② / 様式2', note: '手で触って、見て確かめる',
-    law: ['*各機器の取付状態（ネジ等の脱落やゆるみ、コネクタ、ケーブル）', '*プロペラの外観・損傷・ゆがみ', '*フレームの外観・損傷・ゆがみ', '*操縦装置の外観、スティックとスイッチ', '*登録記号が機体に表示されているか'],
-    keys: ['frameTop', 'frameBottom', 'arm', 'armClamp', 'motorMount', 'standoff', 'screws', 'landingGear', 'batteryTray', 'prop', 'propNut', 'propAdapter', 'motor', 'shaft', 'bell', 'stator', 'winding', 'magnet', 'motorBase', 'battery', 'cells', 'xt60', 'balance', 'strap', 'wiring', 'pdb', 'esc', 'capacitor', 'damper', 'gimbal', 'camera'],
-    core: ['prop', 'motor', 'arm', 'screws', 'battery', 'xt60', 'landingGear'] },
-  { id: 'act', name: '機体の作動点検（電源を入れてから）', ky: '規則236条の77② / 様式2', note: '人を離し、プロペラの回転域に立たない',
-    law: ['*電源系統（機体と操縦装置）が正常に作動するか', '*通信系統（機体と操縦装置の通信品質）が正常か', '*推進系統（モーター）が正常に作動し、異音がないか', '*自動制御系統（飛行制御装置）が正常に作動するか', '*バッテリーの充電量は十分か', '*リモートID機能が正常に作動しているか（ランプの点灯を目視）'],
-    extra: ['*送信機 → 機体の順に電源を入れた', 'GNSSの受信衛星数と、コンパスの示す方位', '*フェイルセーフの設定（電波が切れたときの動き）', '灯火が点いているか（夜間飛行では必要）', '映像と機体の情報が手元に届いているか', '高度と距離の上限を機体側に設定したか'],
-    keys: ['fc', 'gps', 'rx', 'telemetry', 'vtx', 'led', 'buzzer', 'remoteId'], core: ['fc', 'gps', 'rx'] },
+    law: ['*第三者の有無、地上・水上の状況（住宅・学校・病院・道路・鉄道など）', '*航空機や他の無人航空機の飛行状況', '*障害物や安全性に影響する物件（高圧線・変電所・電波塔・無線施設など）', '*緊急用務空域に該当しないか（当日あらためて確認）', '*飛行自粛要請空域に該当しないか（法令の空域ではなく要請）', '*小型無人機等飛行禁止法の飛行禁止空域に該当しないか', '*立入管理措置と安全確保措置の準備（区画・補助者・掲示・緊急着陸地点）'] },
+  { id: 'wx', name: '現場に着いたら — 気象', ky: '3.1.2 / 6.2', note: '測った値を書き留める。中止の判断根拠として残る',
+    law: ['*最新の気象情報（天気・風向・風速・警報・注意報）', '*視程（機体を目視で捉えられる距離。飛行マニュアルの基準と照らす）', '*機体の運用限界（風速など）に収まっているか'],
+    extra: ['*日没の時刻（日没後から日出前は夜間飛行になり、手続きが変わる）', '気温（低いとバッテリーは表示より早く落ちる）'] },
+  { id: 'build', name: '組み立て', ky: '4.6', note: '点検ではなく作業。終わった直後に確認する',
+    extra: ['*アームを展開し、クランプを確実に締めた', '*プロペラを向き（CW/CCW）どおりに取り付け、ナットを工具で締めた', '*バッテリーを載せ、ストラップとトレイで確実に固定した', '*ジンバルのロックを外した（積んでいるとき）'] },
+  { id: 'ext', name: '機体の外部点検（電源を入れる前）', ky: '規則236条の77② / 様式2', note: '機体を一周しながら、手で触って見る',
+    law: ['*各機器の取付状態（ネジ等の脱落やゆるみ、コネクタ、ケーブル、バッテリーの固定を含む）〔様式2: 機体全般〕', '*プロペラの外観・損傷・ゆがみ〔様式2: プロペラ〕', '*フレームの外観・損傷・ゆがみ〔様式2: フレーム〕', '*操縦装置の外観、スティックとスイッチ〔様式2: 操縦装置〕', '*登録記号が機体に表示されているか〔法132条の5〕'],
+    keys: ['prop', 'propNut', 'propAdapter', 'motor', 'shaft', 'bell', 'stator', 'winding', 'magnet', 'motorBase', 'arm', 'armClamp', 'motorMount', 'frameTop', 'frameBottom', 'standoff', 'screws', 'landingGear', 'batteryTray', 'strap', 'battery', 'cells', 'xt60', 'balance', 'wiring', 'pdb', 'esc', 'capacitor', 'damper', 'gimbal', 'camera', 'regMark'],
+    core: ['prop@0,2,1', 'motor', 'arm', 'armClamp', 'screws', 'landingGear', 'strap', 'battery', 'xt60'] },
+  { id: 'act', name: '機体の作動点検（電源を入れてから）', ky: '規則236条の77② / 様式2', note: '送信機 → 機体の順に電源を入れる。人を離し、プロペラの回転域に立たない',
+    law: ['*電源系統（機体と操縦装置）が正常に作動するか〔様式2: 電源系統〕', '*通信系統（機体と操縦装置の通信品質）が正常か〔様式2: 通信系統〕', '*推進系統（モーター）が正常に作動し、異音がないか〔様式2: 推進系統〕', '*自動制御系統（飛行制御装置）が正常に作動するか〔様式2: 自動制御系統〕', '*バッテリーの残量（又は燃料の搭載量）〔規則236条の77①四／様式2: バッテリー、燃料〕', '*リモートID機能が正常に作動しているか。ランプの点灯を目視〔規則236条の77①五〕'],
+    extra: ['*送信機の残量、モード（1/2）、トリムとフライトモードの位置', '*GNSSの受信衛星数（目安12以上）と、コンパスの示す方位', '*フェイルセーフの設定（電波が切れたときの動き）', '*ホームポイントを記録し、帰還高度を周囲の障害物より高く設定した', '*灯火が点いているか（夜間飛行では必要）', '*高度と距離の上限を機体側に設定した', '映像と機体の情報が手元に届いているか'],
+    keys: ['fc', 'gps', 'rx', 'telemetry', 'vtx', 'led', 'buzzer', 'remoteId'], core: ['fc', 'gps@2,1', 'rx@1'] },
   { id: 'takeoff', name: '離陸の直前', ky: '3.1.2 / 5.1.2',
-    law: ['*飲酒や薬物の影響がないこと', '*航行中の航空機がいないこと', '*立入管理区画の中に第三者がいないこと'],
-    extra: ['*操縦者と補助者の役割、合図と連絡手段の最終確認', '緊急時に降ろす場所をその場で指さして確認した'] },
+    law: ['*飲酒や薬物の影響がないこと〔法132条の86①一〕', '*航行中の航空機がいないこと', '*立入管理区画の中に第三者がいないこと'],
+    extra: ['*操縦者と補助者の役割、合図と連絡手段の最終確認', '*周囲に声をかけ、プロペラの回転域から全員が離れたことを目視した', '*1mほどでホバリングさせ、異音・流れ・傾きがないことを確かめた', '緊急時に降ろす場所をその場で指さして確認した'] },
   { id: 'post', name: '飛行後の点検', ky: '5.1.2',
     law: ['*機体にゴミ等の付着はないか', '*各機器は確実に取り付けられているか（ネジ等の脱落やゆるみ）', '*機体（プロペラ・フレームなど）に損傷やゆがみはないか', '*各機器に異常な発熱はないか'] },
   { id: 'end', name: '運航が終わったら', ky: '5.1.2 / 3.1.2',
-    law: ['*機体やバッテリーを安全な状態で適切な場所に保管したか', '*飛行日誌（飛行記録・日常点検記録・点検整備記録）を書いたか'],
-    extra: ['バッテリーを保管電圧に戻したか', '*不具合があれば、内容と直した記録を点検整備記録に書いたか'] },
+    law: ['*機体やバッテリーを安全な状態で適切な場所に保管したか', '*飛行日誌（飛行記録・日常点検記録・点検整備記録）を書いたか〔法132条の89〕'],
+    extra: ['バッテリーを保管電圧に戻したか', '*不具合があれば、内容と直した記録を点検整備記録（様式3）に書いたか'] },
 ];
 
 const REG_REPORT = {
@@ -1761,7 +1779,7 @@ const MISHAP_REPORT = {
   motorOut:    '損壊部位: プロペラ1枚、アーム、着陸脚。経過: ホバリング中に後左（M3）モーターが停止し、機体が回転しながら降下して接地。第三者・物件への被害なし。対応: 制御不能となった事態にあたるため重大インシデントとして報告。M3 の配線と ESC を点検。',
 };
 const WHATIF_REPORT = {
-  signal: '経過: ホバリング中に送信機の電波が途絶。機体はフェールセーフで離陸地点へ帰還し着陸。人・物件への被害なし。対応: 報告の対象ではない。電波環境と送信機の設定を飛行記録に残す。',
+  signal: '経過: ホバリング中に送信機の電波が途絶。機体はフェイルセーフで離陸地点へ帰還し着陸。人・物件への被害なし。対応: 報告の対象ではない。電波環境と送信機の設定を飛行記録に残す。',
   battery: '経過: 飛行中に低電圧の警告が出て、機体が自動降下。安全に着陸し被害なし。対応: 報告の対象ではない。残量確認の手順と飛行時間の計画を見直す。',
   gps: '経過: 飛行中に GNSS の受信が不安定になり位置保持が外れ、風下へ流された。手動で位置を戻し着陸。被害なし。対応: 報告の対象ではない。建物の近くでの飛行計画を見直す。',
   wind: '経過: 風が強まり機体が風下へ流されたため、飛行を中止して着陸。被害なし。対応: 報告の対象ではない。飛行前の風速確認と中止基準を飛行マニュアルどおりに運用する。',
@@ -4553,7 +4571,7 @@ function bindLessonSheet() {
 }
 
 function initLesson() {
-  $('#lessonPop').innerHTML = `<h3>授業・説明会</h3>${LESSONS.map(l => `<button class="course" data-l="${l.id}"><b>${l.name}</b><span>${l.audience} · 約${l.total}分 · ${l.steps.length}段落</span></button>`).join('')}<button class="course quiz" id="quizBtn"><b>ふたりクイズだけ</b><span>光った部品の名前を隣の人に説明する。答え合わせは画面がしない</span></button><p class="pop-foot">台本パネルが開き、段落ごとに視点と表示が切り替わります。URL を共有すると同じ段落から開きます。</p>`;
+  $('#lessonPop').innerHTML = `<h3>授業・説明会</h3>${LESSONS.map(l => `<button class="course" data-l="${l.id}"><b>${l.name}</b><span>${l.audience} · 約${l.total}分 · ${l.steps.length}段落</span></button>`).join('')}<button class="course quiz" id="quizBtn"><b>ふたりクイズだけ</b><span>光った部品の名前を隣の人に説明する。答え合わせは画面がしない</span></button><p class="pop-foot">台本パネルが開き、段落ごとに視点と表示が切り替わります。URL を共有すると同じ段落から開きます。</p><h3 class="pop-h2">配る・引く</h3>`;
   const openPop = e => { e.stopPropagation(); $('#settings').hidden = true; $('#askPop').hidden = true; $('#lessonPop').hidden = !$('#lessonPop').hidden; };
   $('#lessonBtn').addEventListener('click', openPop); const lm = $('#lessonBtnM'); if (lm) lm.addEventListener('click', openPop);
   $('#lessonPop').addEventListener('click', e => { const b = e.target.closest('.course'); if (b) { $('#lessonPop').hidden = true; startLesson(b.dataset.l, 0); } });
@@ -5049,59 +5067,73 @@ function reportFold(example) {
 // ---- A3 教則の対応表（授業・説明会のポップから） ----
 // 2つの向きを持つ: 「画面から引く」= この画面は教則のどこか / 「章から引く」= この章を教えるならどの画面か。
 // 講師はシラバス（章）から準備を始めるので、既定は章から引く向きにする。
-const kyView = { mode: 'chapter', chap: '4' };
+const kyView = { mode: 'chapter', chap: '4', scroll: 0 };
 const kyChapNames = KYOSOKU.chapterNames;
 function kySections(c) { return Object.entries(KYOSOKU.chapters).filter(([k]) => k.startsWith(c + '.')); }
 function kyPartsOf(sec) { return Object.keys(KY_PART).filter(k => KY_PART[k] === sec && PARTS[k]); }
 
-function kyosokuHtml() {
-  const modeSeg = `<div class="seg small ky-seg" role="radiogroup" aria-label="引く向き"><button data-kv="chapter" class="${kyView.mode === 'chapter' ? 'on' : ''}">章から引く</button><button data-kv="screen" class="${kyView.mode === 'screen' ? 'on' : ''}">画面から引く</button></div>`;
-  if (kyView.mode === 'screen') {
-    const rows = KY_TAB.map(r => `<tr><td>${r.screen}</td><td>${r.ky.map(k => kyChip(k)).join(' ')}</td><td>${r.note}</td></tr>`).join('');
-    return `${modeSeg}<p>この教材のどの画面が、教則${KYOSOKU.ver}のどの章にあたるかの一覧です。</p><div class="tbl"><table class="ky-tbl"><tr><th>画面</th><th>教則の章</th><th>備考</th></tr>${rows}</table></div>${kyFoot()}`;
-  }
-  const chapSeg = `<div class="seg small ky-chap" role="radiogroup" aria-label="章">${['2', '3', '4', '5', '6'].map(c => `<button data-kc="${c}" class="${kyView.chap === c ? 'on' : ''}">第${c}章</button>`).join('')}</div>`;
-  const body = kySections(kyView.chap).map(([sec, title]) => {
+function kySectionsHtml() {
+  return kySections(kyView.chap).map(([sec, title]) => {
     const js = KY_JUMP[sec] || [], ps = kyPartsOf(sec);
     return `<section class="ky-sec">
       <h4><i class="ky">教則 ${sec}</i><span>${title}</span></h4>
       ${js.length ? `<div class="ky-go">${js.map((j, i) => `<button data-kg="${sec}" data-ki="${i}" title="${j.note || ''}">${j.label}${j.note ? `<small>${j.note}</small>` : ''}</button>`).join('')}</div>` : '<p class="ky-none">この節にあたる画面はまだありません</p>'}
-      ${ps.length ? `<p class="ky-parts">この節の部品: ${ps.map(k => `<button class="ky-part" data-kp="${k}">${PARTS[k].name}</button>`).join('')}</p>` : ''}
-      ${js.length ? `<button class="ky-copy" data-kcp="${sec}">この節のリンクをコピー</button>` : ''}
+      ${ps.length ? `<details class="ky-parts"><summary>この節の部品 ${ps.length}</summary>${ps.map(k => `<button class="ky-part" data-kp="${k}">${partName(k)}</button>`).join('')}</details>` : ''}
+      ${js.some(j => j.go) ? `<button class="ky-copy" data-kcp="${sec}">この節のリンクをコピー</button>` : ''}
     </section>`;
   }).join('');
-  return `${modeSeg}<p class="ky-lead">第${kyView.chap}章 ${kyChapNames[kyView.chap]}。節を選ぶと、その話をするときに出せる画面が並びます。押すとその画面に切り替わります。</p>${chapSeg}${body}${kyFoot()}`;
 }
-const kyFoot = () => `<p class="ky-src"><a href="${KYOSOKU.url}" target="_blank" rel="noopener">教則${KYOSOKU.ver}（PDF・国土交通省）</a></p>${regDate()}`;
+function kyosokuHtml() {
+  const modeSeg = `<div class="seg small ky-seg" role="radiogroup" aria-label="引く向き"><button data-kv="chapter" class="${kyView.mode === 'chapter' ? 'on' : ''}">章から引く</button><button data-kv="screen" class="${kyView.mode === 'screen' ? 'on' : ''}">画面から引く</button></div>`;
+  if (kyView.mode === 'screen') {
+    const rows = KY_TAB.map(r => `<tr><td>${r.screen}</td><td>${r.ky.map(k => kyChip(k)).join(' ')}</td><td>${r.note}</td></tr>`).join('');
+    return `${modeSeg}${langNote()}<p>この教材のどの画面が、教則${KYOSOKU.ver}のどの章にあたるかの一覧です。</p><div class="tbl"><table class="ky-tbl"><tr><th>画面</th><th>教則の章</th><th>備考</th></tr>${rows}</table></div>${kyFoot()}`;
+  }
+  const chapSeg = `<div class="seg small ky-chap" role="radiogroup" aria-label="章">${['2', '3', '4', '5', '6'].map(c => `<button data-kc="${c}" class="${kyView.chap === c ? 'on' : ''}">第${c}章</button>`).join('')}</div>`;
+  return `${modeSeg}${langNote()}<p class="ky-lead" id="kyLead">第${kyView.chap}章 ${kyChapNames[kyView.chap]}。節を選ぶと、その話をするときに出せる画面が並びます。押すとその画面に切り替わります。</p>${chapSeg}<div id="kySecs">${kySectionsHtml()}</div>${kyFoot()}`;
+}
+const kyFoot = () => `<p class="ky-src"><a href="${KYOSOKU.url}" target="_blank" rel="noopener">教則${KYOSOKU.ver}（PDF・国土交通省）</a>。第1章「はじめに」には節の番号がありません。</p>${regDate()}`;
 
 function showKyosokuTable(mode) {
   if (mode) kyView.mode = mode;
   renderNote({ kind: 'kyosoku', title: `教則${KYOSOKU.ver}との対応`, html: kyosokuHtml(), actions: [{ label: '閉じる', fn: () => renderNote(null) }] });
   bindKyosoku();
+  const card = $('#noteCard'); if (kyView.scroll) card.scrollTop = kyView.scroll;
+}
+// 章の切り替えは節の一覧だけ差し替える。カード全体を作り直すと、押したボタンが消えてフォーカスが落ち、aria-live が全部を読み直す
+function kySetChapter(c, btn) {
+  kyView.chap = c; kyView.scroll = 0;
+  segSet($('#noteBody .ky-chap'), 'kc', c);
+  const lead = $('#kyLead'); if (lead) lead.textContent = `第${c}章 ${kyChapNames[c]}。節を選ぶと、その話をするときに出せる画面が並びます。押すとその画面に切り替わります。`;
+  const box = $('#kySecs'); if (box) box.innerHTML = kySectionsHtml();
+  $('#noteCard').scrollTop = 0;
+  if (btn) btn.focus();
 }
 function bindKyosoku() {
   const box = $('#noteBody'); if (!box) return;
   box.onclick = (e) => {
     const b = e.target.closest('button'); if (!b) return;
-    if (b.dataset.kv) { kyView.mode = b.dataset.kv; showKyosokuTable(); return; }
-    if (b.dataset.kc) { kyView.chap = b.dataset.kc; showKyosokuTable(); return; }
-    if (b.dataset.kp) { renderNote(null); gotoState({ tab: 'see', part: b.dataset.kp, focus: true }); return; }
+    if (b.dataset.kv) { kyView.mode = b.dataset.kv; kyView.scroll = 0; showKyosokuTable(); return; }
+    if (b.dataset.kc) { kySetChapter(b.dataset.kc, b); return; }
+    if (b.dataset.kp) { kyView.scroll = $('#noteCard').scrollTop; renderNote(null); gotoState({ tab: 'see', part: b.dataset.kp, focus: true }); showToast(`${partName(b.dataset.kp)} を開きました`, 2400); return; }
     if (b.dataset.kcp) { kyCopyLinks(b.dataset.kcp, b); return; }
     if (b.dataset.kg) {
       const j = (KY_JUMP[b.dataset.kg] || [])[+b.dataset.ki]; if (!j) return;
-      renderNote(null);
-      if (j.act === 'preflight') { openPreflight(); return; }
+      kyView.scroll = $('#noteCard').scrollTop;
+      if (j.act === 'preflight') { renderNote(null); openPreflight(); return; }
+      if (narrow()) renderNote(null);   /* スマホはカードが画面の半分近くを覆うので閉じる。広い画面は開いたままにして続けて押せるようにする */
       gotoState(j.go || {}, { sceneDelay: 260 });
-      showToast(`教則 ${b.dataset.kg} → ${j.label}`, 2600);
+      showToast(`教則 ${b.dataset.kg}「${KYOSOKU.chapters[b.dataset.kg]}」の画面を開きました`, 2800);
+      if (!narrow() && $('#noteCard').dataset.kind === 'kyosoku') bindKyosoku();   /* 行き先が別のカードを出さなければ、対応表はそのまま */
     }
   };
 }
 async function kyCopyLinks(sec, btn) {
   const list = (KY_JUMP[sec] || []).filter(j => j.go);
   const title = KYOSOKU.chapters[sec] || '';
-  const text = [`教則${KYOSOKU.ver} ${sec} ${title}`, ...list.map(j => `${j.label}\t${stateUrl(j.go)}`)].join('\n');
+  const text = [`教則${KYOSOKU.ver} ${sec} ${title}`, ...list.map(j => `${j.label}\t${stateUrl(j.go)}`), ...(KY_JUMP[sec] || []).filter(j => j.act).map(j => `${j.label}（画面から開く）`)].join('\n');
   try { await navigator.clipboard.writeText(text); btn.textContent = 'コピーしました'; setTimeout(() => { btn.textContent = 'この節のリンクをコピー'; }, 1800); }
-  catch (e) { showToast('コピーできませんでした。共有ボタン（🔗）から1つずつどうぞ', 3200); }
+  catch (e) { showToast('コピーできませんでした。共有ボタン（🔗）から1つずつコピーできます', 3200); }
 }
 
 function kyosokuSheetHtml() {   // 印刷シート用
@@ -5147,7 +5179,7 @@ function renderRegSources() {
 
 function initReg() {
   syncRegToggle(); renderRegSources();
-  const pop = $('#lessonPop'); if (pop && !$('#kyBtn')) { const b = document.createElement('button'); b.className = 'course ky-course'; b.id = 'kyBtn'; b.innerHTML = `<b>教則${KYOSOKU.ver}との対応表</b><span>登録講習機関・講師向け。章を選ぶと、その話に出せる画面が並びます</span>`; b.addEventListener('click', e => { e.stopPropagation(); pop.hidden = true; showKyosokuTable(); }); const foot = pop.querySelector('.pop-foot'); if (foot) pop.insertBefore(b, foot); else pop.appendChild(b); }
+  const pop = $('#lessonPop'); if (pop && !$('#kyBtn')) { const b = document.createElement('button'); b.className = 'course ky-course'; b.id = 'kyBtn'; b.innerHTML = `<b>教則${KYOSOKU.ver}との対応表</b><span>講師向け · 章から引く · 画面から引く</span>`; b.addEventListener('click', e => { e.stopPropagation(); pop.hidden = true; showKyosokuTable(); }); pop.appendChild(b); }   /* 「配る・引く」の見出しより後ろに積む */
   window.__reg = { regOn, setReg, regGhosts, showKyosokuTable, kyView, KY_TAB, KY_JUMP, KY_PART, KYOSOKU, REG, WHATIF_REG };
 }
 
@@ -5155,63 +5187,85 @@ function initReg() {
 // 部品40種がすでに持っている check[] を、飛行前の動線の順に並べ替えて紙に出す。
 // 画面と同じ部品名で書くので、「この名前の部品が、どこにあって、なぜ点検するのか」を3Dに戻って確かめられる。
 // 制度の判定はしない。記録の欄は様式そのものではなく、書く項目を思い出すための下書き。
-const preflight = { detail: 'short', logs: true };
+const preflight = { detail: 'short', logs: true };   /* 保存値は initPreflight で読む（store は ui.js で宣言されるので、ここでは触れない） */
 
 // みじかい版は現場で上から潰せる量に絞る。'*' を付けた項目と core の部品だけが残る。
+// core は 'prop@0,2,1' のように、その部品の check[] のどれを採るかを書ける（先頭1件だと取り付け向きなど肝心の項目が落ちる）。
 // law（法令・教則・様式に列挙）と、この機体の追加（extra と部品の点検ポイント）は、紙の上でも見出しで分ける。
+const pfPick = (spec) => { const [k, idx] = String(spec).split('@'); return { k, idx: idx ? idx.split(',').map(Number) : [0] }; };
 function preflightSections() {
   const full = preflight.detail === 'full';
   const keep = (t) => full || t[0] === '*';
   const strip = (t) => t.replace(/^\*/, '');
-  return PREFLIGHT.map(sec => ({
-    ...sec,
-    law: (sec.law || []).filter(keep).map(strip),
-    add: [
-      ...(sec.extra || []).filter(keep).map(t => ({ t: strip(t) })),
-      ...(sec.keys || []).filter(k => PARTS[k] && (full || (sec.core || []).includes(k))).flatMap(k =>
-        (full ? PARTS[k].check : PARTS[k].check.slice(0, 1)).map((t, i) => ({ t, name: i === 0 ? PARTS[k].name : '' }))),
-    ],
-  })).filter(sec => sec.law.length || sec.add.length);
+  return PREFLIGHT.map(sec => {
+    const picks = (sec.core || []).map(pfPick);
+    return {
+      ...sec,
+      law: (sec.law || []).filter(keep).map(strip),
+      add: [
+        ...(sec.extra || []).filter(keep).map(t => ({ t: strip(t) })),
+        ...(sec.keys || []).filter(k => PARTS[k] && (full || picks.some(x => x.k === k))).flatMap(k => {
+          const items = full ? PARTS[k].check.map((t, i) => i) : (picks.find(x => x.k === k).idx);
+          return items.filter(i => PARTS[k].check[i]).map((i, n) => ({ t: PARTS[k].check[i], name: n === 0 ? PARTS[k].name : '' }));
+        }),
+      ],
+    };
+  }).filter(sec => sec.law.length || sec.add.length);
 }
 const preflightCount = (full) => {
   const keep = (t) => full || t[0] === '*';
-  return PREFLIGHT.reduce((a, sec) => a + (sec.law || []).filter(keep).length + (sec.extra || []).filter(keep).length
-    + (sec.keys || []).filter(k => PARTS[k] && (full || (sec.core || []).includes(k))).reduce((b, k) => b + (full ? PARTS[k].check.length : 1), 0), 0);
+  return PREFLIGHT.reduce((a, sec) => {
+    const picks = (sec.core || []).map(pfPick);
+    return a + (sec.law || []).filter(keep).length + (sec.extra || []).filter(keep).length
+      + (sec.keys || []).filter(k => PARTS[k]).reduce((b, k) => b + (full ? PARTS[k].check.length : (picks.find(x => x.k === k) ? picks.find(x => x.k === k).idx.filter(i => PARTS[k].check[i]).length : 0)), 0);
+  }, 0);
 };
+// A4 の本文域は 273mm。break-inside: avoid のぶん少し余裕を見る
+function preflightPages() {
+  const sheet = $('#printSheet'); const prev = sheet.getAttribute('style') || '';
+  sheet.setAttribute('style', 'display:block;position:fixed;left:-10000px;top:0;width:186mm;');
+  const h = sheet.scrollHeight; sheet.setAttribute('style', prev);
+  return Math.max(1, Math.ceil(h * 1.06 / (273 * 96 / 25.4)));
+}
 
 function preflightSheetHtml() {
   const secs = preflightSections();
   const n = secs.reduce((a, s) => a + s.law.length + s.add.length, 0);
-  const li = (t, name) => `<li><span class="pf-box"></span><span class="pf-t">${name ? `<b>${name}</b>` : ''}${t}</span></li>`;
+  const li = (t, name) => `<li><span class="pf-box"></span><span class="pf-t">${name ? `<b>${name}</b>` : ''}${t}</span><span class="pf-res"></span></li>`;
   const body = secs.map((sec, si) => `<section class="pf-sec">
     <h2><span class="pf-n">${si + 1}</span>${sec.name}${sec.ky ? `<em>${/^\d/.test(sec.ky) ? '教則 ' : ''}${sec.ky}</em>` : ''}</h2>
     ${sec.note ? `<p class="ps-small">${sec.note}</p>` : ''}
     ${sec.law.length ? `<ul class="pf-list">${sec.law.map(t => li(t)).join('')}</ul>` : ''}
     ${sec.add.length ? `<p class="pf-sub">この機体の追加（取扱説明書に基づく例。法令が列挙している項目ではない）</p><ul class="pf-list pf-add">${sec.add.map(r => li(r.t, r.name)).join('')}</ul>` : ''}
+    ${sec.id === 'wx' ? '<p class="pf-meas">風速 <i></i> m/s　　気温 <i></i> ℃　　天候 <i></i></p>' : ''}
   </section>`).join('');
   const logs = preflight.logs ? `<section class="pf-log">
     <h2><span class="pf-n">記</span>飛行日誌へ書き写す</h2>
-    <p class="ps-small">飛行日誌は「飛行記録」「日常点検記録」「点検整備記録」の3つ。特定飛行をするときは備え付けと記載が求められます。<b>この紙は日常点検記録（様式2）そのものではありません。</b>終わったらこの欄から様式2へ書き写してください。不具合を見つけて直したときは、その記録は点検整備記録（様式3）に書きます。</p>
+    <p class="ps-small">飛行日誌は「飛行記録」「日常点検記録」「点検整備記録」の3つ。特定飛行をするときは備え付けと記載が求められます。不具合を見つけて直したときは、その記録は点検整備記録（様式3）に書きます。</p>
     <div class="pf-two">
       <div><h3>日常点検記録（様式2）に書くこと</h3><ol class="ps-repl">${['実施の年月日・場所', '実施者の氏名', '点検項目ごとの結果', '特記事項'].map(t => `<li><span>${t}</span><span class="fill-line"></span></li>`).join('')}</ol>
-        <p class="ps-small">様式2の点検項目は、機体全般／プロペラ／フレーム／通信系統／推進系統／電源系統／自動制御系統／操縦装置／バッテリー・燃料 の9つ。追加の項目を書く空欄もあります。</p></div>
+        <p class="ps-small">様式2の点検項目は、機体全般／プロペラ／フレーム／通信系統／推進系統／電源系統／自動制御系統／操縦装置／バッテリー、燃料 の9つ。このシートの〔様式2: …〕がその欄にあたります。</p></div>
       <div><h3>飛行記録（様式1）に書くこと</h3><ol class="ps-repl">${['飛行の年月日', '飛行させた者の氏名', '飛行の概要', '離陸と着陸の時刻・場所', '飛行時間', '総飛行時間', '不具合とその措置'].map(t => `<li><span>${t}</span><span class="fill-line"></span></li>`).join('')}</ol></div>
     </div>
   </section>` : '';
+  const home = location.protocol === 'file:' ? 'https://drone-anatomy-3d.hiro-k61.workers.dev/' : location.origin + location.pathname;
+  const src = [REG_SOURCES.mlit, REG_SOURCES.log, REG_SOURCES.dips, REG_SOURCES.soumu].map(x => `${x.name} ${x.url}`).join(' ／ ');
   return `
-    <header class="ps-head"><h1>飛行前の点検・確認シート</h1>
-      <div class="ps-meta"><span>${REG_DATE}の制度に基づく</span><span>${preflight.detail === 'full' ? 'くわしい' : 'みじかい'}版・${n}項目</span><span>教則${KYOSOKU.ver}に対応</span></div>
+    <header class="ps-head"><h1>運航前後の点検・確認シート</h1>
+      <div class="ps-meta"><span>${REG_DATE}の制度に基づく</span><span>${preflight.detail === 'full' ? '全部' : '現場用'}・${n}項目</span><span>教則${KYOSOKU.ver}に対応</span></div>
       <div class="pf-head">
         <div><span>年月日</span><i></i></div><div><span>場所</span><i></i></div>
         <div><span>機体（型式）</span><i></i></div><div><span>登録記号</span><i></i></div>
-        <div><span>操縦者</span><i></i></div><div><span>点検者</span><i></i></div>
+        <div><span>操縦者</span><i></i></div><div><span>補助者</span><i></i></div>
+        <div><span>点検者</span><i></i></div><div><span>飛行の区分</span><i></i></div>
       </div>
     </header>
-    <p class="pf-lead">上から順に □ を埋めます。<b>白い □ は法令・教則・様式に列挙されている項目</b>、<b>灰色の □ はこの機体の追加</b>です。異常があればその場で飛行を中止し、特記事項に書いてください。部品名は3D教材の画面と同じ言葉です。</p>
+    <p class="pf-warn"><b>この紙は現場の手控えです。日常点検記録（様式2）そのものではありません。</b>終わったら様式2へ書き写してください。</p>
+    <p class="pf-lead">左の段を上から、次に右の段の順に □ を埋めます。<b>白い □ は法令・教則・様式に列挙されている項目</b>、<b>破線の □ はこの機体の追加</b>です。右端の線には結果や数値を書けます。異常があればその場で飛行を中止し、特記事項に書いてください。部品名は3D教材の画面と同じ言葉です。</p>
     ${body}
     <section class="pf-note"><h2><span class="pf-n">特</span>特記事項（不具合の内容と箇所、行った措置）</h2><div class="pf-freebox"></div></section>
     ${logs}
-    <footer class="ps-foot">${PREFLIGHT_LAW}<br>${PREFLIGHT_NOTE}<br>確認先: ${REG_SOURCES.mlit.name} ${REG_SOURCES.mlit.url} ／ ${REG_SOURCES.log.name} ${REG_SOURCES.log.url}<br>${location.origin + location.pathname}</footer>`;
+    <footer class="ps-foot">${PREFLIGHT_LAW}<br>確認先: ${src}<br>${home}</footer>`;
 }
 
 async function buildPreflightSheet() {
@@ -5223,37 +5277,40 @@ async function printPreflight() { await buildPreflightSheet(); window.print(); }
 function openPreflight() {
   const short = preflightCount(false), full = preflightCount(true);
   renderNote({
-    kind: 'preflight', title: '飛行前の点検・確認シート',
-    html: `<p>法令と教則が挙げている確認項目を現場の動線の順に並べ、そこにこの教材の部品ごとの点検ポイントを足して印刷します。判定はしません。<b>日常点検記録（様式2）そのものではないので、終わったら様式2へ書き写してください。</b></p>
+    kind: 'preflight', title: '運航前後の点検・確認シート',
+    html: `${langNote()}<p>法令と教則が挙げている確認項目を現場の動線の順に並べ、そこにこの教材の部品ごとの点検ポイントを足して印刷します。判定はしません。<b>日常点検記録（様式2）そのものではないので、終わったら様式2へ書き写してください。</b></p>
       <div class="pf-opt">
         <div class="seg small" id="pfLen" role="radiogroup" aria-label="長さ">
-          <button data-pf="short" class="${preflight.detail === 'short' ? 'on' : ''}">みじかい（${short}項目）</button>
-          <button data-pf="full" class="${preflight.detail === 'full' ? 'on' : ''}">くわしい（${full}項目）</button>
+          <button data-pf="short" class="${preflight.detail === 'short' ? 'on' : ''}">現場用（${short}項目）</button>
+          <button data-pf="full" class="${preflight.detail === 'full' ? 'on' : ''}">全部（${full}項目）</button>
         </div>
-        <button class="tgl ${preflight.logs ? 'on' : ''}" id="pfLogs" aria-pressed="${preflight.logs}"><i></i>飛行日誌に書く項目も付ける</button>
+        <button class="tgl" id="pfLogs" data-t="pfLogs" aria-pressed="${preflight.logs}"><i></i>飛行日誌に書く項目も付ける</button>
       </div>
-      <p class="hint">みじかい版は現場で上から潰せる量、くわしい版は40部品すべての点検ポイントまで載せた版です。法令・教則に列挙された項目と、この機体の追加点検は、紙の上でも分けて並びます。</p>
+      <p class="hint" id="pfPages">—</p>
       ${regDate()}`,
     actions: [
       { label: '印刷する', primary: true, fn: () => { renderNote(null); setTimeout(printPreflight, 60); } },
-      { label: '画面で見る', fn: async () => { renderNote(null); await buildPreflightSheet(); document.body.classList.add('print-preview'); } },
+      { label: '画面で見る', fn: async () => { renderNote(null); await buildPreflightSheet(); openPreview(); } },
       { label: '閉じる', fn: () => renderNote(null) },
     ],
   });
-  const seg = $('#pfLen'); if (seg) seg.onclick = (e) => { const b = e.target.closest('button'); if (!b) return; preflight.detail = b.dataset.pf; segSet(seg, 'pf', b.dataset.pf); };
-  const lg = $('#pfLogs'); if (lg) lg.onclick = () => { preflight.logs = !preflight.logs; lg.classList.toggle('on', preflight.logs); lg.setAttribute('aria-pressed', String(preflight.logs)); };
+  const showPages = async () => { await buildPreflightSheet(); const el = $('#pfPages'); if (el) el.textContent = `A4縦でおよそ ${preflightPages()} 枚。法令・教則に列挙された項目と、この機体の追加点検は、紙の上でも分けて並びます。`; };
+  const seg = $('#pfLen'); if (seg) seg.onclick = (e) => { const b = e.target.closest('button'); if (!b) return; preflight.detail = b.dataset.pf; store.set('pfDetail', preflight.detail); segSet(seg, 'pf', b.dataset.pf); showPages(); };
+  const lg = $('#pfLogs'); if (lg) { lg.classList.toggle('on', preflight.logs); lg.addEventListener('click', () => { preflight.logs = lg.classList.contains('on'); store.set('pfLogs', preflight.logs ? '1' : '0'); showPages(); }); }   /* on/off の付け替えは ui.js の .tgl 委譲がする */
+  showPages();
 }
 
 function initPreflight() {
+  preflight.detail = store.get('pfDetail') === 'full' ? 'full' : 'short';
+  preflight.logs = store.get('pfLogs') !== '0';
   const pop = $('#lessonPop');
   if (pop && !$('#pfBtn')) {
     const b = document.createElement('button'); b.className = 'course pf-course'; b.id = 'pfBtn';
-    b.innerHTML = '<b>飛行前の点検・確認シート</b><span>法令と教則の確認項目に、この機体の点検ポイントを足して印刷する</span>';
+    b.innerHTML = '<b>運航前後の点検・確認シート</b><span>現場向け · 印刷 · 法令と教則の項目＋この機体の点検</span>';
     b.addEventListener('click', e => { e.stopPropagation(); pop.hidden = true; openPreflight(); });
-    const ky = $('#kyBtn'), foot = pop.querySelector('.pop-foot');
-    pop.insertBefore(b, ky || foot || null);
+    pop.appendChild(b);   /* 「配る・引く」の見出しより後ろに積む */
   }
-  window.__preflight = { preflight, openPreflight, buildPreflightSheet, preflightSections, preflightCount, PREFLIGHT };
+  window.__preflight = { preflight, openPreflight, buildPreflightSheet, preflightSections, preflightCount, preflightPages, PREFLIGHT };
 }
 
 // ===== 共有リンク（いま見えている画面をURLにする） =====
@@ -5409,8 +5466,11 @@ function showToast(msg, ms = 2500) { if (share.restoring) return;   /* 共有リ
 function segSet(seg, attr, val) { for (const b of $$('button', seg)) { const on = b.dataset[attr] === String(val); b.classList.toggle('on', on); if (b.getAttribute('role') === 'tab' || b.parentElement.getAttribute('role') === 'radiogroup') b.setAttribute('aria-selected', on); } }
 
 // ---------- 説明カード ----------
+function openPreview() { document.body.classList.add('print-preview'); $('#printSheet').removeAttribute('aria-hidden'); $('#previewClose').hidden = false; $('#previewClose').focus(); }
+function closePreview() { if (!document.body.classList.contains('print-preview')) return false; document.body.classList.remove('print-preview'); $('#printSheet').setAttribute('aria-hidden', 'true'); $('#previewClose').hidden = true; return true; }
 function renderNote(o) {
-  const card = $('#noteCard'); if (!o) { card.hidden = true; return; }
+  const card = $('#noteCard'); $('#noteBody').onclick = null;   /* 前のカードが張った委譲を残さない */
+  if (!o) { card.hidden = true; return; }
   $('#noteTitle').textContent = o.title || ''; const b = $('#noteBadge'); if (o.badge) { b.textContent = o.badge; b.hidden = false; } else b.hidden = true;
   $('#noteBody').innerHTML = o.html || ''; const acts = $('#noteActions'); acts.innerHTML = '';
   for (const a of (o.actions || [])) { const btn = document.createElement('button'); btn.textContent = a.label; if (a.primary) btn.classList.add('primary'); btn.onclick = a.fn; acts.appendChild(btn); }
@@ -5895,6 +5955,7 @@ function updateHover() {
 }
 // キーボード
 document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && closePreview()) return;
   if (e.target.matches && e.target.matches('input, textarea, select')) return; const k = e.key.toLowerCase();
   if (S.lesson && lessonKey(e)) return;
   if (quiz.active && e.key === 'Escape') { quizStop(); return; }
@@ -5944,6 +6005,7 @@ function bindSheet(el) {
   grab.addEventListener('pointerup', end); grab.addEventListener('pointercancel', end);
 }
 bindSheet($('#inspector'));
+$('#previewClose').addEventListener('click', closePreview);
 new ResizeObserver(() => document.documentElement.style.setProperty('--dock-h', $('#dock').offsetHeight + 'px')).observe($('#dock'));
 
 function onThemeChanged(dark) { airflowTheme(dark); }
