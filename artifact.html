@@ -5753,8 +5753,11 @@ function farGroundBuild() {
   scene.add(m); farGround.mesh = m; farGroundTheme();
 }
 function farGroundOn(on) { farGroundBuild(); if (farGround.mesh.visible !== !!on) { farGround.mesh.visible = !!on; S.shadowDirty = S.csDirty = S.aoDirty = true; } }
+let _fgKey = '';
 function farGroundTheme(hazeOverride) {
   const far = farGround.mesh; if (!far) return;
+  const key = groundMat.color.getHex() + '|' + (hazeOverride ? hazeOverride.r.toFixed(2) + hazeOverride.g.toFixed(2) + hazeOverride.b.toFixed(2) : (themeDark ? 'D' : 'L'));
+  if (key === _fgKey) return; _fgKey = key;   // 1241頂点の塗り直しなので、同じ色なら省く
   far.material.color.copy(groundMat.color);   // 近くの床と必ず同じ色にする（空もようは床の色も変える）
   const one = new THREE.Color(1, 1, 1), haze = hazeOverride || (themeDark ? new THREE.Color(3.1, 3.3, 3.8) : new THREE.Color(0.70, 0.74, 0.83));
   const pos = far.geometry.attributes.position, col = far.geometry.attributes.color, c = new THREE.Color();
@@ -5939,7 +5942,7 @@ function initFpv() {
 // ===== 空もよう（教則第5版 6.2 気象）=====
 // 空・光・風を「その日の場」として差し替える。場面（劇場・もしも・降ろし方）と違い、選んだあとはそのまま飛ばせる。
 // 風は physics に外乱として渡すだけで、機体の挙動は既存の制御が決める（風上へ傾いて定位置を保つ、強いと流される）。
-const weather = { id: null, on: false, t: 0, sockGrp: null, sock: null, rain: null, fogWas: null, gust: 0, cyc: 0, burstEnv: 0, last: '' };
+const weather = { id: null, on: false, t: 0, ts: 0, sockGrp: null, sock: null, rain: null, fogWas: null, gust: 0, cyc: 0, burstEnv: 0, lastVal: 0 };
 const WEATHER_BY_ID = Object.fromEntries(WEATHER.map(w => [w.id, w]));
 const W16 = ['北', '北北東', '北東', '東北東', '東', '東南東', '南東', '南南東', '南', '南南西', '南西', '西南西', '西', '西北西', '北西', '北北西'];
 const windName = (deg) => W16[Math.round(((deg % 360) + 360) % 360 / 22.5) % 16];
@@ -6030,6 +6033,8 @@ function rainStep(dtReal) {
     let x = sd[i * 4], y = sd[i * 4 + 1], z = sd[i * 4 + 2]; const vy = sd[i * 4 + 3];
     y -= vy * dtReal; x += w.x * dtReal * 0.4; z += w.z * dtReal * 0.4;
     if (y < -0.16) { y = 3.2 + Math.random() * 0.5; x = (Math.random() - 0.5) * 5; z = (Math.random() - 0.5) * 5; }
+    if (x > 2.5) x -= 5; else if (x < -2.5) x += 5;
+    if (z > 2.5) z -= 5; else if (z < -2.5) z += 5;   // 風下へ流れ切ったら反対側から入れ直す
     sd[i * 4] = x; sd[i * 4 + 1] = y; sd[i * 4 + 2] = z;
     const dx = w.x * 0.4, dz = w.z * 0.4, m = Math.hypot(dx, vy, dz) || 1, k = len * (vy / 3.5);
     a.array[i * 6] = x; a.array[i * 6 + 1] = y; a.array[i * 6 + 2] = z;
@@ -6100,7 +6105,7 @@ function setWeather(id, quiet) {
   const same = weather.id === id;
   const w = id && WEATHER_BY_ID[id];
   if (!w) {   // 元へ戻す
-    weather.on = false; weather.id = null; weather.last = '';
+    weather.on = false; weather.id = null; weather.lastVal = 0;
     if (weather.sockGrp) weather.sockGrp.visible = false;
     if (!(typeof fpv === 'object' && fpv.on)) farGroundOn(false);
     if (weather.rain) weather.rain.visible = false;
@@ -6114,8 +6119,8 @@ function setWeather(id, quiet) {
   }
   if (same && weather.on) return setWeather(null);   // 同じものをもう一度押したら戻す
   stopOthers('weather');
-  weather.on = true; weather.id = id; weather.t = 0; weather.gust = 0; weather.burstEnv = 0; weather.last = '';
-  weather.cyc = { dir: w.wind.dir, spd: w.wind.spd, label: '昼（海風）' };
+  weather.on = true; weather.id = id; weather.t = 0; weather.ts = 0; weather.gust = 0; weather.burstEnv = 0; weather.lastVal = 0;
+  weather.cyc = { dir: w.wind.dir, spd: w.wind.spd, label: '昼（海から陸へ）' };
   windsockBuild(); weather.sockGrp.visible = true;
   if (w.wind.burst) burstProps(); else if (weather.burstGrp) weather.burstGrp.visible = false;
   farGroundOn(true);   /* 空を出すなら地平線も要る。床(半径2.8m)だけだと雲の下端が宙に浮く */
@@ -6139,24 +6144,28 @@ function setWeather(id, quiet) {
 function stepWeather(dtSim, dtReal) {
   if (!weather.on) return;
   const w = WEATHER_BY_ID[weather.id]; if (!w) return;
-  weather.t += dtReal;
+  weather.t += dtReal;      // 見た目（雲の流れ・雨・吹き流しの揺れ）
+  weather.ts += dtSim;      // 機体に効くもの（突風・海陸風・ダウンバースト）は「ゆっくり」に従う
   backdropMat.uniforms.uT.value = weather.t;
   // 突風（-1〜1のゆらぎ）。寒冷前線は強く、速く
   const f = w.id === 'cold' ? 1.7 : 1.0;
-  weather.gust = (Math.sin(weather.t * 0.9 * f) * 0.6 + Math.sin(weather.t * 2.3 * f + 1.7) * 0.3 + Math.sin(weather.t * 4.7 * f + 0.4) * 0.1);
+  weather.gust = (Math.sin(weather.ts * 0.9 * f) * 0.6 + Math.sin(weather.ts * 2.3 * f + 1.7) * 0.3 + Math.sin(weather.ts * 4.7 * f + 0.4) * 0.1);
   // 海陸風: 40秒で1日。入れ替わりは凪
   if (w.wind.cycle) {
-    const ph = (weather.t / 40) % 1;
+    // 凪はV字（落ちて、また上がる）。片側だけだと、凪の終わりで風速が段になって機体がカクッと押される
+    const ph = (weather.ts / 40) % 1;
     let dir, spd, label;
-    if (ph < 0.38) { dir = 180; spd = 3.0; label = '昼（海から陸へ）'; }
-    else if (ph < 0.5) { const k = (ph - 0.38) / 0.12; dir = 180 + 180 * k; spd = 3.0 * (1 - k) + 0.15; label = '夕凪（入れ替わり）'; }
-    else if (ph < 0.88) { dir = 0; spd = 2.0; label = '夜（陸から海へ）'; }
-    else { const k = (ph - 0.88) / 0.12; dir = 360 - 180 * k; spd = 2.0 * (1 - k) + 0.15; label = '朝凪（入れ替わり）'; }
+    if (ph < 0.35) { dir = 180; spd = 3.0; label = '昼（海から陸へ）'; }
+    else if (ph < 0.425) { const k = (ph - 0.35) / 0.075; dir = 180 + 180 * k; spd = 3.0 - 2.85 * k; label = '夕凪（入れ替わり）'; }
+    else if (ph < 0.50) { const k = (ph - 0.425) / 0.075; dir = 0; spd = 0.15 + 1.85 * k; label = '夕凪（入れ替わり）'; }
+    else if (ph < 0.85) { dir = 0; spd = 2.0; label = '夜（陸から海へ）'; }
+    else if (ph < 0.925) { const k = (ph - 0.85) / 0.075; dir = 360 - 180 * k; spd = 2.0 - 1.85 * k; label = '朝凪（入れ替わり）'; }
+    else { const k = (ph - 0.925) / 0.075; dir = 180; spd = 0.15 + 2.85 * k; label = '朝凪（入れ替わり）'; }
     weather.cyc = { dir: dir % 360, spd, label };
   }
-  // ダウンバースト: 22秒で 接近 → 最盛 → 減衰
+  // ダウンバースト: 24秒で 接近 → 最盛 → 減衰
   if (w.wind.burst) {
-    const ph = (weather.t / 24) % 1;
+    const ph = (weather.ts / 24) % 1;
     weather.burstEnv = ph < 0.22 ? 0 : ph < 0.36 ? (ph - 0.22) / 0.14 : ph < 0.78 ? 1 : ph < 0.92 ? 1 - (ph - 0.78) / 0.14 : 0;
     weather.burstX = -2.0 + 4.0 * clamp((ph - 0.22) / 0.70, 0, 1);   // 中心が通り過ぎる: 向かい風 → 真下 → 追い風
   }
@@ -6184,7 +6193,7 @@ function weatherStateText() {
   return bits.join('');
 }
 function updateWeatherVals() {
-  const el = $('#skyVals'); if (!el) return;
+  const el = $('#skyVals'); if (!el || $('#noteCard').hidden) return;
   el.innerHTML = `<i class="dot" aria-hidden="true"></i>${weatherStateText()}`;
 }
 function renderWeather() {
@@ -6249,7 +6258,10 @@ function dshowShape(id, n, out) {
     for (let i = 0; i < n; i++) { const c = i % cols, r = (i / cols) | 0;
       put(i, (c / (cols - 1) - 0.5) * DSHOW_R * 1.6, (r / Math.max(1, rows - 1) - 0.5) * DSHOW_R * 0.8, 0); }
   } else if (id === 'ring') {
-    for (let i = 0; i < n; i++) { const k = i % 2, a = (i / n) * Math.PI * 2 * 2, r = DSHOW_R * (k ? 0.62 : 1.0);
+    // 内と外をそれぞれ等分する。角度を (i/n)*4π にすると i と i+n/2 が重なって、半数が同じ場所に立つ
+    for (let i = 0; i < n; i++) {
+      const k = i % 2, m = k ? Math.floor(n / 2) : Math.ceil(n / 2), j = (i - k) / 2;
+      const a = (j / m) * Math.PI * 2 + (k ? Math.PI / m : 0), r = DSHOW_R * (k ? 0.62 : 1.0);
       put(i, Math.cos(a) * r, Math.sin(a) * r, 0); }
   } else if (id === 'star') {
     const pts = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = DSHOW_R * (i % 2 ? 0.46 : 1.0); pts.push([Math.cos(a) * r, Math.sin(a) * r]); }
@@ -6318,11 +6330,12 @@ function dshowOn(on) {
   if (on) {
     stopOthers('dshow');
     dshowBuild();
-    dshow.on = true; dshow.t = 0; dshow.fig = 0; dshow.figT = 0; dshow.phase = 'hold'; dshow.star = 0;
+    dshowLayout();   /* 主役機の置き場所は画面の形で決まる。位置を読む前に確定させる */
+    dshow.on = true; dshow.t = 0; dshow.fig = 0; dshow.figT = 0; dshow.phase = 'hold'; dshow.star = 0; dshow.lastVals = 0;
     document.body.classList.add('dshow'); syncDockH();   /* 操作列を畳んで夜空を広くとる */
     dshow.saved = { power: S.power, labels: S.labelsSuppressed, air: S.air };
     S.labelsSuppressed = true; buildLabels();
-    S.air = false; for (const x of $$('.tgl[data-t=air]')) x.classList.remove('on');
+    S.air = false; for (const x of $$('.tgl[data-t=air]')) { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); }
     if (S.explode > 0.02) setExplode(0); if (S.mode === 'cut') setMode('normal');
     dshow.pts.visible = true;
     farGroundOn(true);
@@ -6332,7 +6345,6 @@ function dshowOn(on) {
     const bp = dshow.bodyPos || [2.2, 0.45, 0.6];
     body.px = bp[0]; body.py = bp[1]; body.pz = bp[2]; body.tx = body.tz = body.wx = body.wz = 0; body.yaw = 0; body.mult = [1, 1, 1, 1];
     dshowSky();
-    dshowLayout();
     { const tall = dshowTall();
       const dir = new THREE.Vector3(0.32, 0.40, 1).normalize(), aim = new THREE.Vector3(0, tall ? 1.25 : 1.45, 0);   /* 見上げるほど空が広い */   /* 観客の位置から見上げる。隊列と地上の機体を1枚に入れる */
       flyTo(aim.clone().addScaledVector(dir, (tall ? 9.2 : 10.6) * viewScale()), aim, 1100, false); }
@@ -6344,9 +6356,9 @@ function dshowOn(on) {
     if (dshow.pts) dshow.pts.visible = false;
     const s = dshow.saved || {};
     S.labelsSuppressed = !!s.labels; buildLabels();
-    S.air = !!s.air; for (const x of $$('.tgl[data-t=air]')) x.classList.toggle('on', S.air);
+    S.air = !!s.air; for (const x of $$('.tgl[data-t=air]')) { x.classList.toggle('on', S.air); x.setAttribute('aria-pressed', String(S.air)); }
     if (!(typeof fpv === 'object' && fpv.on)) farGroundOn(false);
-    backdropMat.uniforms.uStar.value = 0;
+    { const u = backdropMat.uniforms; u.uStar.value = 0; u.uCloud.value = 0; u.uWall.value = 0; u.uHaze.value = 0; }   /* 星だけ戻しても、夜の雲とかすみが昼の空に残る */
     if (typeof weather === 'object' && weather.on) weatherSky(); else applyTheme();
     body.px = body.pz = 0; body.py = 0; body.tx = body.tz = 0;
     if (s.power === 0 && S.power > 0) setPower(0, true);
@@ -6414,15 +6426,15 @@ function stepDshow(dtReal) {
     body.py = bp[1] + (reduceMotion ? 0 : Math.sin(dshow.t * 1.3) * 0.018);
     if (!reduceMotion) { body.tz = Math.sin(dshow.t * 0.9) * 0.012; body.tx = Math.sin(dshow.t * 1.1 + 2) * 0.010; } }
   dshow.geo.attributes.position.needsUpdate = true;
-  dshow.geo.attributes.color.needsUpdate = true;
+  if (dshow.phase === 'move') dshow.geo.attributes.color.needsUpdate = true;   /* 静止中は色が変わらない */
   if (dshow.t - dshow.lastVals > 0.25) { dshow.lastVals = dshow.t; updateDshowVals(); }
 }
 
 // ---------- 説明カード ----------
 function updateDshowVals() {
-  const el = $('#dshowVals'); if (!el) return;
+  const el = $('#dshowVals'); if (!el || $('#noteCard').hidden) return;
   const f = DSHOW_FIGS[dshow.fig];
-  el.innerHTML = `<i class="dot" aria-hidden="true"></i><span>いま <b>${f.name}</b></span><span>${dshow.n} 機</span><span>高さ ${(DSHOW_H - 0.158).toFixed(1)} m</span><span>${dshow.phase === 'move' ? '移動中' : '静止中'}</span>`;
+  el.innerHTML = `<i class="dot" aria-hidden="true"></i><span>いま <b>${f.name}</b></span><span>${dshow.n} 機</span><span>高さ ${(DSHOW_H * (dshow.pts ? dshow.pts.scale.x : 1)).toFixed(1)} m</span><span>${dshow.phase === 'move' ? '移動中' : '静止中'}</span>`;
 }
 function renderDshow() {
   if (!dshow.on) return;
@@ -6454,7 +6466,7 @@ function onResizedDshow() { if (dshow.on) dshowLayout(); }
 function initDshow() {
   const b = $('#showBtn');
   if (b) b.addEventListener('click', () => dshowOn(!dshow.on));
-  window.__dshow = { dshow, dshowOn, DSHOW_FIGS, dshowShape };
+  window.__dshow = { dshow, dshowOn, DSHOW_FIGS, dshowShape, skyUniforms: () => { const u = backdropMat.uniforms; return { star: u.uStar.value, cloud: u.uCloud.value, wall: u.uWall.value, haze: u.uHaze.value }; } };
 }
 
 // ===== 共有リンク（いま見えている画面をURLにする） =====
@@ -6619,7 +6631,7 @@ function renderNoteActions(list) {
 }
 function renderNote(o) {
   const card = $('#noteCard'); $('#noteBody').onclick = null;   /* 前のカードが張った委譲を残さない */
-  if (!o) { card.hidden = true; return; }
+  if (!o) { card.hidden = true; card.dataset.kind = ''; return; }   /* kind を残すと、次に同じ種類を開くとき「閉じられたまま」と誤判定される */
   $('#noteTitle').textContent = o.title || ''; const b = $('#noteBadge'); if (o.badge) { b.textContent = o.badge; b.hidden = false; } else b.hidden = true;
   $('#noteBody').innerHTML = o.html || ''; renderNoteActions(o.actions);
   card.hidden = false; if (card.dataset.kind !== (o.kind || '')) card.scrollTop = 0;   /* 同じ種類のカードを描き直すときは読んでいた位置を保つ */
@@ -7166,8 +7178,11 @@ $('#previewClose').addEventListener('click', closePreview);
 function syncDockH() { document.documentElement.style.setProperty('--dock-h', $('#dock').offsetHeight + 'px'); }
 new ResizeObserver(syncDockH).observe($('#dock'));
 
-function onThemeChanged(dark) { airflowTheme(dark); fpvStageTheme(); weatherLight(); }
-function onQualityChanged(level) { if (air.mesh && air.N !== Q.particles) rebuildAirflow(); $('#perfInfo').textContent = `品質 ${level}`; }
+function onThemeChanged(dark) { airflowTheme(dark); fpvStageTheme();
+  if (typeof dshow === 'object' && dshow.on) dshowSky();          /* 夜のショーは自前の空と光を持つ */
+  else if (weather.on) weatherSky(); else weatherLight(); }
+function onQualityChanged(level) { if (air.mesh && air.N !== Q.particles) rebuildAirflow(); $('#perfInfo').textContent = `品質 ${level}`;
+  if (typeof dshow === 'object' && dshow.on) dshowSky(); else if (typeof weather === 'object' && weather.on) weatherSky(); }   /* 空のfbmのオクターブは選択時に決まるので、ここで入れ直す */
 { // シートの開閉・カードの出入りで、3Dの見える帯が変わるたびに視錐台を合わせ直す
   const watch = ['#inspector', '#lesson', '#expert', '#noteCard', '#massBar'].map(s => $(s)).filter(Boolean);
   let t = 0; const kick = () => { clearTimeout(t); t = setTimeout(() => { if (narrow()) resize(); }, 60); };   /* シートは .38s かけて動くので、動き終わりにも測り直す */

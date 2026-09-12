@@ -37,7 +37,10 @@ function dshowShape(id, n, out) {
     for (let i = 0; i < n; i++) { const c = i % cols, r = (i / cols) | 0;
       put(i, (c / (cols - 1) - 0.5) * DSHOW_R * 1.6, (r / Math.max(1, rows - 1) - 0.5) * DSHOW_R * 0.8, 0); }
   } else if (id === 'ring') {
-    for (let i = 0; i < n; i++) { const k = i % 2, a = (i / n) * Math.PI * 2 * 2, r = DSHOW_R * (k ? 0.62 : 1.0);
+    // 内と外をそれぞれ等分する。角度を (i/n)*4π にすると i と i+n/2 が重なって、半数が同じ場所に立つ
+    for (let i = 0; i < n; i++) {
+      const k = i % 2, m = k ? Math.floor(n / 2) : Math.ceil(n / 2), j = (i - k) / 2;
+      const a = (j / m) * Math.PI * 2 + (k ? Math.PI / m : 0), r = DSHOW_R * (k ? 0.62 : 1.0);
       put(i, Math.cos(a) * r, Math.sin(a) * r, 0); }
   } else if (id === 'star') {
     const pts = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = DSHOW_R * (i % 2 ? 0.46 : 1.0); pts.push([Math.cos(a) * r, Math.sin(a) * r]); }
@@ -106,11 +109,12 @@ function dshowOn(on) {
   if (on) {
     stopOthers('dshow');
     dshowBuild();
-    dshow.on = true; dshow.t = 0; dshow.fig = 0; dshow.figT = 0; dshow.phase = 'hold'; dshow.star = 0;
+    dshowLayout();   /* 主役機の置き場所は画面の形で決まる。位置を読む前に確定させる */
+    dshow.on = true; dshow.t = 0; dshow.fig = 0; dshow.figT = 0; dshow.phase = 'hold'; dshow.star = 0; dshow.lastVals = 0;
     document.body.classList.add('dshow'); syncDockH();   /* 操作列を畳んで夜空を広くとる */
     dshow.saved = { power: S.power, labels: S.labelsSuppressed, air: S.air };
     S.labelsSuppressed = true; buildLabels();
-    S.air = false; for (const x of $$('.tgl[data-t=air]')) x.classList.remove('on');
+    S.air = false; for (const x of $$('.tgl[data-t=air]')) { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); }
     if (S.explode > 0.02) setExplode(0); if (S.mode === 'cut') setMode('normal');
     dshow.pts.visible = true;
     farGroundOn(true);
@@ -120,7 +124,6 @@ function dshowOn(on) {
     const bp = dshow.bodyPos || [2.2, 0.45, 0.6];
     body.px = bp[0]; body.py = bp[1]; body.pz = bp[2]; body.tx = body.tz = body.wx = body.wz = 0; body.yaw = 0; body.mult = [1, 1, 1, 1];
     dshowSky();
-    dshowLayout();
     { const tall = dshowTall();
       const dir = new THREE.Vector3(0.32, 0.40, 1).normalize(), aim = new THREE.Vector3(0, tall ? 1.25 : 1.45, 0);   /* 見上げるほど空が広い */   /* 観客の位置から見上げる。隊列と地上の機体を1枚に入れる */
       flyTo(aim.clone().addScaledVector(dir, (tall ? 9.2 : 10.6) * viewScale()), aim, 1100, false); }
@@ -132,9 +135,9 @@ function dshowOn(on) {
     if (dshow.pts) dshow.pts.visible = false;
     const s = dshow.saved || {};
     S.labelsSuppressed = !!s.labels; buildLabels();
-    S.air = !!s.air; for (const x of $$('.tgl[data-t=air]')) x.classList.toggle('on', S.air);
+    S.air = !!s.air; for (const x of $$('.tgl[data-t=air]')) { x.classList.toggle('on', S.air); x.setAttribute('aria-pressed', String(S.air)); }
     if (!(typeof fpv === 'object' && fpv.on)) farGroundOn(false);
-    backdropMat.uniforms.uStar.value = 0;
+    { const u = backdropMat.uniforms; u.uStar.value = 0; u.uCloud.value = 0; u.uWall.value = 0; u.uHaze.value = 0; }   /* 星だけ戻しても、夜の雲とかすみが昼の空に残る */
     if (typeof weather === 'object' && weather.on) weatherSky(); else applyTheme();
     body.px = body.pz = 0; body.py = 0; body.tx = body.tz = 0;
     if (s.power === 0 && S.power > 0) setPower(0, true);
@@ -202,15 +205,15 @@ function stepDshow(dtReal) {
     body.py = bp[1] + (reduceMotion ? 0 : Math.sin(dshow.t * 1.3) * 0.018);
     if (!reduceMotion) { body.tz = Math.sin(dshow.t * 0.9) * 0.012; body.tx = Math.sin(dshow.t * 1.1 + 2) * 0.010; } }
   dshow.geo.attributes.position.needsUpdate = true;
-  dshow.geo.attributes.color.needsUpdate = true;
+  if (dshow.phase === 'move') dshow.geo.attributes.color.needsUpdate = true;   /* 静止中は色が変わらない */
   if (dshow.t - dshow.lastVals > 0.25) { dshow.lastVals = dshow.t; updateDshowVals(); }
 }
 
 // ---------- 説明カード ----------
 function updateDshowVals() {
-  const el = $('#dshowVals'); if (!el) return;
+  const el = $('#dshowVals'); if (!el || $('#noteCard').hidden) return;
   const f = DSHOW_FIGS[dshow.fig];
-  el.innerHTML = `<i class="dot" aria-hidden="true"></i><span>いま <b>${f.name}</b></span><span>${dshow.n} 機</span><span>高さ ${(DSHOW_H - 0.158).toFixed(1)} m</span><span>${dshow.phase === 'move' ? '移動中' : '静止中'}</span>`;
+  el.innerHTML = `<i class="dot" aria-hidden="true"></i><span>いま <b>${f.name}</b></span><span>${dshow.n} 機</span><span>高さ ${(DSHOW_H * (dshow.pts ? dshow.pts.scale.x : 1)).toFixed(1)} m</span><span>${dshow.phase === 'move' ? '移動中' : '静止中'}</span>`;
 }
 function renderDshow() {
   if (!dshow.on) return;
@@ -242,5 +245,5 @@ function onResizedDshow() { if (dshow.on) dshowLayout(); }
 function initDshow() {
   const b = $('#showBtn');
   if (b) b.addEventListener('click', () => dshowOn(!dshow.on));
-  window.__dshow = { dshow, dshowOn, DSHOW_FIGS, dshowShape };
+  window.__dshow = { dshow, dshowOn, DSHOW_FIGS, dshowShape, skyUniforms: () => { const u = backdropMat.uniforms; return { star: u.uStar.value, cloud: u.uCloud.value, wall: u.uWall.value, haze: u.uHaze.value }; } };
 }

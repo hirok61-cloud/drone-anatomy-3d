@@ -57,6 +57,10 @@ set('burst');
   A(wxMin < -0.5 && wxMax > 0.5, 'ダウンバースト: 向かい風が追い風に変わる', wxMin.toFixed(2), wxMax.toFixed(2));
   A(wx.burstGrp, 'ダウンバースト: 吹き降ろしの小道具'); }
 
+// 空を切り替えたあとも、生きた数値が動き続ける（切り替えで時計だけ戻すと止まる）
+set('fine'); d.step(30, 30); set('cold'); d.step(3, 30);
+A(W.weather.lastVal <= W.weather.t + 0.01 && W.weather.t - W.weather.lastVal < 0.5, '切り替えても数値が動き続ける', W.weather.lastVal.toFixed(1), W.weather.t.toFixed(1));
+
 // もう一度押すと戻る
 document.querySelector('#skyChips [data-sky=fine]').click(); d.step(0.6, 30);
 A(wx.on && wx.id === 'fine', 'チップで選べる');

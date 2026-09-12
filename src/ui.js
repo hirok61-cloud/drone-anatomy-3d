@@ -23,7 +23,7 @@ function renderNoteActions(list) {
 }
 function renderNote(o) {
   const card = $('#noteCard'); $('#noteBody').onclick = null;   /* 前のカードが張った委譲を残さない */
-  if (!o) { card.hidden = true; return; }
+  if (!o) { card.hidden = true; card.dataset.kind = ''; return; }   /* kind を残すと、次に同じ種類を開くとき「閉じられたまま」と誤判定される */
   $('#noteTitle').textContent = o.title || ''; const b = $('#noteBadge'); if (o.badge) { b.textContent = o.badge; b.hidden = false; } else b.hidden = true;
   $('#noteBody').innerHTML = o.html || ''; renderNoteActions(o.actions);
   card.hidden = false; if (card.dataset.kind !== (o.kind || '')) card.scrollTop = 0;   /* 同じ種類のカードを描き直すときは読んでいた位置を保つ */
@@ -570,8 +570,11 @@ $('#previewClose').addEventListener('click', closePreview);
 function syncDockH() { document.documentElement.style.setProperty('--dock-h', $('#dock').offsetHeight + 'px'); }
 new ResizeObserver(syncDockH).observe($('#dock'));
 
-function onThemeChanged(dark) { airflowTheme(dark); fpvStageTheme(); weatherLight(); }
-function onQualityChanged(level) { if (air.mesh && air.N !== Q.particles) rebuildAirflow(); $('#perfInfo').textContent = `品質 ${level}`; }
+function onThemeChanged(dark) { airflowTheme(dark); fpvStageTheme();
+  if (typeof dshow === 'object' && dshow.on) dshowSky();          /* 夜のショーは自前の空と光を持つ */
+  else if (weather.on) weatherSky(); else weatherLight(); }
+function onQualityChanged(level) { if (air.mesh && air.N !== Q.particles) rebuildAirflow(); $('#perfInfo').textContent = `品質 ${level}`;
+  if (typeof dshow === 'object' && dshow.on) dshowSky(); else if (typeof weather === 'object' && weather.on) weatherSky(); }   /* 空のfbmのオクターブは選択時に決まるので、ここで入れ直す */
 { // シートの開閉・カードの出入りで、3Dの見える帯が変わるたびに視錐台を合わせ直す
   const watch = ['#inspector', '#lesson', '#expert', '#noteCard', '#massBar'].map(s => $(s)).filter(Boolean);
   let t = 0; const kick = () => { clearTimeout(t); t = setTimeout(() => { if (narrow()) resize(); }, 60); };   /* シートは .38s かけて動くので、動き終わりにも測り直す */

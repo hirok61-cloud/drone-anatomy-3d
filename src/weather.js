@@ -1,7 +1,7 @@
 // ===== 空もよう（教則第5版 6.2 気象）=====
 // 空・光・風を「その日の場」として差し替える。場面（劇場・もしも・降ろし方）と違い、選んだあとはそのまま飛ばせる。
 // 風は physics に外乱として渡すだけで、機体の挙動は既存の制御が決める（風上へ傾いて定位置を保つ、強いと流される）。
-const weather = { id: null, on: false, t: 0, sockGrp: null, sock: null, rain: null, fogWas: null, gust: 0, cyc: 0, burstEnv: 0, last: '' };
+const weather = { id: null, on: false, t: 0, ts: 0, sockGrp: null, sock: null, rain: null, fogWas: null, gust: 0, cyc: 0, burstEnv: 0, lastVal: 0 };
 const WEATHER_BY_ID = Object.fromEntries(WEATHER.map(w => [w.id, w]));
 const W16 = ['北', '北北東', '北東', '東北東', '東', '東南東', '南東', '南南東', '南', '南南西', '南西', '西南西', '西', '西北西', '北西', '北北西'];
 const windName = (deg) => W16[Math.round(((deg % 360) + 360) % 360 / 22.5) % 16];
@@ -92,6 +92,8 @@ function rainStep(dtReal) {
     let x = sd[i * 4], y = sd[i * 4 + 1], z = sd[i * 4 + 2]; const vy = sd[i * 4 + 3];
     y -= vy * dtReal; x += w.x * dtReal * 0.4; z += w.z * dtReal * 0.4;
     if (y < -0.16) { y = 3.2 + Math.random() * 0.5; x = (Math.random() - 0.5) * 5; z = (Math.random() - 0.5) * 5; }
+    if (x > 2.5) x -= 5; else if (x < -2.5) x += 5;
+    if (z > 2.5) z -= 5; else if (z < -2.5) z += 5;   // 風下へ流れ切ったら反対側から入れ直す
     sd[i * 4] = x; sd[i * 4 + 1] = y; sd[i * 4 + 2] = z;
     const dx = w.x * 0.4, dz = w.z * 0.4, m = Math.hypot(dx, vy, dz) || 1, k = len * (vy / 3.5);
     a.array[i * 6] = x; a.array[i * 6 + 1] = y; a.array[i * 6 + 2] = z;
@@ -162,7 +164,7 @@ function setWeather(id, quiet) {
   const same = weather.id === id;
   const w = id && WEATHER_BY_ID[id];
   if (!w) {   // 元へ戻す
-    weather.on = false; weather.id = null; weather.last = '';
+    weather.on = false; weather.id = null; weather.lastVal = 0;
     if (weather.sockGrp) weather.sockGrp.visible = false;
     if (!(typeof fpv === 'object' && fpv.on)) farGroundOn(false);
     if (weather.rain) weather.rain.visible = false;
@@ -176,8 +178,8 @@ function setWeather(id, quiet) {
   }
   if (same && weather.on) return setWeather(null);   // 同じものをもう一度押したら戻す
   stopOthers('weather');
-  weather.on = true; weather.id = id; weather.t = 0; weather.gust = 0; weather.burstEnv = 0; weather.last = '';
-  weather.cyc = { dir: w.wind.dir, spd: w.wind.spd, label: '昼（海風）' };
+  weather.on = true; weather.id = id; weather.t = 0; weather.ts = 0; weather.gust = 0; weather.burstEnv = 0; weather.lastVal = 0;
+  weather.cyc = { dir: w.wind.dir, spd: w.wind.spd, label: '昼（海から陸へ）' };
   windsockBuild(); weather.sockGrp.visible = true;
   if (w.wind.burst) burstProps(); else if (weather.burstGrp) weather.burstGrp.visible = false;
   farGroundOn(true);   /* 空を出すなら地平線も要る。床(半径2.8m)だけだと雲の下端が宙に浮く */
@@ -201,24 +203,28 @@ function setWeather(id, quiet) {
 function stepWeather(dtSim, dtReal) {
   if (!weather.on) return;
   const w = WEATHER_BY_ID[weather.id]; if (!w) return;
-  weather.t += dtReal;
+  weather.t += dtReal;      // 見た目（雲の流れ・雨・吹き流しの揺れ）
+  weather.ts += dtSim;      // 機体に効くもの（突風・海陸風・ダウンバースト）は「ゆっくり」に従う
   backdropMat.uniforms.uT.value = weather.t;
   // 突風（-1〜1のゆらぎ）。寒冷前線は強く、速く
   const f = w.id === 'cold' ? 1.7 : 1.0;
-  weather.gust = (Math.sin(weather.t * 0.9 * f) * 0.6 + Math.sin(weather.t * 2.3 * f + 1.7) * 0.3 + Math.sin(weather.t * 4.7 * f + 0.4) * 0.1);
+  weather.gust = (Math.sin(weather.ts * 0.9 * f) * 0.6 + Math.sin(weather.ts * 2.3 * f + 1.7) * 0.3 + Math.sin(weather.ts * 4.7 * f + 0.4) * 0.1);
   // 海陸風: 40秒で1日。入れ替わりは凪
   if (w.wind.cycle) {
-    const ph = (weather.t / 40) % 1;
+    // 凪はV字（落ちて、また上がる）。片側だけだと、凪の終わりで風速が段になって機体がカクッと押される
+    const ph = (weather.ts / 40) % 1;
     let dir, spd, label;
-    if (ph < 0.38) { dir = 180; spd = 3.0; label = '昼（海から陸へ）'; }
-    else if (ph < 0.5) { const k = (ph - 0.38) / 0.12; dir = 180 + 180 * k; spd = 3.0 * (1 - k) + 0.15; label = '夕凪（入れ替わり）'; }
-    else if (ph < 0.88) { dir = 0; spd = 2.0; label = '夜（陸から海へ）'; }
-    else { const k = (ph - 0.88) / 0.12; dir = 360 - 180 * k; spd = 2.0 * (1 - k) + 0.15; label = '朝凪（入れ替わり）'; }
+    if (ph < 0.35) { dir = 180; spd = 3.0; label = '昼（海から陸へ）'; }
+    else if (ph < 0.425) { const k = (ph - 0.35) / 0.075; dir = 180 + 180 * k; spd = 3.0 - 2.85 * k; label = '夕凪（入れ替わり）'; }
+    else if (ph < 0.50) { const k = (ph - 0.425) / 0.075; dir = 0; spd = 0.15 + 1.85 * k; label = '夕凪（入れ替わり）'; }
+    else if (ph < 0.85) { dir = 0; spd = 2.0; label = '夜（陸から海へ）'; }
+    else if (ph < 0.925) { const k = (ph - 0.85) / 0.075; dir = 360 - 180 * k; spd = 2.0 - 1.85 * k; label = '朝凪（入れ替わり）'; }
+    else { const k = (ph - 0.925) / 0.075; dir = 180; spd = 0.15 + 2.85 * k; label = '朝凪（入れ替わり）'; }
     weather.cyc = { dir: dir % 360, spd, label };
   }
-  // ダウンバースト: 22秒で 接近 → 最盛 → 減衰
+  // ダウンバースト: 24秒で 接近 → 最盛 → 減衰
   if (w.wind.burst) {
-    const ph = (weather.t / 24) % 1;
+    const ph = (weather.ts / 24) % 1;
     weather.burstEnv = ph < 0.22 ? 0 : ph < 0.36 ? (ph - 0.22) / 0.14 : ph < 0.78 ? 1 : ph < 0.92 ? 1 - (ph - 0.78) / 0.14 : 0;
     weather.burstX = -2.0 + 4.0 * clamp((ph - 0.22) / 0.70, 0, 1);   // 中心が通り過ぎる: 向かい風 → 真下 → 追い風
   }
@@ -246,7 +252,7 @@ function weatherStateText() {
   return bits.join('');
 }
 function updateWeatherVals() {
-  const el = $('#skyVals'); if (!el) return;
+  const el = $('#skyVals'); if (!el || $('#noteCard').hidden) return;
   el.innerHTML = `<i class="dot" aria-hidden="true"></i>${weatherStateText()}`;
 }
 function renderWeather() {

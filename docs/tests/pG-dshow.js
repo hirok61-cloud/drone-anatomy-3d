@@ -50,6 +50,21 @@ A(d.body.mode !== 'theater' && Math.abs(d.body.py) < 0.2, '機体が地上に戻
 A(!window.__fpv.farGround.mesh.visible, '地平線が消える');
 A(d.S.power === 0, '電源が戻る', d.S.power);
 
+// 一度閉じて開き直しても、説明カード（＝「やめる」の出口）が出る
+DS.dshowOn(false); d.step(1.0, 30); DS.dshowOn(true); d.step(1.0, 30);
+A(!document.getElementById('noteCard').hidden && document.getElementById('noteCard').dataset.kind === 'dshow', '2回目もカードが出る');
+// 輪は機体が重ならない（角度の作り方を誤ると半数が同じ場所に立つ）
+{ const m = 120, r = new Float32Array(m * 3); DS.dshowShape('ring', m, r);
+  const uniq = new Set([...Array(m)].map((_, i) => r[i * 3].toFixed(4) + ',' + r[i * 3 + 1].toFixed(4))).size;
+  A(uniq === m, '輪: 機体が重ならない', uniq, m); }
+// テーマや明るさを触っても夜のまま
+document.querySelector('#themeSeg [data-th=light]').click(); d.step(0.8, 30);
+A(d.D.parts.find(p => p.key === 'led').obj.userData.halo.material.opacity > 0.2, 'テーマを変えても夜の灯火が残る');
+document.querySelector('#themeSeg [data-th=dark]').click(); d.step(0.5, 30);
+// やめると夜の空が残らない
+DS.dshowOn(false); d.step(1.2, 30);
+{ const u = DS.skyUniforms(); A(u.star === 0 && u.cloud === 0 && u.wall === 0 && u.haze === 0, 'やめると夜の星・雲・かすみが消える', JSON.stringify(u)); }
+
 // Esc でも止まる
 document.getElementById('showBtn').click(); d.step(1.0, 30);
 document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));

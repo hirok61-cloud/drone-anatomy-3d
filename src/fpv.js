@@ -49,8 +49,11 @@ function farGroundBuild() {
   scene.add(m); farGround.mesh = m; farGroundTheme();
 }
 function farGroundOn(on) { farGroundBuild(); if (farGround.mesh.visible !== !!on) { farGround.mesh.visible = !!on; S.shadowDirty = S.csDirty = S.aoDirty = true; } }
+let _fgKey = '';
 function farGroundTheme(hazeOverride) {
   const far = farGround.mesh; if (!far) return;
+  const key = groundMat.color.getHex() + '|' + (hazeOverride ? hazeOverride.r.toFixed(2) + hazeOverride.g.toFixed(2) + hazeOverride.b.toFixed(2) : (themeDark ? 'D' : 'L'));
+  if (key === _fgKey) return; _fgKey = key;   // 1241頂点の塗り直しなので、同じ色なら省く
   far.material.color.copy(groundMat.color);   // 近くの床と必ず同じ色にする（空もようは床の色も変える）
   const one = new THREE.Color(1, 1, 1), haze = hazeOverride || (themeDark ? new THREE.Color(3.1, 3.3, 3.8) : new THREE.Color(0.70, 0.74, 0.83));
   const pos = far.geometry.attributes.position, col = far.geometry.attributes.color, c = new THREE.Color();
