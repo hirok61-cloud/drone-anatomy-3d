@@ -27,15 +27,15 @@ function startWhatif(id) {
   if (D.personGroup) { whatif.saved.personPos = D.personGroup.position.clone(); whatif.saved.personVis = D.personGroup.visible; }
   if (def.motion === 'airport') airportSetup();
   if (def.motion === 'crowd') dropSetup();
-  const wide = { tachiiri: 2.6, bvlos: 4.2, airport: 2.6, crowd: 1.7 }[def.motion];   /* 床(半径2.8m)より広い場面は一時的に広げる */
+  const wide = { tachiiri: 2.6, bvlos: narrow() ? 3.2 : 4.2, airport: 2.4, crowd: 1.5 }[def.motion];   /* 床(半径2.8m)より広い場面は一時的に広げる */
   if (wide && !whatif.groundScale) { whatif.groundScale = ground.scale.x; ground.scale.set(wide, 1, wide); }
   const vs = viewScale();
   if (def.motion === 'tachiiri') { tachiiriSetup(); const dv = vs > 1 ? 1.3 : 1; theaterCamera(new THREE.Vector3(4.6 * dv, 4.4 * dv, 4.6 * dv), new THREE.Vector3(-1.4, 0.2, -1.4), 900); }   /* 近づく向きに沿って奥を見る俯瞰。3人を奥行き方向に並べるので縦画面でも入る */
   else if (def.motion === 'person') theaterCamera(new THREE.Vector3(3.2 * vs, 1.6 * vs, -2.6 * vs), new THREE.Vector3(-0.35, 0.72, -0.35), 900);   // 人型(1.7m)が全身で入る引き(約4.4m)
   else if (def.motion === 'night') theaterCamera(new THREE.Vector3(1.15 * vs, 0.42 * vs, -1.15 * vs), new THREE.Vector3(0, 0.02, 0), 900);   /* 灯火の色が前後で分かる高さ。俯瞰にすると向きが読めない */
-  else if (def.motion === 'bvlos') theaterCamera(new THREE.Vector3(1.95 * vs, 1.05 * vs, 1.95 * vs), new THREE.Vector3(-0.15, 0.30, -0.15), 900);   /* 操縦者の肩ごし。機体が奥へ小さくなっていくのを見送る */
-  else if (def.motion === 'airport') theaterCamera(new THREE.Vector3(3.5 * vs, 1.5 * vs, -1.2 * vs), new THREE.Vector3(0, 0.75, 1.2), 900);   /* 斜めの面と機体の高さの関係が見える横から */
-  else if (def.motion === 'crowd') theaterCamera(new THREE.Vector3(3.4 * vs, 2.5 * vs, -3.4 * vs), new THREE.Vector3(-0.7, 0.35, -0.7), 900);   /* 床の円が広がるのが見える俯瞰 */
+  else if (def.motion === 'bvlos') theaterCamera(new THREE.Vector3(1.9 * vs, 1.0 * vs, 1.9 * vs), new THREE.Vector3(-0.85, 0.46, -0.85), 900);   /* 操縦者の肩ごし。機体が奥へ小さくなっていくのを見送る */
+  else if (def.motion === 'airport') theaterCamera(new THREE.Vector3(3.2 * vs, 1.25 * vs, -1.5 * vs), new THREE.Vector3(0, 0.72, 0.25), 900);   /* 斜めの面と機体の高さの関係が見える横から */
+  else if (def.motion === 'crowd') theaterCamera(new THREE.Vector3(2.9 * vs, 2.35 * vs, -2.9 * vs), new THREE.Vector3(0, 0.60, 0), 900);   /* 床の円が広がるのが見える俯瞰。円の中心（機体の真下）を画の中心に置く */
   else theaterCamera(new THREE.Vector3(1.05 * vs, 0.55 * vs, -1.05 * vs), new THREE.Vector3(0, 0.03, 0), 800);
   if (typeof onWhatifChanged === 'function') onWhatifChanged();
 }
@@ -194,8 +194,8 @@ const WHATIF_MOTION = {
   },
   // 見えなくなる → 遠ざかって小さくなる。操縦者の位置にカメラを置いたまま見送る
   bvlos(t, dt) {
-    body.py = free.hoverY + 0.55 * smoothstep(0.5, 4.2, t);
-    const k = smoothstep(0.5, 4.6, t), d = 9.5 * k;
+    body.py = free.hoverY + 0.38 * smoothstep(0.5, 4.2, t);
+    const k = smoothstep(0.5, 4.6, t), d = (narrow() ? 6.6 : 9.5) * k;   /* 縦画面は見える帯が狭いので、点になりすぎない距離で止める */
     body.px = -0.707 * d; body.pz = -0.707 * d;
     body.yaw = dl(body.yaw, Math.PI * 0.75, dt, 1.2);
     return t > 5.2;
@@ -219,10 +219,10 @@ const WHATIF_MOTION = {
     const k = smoothstep(0.5, 4.0, t);
     body.py = free.hoverY + 1.5 * k;
     const g = D.personGroup;
-    if (g) { g.visible = true; g.position.set(-1.55, -0.158, -1.55); if (g.userData.face) g.userData.face(0, 0); if (g.userData.rest) g.userData.rest(dt); }
-    const r = 0.35 + 2.15 * k;   /* 高さに比例して広がる（模式。実際の落下距離ではない） */
+    if (g) { g.visible = true; g.position.set(-1.35, -0.158, 0.60);   /* 縦画面でも横に収まり、機体と重ならない位置（画面では機体の奥・やや右） */ if (g.userData.face) g.userData.face(0, 0); if (g.userData.rest) g.userData.rest(dt); }
+    const r = 0.35 + 1.75 * k;   /* 高さに比例して広がる（模式。実際の落下距離ではない） */
     if (whatif.drop) { whatif.drop.scale.set(r, 1, r); whatif.drop.position.set(body.px, 0, body.pz); }
-    const dist = Math.hypot(-1.55 - body.px, -1.55 - body.pz);
+    const dist = Math.hypot(-1.35 - body.px, 0.60 - body.pz);
     const inside = r >= dist;
     if (whatif.drop) dropColor(inside);
     if (inside) { const b = 0.5 + 0.5 * Math.sin(t * 2 * Math.PI / 0.5); for (const p of partsOf('led')) { setTint(p, RED, 0.7 * b); const h = p.obj.userData.halo; if (h) { h.material.color.copy(RED); h.material.opacity = 0.06 + 0.5 * b; } } }

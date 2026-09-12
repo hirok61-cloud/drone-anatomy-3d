@@ -143,5 +143,5 @@ function renderRegSources() {
 function initReg() {
   syncRegToggle(); renderRegSources();
   const pop = $('#lessonPop'); if (pop && !$('#kyBtn')) { const b = document.createElement('button'); b.className = 'course ky-course'; b.id = 'kyBtn'; b.innerHTML = `<b>教則${KYOSOKU.ver}との対応表</b><span>登録講習機関・講師向け。章を選ぶと、その話に出せる画面が並びます</span>`; b.addEventListener('click', e => { e.stopPropagation(); pop.hidden = true; showKyosokuTable(); }); const foot = pop.querySelector('.pop-foot'); if (foot) pop.insertBefore(b, foot); else pop.appendChild(b); }
-  window.__reg = { regOn, setReg, regGhosts, showKyosokuTable, kyView, KY_TAB, KY_JUMP, REG, WHATIF_REG };
+  window.__reg = { regOn, setReg, regGhosts, showKyosokuTable, kyView, KY_TAB, KY_JUMP, KY_PART, KYOSOKU, REG, WHATIF_REG };
 }

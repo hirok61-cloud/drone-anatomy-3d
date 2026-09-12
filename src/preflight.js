@@ -100,5 +100,5 @@ function initPreflight() {
     const ky = $('#kyBtn'), foot = pop.querySelector('.pop-foot');
     pop.insertBefore(b, ky || foot || null);
   }
-  window.__preflight = { preflight, openPreflight, buildPreflightSheet, preflightSections, preflightCount };
+  window.__preflight = { preflight, openPreflight, buildPreflightSheet, preflightSections, preflightCount, PREFLIGHT };
 }

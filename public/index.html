@@ -263,6 +263,12 @@ button, .tabs, .seg, .chips { touch-action: manipulation; -webkit-user-select: n
   .popover { position: fixed; left: calc(10px + var(--sal)); right: calc(10px + var(--sar)); top: auto; bottom: calc(10px + var(--sab)); width: auto; max-height: 60vh; }
   #dock { left: calc(10px + var(--sal)); right: calc(10px + var(--sar)); bottom: calc(10px + var(--sab)); }
   .ctx { padding: 8px 10px 6px; } .ctx-row[data-tab=mishap] { flex-wrap: wrap; overflow-x: hidden; mask-image: none; -webkit-mask-image: none; padding-right: 0; gap: 6px; } .ctx-row[data-tab=mishap] .dock-group.grow { width: 100%; flex: none; }
+  /* もしもは3種で18枚。スマホは種類を選んで1組だけ出す(3組を積むとドックが画面の半分を覆う) */
+  .phone-only { display: flex; } #mishapSeg { width: 100%; }
+  .ctx-row[data-tab=mishap] .dock-group[data-mg] { display: none; } .ctx-row[data-tab=mishap] .dock-group[data-mg] > label { display: none; }
+  .ctx-row[data-tab=mishap][data-sel=mis] .dock-group[data-mg=mis],
+  .ctx-row[data-tab=mishap][data-sel=craft] .dock-group[data-mg=craft],
+  .ctx-row[data-tab=mishap][data-sel=site] .dock-group[data-mg=site] { display: flex; }
   .ctx-row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; align-items: flex-end; gap: 12px; padding-right: 24px; mask-image: linear-gradient(to right, #000 88%, transparent); -webkit-mask-image: linear-gradient(to right, #000 88%, transparent); } .ctx-row::-webkit-scrollbar { display: none; }
   .dock-group { flex: none; } .dock-group.grow { flex: none; width: 150px; } .chips { flex-wrap: nowrap; }
   .tabs button span { font-size: 11px; } .tabs button { flex-direction: column; gap: 2px; padding: 6px 4px; }
@@ -393,7 +399,7 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
 
 /* ---------- 第3ラウンド UI/UX 反映 ---------- */
 .pill-btn.on, .pill-btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-text); box-shadow: inset 0 0 0 1.5px var(--accent); }
-.mobile-only { display: none; }
+.mobile-only { display: none; } .phone-only { display: none; }
 body.big #sticks { bottom: calc(var(--dock-h) + 104px); }
 #massBar { overflow: hidden; } .mb-main { flex: 1; min-height: 0; overflow: auto; }
 body.scale #noteCard { left: calc(14px + 212px + 12px); width: min(420px, calc(100vw - var(--insp-w) - 60px - 224px)); }
@@ -563,10 +569,11 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
       <button id="useReset" class="pill-btn" hidden>もどす</button>
       <button id="scaleBtn" class="pill-btn" aria-pressed="false">重さ・お金</button>
     </div>
-    <div class="ctx-row" data-tab="mishap" hidden>
-      <div class="dock-group grow"><label>もしも、まちがえたら</label><div class="cards" id="mishapCards"></div></div>
-      <div class="dock-group grow"><label>もしも、機体がこうなったら</label><div class="cards" id="whatifCards"></div></div>
-      <div class="dock-group grow"><label>もしも、こんな場所・時間なら</label><div class="cards" id="whatifSiteCards"></div></div>
+    <div class="ctx-row" data-tab="mishap" data-sel="mis" hidden>
+      <div class="seg small phone-only" id="mishapSeg" role="radiogroup" aria-label="もしもの種類"><button data-mg="mis" class="on">まちがえ</button><button data-mg="craft">機体</button><button data-mg="site">場所・時間</button></div>
+      <div class="dock-group grow" data-mg="mis"><label>もしも、まちがえたら</label><div class="cards" id="mishapCards"></div></div>
+      <div class="dock-group grow" data-mg="craft"><label>もしも、機体がこうなったら</label><div class="cards" id="whatifCards"></div></div>
+      <div class="dock-group grow" data-mg="site"><label>もしも、こんな場所・時間なら</label><div class="cards" id="whatifSiteCards"></div></div>
     </div>
     <div class="ctx-row" data-tab="expert" hidden>
       <div class="dock-group"><label>なにを見る？</label><div class="seg small" id="expertSeg" role="radiogroup" aria-label="なにを見る？"><button data-x="sensors">センサー</button><button data-x="wear">消耗</button><button data-x="toolbox">設計の計算</button></div></div><button id="expertToggle" class="pill-btn compact-only">パネル</button>
@@ -3565,15 +3572,15 @@ function startWhatif(id) {
   if (D.personGroup) { whatif.saved.personPos = D.personGroup.position.clone(); whatif.saved.personVis = D.personGroup.visible; }
   if (def.motion === 'airport') airportSetup();
   if (def.motion === 'crowd') dropSetup();
-  const wide = { tachiiri: 2.6, bvlos: 4.2, airport: 2.6, crowd: 1.7 }[def.motion];   /* 床(半径2.8m)より広い場面は一時的に広げる */
+  const wide = { tachiiri: 2.6, bvlos: narrow() ? 3.2 : 4.2, airport: 2.4, crowd: 1.5 }[def.motion];   /* 床(半径2.8m)より広い場面は一時的に広げる */
   if (wide && !whatif.groundScale) { whatif.groundScale = ground.scale.x; ground.scale.set(wide, 1, wide); }
   const vs = viewScale();
   if (def.motion === 'tachiiri') { tachiiriSetup(); const dv = vs > 1 ? 1.3 : 1; theaterCamera(new THREE.Vector3(4.6 * dv, 4.4 * dv, 4.6 * dv), new THREE.Vector3(-1.4, 0.2, -1.4), 900); }   /* 近づく向きに沿って奥を見る俯瞰。3人を奥行き方向に並べるので縦画面でも入る */
   else if (def.motion === 'person') theaterCamera(new THREE.Vector3(3.2 * vs, 1.6 * vs, -2.6 * vs), new THREE.Vector3(-0.35, 0.72, -0.35), 900);   // 人型(1.7m)が全身で入る引き(約4.4m)
   else if (def.motion === 'night') theaterCamera(new THREE.Vector3(1.15 * vs, 0.42 * vs, -1.15 * vs), new THREE.Vector3(0, 0.02, 0), 900);   /* 灯火の色が前後で分かる高さ。俯瞰にすると向きが読めない */
-  else if (def.motion === 'bvlos') theaterCamera(new THREE.Vector3(1.95 * vs, 1.05 * vs, 1.95 * vs), new THREE.Vector3(-0.15, 0.30, -0.15), 900);   /* 操縦者の肩ごし。機体が奥へ小さくなっていくのを見送る */
-  else if (def.motion === 'airport') theaterCamera(new THREE.Vector3(3.5 * vs, 1.5 * vs, -1.2 * vs), new THREE.Vector3(0, 0.75, 1.2), 900);   /* 斜めの面と機体の高さの関係が見える横から */
-  else if (def.motion === 'crowd') theaterCamera(new THREE.Vector3(3.4 * vs, 2.5 * vs, -3.4 * vs), new THREE.Vector3(-0.7, 0.35, -0.7), 900);   /* 床の円が広がるのが見える俯瞰 */
+  else if (def.motion === 'bvlos') theaterCamera(new THREE.Vector3(1.9 * vs, 1.0 * vs, 1.9 * vs), new THREE.Vector3(-0.85, 0.46, -0.85), 900);   /* 操縦者の肩ごし。機体が奥へ小さくなっていくのを見送る */
+  else if (def.motion === 'airport') theaterCamera(new THREE.Vector3(3.2 * vs, 1.25 * vs, -1.5 * vs), new THREE.Vector3(0, 0.72, 0.25), 900);   /* 斜めの面と機体の高さの関係が見える横から */
+  else if (def.motion === 'crowd') theaterCamera(new THREE.Vector3(2.9 * vs, 2.35 * vs, -2.9 * vs), new THREE.Vector3(0, 0.60, 0), 900);   /* 床の円が広がるのが見える俯瞰。円の中心（機体の真下）を画の中心に置く */
   else theaterCamera(new THREE.Vector3(1.05 * vs, 0.55 * vs, -1.05 * vs), new THREE.Vector3(0, 0.03, 0), 800);
   if (typeof onWhatifChanged === 'function') onWhatifChanged();
 }
@@ -3732,8 +3739,8 @@ const WHATIF_MOTION = {
   },
   // 見えなくなる → 遠ざかって小さくなる。操縦者の位置にカメラを置いたまま見送る
   bvlos(t, dt) {
-    body.py = free.hoverY + 0.55 * smoothstep(0.5, 4.2, t);
-    const k = smoothstep(0.5, 4.6, t), d = 9.5 * k;
+    body.py = free.hoverY + 0.38 * smoothstep(0.5, 4.2, t);
+    const k = smoothstep(0.5, 4.6, t), d = (narrow() ? 6.6 : 9.5) * k;   /* 縦画面は見える帯が狭いので、点になりすぎない距離で止める */
     body.px = -0.707 * d; body.pz = -0.707 * d;
     body.yaw = dl(body.yaw, Math.PI * 0.75, dt, 1.2);
     return t > 5.2;
@@ -3757,10 +3764,10 @@ const WHATIF_MOTION = {
     const k = smoothstep(0.5, 4.0, t);
     body.py = free.hoverY + 1.5 * k;
     const g = D.personGroup;
-    if (g) { g.visible = true; g.position.set(-1.55, -0.158, -1.55); if (g.userData.face) g.userData.face(0, 0); if (g.userData.rest) g.userData.rest(dt); }
-    const r = 0.35 + 2.15 * k;   /* 高さに比例して広がる（模式。実際の落下距離ではない） */
+    if (g) { g.visible = true; g.position.set(-1.35, -0.158, 0.60);   /* 縦画面でも横に収まり、機体と重ならない位置（画面では機体の奥・やや右） */ if (g.userData.face) g.userData.face(0, 0); if (g.userData.rest) g.userData.rest(dt); }
+    const r = 0.35 + 1.75 * k;   /* 高さに比例して広がる（模式。実際の落下距離ではない） */
     if (whatif.drop) { whatif.drop.scale.set(r, 1, r); whatif.drop.position.set(body.px, 0, body.pz); }
-    const dist = Math.hypot(-1.55 - body.px, -1.55 - body.pz);
+    const dist = Math.hypot(-1.35 - body.px, 0.60 - body.pz);
     const inside = r >= dist;
     if (whatif.drop) dropColor(inside);
     if (inside) { const b = 0.5 + 0.5 * Math.sin(t * 2 * Math.PI / 0.5); for (const p of partsOf('led')) { setTint(p, RED, 0.7 * b); const h = p.obj.userData.halo; if (h) { h.material.color.copy(RED); h.material.opacity = 0.06 + 0.5 * b; } } }
@@ -5140,7 +5147,7 @@ function renderRegSources() {
 function initReg() {
   syncRegToggle(); renderRegSources();
   const pop = $('#lessonPop'); if (pop && !$('#kyBtn')) { const b = document.createElement('button'); b.className = 'course ky-course'; b.id = 'kyBtn'; b.innerHTML = `<b>教則${KYOSOKU.ver}との対応表</b><span>登録講習機関・講師向け。章を選ぶと、その話に出せる画面が並びます</span>`; b.addEventListener('click', e => { e.stopPropagation(); pop.hidden = true; showKyosokuTable(); }); const foot = pop.querySelector('.pop-foot'); if (foot) pop.insertBefore(b, foot); else pop.appendChild(b); }
-  window.__reg = { regOn, setReg, regGhosts, showKyosokuTable, kyView, KY_TAB, KY_JUMP, REG, WHATIF_REG };
+  window.__reg = { regOn, setReg, regGhosts, showKyosokuTable, kyView, KY_TAB, KY_JUMP, KY_PART, KYOSOKU, REG, WHATIF_REG };
 }
 
 // ===== 飛行前点検チェックリスト（印刷） =====
@@ -5245,7 +5252,7 @@ function initPreflight() {
     const ky = $('#kyBtn'), foot = pop.querySelector('.pop-foot');
     pop.insertBefore(b, ky || foot || null);
   }
-  window.__preflight = { preflight, openPreflight, buildPreflightSheet, preflightSections, preflightCount };
+  window.__preflight = { preflight, openPreflight, buildPreflightSheet, preflightSections, preflightCount, PREFLIGHT };
 }
 
 // ===== 共有リンク（いま見えている画面をURLにする） =====
@@ -5735,8 +5742,11 @@ function buildWhatifCards() {
   $('#whatifCards').innerHTML = WHATIF.filter(w => w.grp !== 'site').map(card).join('');
   const site = $('#whatifSiteCards'); if (site) site.innerHTML = WHATIF.filter(w => w.grp === 'site').map(card).join('');
 }
+{ const seg = $('#mishapSeg'); if (seg) seg.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; segSet(seg, 'mg', b.dataset.mg); $('.ctx-row[data-tab=mishap]').dataset.sel = b.dataset.mg; }); }
 for (const sel of ['#whatifCards', '#whatifSiteCards']) { const el = $(sel); if (el) el.addEventListener('click', e => { const b = e.target.closest('button'); if (b) startWhatifUI(b.dataset.w); }); }
+function syncMishapSeg(kind) { const row = $('.ctx-row[data-tab=mishap]'), seg = $('#mishapSeg'); if (!row || !seg) return; row.dataset.sel = kind; segSet(seg, 'mg', kind); }
 function startWhatifUI(id) {
+  { const w = WHATIF.find(x => x.id === id); if (w) syncMishapSeg(w.grp === 'site' ? 'site' : 'craft'); }
   stopOthers('whatif'); if (S.flight) setFlight(null); clearQuestion(); select(null); setSticks(false); if (S.explode > 0) setExplode(0); if (S.mode !== 'normal') setMode('normal'); if (S.scale) setScale(false); if (S.use) setUse(null);
   $('#coach').hidden = true; startWhatif(id); document.body.classList.add('theater'); $('#inspector').inert = true; $('#topbar').inert = true; $('#inspector').classList.remove('open');
   S.tab = 'theater'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'theater'; segSet($('#tabs'), 'tab', 'mishap');
@@ -5763,6 +5773,7 @@ function onWhatifChanged() {
   renderNote({ kind: 'whatif', title: `${d.icon} ${d.name}`, badge: WHATIF_STAGES[si], html, actions });
 }
 function startTheaterUI(id) {
+  syncMishapSeg('mis');
   stopOthers('theater'); if (whatif.active) { stopWhatif(true); for (const b of $$('#whatifCards button, #whatifSiteCards button')) b.classList.remove('on'); }
   if (S.flight) setFlight(null); clearQuestion(); select(null); setSticks(false); if (S.explode > 0) setExplode(0); if (S.mode === 'cut') setMode('normal');
   $('#coach').hidden = true; startTheater(id); document.body.classList.add('theater'); $('#inspector').inert = true; $('#topbar').inert = true; $('#inspector').classList.remove('open'); S.tab = 'theater'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'theater'; segSet($('#tabs'), 'tab', 'mishap');
@@ -6016,7 +6027,7 @@ function tick(now) {
   }
 }
 // 検証用に最小限だけグローバルへ出す(モジュールスコープのままだとコンソールから触れないため)
-window.LIST_ORDER = LIST_ORDER; window.PARTS = PARTS; window.WHATIF = WHATIF; window.WEAR = WEAR;
+window.LIST_ORDER = LIST_ORDER; window.PARTS = PARTS; window.WHATIF = WHATIF; window.WEAR = WEAR; window.MISHAPS = MISHAPS; window.USES = USES; window.FLIGHT = FLIGHT; window.EXPERT_MODES = EXPERT_MODES;
 window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: scale, __codex: codex, __whatif: whatif, __alive: alive, __lesson: lesson, __expert: expert, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
 // ---------- 起動 ----------
 (async () => {

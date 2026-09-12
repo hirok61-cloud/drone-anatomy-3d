@@ -348,8 +348,11 @@ function buildWhatifCards() {
   $('#whatifCards').innerHTML = WHATIF.filter(w => w.grp !== 'site').map(card).join('');
   const site = $('#whatifSiteCards'); if (site) site.innerHTML = WHATIF.filter(w => w.grp === 'site').map(card).join('');
 }
+{ const seg = $('#mishapSeg'); if (seg) seg.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; segSet(seg, 'mg', b.dataset.mg); $('.ctx-row[data-tab=mishap]').dataset.sel = b.dataset.mg; }); }
 for (const sel of ['#whatifCards', '#whatifSiteCards']) { const el = $(sel); if (el) el.addEventListener('click', e => { const b = e.target.closest('button'); if (b) startWhatifUI(b.dataset.w); }); }
+function syncMishapSeg(kind) { const row = $('.ctx-row[data-tab=mishap]'), seg = $('#mishapSeg'); if (!row || !seg) return; row.dataset.sel = kind; segSet(seg, 'mg', kind); }
 function startWhatifUI(id) {
+  { const w = WHATIF.find(x => x.id === id); if (w) syncMishapSeg(w.grp === 'site' ? 'site' : 'craft'); }
   stopOthers('whatif'); if (S.flight) setFlight(null); clearQuestion(); select(null); setSticks(false); if (S.explode > 0) setExplode(0); if (S.mode !== 'normal') setMode('normal'); if (S.scale) setScale(false); if (S.use) setUse(null);
   $('#coach').hidden = true; startWhatif(id); document.body.classList.add('theater'); $('#inspector').inert = true; $('#topbar').inert = true; $('#inspector').classList.remove('open');
   S.tab = 'theater'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'theater'; segSet($('#tabs'), 'tab', 'mishap');
@@ -376,6 +379,7 @@ function onWhatifChanged() {
   renderNote({ kind: 'whatif', title: `${d.icon} ${d.name}`, badge: WHATIF_STAGES[si], html, actions });
 }
 function startTheaterUI(id) {
+  syncMishapSeg('mis');
   stopOthers('theater'); if (whatif.active) { stopWhatif(true); for (const b of $$('#whatifCards button, #whatifSiteCards button')) b.classList.remove('on'); }
   if (S.flight) setFlight(null); clearQuestion(); select(null); setSticks(false); if (S.explode > 0) setExplode(0); if (S.mode === 'cut') setMode('normal');
   $('#coach').hidden = true; startTheater(id); document.body.classList.add('theater'); $('#inspector').inert = true; $('#topbar').inert = true; $('#inspector').classList.remove('open'); S.tab = 'theater'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'theater'; segSet($('#tabs'), 'tab', 'mishap');
