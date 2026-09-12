@@ -73,37 +73,64 @@ async function shareNow() {
 }
 
 // ---------- 読み戻し ----------
+// 画面の状態をひとまとめに当てる。共有リンクの読み戻しと、教則の逆引きの「ここへ飛ぶ」が同じ道を通る
+function gotoState(o, opts = {}) {
+  const quiet = opts.quiet !== false;
+  if (quiet) share.restoring = true;
+  try {
+    if (o.lang) setLang(o.lang);
+    if (o.depth) setDepth(o.depth);
+    if (o.reg != null) setReg(!!o.reg);
+    if (o.tab) setTab(o.tab);
+    if (o.mode && (o.mode !== 'blueprint' || codex.done)) setMode(o.mode);   /* 設計図は全部品を見た人だけ */
+    if (o.explode != null) setExplode(clamp(+o.explode, 0, 1));
+    if (o.use) { setTab('use'); setUse(o.use); }
+    if (o.mass) { setTab('use'); setScale(true); if (o.price) setPrice(true); }
+    if (o.flight) { setTab('fly'); setFlight(o.flight); }
+    if (o.expert) { setTab('expert'); expertStart(o.expert); }
+    if (o.iso) { S.isolated = o.iso; applyVisibility(); }
+    if (o.part && partsOf(o.part).length) { select(partsOf(o.part)[0], true); if (o.focus) focusOn(partsOf(o.part).map(x => x.obj), { pull: true }); }
+    if (o.view) { S.view = o.view; segSet($('#viewCol'), 'v', o.view); if (!o.cam) setView(o.view); }
+    if (o.cam) applyCam(o.cam);   /* 視点は最後に。部品を選んでもカメラは動かないので、共有した人が見ていた画がそのまま出る */
+    if (o.whatif || o.mishap) { const w = o.whatif, mi = o.mishap; setTimeout(() => { if (w) startWhatifUI(w); else startTheaterUI(mi); }, opts.sceneDelay != null ? opts.sceneDelay : 700); }   /* 場面は絵が出てから始める */
+  } catch (err) { console.warn('[share] 状態の反映に失敗', err); }
+  if (quiet) share.restoring = false;
+}
+// 状態からリンクを作る（教則の逆引きで「この画面のURL」を配れるように）
+function stateUrl(o) {
+  const u = new URL(location.href); const q = u.searchParams;
+  for (const k of SHARE_KEYS) q.delete(k); q.delete('lesson'); q.delete('step');
+  const put = (k, v) => { if (v != null && v !== false && v !== '') q.set(k, String(v)); };
+  put('d', o.depth); put('lang', o.lang); put('t', o.tab); put('m', o.mode);
+  if (o.explode) put('e', Math.round(o.explode * 100));
+  put('v', o.view); put('c', o.cam); put('p', o.part); put('iso', o.iso); put('u', o.use);
+  put('f', o.flight); put('x', o.expert); put('w', o.whatif); put('mi', o.mishap);
+  if (o.mass) { put('mass', 1); if (o.price) put('price', 1); }
+  if (o.reg != null) put('reg', o.reg ? 1 : 0);
+  u.hash = ''; return u.toString();
+}
 function applyShare() {
   const q = new URLSearchParams(location.search);
   if (!SHARE_KEYS.some(k => q.has(k))) return false;
-  const has = (k, ok) => { const v = q.get(k); return v != null && (!ok || ok.includes(v)) ? v : null; };
-  share.restoring = true;
-  try {
-    const lang = has('lang', ['ja', 'easy', 'en']); if (lang) setLang(lang);
-    const d = has('d', ['simple', 'full']); if (d) setDepth(d);
-    const reg = has('reg', ['0', '1']); if (reg != null) setReg(reg === '1');
-    const t = has('t', ['see', 'fly', 'use', 'mishap', 'expert']); if (t) setTab(t);
-    const m = has('m', ['normal', 'xray', 'wire', 'cut', 'blueprint']); if (m && (m !== 'blueprint' || codex.done)) setMode(m);   /* 設計図は全部品を見た人だけ */
-    const e = q.get('e'); if (e != null && isFinite(+e)) setExplode(clamp(+e / 100, 0, 1));
-    const u = has('u', USES.map(x => x.id)); if (u) { setTab('use'); setUse(u); }
-    if (q.get('mass') === '1') { setTab('use'); setScale(true); if (q.get('price') === '1') setPrice(true); }
-    const f = has('f', Object.keys(FLIGHT)); if (f) { setTab('fly'); setFlight(f); }
-    const x = has('x', EXPERT_MODES); if (x) { setTab('expert'); expertStart(x); }
-    const iso = has('iso', LIST_ORDER); if (iso) { S.isolated = iso; applyVisibility(); }
-    const p = has('p', Object.keys(PARTS)); if (p && partsOf(p).length) select(partsOf(p)[0], true);
-    const v = has('v', ['iso', 'front', 'top', 'side', 'inside']), c = q.get('c');
-    if (v) { S.view = v; segSet($('#viewCol'), 'v', v); if (!c) setView(v); }
-    if (c) applyCam(c);   /* 視点は最後に。部品を選んでもカメラは動かないので、共有した人が見ていた画がそのまま出る */
-    // 場面は絵が出てから始める（起動直後に走らせると最初の1コマを飛ばす）
-    const w = has('w', WHATIF.map(x => x.id)), mi = has('mi', MISHAPS.map(x => x.id));
-    if (w || mi) setTimeout(() => { if (w) startWhatifUI(w); else startTheaterUI(mi); }, 700);
-  } catch (err) { console.warn('[share] 読み戻しに失敗', err); }
-  share.restoring = false;
+  const pick = (k, ok) => { const v = q.get(k); return v != null && (!ok || ok.includes(v)) ? v : undefined; };
+  const e = q.get('e');
+  gotoState({
+    lang: pick('lang', ['ja', 'easy', 'en']), depth: pick('d', ['simple', 'full']),
+    reg: q.has('reg') ? q.get('reg') === '1' : undefined,
+    tab: pick('t', ['see', 'fly', 'use', 'mishap', 'expert']),
+    mode: pick('m', ['normal', 'xray', 'wire', 'cut', 'blueprint']),
+    explode: e != null && isFinite(+e) ? +e / 100 : undefined,
+    use: pick('u', USES.map(x => x.id)), mass: q.get('mass') === '1', price: q.get('price') === '1',
+    flight: pick('f', Object.keys(FLIGHT)), expert: pick('x', EXPERT_MODES),
+    iso: pick('iso', LIST_ORDER), part: pick('p', Object.keys(PARTS)),
+    view: pick('v', ['iso', 'front', 'top', 'side', 'inside']), cam: q.get('c') || undefined,
+    whatif: pick('w', WHATIF.map(x => x.id)), mishap: pick('mi', MISHAPS.map(x => x.id)),
+  });
   setTimeout(() => showToast(`共有されたリンクで開きました（${shareSummary()}）`, 3600), 900);
   return true;
 }
 
 function initShare() {
   const btn = $('#shareBtn'); if (btn) btn.addEventListener('click', shareNow);
-  window.__share = { shareUrl, shareSummary, shareNow, applyShare };
+  window.__share = { shareUrl, shareSummary, shareNow, applyShare, gotoState, stateUrl };
 }
