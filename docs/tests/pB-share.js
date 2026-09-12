@@ -34,7 +34,7 @@ document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: tr
 { const q = new URL(SH.shareUrl()).searchParams; A(!q.has('m') && !q.has('e') && !q.has('p'), 'share: 既定値は載せない', [...q.keys()].join(',')); }
 // 場面のリンク
 document.querySelector('#tabs [data-tab=mishap]').click(); d.step(0.2, 30);
-document.querySelector('#whatifCards button[data-w=wind]').click(); d.step(0.8, 30);
+document.querySelector('#whatifCards button[data-w=wind], #whatifSiteCards button[data-w=wind]').click(); d.step(0.8, 30);
 A(new URL(SH.shareUrl()).searchParams.get('w') === 'wind', 'share: もしもの場面');
 document.getElementById('thQuit').click(); d.step(0.4, 30);
 // 受け取り側の検証は applyShare を直に呼んで確かめる（location を書き換えずに済ませる）

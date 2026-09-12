@@ -342,18 +342,23 @@ function setUse(id) {
 // ---------- もしも(シアター) ----------
 function buildMishapCards() { const list = S.depth === 'simple' ? MISHAPS.filter(m => ['propReverse', 'drop', 'motorOut'].includes(m.id)) : MISHAPS; $('#mishapCards').innerHTML = list.map(m => `<button data-m="${m.id}"><b>${m.short}</b>${m.name}${regOn() ? kyChip('4.6') : ''}</button>`).join(''); }
 $('#mishapCards').addEventListener('click', e => { const b = e.target.closest('button'); if (b) startTheaterUI(b.dataset.m); });
-function buildWhatifCards() { $('#whatifCards').innerHTML = WHATIF.map(w => `<button data-w="${w.id}"><b>${w.icon} ${w.name}</b>${w.short || w.intro.slice(0, 22)}${regOn() && WHATIF_REG[w.id] ? kyChip(WHATIF_REG[w.id].ky.split(' ')[0]) : ''}</button>`).join(''); }
-$('#whatifCards').addEventListener('click', e => { const b = e.target.closest('button'); if (b) startWhatifUI(b.dataset.w); });
+// 場面が10個になったので、機体で起きること（craft）と、場所・時間で決まること（site）に分けて並べる
+function buildWhatifCards() {
+  const card = (w) => `<button data-w="${w.id}"><b>${w.icon} ${w.name}</b>${w.short || w.intro.slice(0, 22)}${regOn() && WHATIF_REG[w.id] ? kyChip(WHATIF_REG[w.id].ky.split(' ')[0]) : ''}</button>`;
+  $('#whatifCards').innerHTML = WHATIF.filter(w => w.grp !== 'site').map(card).join('');
+  const site = $('#whatifSiteCards'); if (site) site.innerHTML = WHATIF.filter(w => w.grp === 'site').map(card).join('');
+}
+for (const sel of ['#whatifCards', '#whatifSiteCards']) { const el = $(sel); if (el) el.addEventListener('click', e => { const b = e.target.closest('button'); if (b) startWhatifUI(b.dataset.w); }); }
 function startWhatifUI(id) {
   stopOthers('whatif'); if (S.flight) setFlight(null); clearQuestion(); select(null); setSticks(false); if (S.explode > 0) setExplode(0); if (S.mode !== 'normal') setMode('normal'); if (S.scale) setScale(false); if (S.use) setUse(null);
   $('#coach').hidden = true; startWhatif(id); document.body.classList.add('theater'); $('#inspector').inert = true; $('#topbar').inert = true; $('#inspector').classList.remove('open');
   S.tab = 'theater'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'theater'; segSet($('#tabs'), 'tab', 'mishap');
-  for (const b of $$('#whatifCards button')) b.classList.toggle('on', b.dataset.w === id);
+  for (const b of $$('#whatifCards button, #whatifSiteCards button')) b.classList.toggle('on', b.dataset.w === id);
 }
 function stopWhatifUI() {
   stopWhatif(true); document.body.classList.remove('theater'); $('#inspector').inert = false; $('#topbar').inert = false; camHome();
   setPower(0, true); renderNote(null); S.tab = 'mishap'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'mishap';
-  for (const b of $$('#whatifCards button')) b.classList.remove('on'); syncBodyMode();
+  for (const b of $$('#whatifCards button, #whatifSiteCards button')) b.classList.remove('on'); syncBodyMode();
 }
 function onWhatifChanged() {
   if (!whatif.active) return;
@@ -371,7 +376,7 @@ function onWhatifChanged() {
   renderNote({ kind: 'whatif', title: `${d.icon} ${d.name}`, badge: WHATIF_STAGES[si], html, actions });
 }
 function startTheaterUI(id) {
-  stopOthers('theater'); if (whatif.active) { stopWhatif(true); for (const b of $$('#whatifCards button')) b.classList.remove('on'); }
+  stopOthers('theater'); if (whatif.active) { stopWhatif(true); for (const b of $$('#whatifCards button, #whatifSiteCards button')) b.classList.remove('on'); }
   if (S.flight) setFlight(null); clearQuestion(); select(null); setSticks(false); if (S.explode > 0) setExplode(0); if (S.mode === 'cut') setMode('normal');
   $('#coach').hidden = true; startTheater(id); document.body.classList.add('theater'); $('#inspector').inert = true; $('#topbar').inert = true; $('#inspector').classList.remove('open'); S.tab = 'theater'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'theater'; segSet($('#tabs'), 'tab', 'mishap');
   for (const b of $$('#mishapCards button')) b.classList.toggle('on', b.dataset.m === id);

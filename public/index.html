@@ -565,7 +565,8 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
     </div>
     <div class="ctx-row" data-tab="mishap" hidden>
       <div class="dock-group grow"><label>もしも、まちがえたら</label><div class="cards" id="mishapCards"></div></div>
-      <div class="dock-group grow"><label>もしも、外でこうなったら</label><div class="cards" id="whatifCards"></div></div>
+      <div class="dock-group grow"><label>もしも、機体がこうなったら</label><div class="cards" id="whatifCards"></div></div>
+      <div class="dock-group grow"><label>もしも、こんな場所・時間なら</label><div class="cards" id="whatifSiteCards"></div></div>
     </div>
     <div class="ctx-row" data-tab="expert" hidden>
       <div class="dock-group"><label>なにを見る？</label><div class="seg small" id="expertSeg" role="radiogroup" aria-label="なにを見る？"><button data-x="sensors">センサー</button><button data-x="wear">消耗</button><button data-x="toolbox">設計の計算</button></div></div><button id="expertToggle" class="pill-btn compact-only">パネル</button>
@@ -2963,8 +2964,9 @@ function stepCamera(dt) {
   // 防護: 非有限値や暴走の復帰
   const p = camera.position, t = controls.target;
   if (!Number.isFinite(p.x + p.y + p.z + t.x + t.y + t.z)) { S.camSpring = null; S.camInertia = null; cam.v.set(0, 0, 0); cam.tv.set(0, 0, 0); t.set(0, 0, 0); p.set(0.78, 0.50, -0.82); }
-  if (!S.camSpring && !S.camInertia && controls.maxDistance > camMax()) controls.maxDistance = Math.max(camMax(), controls.maxDistance - (controls.maxDistance - camMax()) * (1 - Math.exp(-dt / 0.5)));   // 場面を抜けたら上限をゆっくり戻す
-  if (t.length() > 3) t.clampLength(0, 3);
+  const inScene2 = (typeof whatif === 'object' && whatif.active) || (typeof theater === 'object' && theater.active);
+  if (!S.camSpring && !S.camInertia && !inScene2 && controls.maxDistance > camMax()) controls.maxDistance = Math.max(camMax(), controls.maxDistance - (controls.maxDistance - camMax()) * (1 - Math.exp(-dt / 0.5)));   // 場面を抜けたら上限をゆっくり戻す(場面の最中に戻すと、引きが切られて画がじりじり寄る)
+  { const inScene = (typeof whatif === 'object' && whatif.active) || (typeof theater === 'object' && theater.active); const tmax = inScene ? 14 : 3; if (t.length() > tmax) t.clampLength(0, tmax); }   /* 場面では機体が原点から離れる(目視外は9m先)。固定3mだと注視点が引き戻されて画が壊れる */
   const lim = Math.max(4, controls.maxDistance); const off = tmpV.copy(p).sub(t); if (off.length() > lim) p.copy(t).addScaledVector(off.normalize(), lim);   // 上限は画面の縦横比と台本の引きに合わせる(固定4mだと縦画面で場面が枠に入らない)
 }
 function onCamInterrupt() { if (S.camSpring) { S.camSpring = null; S.camInertia = { v: cam.v.clone().clampLength(0, 2), t: 0.3 }; cam.v.set(0, 0, 0); cam.tv.set(0, 0, 0); } }
@@ -3554,15 +3556,24 @@ function startWhatif(id) {
   D.motors.forEach(mo => { mo.rpmTarget = null; mo.rpmRate = 3.5; });
   S.power = 0.5;
   whatif.saved.air = S.air; S.labelsSuppressed = true; S.labelOnly = null;
+  if (def.motion === 'night') { whatif.night = true; for (const a of D.arrows.thrust) a.userData.forceHide = true; }   /* 光るものを灯火だけにする */
   if (def.motion === 'wind') { S.air = true; for (const x of $$('.tgl[data-t=air]')) x.classList.add('on'); }   // 風の場面だけ気流を出す
   if (def.motion === 'driftHold') {   // GPS: 開始位置の床リング(流された量の基準)
     if (!whatif.ring) { const rg = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.002, 8, 72), new THREE.MeshBasicMaterial({ color: 0x3b7df7, transparent: true, opacity: 0.5, toneMapped: false })); rg.rotation.x = Math.PI / 2; rg.position.y = -0.156; rg.userData.noPart = rg.userData.noPick = rg.userData.noAO = rg.userData.noShadow = true; scene.add(rg); whatif.ring = rg; }
     whatif.ring.visible = true;
   }
   if (D.personGroup) { whatif.saved.personPos = D.personGroup.position.clone(); whatif.saved.personVis = D.personGroup.visible; }
+  if (def.motion === 'airport') airportSetup();
+  if (def.motion === 'crowd') dropSetup();
+  const wide = { tachiiri: 2.6, bvlos: 4.2, airport: 2.6, crowd: 1.7 }[def.motion];   /* 床(半径2.8m)より広い場面は一時的に広げる */
+  if (wide && !whatif.groundScale) { whatif.groundScale = ground.scale.x; ground.scale.set(wide, 1, wide); }
   const vs = viewScale();
   if (def.motion === 'tachiiri') { tachiiriSetup(); const dv = vs > 1 ? 1.3 : 1; theaterCamera(new THREE.Vector3(4.6 * dv, 4.4 * dv, 4.6 * dv), new THREE.Vector3(-1.4, 0.2, -1.4), 900); }   /* 近づく向きに沿って奥を見る俯瞰。3人を奥行き方向に並べるので縦画面でも入る */
   else if (def.motion === 'person') theaterCamera(new THREE.Vector3(3.2 * vs, 1.6 * vs, -2.6 * vs), new THREE.Vector3(-0.35, 0.72, -0.35), 900);   // 人型(1.7m)が全身で入る引き(約4.4m)
+  else if (def.motion === 'night') theaterCamera(new THREE.Vector3(1.15 * vs, 0.42 * vs, -1.15 * vs), new THREE.Vector3(0, 0.02, 0), 900);   /* 灯火の色が前後で分かる高さ。俯瞰にすると向きが読めない */
+  else if (def.motion === 'bvlos') theaterCamera(new THREE.Vector3(1.95 * vs, 1.05 * vs, 1.95 * vs), new THREE.Vector3(-0.15, 0.30, -0.15), 900);   /* 操縦者の肩ごし。機体が奥へ小さくなっていくのを見送る */
+  else if (def.motion === 'airport') theaterCamera(new THREE.Vector3(3.5 * vs, 1.5 * vs, -1.2 * vs), new THREE.Vector3(0, 0.75, 1.2), 900);   /* 斜めの面と機体の高さの関係が見える横から */
+  else if (def.motion === 'crowd') theaterCamera(new THREE.Vector3(3.4 * vs, 2.5 * vs, -3.4 * vs), new THREE.Vector3(-0.7, 0.35, -0.7), 900);   /* 床の円が広がるのが見える俯瞰 */
   else theaterCamera(new THREE.Vector3(1.05 * vs, 0.55 * vs, -1.05 * vs), new THREE.Vector3(0, 0.03, 0), 800);
   if (typeof onWhatifChanged === 'function') onWhatifChanged();
 }
@@ -3578,6 +3589,9 @@ function stopWhatif(silent) {
   if (D.personGroup) { if (whatif.saved.personPos) D.personGroup.position.copy(whatif.saved.personPos); D.personGroup.visible = whatif.saved.personVis; if (D.personGroup.userData.rest) D.personGroup.userData.rest(); if (D.personGroup.userData.face) D.personGroup.userData.face(0, 0); }
   if (whatif.people) for (const g of whatif.people) { g.visible = false; if (g.userData.foot) g.userData.foot.visible = false; }
   if (whatif.ring2) whatif.ring2.visible = false;
+  if (whatif.apt) whatif.apt.visible = false;
+  if (whatif.drop) whatif.drop.visible = false;
+  if (whatif.night) { whatif.night = false; nightLevel(0); for (const p of partsOf('led')) { const h = p.obj.userData.halo; if (h) h.scale.setScalar(0.022); } applyTheme(); for (const a of D.arrows.thrust) a.userData.forceHide = false; }
   if (whatif.groundScale) { ground.scale.set(whatif.groundScale, 1, whatif.groundScale); whatif.groundScale = null; }
   S.labelsSuppressed = false; S.labelOnly = null; buildLabels();
   whatif.active = false; whatif.def = null; whatif.phase = 0; S.whatif = null;
@@ -3593,6 +3607,62 @@ function whatifNext() {
   if (typeof onWhatifChanged === 'function') onWhatifChanged();
 }
 function whatifRestart() { const id = whatif.def && whatif.def.id; if (id) { stopWhatif(true); startWhatif(id); } }
+
+// ---------- 場面の小道具（夜の明るさ・空港の制限表面・落下の範囲） ----------
+// 夜は「暗くする」のではなく、光源と環境光を落として灯火だけが残る状態にする。テーマの値を基準に戻せるようにしておく
+function nightLevel(k) {
+  const T = THEME[themeDark ? 'dark' : 'light'];
+  key.intensity = T.key[1] * (1 - 0.92 * k); rim.intensity = T.rim[1] * (1 - 0.88 * k); kick.intensity = T.kick[1] * (1 - 0.94 * k);
+  scene.environmentIntensity = T.env * S.envMul * (1 - 0.90 * k);
+  renderer.toneMappingExposure = T.exposure * S.exposureMul * (1 - 0.18 * k);
+  const mix = (u, hex) => u.value.set(hex).lerp(NIGHT_SKY, k);
+  mix(backdropMat.uniforms.top, T.bg[0]); mix(backdropMat.uniforms.mid, T.bg[1]); mix(backdropMat.uniforms.edge, T.bg[2]); mix(backdropMat.uniforms.bottom, T.bg[3]);
+  groundMat.color.set(T.ground).lerp(NIGHT_GROUND, k);
+  for (const p of partsOf('led')) { const h = p.obj.userData.halo; if (h) { h.material.opacity = THEME[themeDark ? 'dark' : 'light'].halo + 0.55 * k; h.scale.setScalar(0.022 * (1 + 1.6 * k)); } }
+  S.csDirty = S.aoDirty = true;
+}
+const NIGHT_SKY = new THREE.Color(0x05070c), NIGHT_GROUND = new THREE.Color(0x0a0c10);
+
+// 空港: 滑走路の帯と、そこから斜めに立ち上がる面（模式図）。高さは実際の制限表面ではない
+const APT_LO = 0.12, APT_HI = 1.45;
+const aptHeight = (z) => APT_LO + (APT_HI - APT_LO) * clamp((3.2 - z) / 4.6, 0, 1);
+function airportSetup() {
+  if (!whatif.apt) {
+    const g = new THREE.Group(); g.userData.noShadow = true;
+    const strip = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 5.0), new THREE.MeshBasicMaterial({ color: 0x9aa3b0, transparent: true, opacity: 0.55, toneMapped: false, side: THREE.DoubleSide }));
+    strip.rotation.x = -Math.PI / 2; strip.position.set(0, -0.1551, 5.2);
+    const center = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 4.4), new THREE.MeshBasicMaterial({ color: 0xf2f4f8, transparent: true, opacity: 0.8, toneMapped: false, side: THREE.DoubleSide }));
+    center.rotation.x = -Math.PI / 2; center.position.set(0, -0.1549, 5.2);
+    // 面は4隅を直に置く（回転で作ると向きを間違える）。滑走路の側(奥 z=+3.2)で低く、手前へ来るほど高い
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute([-2.6, APT_LO, 3.2, 2.6, APT_LO, 3.2, 2.6, APT_HI, -1.4, -2.6, APT_HI, -1.4], 3));
+    geo.setIndex([0, 1, 2, 0, 2, 3]); geo.computeVertexNormals();
+    const surf = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0xef6a2d, transparent: true, opacity: 0.17, toneMapped: false, side: THREE.DoubleSide, depthWrite: false }));
+    const edge = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.012, 0.012), new THREE.MeshBasicMaterial({ color: 0xef6a2d, toneMapped: false }));
+    edge.position.set(0, APT_LO, 3.2);
+    for (const m of [strip, center, surf, edge]) { m.userData.noPart = m.userData.noPick = m.userData.noAO = m.userData.noShadow = true; g.add(m); }
+    scene.add(g); whatif.apt = g; whatif.aptSurf = surf;
+  }
+  whatif.apt.visible = true;
+}
+// 落ちる範囲: 高度に応じて広がる床の円（模式図）
+function dropSetup() {
+  if (!whatif.drop) {
+    const g = new THREE.Group(); g.userData.noShadow = true;
+    const ringGeo = new THREE.RingGeometry(0.97, 1.0, 96);
+    const ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: 0xe8a33d, transparent: true, opacity: 0.95, toneMapped: false, side: THREE.DoubleSide }));
+    const fill = new THREE.Mesh(new THREE.CircleGeometry(1.0, 96), new THREE.MeshBasicMaterial({ color: 0xe8a33d, transparent: true, opacity: 0.10, toneMapped: false, side: THREE.DoubleSide, depthWrite: false }));
+    for (const m of [fill, ring]) { m.rotation.x = -Math.PI / 2; m.position.y = -0.1548; m.userData.noPart = m.userData.noPick = m.userData.noAO = m.userData.noShadow = true; g.add(m); }
+    scene.add(g); whatif.drop = g; whatif.dropRing = ring; whatif.dropFill = fill;
+  }
+  whatif.drop.visible = true; whatif.drop.scale.set(0.35, 1, 0.35); whatif.dropFill.material.opacity = 0.10; whatif.dropRing.material.opacity = 0.95;
+}
+function dropColor(inside) {
+  if (whatif.phase >= 2) return;
+  const c = inside ? RED : new THREE.Color(0xe8a33d);
+  whatif.dropRing.material.color.copy(c); whatif.dropFill.material.color.copy(c);
+  whatif.dropFill.material.opacity = inside ? 0.18 : 0.10;
+}
 
 // ---------- 機体の反応（すべて小さく: 姿勢±8°・移動0.25m以内） ----------
 const RM = () => (reduceMotion ? 1 / 3 : 1);
@@ -3652,6 +3722,50 @@ const WHATIF_MOTION = {
     if (t > 3.6) { const b = 0.5 + 0.5 * Math.sin((t - 3.6) * 2 * Math.PI / 0.6); for (const p of partsOf('led')) { setTint(p, RED, 0.6 * b); const h = p.obj.userData.halo; if (h) { h.material.color.copy(RED); h.material.opacity = 0.06 + 0.4 * b; } } }
     return t > 5.4;
   },
+  // 夜に飛ばす → 暗くなり、灯火だけが残る。機首の向きを見せるためにゆっくり半回転する
+  night(t, dt) {
+    body.py = free.hoverY;
+    nightLevel(smoothstep(0.2, 2.2, t));
+    if (t > 1.6) body.yaw = dl(body.yaw, Math.PI, dt, 1.1);
+    if (t > 2.0) { const b = 0.5 + 0.5 * Math.sin((t - 2.0) * 2 * Math.PI / 1.1); for (const p of partsOf('led')) { setTint(p, RED, 0.55 * b); const h = p.obj.userData.halo; if (h) { h.material.color.copy(RED); h.material.opacity = 0.25 + 0.5 * b; } } }
+    return t > 5.6;
+  },
+  // 見えなくなる → 遠ざかって小さくなる。操縦者の位置にカメラを置いたまま見送る
+  bvlos(t, dt) {
+    body.py = free.hoverY + 0.55 * smoothstep(0.5, 4.2, t);
+    const k = smoothstep(0.5, 4.6, t), d = 9.5 * k;
+    body.px = -0.707 * d; body.pz = -0.707 * d;
+    body.yaw = dl(body.yaw, Math.PI * 0.75, dt, 1.2);
+    return t > 5.2;
+  },
+  // 空港が近い → 高度を上げると、斜めの制限表面に頭が入る
+  airport(t, dt) {
+    const k = smoothstep(0.6, 3.6, t);
+    body.py = free.hoverY + 1.30 * k;   /* 面（手前で1.45m）に頭が入るところまで上がる */
+    body.pz = 0.2 * k;
+    if (whatif.aptSurf) {   /* 面に届いたら色を強める */
+      const over = body.py > aptHeight(body.pz) - 0.12;
+      whatif.aptSurf.material.opacity = over ? 0.32 : 0.17;
+      whatif.aptSurf.material.color.set(over ? 0xef4444 : 0xef6a2d);
+      whatif.aptOver = over;
+    }
+    if (t > 3.4) { const b = 0.5 + 0.5 * Math.sin((t - 3.4) * 2 * Math.PI / 0.5); for (const p of partsOf('led')) { setTint(p, RED, 0.7 * b); const h = p.obj.userData.halo; if (h) { h.material.color.copy(RED); h.material.opacity = 0.06 + 0.5 * b; } } }
+    return t > 5.0;
+  },
+  // 落ちる範囲 → 高度を上げるほど床の円が広がり、立っている人を呑み込む
+  crowd(t, dt) {
+    const k = smoothstep(0.5, 4.0, t);
+    body.py = free.hoverY + 1.5 * k;
+    const g = D.personGroup;
+    if (g) { g.visible = true; g.position.set(-1.55, -0.158, -1.55); if (g.userData.face) g.userData.face(0, 0); if (g.userData.rest) g.userData.rest(dt); }
+    const r = 0.35 + 2.15 * k;   /* 高さに比例して広がる（模式。実際の落下距離ではない） */
+    if (whatif.drop) { whatif.drop.scale.set(r, 1, r); whatif.drop.position.set(body.px, 0, body.pz); }
+    const dist = Math.hypot(-1.55 - body.px, -1.55 - body.pz);
+    const inside = r >= dist;
+    if (whatif.drop) dropColor(inside);
+    if (inside) { const b = 0.5 + 0.5 * Math.sin(t * 2 * Math.PI / 0.5); for (const p of partsOf('led')) { setTint(p, RED, 0.7 * b); const h = p.obj.userData.halo; if (h) { h.material.color.copy(RED); h.material.opacity = 0.06 + 0.5 * b; } } }
+    return t > 5.0;
+  },
   // 人が近づいた → 機体は避けられない。灯火と音で知らせるだけ
   person(t, dt) {
     body.py = free.hoverY + 0.03 * smoothstep(1.0, 1.8, t);
@@ -3697,7 +3811,9 @@ function stepWhatif(dtSim, dtReal) {
   if (whatif.phase === 1) {
     const done = WHATIF_MOTION[def.motion](whatif.t, dtSim);
     if (done) { whatif.phase = 2; whatif.t = 0; whatif.litIdx = -1; whatif.seq = []; S.labelsSuppressed = false;
-      if (def.motion === 'tachiiri') { const vs2 = viewScale(); theaterCamera(new THREE.Vector3(1.05 * vs2, 0.55 * vs2, -1.05 * vs2), new THREE.Vector3(0, 0.03, 0), 900); }   /* 俯瞰のままだと部品が小さすぎるので寄る */ if (typeof onWhatifChanged === 'function') onWhatifChanged(); }
+      if (whatif.aptSurf) whatif.aptSurf.material.opacity = 0.10;   /* 部品を見る段では小道具を控えめに */
+      if (whatif.dropFill) { whatif.dropFill.material.opacity = 0.06; whatif.dropRing.material.opacity = 0.7; }
+      if (['tachiiri', 'bvlos', 'airport', 'crowd'].includes(def.motion)) { const vs2 = viewScale(); const c = new THREE.Vector3(body.px, body.py, body.pz); theaterCamera(new THREE.Vector3(1.05 * vs2, 0.55 * vs2, -1.05 * vs2).add(c), c.clone().setY(body.py + 0.03), 900); }   /* 引いたままだと部品が小さすぎるので、いまいる場所へ寄る */ if (typeof onWhatifChanged === 'function') onWhatifChanged(); }
   } else if (whatif.phase === 2) {
     const idx = Math.min(def.parts.length - 1, Math.floor(whatif.t / 1.2));
     if (idx !== whatif.litIdx) {
@@ -5613,18 +5729,23 @@ function setUse(id) {
 // ---------- もしも(シアター) ----------
 function buildMishapCards() { const list = S.depth === 'simple' ? MISHAPS.filter(m => ['propReverse', 'drop', 'motorOut'].includes(m.id)) : MISHAPS; $('#mishapCards').innerHTML = list.map(m => `<button data-m="${m.id}"><b>${m.short}</b>${m.name}${regOn() ? kyChip('4.6') : ''}</button>`).join(''); }
 $('#mishapCards').addEventListener('click', e => { const b = e.target.closest('button'); if (b) startTheaterUI(b.dataset.m); });
-function buildWhatifCards() { $('#whatifCards').innerHTML = WHATIF.map(w => `<button data-w="${w.id}"><b>${w.icon} ${w.name}</b>${w.short || w.intro.slice(0, 22)}${regOn() && WHATIF_REG[w.id] ? kyChip(WHATIF_REG[w.id].ky.split(' ')[0]) : ''}</button>`).join(''); }
-$('#whatifCards').addEventListener('click', e => { const b = e.target.closest('button'); if (b) startWhatifUI(b.dataset.w); });
+// 場面が10個になったので、機体で起きること（craft）と、場所・時間で決まること（site）に分けて並べる
+function buildWhatifCards() {
+  const card = (w) => `<button data-w="${w.id}"><b>${w.icon} ${w.name}</b>${w.short || w.intro.slice(0, 22)}${regOn() && WHATIF_REG[w.id] ? kyChip(WHATIF_REG[w.id].ky.split(' ')[0]) : ''}</button>`;
+  $('#whatifCards').innerHTML = WHATIF.filter(w => w.grp !== 'site').map(card).join('');
+  const site = $('#whatifSiteCards'); if (site) site.innerHTML = WHATIF.filter(w => w.grp === 'site').map(card).join('');
+}
+for (const sel of ['#whatifCards', '#whatifSiteCards']) { const el = $(sel); if (el) el.addEventListener('click', e => { const b = e.target.closest('button'); if (b) startWhatifUI(b.dataset.w); }); }
 function startWhatifUI(id) {
   stopOthers('whatif'); if (S.flight) setFlight(null); clearQuestion(); select(null); setSticks(false); if (S.explode > 0) setExplode(0); if (S.mode !== 'normal') setMode('normal'); if (S.scale) setScale(false); if (S.use) setUse(null);
   $('#coach').hidden = true; startWhatif(id); document.body.classList.add('theater'); $('#inspector').inert = true; $('#topbar').inert = true; $('#inspector').classList.remove('open');
   S.tab = 'theater'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'theater'; segSet($('#tabs'), 'tab', 'mishap');
-  for (const b of $$('#whatifCards button')) b.classList.toggle('on', b.dataset.w === id);
+  for (const b of $$('#whatifCards button, #whatifSiteCards button')) b.classList.toggle('on', b.dataset.w === id);
 }
 function stopWhatifUI() {
   stopWhatif(true); document.body.classList.remove('theater'); $('#inspector').inert = false; $('#topbar').inert = false; camHome();
   setPower(0, true); renderNote(null); S.tab = 'mishap'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'mishap';
-  for (const b of $$('#whatifCards button')) b.classList.remove('on'); syncBodyMode();
+  for (const b of $$('#whatifCards button, #whatifSiteCards button')) b.classList.remove('on'); syncBodyMode();
 }
 function onWhatifChanged() {
   if (!whatif.active) return;
@@ -5642,7 +5763,7 @@ function onWhatifChanged() {
   renderNote({ kind: 'whatif', title: `${d.icon} ${d.name}`, badge: WHATIF_STAGES[si], html, actions });
 }
 function startTheaterUI(id) {
-  stopOthers('theater'); if (whatif.active) { stopWhatif(true); for (const b of $$('#whatifCards button')) b.classList.remove('on'); }
+  stopOthers('theater'); if (whatif.active) { stopWhatif(true); for (const b of $$('#whatifCards button, #whatifSiteCards button')) b.classList.remove('on'); }
   if (S.flight) setFlight(null); clearQuestion(); select(null); setSticks(false); if (S.explode > 0) setExplode(0); if (S.mode === 'cut') setMode('normal');
   $('#coach').hidden = true; startTheater(id); document.body.classList.add('theater'); $('#inspector').inert = true; $('#topbar').inert = true; $('#inspector').classList.remove('open'); S.tab = 'theater'; for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== 'theater'; segSet($('#tabs'), 'tab', 'mishap');
   for (const b of $$('#mishapCards button')) b.classList.toggle('on', b.dataset.m === id);
