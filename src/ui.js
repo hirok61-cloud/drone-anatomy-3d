@@ -41,6 +41,7 @@ function stopOthers(keep, arg) {
   if (keep !== 'use' && S.use) setUse(null);
   if (keep !== 'scale' && S.scale) setScale(false);
   if (keep !== 'expert' && S.expert && typeof expertStop === 'function') expertStop();
+  if (keep !== 'descent' && descent.active) stopDescent(true);
 }
 function setTab(tab) {
   $('#coach').hidden = true;
@@ -49,7 +50,7 @@ function setTab(tab) {
   S.tab = tab; segSet($('#tabs'), 'tab', tab);
   for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== tab;
   if (tab === 'fly') { if (S.explode > 0.02) { setExplode(0); showToast('分解をもどしました'); } if (S.mode === 'cut') setMode('normal'); }
-  if (tab !== 'fly') { setSticks(false); if (S.power > 0 && !theater.active) setPower(0, true); if (S.flight) setFlight(null); }
+  if (tab !== 'fly') { setSticks(false); if (descent.active) stopDescent(true); if (S.power > 0 && !theater.active) setPower(0, true); if (S.flight) setFlight(null); }
   if (tab !== 'use' && S.use) setUse(null);
   if (tab !== 'use' && S.scale) setScale(false);
   if (tab !== 'expert' && S.expert) expertStop(true);
@@ -80,7 +81,7 @@ function setPower(p, silent) { S.power = p; segSet($('#powerSeg'), 'p', p); cons
 $('#powerBtn').addEventListener('click', () => setPower(S.power > 0 ? 0 : (S.depth === 'full' ? (parseFloat($('#powerSeg .on')?.dataset.p) || 0.5) : 0.5)));
 $('#powerSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setPower(parseFloat(b.dataset.p)); });
 function syncBodyMode() {
-  if (theater.active) return setBodyMode('theater');
+  if (theater.active || descent.active) return setBodyMode('theater');
   if (S.flight) return setBodyMode('demo');
   if (S.power > 0 && (S.tab === 'fly' || S.scale || alive.on || (S.lesson && lesson.hover) || S.expert === 'sensors')) return setBodyMode('free');
   setBodyMode('idle');

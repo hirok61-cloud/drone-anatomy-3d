@@ -24,7 +24,7 @@ function tick(now) {
   if (S.scale) stepScale();
   if (S.explodeFrame && Math.abs(S.explode - S.explodeT) < 0.01 && performance.now() - (S.explodeAt || 0) > 350) { S.explodeFrame = false; D.root.updateWorldMatrix(true, true); focusOn(D.parts.filter(p => partVisible(p) && effVisible(p.obj)).map(p => p.obj), { pull: true }); }   // 分解が落ち着いたら全体をフレーミング
   // 機体
-  stepAlive(dt); stepBody(dtSim, dt); if (theater.active) stepTheater(dtSim, dt); if (whatif.active) stepWhatif(dtSim, dt); applyBody(dt);
+  stepAlive(dt); stepBody(dtSim, dt); if (theater.active) stepTheater(dtSim, dt); if (whatif.active) stepWhatif(dtSim, dt); if (descent.active) stepDescent(dtSim); applyBody(dt);
   updateMotors(dtSim, dt); updateMoveArrow(); updateAirflow(dtSim, dt);
   if (S.expert) stepExpert(dtSim, dt);
   if (S.mode === 'cut') updateCutPlanes();
@@ -62,7 +62,7 @@ window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: sca
   $('#loadMsg').textContent = '照明と材質を準備しています…';
   buildList(); applyTheme(); resize();
   applyQuality(isMobile ? (HF ? 1 : 0) : 3);
-  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif(); initLive(); initLesson(); initExpert(); initReg(); initPreflight(); initShare();
+  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif(); initLive(); initLesson(); initExpert(); initReg(); initPreflight(); initDescent(); initShare();
   { const vs = viewScale(); if (vs > 1) camera.position.multiplyScalar(vs); }
   renderer.setClearColor(0x000000, 1);
   $('#loadMsg').textContent = 'シェーダーをコンパイルしています…'; mark('setup');
