@@ -17,8 +17,8 @@
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   color-scheme: light;
 }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0e1116; --bg2: #171b22; --ink: #e8ebf0; --ink2: #aab2c0; --ink3: #78808f; --glass: rgba(26,29,36,0.66); --glass-strong: rgba(30,33,41,0.92); --glass-border: rgba(255,255,255,0.09); --glass-shadow: 0 12px 40px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.4); --accent: #ff7a3d; --accent-text: #ff9a66; --accent-soft: rgba(255,122,61,0.18); --hair: rgba(255,255,255,0.08); --hair2: rgba(255,255,255,0.14); --row-hover: rgba(255,255,255,0.06); --seg-bg: rgba(255,255,255,0.07); color-scheme: dark; } }
-:root[data-theme="dark"] { --bg: #0e1116; --bg2: #171b22; --ink: #e8ebf0; --ink2: #aab2c0; --ink3: #78808f; --glass: rgba(26,29,36,0.66); --glass-strong: rgba(30,33,41,0.92); --glass-border: rgba(255,255,255,0.09); --glass-shadow: 0 12px 40px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.4); --accent: #ff7a3d; --accent-text: #ff9a66; --accent-soft: rgba(255,122,61,0.18); --hair: rgba(255,255,255,0.08); --hair2: rgba(255,255,255,0.14); --row-hover: rgba(255,255,255,0.06); --seg-bg: rgba(255,255,255,0.07); color-scheme: dark; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0e1116; --bg2: #171b22; --ink: #e8ebf0; --ink2: #aab2c0; --ink3: #78808f; --glass: rgba(26,29,36,0.66); --glass-strong: rgba(30,33,41,0.92); --glass-border: rgba(255,255,255,0.09); --glass-shadow: 0 12px 40px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.4); --accent: #ff7a3d; --accent-text: #ff9a66; --accent-soft: rgba(255,122,61,0.18); --warn: #e39b4f; --ok: #4ade80; --red: #ff6b63; --hair: rgba(255,255,255,0.08); --hair2: rgba(255,255,255,0.14); --row-hover: rgba(255,255,255,0.06); --seg-bg: rgba(255,255,255,0.07); color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #0e1116; --bg2: #171b22; --ink: #e8ebf0; --ink2: #aab2c0; --ink3: #78808f; --glass: rgba(26,29,36,0.66); --glass-strong: rgba(30,33,41,0.92); --glass-border: rgba(255,255,255,0.09); --glass-shadow: 0 12px 40px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.4); --accent: #ff7a3d; --accent-text: #ff9a66; --accent-soft: rgba(255,122,61,0.18); --warn: #e39b4f; --ok: #4ade80; --red: #ff6b63; --hair: rgba(255,255,255,0.08); --hair2: rgba(255,255,255,0.14); --row-hover: rgba(255,255,255,0.06); --seg-bg: rgba(255,255,255,0.07); color-scheme: dark; }
 @media (pointer: coarse) { :root { --tap: 44px; } }
 
 * { box-sizing: border-box; }
@@ -94,7 +94,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 #viewCol .tgl i { display: none; }
 
 /* ---- note card ---- */
-#noteCard { position: fixed; left: 14px; bottom: calc(var(--dock-h) + 30px); z-index: 9; width: min(420px, calc(100vw - var(--insp-w) - 60px)); padding: 12px 14px 12px 16px; max-height: 46vh; overflow-y: auto; }
+#noteCard { position: fixed; left: calc(14px + var(--sal)); bottom: calc(var(--dock-h) + 30px); z-index: 9; width: min(420px, calc(100vw - var(--insp-w) - 60px - var(--sal) - var(--sar))); padding: 12px 14px 12px 16px; max-height: min(46vh, calc(100vh - var(--dock-h) - 122px - var(--sat))); overflow-y: auto; }   /* 操作列が2段になっても、タイトルバーの裏に回らない高さに抑える */
 .note-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
 .note-head h3 { font-size: calc(15px * var(--fs, 1)); font-weight: 700; letter-spacing: -0.005em; flex: 1; }
 .badge { font: 600 11px/1.4 var(--mono); padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
@@ -179,11 +179,11 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 .ctx { padding: 10px 14px 8px 16px; }
 .ctx-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 16px; }
 .dock-group { display: flex; flex-direction: column; gap: 4px; } .dock-group.grow { flex: 1 1 180px; min-width: 160px; }
-.dock-group > label { font-size: 11px; font-weight: 700; letter-spacing: .02em; color: var(--ink3); }
+.dock-group > label, .dock-group > .dg-label { font-size: 11px; font-weight: 700; letter-spacing: .02em; color: var(--ink3); }
 .dock-group > label .mono { color: var(--ink2); margin-left: 4px; font-weight: 600; }
 .chips { display: flex; gap: 5px; flex-wrap: wrap; }
 .chips button { padding: 5px 11px; border-radius: 999px; font-size: 12.5px; font-weight: 500; background: var(--seg-bg); color: var(--ink2); min-height: var(--tap); transition: background .15s, color .15s, transform .1s; white-space: nowrap; }
-.chips button:hover { background: var(--hair2); color: var(--ink); } .chips button:active { transform: scale(.96); } .chips button.on { background: var(--accent); color: #fff; }
+.chips button:hover { background: var(--hair2); color: var(--ink); } .chips button:active { transform: scale(.96); } .chips button.on { background: var(--accent-soft); color: var(--accent-text); box-shadow: inset 0 0 0 1.5px var(--accent); }   /* 白on橙は3.1:1しかない */
 .tgl { display: inline-flex; align-items: center; gap: 7px; }
 .tgl i { width: 8px; height: 8px; border-radius: 50%; background: var(--hair2); transition: background .15s, box-shadow .15s; }
 .tgl.on { background: var(--accent-soft) !important; color: var(--accent-text) !important; } .tgl.on i { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); position: relative; } .tgl.on i::after { content: ''; position: absolute; left: 2px; top: 1.5px; width: 3px; height: 1.5px; border: solid #fff; border-width: 0 0 1.5px 1.5px; transform: rotate(-45deg) scale(1.1); }
@@ -256,7 +256,7 @@ button, .tabs, .seg, .chips { touch-action: manipulation; -webkit-user-select: n
   .ctx-row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; align-items: flex-end; gap: 12px; padding-right: 24px; mask-image: linear-gradient(to right, #000 88%, transparent); -webkit-mask-image: linear-gradient(to right, #000 88%, transparent); } .ctx-row::-webkit-scrollbar { display: none; }
   .dock-group { flex: none; } .dock-group.grow { flex: none; width: 150px; } .chips { flex-wrap: nowrap; }
   .tabs button span { font-size: 11px; } .tabs button { flex-direction: column; gap: 2px; padding: 6px 4px; }
-  #noteCard { left: 10px; bottom: calc(var(--dock-h) + 8px); width: calc(100vw - 20px); max-height: 34vh; font-size: 13px; }
+  #noteCard { left: calc(10px + var(--sal)); bottom: calc(var(--dock-h) + 8px); width: calc(100vw - 20px - var(--sal) - var(--sar)); max-height: min(34vh, calc(100vh - var(--dock-h) - 96px - var(--sat) - var(--sab))); font-size: 13px; }
   #coach { width: calc(100vw - 40px); top: 130px; }
   #sticks { bottom: calc(var(--dock-h) + 10px); gap: 10px; } .stick { width: 112px; height: 112px; }
   .cards button { width: 140px; }
@@ -400,15 +400,16 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
 .fpv-cross::after { top: 50%; left: 0; height: 1.5px; width: 100%; margin-top: -0.75px; }
 .fpv-head { position: absolute; top: var(--fpv-t); left: calc(18px + var(--sal)); right: calc(18px + var(--sar)); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .fpv-foot { position: absolute; bottom: var(--fpv-b); left: calc(16px + var(--sal)); right: calc(16px + var(--sar)); display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
-.fpv-tl, .fpv-tr { display: grid; gap: 0 8px; font-size: 12px; line-height: 1.35; font-variant-numeric: tabular-nums; padding: 7px 11px; border-radius: 12px; background: rgba(8,12,18,.60); backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px); }
+.fpv-tl, .fpv-tr { display: grid; gap: 0 8px; font-size: calc(12px * var(--fs, 1)); line-height: 1.35; font-variant-numeric: tabular-nums; padding: 7px 11px; border-radius: 12px; background: rgba(8,12,18,.72); backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px); }
 .fpv-tl { grid-template-columns: auto auto; justify-items: start; }
 .fpv-tr { text-align: right; justify-items: end; }
-.fpv-tl b, .fpv-tr b { font-size: 15px; font-weight: 700; }
-.fpv-tl span, .fpv-tr span { color: rgba(234,242,255,.66); font-size: 10.5px; align-self: center; }
+.fpv-tl b, .fpv-tr b { font-size: calc(15px * var(--fs, 1)); font-weight: 700; }
+.fpv-tl span, .fpv-tr span { color: rgba(234,242,255,.92); font-size: calc(10.5px * var(--fs, 1)); align-self: center; }   /* 明るいテーマでは .66 だと 3.2:1 しかない */
 .fpv-tag { grid-column: 1 / -1; justify-self: start; margin-bottom: 5px; font-size: 11px; letter-spacing: .14em; padding: 3px 9px; border: 1px solid rgba(234,242,255,.45); border-radius: 3px; }
 .fpv-tr .fpv-tag { justify-self: end; }
 .fpv-sub { display: block; }
-.fpv-mini { pointer-events: auto; display: block; padding: 2px 6px; margin: 1px -6px 0 0; border-radius: 6px; font-family: var(--mono); font-size: 11px; color: rgba(234,242,255,.8); background: none; border: 0; text-shadow: inherit; }
+.fpv-mini b { font-weight: 700; }
+.fpv-mini { pointer-events: auto; display: block; padding: 2px 6px; margin: 1px -6px 0 0; border-radius: 6px; font-family: var(--mono); font-size: calc(11px * var(--fs, 1)); color: rgba(234,242,255,.95); background: none; border: 0; text-shadow: inherit; }
 .fpv-mini:hover { background: rgba(12,16,24,.6); color: #eaf2ff; }
 .fpv-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .fpv-btn { pointer-events: auto; min-height: var(--tap); padding: 6px 12px; border-radius: 999px; font-family: var(--mono); font-size: 12px; color: #eaf2ff; background: rgba(12,16,24,.68); border: 1px solid rgba(234,242,255,.35); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
@@ -417,7 +418,12 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
 .fpv-btn.off { border-color: rgba(239,68,68,.8); color: #ffb4b4; }
 .fpv-btn.on { background: rgba(239,106,45,.86); border-color: rgba(239,106,45,.9); color: #fff; }
 #fpvOut { margin-left: auto; }
-.fpv-note { margin: 0; font-family: var(--font); font-size: 11.5px; line-height: 1.5; color: rgba(234,242,255,.9); background: rgba(12,16,24,.66); border-left: 2px solid rgba(239,106,45,.9); padding: 5px 10px; border-radius: 0 6px 6px 0; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.fpv-note { margin: 0; font-family: var(--font); font-size: calc(11.5px * var(--fs, 1)); line-height: 1.5; color: rgba(234,242,255,.9); background: rgba(12,16,24,.66); border-left: 2px solid rgba(239,106,45,.9); padding: 5px 10px; border-radius: 0 6px 6px 0; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+#noteCard[data-kind=descent] { display: flex; flex-direction: column; max-height: min(56vh, calc(100vh - var(--dock-h) - 122px - var(--sat))); overflow: hidden; }   /* 「横へ逃がす」が折り返しの外に出ると、渦から逃がせない */
+#noteCard[data-kind=descent] #noteBody { flex: 1; min-height: 0; overflow-y: auto; }
+#noteCard[data-kind=descent] #descVals { position: sticky; top: 0; z-index: 1; }
+#noteCard[data-kind=descent] .note-actions { flex: none; margin: 8px -14px -12px -16px; padding: 8px 14px 12px 16px; border-top: 1px solid var(--hair); background: var(--glass-strong); }
+@media (max-width: 760px) { #noteCard[data-kind=descent] { max-height: min(44vh, calc(100vh - var(--dock-h) - 96px - var(--sat) - var(--sab))); } }
 body.fpv #viewCol { display: none; }   /* 映像に重ねない。戻り道は「外から見る」と Esc */
 body.fpv #noteCard, body.fpv #bigBand { display: none; }
 body.fpv #ctx { display: none; }   /* 操作はHUDに移す。ドックを畳むと映像が広がり、--dock-h も自動で縮む */
@@ -425,26 +431,29 @@ body.fpv #inspector, body.fpv #lesson, body.fpv #expert, body.fpv #massBar, body
 /* スティックは送信機と同じく左右のすみへ。広い画面はその間に、狭い画面はその上に注記を置く */
 body.fpv #sticks { left: calc(16px + var(--sal)); right: calc(16px + var(--sar)); bottom: calc(var(--dock-h) + 24px + var(--sab)); transform: none; width: auto; justify-content: space-between; gap: 0; }
 body.fpv #sticks .stick-mid { display: none; }
-body.fpv .stick { background: rgba(12,16,24,.42); border-color: rgba(234,242,255,.34); box-shadow: 0 6px 22px rgba(0,0,0,.35); }
-body.fpv .stick .knob { background: rgba(234,242,255,.24); border-color: rgba(234,242,255,.5); }
-body.fpv .stick .lbl { color: rgba(234,242,255,.72); text-shadow: 0 1px 3px rgba(0,0,0,.75); font-size: 10px; }
+body.fpv .stick { background: rgba(8,12,18,.58); border-color: rgba(234,242,255,.42); box-shadow: 0 6px 22px rgba(0,0,0,.35); }
+body.fpv .stick .knob { background: rgba(234,242,255,.55); border-color: rgba(234,242,255,.85); }
+body.fpv .stick .lbl { color: #eaf2ff; background: rgba(8,12,18,.6); padding: 1px 5px; border-radius: 5px; text-shadow: 0 1px 3px rgba(0,0,0,.75); font-size: 10px; }
 body.fpv .stick .lbl.l { left: 4px; } body.fpv .stick .lbl.r { right: 4px; }   /* つまみに文字が重ならないよう内側に詰める */
 body.fpv.sticks-on .fpv-foot { left: calc(150px + var(--sal)); right: calc(150px + var(--sar)); }
 body.fpv.sticks-on .fpv-frame { display: none; }
 @media (max-width: 760px) {
-  .fpv-tl, .fpv-tr { font-size: 11px; }
+  .fpv-tl, .fpv-tr { font-size: calc(11px * var(--fs, 1)); }
   .fpv-btn { font-size: 11px; padding: 6px 10px; }   /* 3つを1行に収める */
-  .fpv-tl b, .fpv-tr b { font-size: 13px; }
-  .fpv-note { font-size: 10.5px; }
+  .fpv-tl b, .fpv-tr b { font-size: calc(13px * var(--fs, 1)); }
+  .fpv-note { font-size: calc(10.5px * var(--fs, 1)); }
+  .fpv-note span[data-full], .fpv-tl span span[data-full], #fpvFov { display: none !important; }   /* 狭い画面では映像を優先。くわしい注記と画角は広い画面で読む */
   .fpv-frame i { width: 18px; height: 18px; }
-  body.fpv.sticks-on .fpv-foot { left: calc(16px + var(--sal)); right: calc(16px + var(--sar)); bottom: calc(var(--dock-h) + 152px + var(--sab)); }
+}
+@media (max-width: 760px) and (min-height: 521px) {
+  body.fpv.sticks-on .fpv-foot { left: calc(16px + var(--sal)); right: calc(16px + var(--sar)); bottom: calc(var(--dock-h) + 152px + var(--sab)); }   /* 縦画面だけスティックの上に。低い横画面は左右に振ったまま */
 }
 @media (prefers-reduced-transparency: reduce) { .fpv-btn, .fpv-note, .fpv-tl, .fpv-tr { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(12,16,24,.9); } }
 
 /* ---------- 第3ラウンド UI/UX 反映 ---------- */
 .pill-btn.on, .pill-btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-text); box-shadow: inset 0 0 0 1.5px var(--accent); }
 .mobile-only { display: none; }
-body.big #sticks { bottom: calc(var(--dock-h) + 104px); }
+body.big:not(.fpv) #sticks { bottom: calc(var(--dock-h) + 104px); }   /* 一人称では #bigBand を出さないので上げない */
 #massBar { overflow: hidden; } .mb-main { flex: 1; min-height: 0; overflow: auto; }
 body.scale #noteCard { left: calc(14px + 212px + 12px); width: min(420px, calc(100vw - var(--insp-w) - 60px - 224px)); }
 .step.on .st-head::before { content: 'いま'; font: 700 10px/1 var(--font); color: #fff; background: var(--accent); padding: 3px 6px; border-radius: 6px; }
@@ -457,11 +466,12 @@ body.scale #noteCard { left: calc(14px + 212px + 12px); width: min(420px, calc(1
   #lessonBtn { display: none; } .mobile-only { display: flex; }
   #toast { top: 128px; }
   body.big #massBar { bottom: calc(var(--dock-h) + 72px); max-height: calc(42vh - 64px); }
-  body.big #sticks { bottom: calc(var(--dock-h) + 72px); }
+  body.big:not(.fpv) #sticks { bottom: calc(var(--dock-h) + 72px); }
   body.scale #noteCard { left: 10px; width: calc(100vw - 20px); }
   .popover .pop-row { padding: 4px 0; }
 }
 @media (pointer: coarse) {
+  .fpv-mini { min-height: var(--tap); display: inline-flex; align-items: center; padding: 4px 8px; }
   .ky-part, .ky-copy { min-height: var(--tap); display: inline-flex; align-items: center; }
   .seg.tiny button { min-height: 36px; padding: 6px 10px; }
   .icon-btn.sm { min-width: 44px; min-height: 44px; }
@@ -589,7 +599,8 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
 #printSheet .ps-ky, #printSheet .ps-rep, #printSheet .ps-review { break-inside: avoid; page-break-inside: avoid; } #printSheet .ps-rep { break-before: page; page-break-before: always; }
 #printSheet .ps-ky ul, #printSheet .ps-repl { margin: 4pt 0; padding-left: 1.2em; } #printSheet .ps-small { font-size: 8.4pt; line-height: 1.4; color: #333; } #printSheet .ps-repl li { display: flex; gap: 8pt; align-items: flex-end; margin: 6pt 0; } #printSheet .ps-repl li span:first-child { flex: none; width: 12em; } #printSheet .ps-repl .fill-line { flex: 1; border-bottom: 1px solid #000; height: 1.2em; }
 
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation-duration: .01s !important; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; }
+  .spinner { animation: spin 1.8s linear infinite !important; }   /* 読み込み中だけは回す(止まると固まったように見える) */ }
 
 </style>
 
@@ -617,7 +628,7 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
         <button class="tgl" data-t="sticks" aria-pressed="false"><i></i>スティック</button>
         <button class="tgl" data-t="tilt" id="tiltBtn" hidden aria-pressed="false"><i></i>かたむき</button>
       </div>
-      <div class="dock-group"><label>降ろし方</label><div class="chips" id="descChips"><button data-dz="straight">まっすぐ降ろす</button><button data-dz="slide">横に流しながら</button></div></div>
+      <div class="dock-group"><span class="dg-label">降ろし方</span><div class="chips" id="descChips" role="group" aria-label="降ろし方"><button data-dz="straight" aria-pressed="false">まっすぐ降ろす</button><button data-dz="slide" aria-pressed="false">横に流しながら</button></div></div>
       <div class="dock-group"><label>飛行の原理</label><div class="chips" id="flightChips"><button data-f="hover">ホバリング</button><button data-f="climb" data-full>上昇</button><button data-f="pitch">前進</button><button data-f="roll" data-full>右へ移動</button><button data-f="yaw">右旋回</button></div></div>
     </div>
     <div class="ctx-row" data-tab="use" hidden>
@@ -768,7 +779,7 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
   <div class="stick" id="stickR"><div class="knob"></div><span class="lbl t"></span><span class="lbl b"></span><span class="lbl l"></span><span class="lbl r"></span></div>
 </div>
 
-<div id="fpv" hidden aria-label="機体のカメラの映像"></div>
+<div id="fpv" hidden role="group" aria-label="機体のカメラの映像"></div>
 <div id="printSheet" aria-hidden="true"></div>
 <button id="previewClose" class="preview-close" hidden>✕ 画面にもどる</button>
 
@@ -5364,8 +5375,8 @@ function initPreflight() {
 
 // ===== 降ろし方（地面効果とボルテックス・リング・ステート） =====
 // 教則 5.2 の2つの現象を、降下のしかたで結果が変わる形で見せる。
-//   地面効果: 対地高度がローター直径の数倍以内になると、吹きおろしが地面付近で滞留して揚力が増す
-//   ボルテックス・リング・ステート: 垂直に降りると自分の後流を吸い込み、回転翼の上下で空気が再循環して急に揚力を失う
+//   地面効果: 対地高度がローター直径の1〜2倍以内になると、吹きおろしが地面付近で滞留して揚力が増す（同時に機体は不安定になる）
+//   ボルテックス・リング・ステート: 垂直降下や降下を伴う低速前進で自分の吹きおろしを吸い込み、回転翼の上下で空気が再循環して急に揚力を失う
 // 数値は見やすさのために小さくしてあるが、「まっすぐ降ろすと落ちる／横に流すと落ちない」という関係は変えていない。
 const descent = {
   active: false, mode: null, t: 0, phase: 'idle', vy: 0, vx: 0, escaped: false, landed: 0,
@@ -5413,14 +5424,15 @@ function startDescent(mode) {
   descent.active = true; descent.mode = mode; descent.t = 0; descent.phase = 'hold'; descent.lastPhase = '';
   descent.vy = 0; descent.vx = mode === 'slide' ? 0.85 : 0; descent.escaped = false; descent.landed = 0;
   S.descent = descent;
-  setBodyMode('theater'); S.power = 0.5;
+  setBodyMode('theater'); setPower(0.5, true); setBodyMode('theater');   /* setPower→syncBodyMode が idle に戻すので、もう一度 theater に置く */
   body.px = mode === 'slide' ? -0.85 : 0; body.pz = 0; body.py = descTop();
   body.tx = body.tz = body.wx = body.wz = 0; body.yaw = 0; body.mult = [1, 1, 1, 1];
   D.motors.forEach(mo => { mo.rpmTarget = null; mo.rpmRate = 3.5; });
+  setSticks(false); if (S.selected) select(null);
   descent.saved.air = S.air; S.air = true; for (const x of $$('.tgl[data-t=air]')) x.classList.add('on');   /* 吹きおろしが見えないと、この2つは分からない */
   descent.band.visible = true; descent.line.visible = true;
   descent.savedTs = S.tsTarget; setTimeScale(0.5);   /* 実時間だと1秒で終わってしまう。降下率の数値は変わらない */
-  for (const b of $$('#descChips button')) b.classList.toggle('on', b.dataset.dz === mode);
+  for (const b of $$('#descChips button')) { b.classList.toggle('on', b.dataset.dz === mode); b.setAttribute('aria-pressed', String(b.dataset.dz === mode)); }
   const dist = (descTop() / 2 + 0.55) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * (narrow() ? 1.55 : 1.05);   /* 説明カードが覆うぶんだけ広く取る */
   const dir = new THREE.Vector3(1, 0.56, -1).normalize();
   const aim = new THREE.Vector3(0, descentAim(), 0);
@@ -5431,17 +5443,18 @@ function startDescent(mode) {
 function stopDescent(silent) {
   if (!descent.active) { if (!silent) renderDescent(); return; }
   descent.active = false; descent.mode = null; descent.phase = 'idle'; S.descent = null;
-  if (descent.rings) for (const r of descent.rings) r.material.opacity = 0;
+  if (descent.rings) for (const r of descent.rings) { r.material.opacity = 0; r.visible = false; }
   if (descent.band) descent.band.visible = false;
   if (descent.line) descent.line.visible = false;
   S.air = descent.saved.air; for (const x of $$('.tgl[data-t=air]')) x.classList.toggle('on', S.air);
   D.motors.forEach(mo => { mo.rpmTarget = null; mo.rpmRate = null; });
   body.tx = body.tz = 0; body.px = body.pz = 0; body.py = 0; body.vx = body.vz = 0;
-  for (const b of $$('#descChips button')) b.classList.remove('on');
+  for (const b of $$('#descChips button')) { b.classList.remove('on'); b.setAttribute('aria-pressed', 'false'); }
   setTimeScale(descent.savedTs != null ? descent.savedTs : 1);
-  S.power = 0; setBodyMode('idle'); syncBodyMode();
+  setPower(0, true); setBodyMode('idle'); syncBodyMode();
   S.shadowDirty = S.csDirty = S.aoDirty = true;
-  if (!silent) { if ($('#noteCard').dataset.kind === 'descent') renderNote(null); camHome(); }
+  if ($('#noteCard').dataset.kind === 'descent') renderNote(null);   /* タブを移っても死んだカードを残さない */
+  if (!silent) camHome();
 }
 function descentEscape() {
   if (!descent.active || descent.phase !== 'vrs') return;
@@ -5458,7 +5471,7 @@ function stepDescent(dtSim) {
   if (ph === 'hold') { if (descent.t > 0.9) { descent.phase = 'fall'; descent.t = 0; } }
   else if (ph === 'fall') {
     descent.vy = dl(descent.vy, -1.05, dtSim, 1.6);
-    if (descent.mode === 'straight' && !descent.escaped && -descent.vy > DESC_VRS_V && Math.abs(descent.vx) < DESC_SIDE && h > DESC_VRS_H) { descent.phase = 'vrs'; descent.t = 0; }
+    if (!descent.escaped && -descent.vy > DESC_VRS_V && Math.abs(descent.vx) < DESC_SIDE && h > DESC_VRS_H) { descent.phase = 'vrs'; descent.t = 0; }   /* 横に流しているかどうかは速さで決める(モードで免除しない) */
   } else if (ph === 'vrs') {
     if (descent.t < 0.05) setTimeScale(0.32);   /* 抜ける操作をする間をつくる */
     // 揚力を失って一気に沈む。姿勢も落ち着かない
@@ -5476,13 +5489,14 @@ function stepDescent(dtSim) {
   // 地面効果: 同じ回転数のままでも沈みが止まる
   if (inGE && ph !== 'vrs') {
     const k = 1 - h / DESC_GE;
-    descent.vy = dl(descent.vy, -0.22 * (1 - 0.7 * k), dtSim, 3.5);
+    const rate = 3.5 * clamp(1.25 - Math.abs(descent.vy) * 0.32, 0.22, 1);   /* 速く落ちているほど地面効果では止まらない。逃がすのが遅いと間に合わない */
+    descent.vy = dl(descent.vy, -0.22 * (1 - 0.7 * k), dtSim, rate);
     body.tx = dl(body.tx, 0, dtSim, 3); body.tz = dl(body.tz, 0, dtSim, 3);
   }
 
   body.py = Math.max(0, body.py + descent.vy * dtSim);
   body.px += descent.vx * dtSim;
-  if (body.px > 0.85) descent.vx = 0;   /* 画の中に収める */
+  if (Math.abs(body.px) > 0.85 && Math.sign(descent.vx) === Math.sign(body.px)) descent.vx = -descent.vx;   /* 画の中に収める。止めると水平移動が消えて説明と食い違う */
   body.vy = descent.vy; body.vx = descent.vx;
 
   if (body.py <= 0.0005 && descent.phase !== 'done') {
@@ -5512,13 +5526,13 @@ function stepDescent(dtSim) {
   if (!S.camSpring && !S.camInertia) { const k = 1 - Math.exp(-dtSim / 0.45); controls.target.y += (descentAim() - controls.target.y) * k; controls.target.x += (body.px * 0.65 - controls.target.x) * k; }
   if (descent.phase !== descent.lastPhase) { descent.lastPhase = descent.phase; renderDescent(); }
   updateDescentVals();
-  S.shadowDirty = S.csDirty = S.aoDirty = true;
+  if (descent.phase !== 'done') S.shadowDirty = S.csDirty = S.aoDirty = true;   /* 降り切ったら影とAOの焼き直しを止める */
 }
 function updateDescentVals() {
   const el = $('#descVals'); if (!el) return;
   const h = body.py, vy = -descent.vy, vx = Math.abs(descent.vx);
-  const state = descent.phase === 'vrs' ? '<b>渦に入った</b>' : h < DESC_GE && descent.phase !== 'hold' ? '<em>地面効果の中</em>' : '通常';
-  el.innerHTML = `<i class="dot" aria-hidden="true"></i><span>対地高度 ${h.toFixed(2)} m</span><span>降下率 ${vy.toFixed(2)} m/s</span><span>横の速さ ${vx.toFixed(2)} m/s</span><span>${state}</span>`;
+  const state = descent.phase === 'vrs' ? '<b>渦に入った（VRS）</b>' : (h < DESC_GE && descent.phase !== 'hold' && descent.phase !== 'done') ? '<em>地面効果の中</em>' : descent.phase === 'done' ? '接地' : '通常';
+  el.innerHTML = `<i class="dot" aria-hidden="true"></i><span>対地高度 ${h.toFixed(2)} m</span><span>降下率 ${vy.toFixed(2)} m/s</span><span>水平方向の速さ ${vx.toFixed(2)} m/s</span><span>${state}</span>`;
 }
 
 // ---------- 説明カード ----------
@@ -5529,24 +5543,30 @@ function renderDescent() {
   let body_ = '', actions = [{ label: 'やめる', fn: () => stopDescent() }];
   if (P === 'hold' || P === 'fall') {
     body_ = straight
-      ? '<p>まっすぐ下へ降ろします。降下率が上がると、自分が吹きおろした空気を上から吸い込み始めます。</p>'
-      : '<p>横へ流しながら降ろします。機体が新しい空気の中へ移り続けるので、自分の後流を吸い込みません。</p>';
+      ? '<p>まっすぐ下へ降ろします。降下率が上がると、自分が吹きおろした空気を上から吸い込み始めます。垂直に近いほど、また水平方向の速さが小さいほど起きやすくなります。</p>'
+      : '<p>横へ流しながら降ろします。機体が新しい空気の中へ移り続けるぶん、自分の吹きおろしを吸い込みにくくなります。教則は、降下の際に水平方向の移動を合わせて操作することを挙げています。ただし水平方向の速さが足りないと、降下を伴う低速前進でも渦に入るとされています。</p>';
   } else if (P === 'vrs') {
-    body_ = '<p><b>ボルテックス・リング・ステート。</b>回転翼の上下で空気が輪になって再循環し、回しているのに揚力が出ません。スロットルを上げても、吸い込む空気が増えるだけで悪化します。</p><p>抜けるには、横へ移して新しい空気の中に出します。</p>';
+    body_ = '<p><b>ボルテックス・リング・ステート。</b>吹きおろした空気が再び吸い込まれ、回転翼の上下で再循環が起きて急に揚力を失います。スロットルを上げると吹きおろしが強まり、かえって沈みが速くなります。</p><p>抜け方は、横へ流すか前進して、吹きおろしの外の新しい空気に出すこと。<span data-full>教則は「急激に高度が低下し回復できない危険性がある」としています。まず入らないこと（降下に水平方向の移動を合わせること）が第一です。</span></p>';
     actions = [{ label: '横へ逃がす', primary: true, fn: descentEscape }, { label: 'やめる', fn: () => stopDescent() }];
   } else if (P === 'recover') {
-    body_ = '<p>横へ流しました。機体が後流の外に出ると揚力が戻ります。</p>';
+    body_ = '<p>横へ流しました。機体が吹きおろしの外に出ると揚力が戻ります。</p>';
   } else if (P === 'done') {
-    const hard = descent.landed > 1.4;
-    body_ = hard
-      ? `<p><b>接地の速さ 毎秒 ${descent.landed.toFixed(1)} m。</b>渦に入ったまま降りると、この速さで地面に届きます。脚とジンバルが壊れる速さです。</p>`
-      : `<p>接地の速さ 毎秒 ${descent.landed.toFixed(2)} m。地面効果に入ってから沈みが止まり、そっと降りました。スロットルは変えていません。</p>`;
+    const v = descent.landed.toFixed(2);
+    body_ = descent.escaped && descent.landed > 0.6
+      ? `<p><b>接地の速さ ${v} m/s。</b>逃がすのが遅く、沈みが残ったまま地面に届きました。渦は入ってからでは戻しにくいので、まず入らないことが第一です。</p>`
+      : descent.landed > 1.2
+        ? `<p><b>接地の速さ ${v} m/s。</b>渦に入ったまま降りると、この速さで地面に届きます。教則は「地面に近づくにつれ、降下速度を遅くし、着陸による衝撃を抑えること。衝撃が大きい場合、脚部が変形又は破損するおそれがある」としています。</p>`
+        : `<p>接地の速さ ${v} m/s。スロットルを変えないまま、地面効果に入ってから沈みが弱まりました。地面効果だけを見せるためにスロットルは固定していますが、実際の着陸では対地高度に応じて降下速度を落とします（教則${KYOSOKU.ver} 5.2 離着陸時の操作）。</p>`;
     actions = [{ label: 'もう一度', primary: true, fn: () => startDescent(descent.mode) }, { label: straight ? '横に流して比べる' : 'まっすぐ降ろして比べる', fn: () => startDescent(straight ? 'slide' : 'straight') }, { label: 'やめる', fn: () => stopDescent() }];
+  }
+  // 位相が進むたびにカードを作り直すと、長い注記まで読み上げ直される（#noteCard は aria-live）
+  if ($('#noteCard').dataset.kind === 'descent' && $('#descBody') && $('#noteTitle').textContent === (straight ? 'まっすぐ降ろす' : '横に流しながら降ろす')) {
+    $('#descBody').innerHTML = body_; renderNoteActions(actions); updateDescentVals(); return;
   }
   renderNote({
     kind: 'descent', title: straight ? 'まっすぐ降ろす' : '横に流しながら降ろす',
-    html: `<div id="descVals" class="vals live" aria-live="off"><i class="dot" aria-hidden="true"></i></div>${body_}
-      <p class="hint">緑の帯は地面効果のおよその範囲で、この教材ではローター直径の2倍ほど（約 ${DESC_GE.toFixed(1)} m）に描いています。教則は1.5kg級の機体で対地1m程度を例に挙げています。渦に入る降下率は機体と条件で変わるので、ここの数値は見やすさを優先した目安です。</p>
+    html: `<div id="descVals" class="vals live" aria-live="off"><i class="dot" aria-hidden="true"></i></div><div id="descBody">${body_}</div>
+      <p class="hint">緑の帯は地面効果のおよその範囲で、この教材ではローター直径の2倍ほど（約 ${DESC_GE.toFixed(1)} m）に描いています。教則は1.5kg級の機体で対地1m程度を例に挙げています。地面効果は揚力が増える一方で機体が不安定にもなるため、教則は「離陸後は速やかに地面効果外まで上昇する」「地面効果範囲内のホバリングは避け、速やかに着陸させる」としています。<span data-full>渦に入る降下率も水平方向の速さも、この教材では場面が短く収まるよう実機より小さい値にしてあります。実際に入る条件は機体・重量・気象で変わるので、取扱説明書で指定された降下率の範囲に従ってください。</span></p>
       <small class="ky-src">教則${KYOSOKU.ver} 5.2 操縦者に求められる操縦知識（離着陸時の操作）</small>`,
     actions, onClose: () => stopDescent(),
   });
@@ -5555,7 +5575,8 @@ function renderDescent() {
 
 function initDescent() {
   const chips = $('#descChips');
-  if (chips) chips.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; if (descent.active && descent.mode === b.dataset.dz && descent.phase !== 'done') stopDescent(); else startDescent(b.dataset.dz);   /* 降り切ったあとは、同じボタンでもう一度 */ });
+  if (chips) chips.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; if (descent.active && descent.mode === b.dataset.dz) stopDescent(); else startDescent(b.dataset.dz);   /* 点いているチップをもう一度押す＝止める。やり直しはカードの「もう一度」 */
+    for (const x of $$('#descChips button')) x.setAttribute('aria-pressed', String(descent.active && descent.mode === x.dataset.dz)); });
   window.__descent = { descent, startDescent, stopDescent, descentEscape, DESC_GE, DESC_TOP };
 }
 
@@ -5568,17 +5589,24 @@ const fpv = { on: false, stabilized: true, pan: 0, tilt: 0, drag: null, saved: n
 const FPV_FOV = 45;              // 縦の画角。機体に積む記録用カメラのおよその値
 const FPV_PAN = THREE.MathUtils.degToRad(95);
 const FPV_TILT_UP = THREE.MathUtils.degToRad(22), FPV_TILT_DOWN = THREE.MathUtils.degToRad(-88);
-const fpvCamObj = () => { const p = partsOf('camera')[0]; return p && p.obj; };
+let _fpvCam = null;
+const fpvCamObj = () => { if (!_fpvCam) { const p = partsOf('camera')[0]; _fpvCam = p && p.obj; } return _fpvCam; };
 const fpvTall = () => innerWidth / Math.max(1, innerHeight) < 1.05;   // 縦長の画面は横の画角が狭い
 
-// ジンバルは3軸。機体が傾いても、カメラだけは水平を保つ（止めると機体と一緒に傾く）
+// ジンバルは3軸。機体が傾いても、カメラだけは水平を保つ（止めると機体と一緒に傾く）。
+// 打ち消しは「親の世界姿勢の逆 × 望みの世界姿勢」で作る。オイラー角を足し引きすると、
+// パンを振った先の座標系で傾きを消すことになり、首を振った状態で水平が保てない。
+const _gq = new THREE.Quaternion(), _gq2 = new THREE.Quaternion(), _ge = new THREE.Euler(), _gv = new THREE.Vector3();
 function updateGimbal() {
-  const c = fpvCamObj(); if (!c) return;
+  const c = fpvCamObj(); if (!c || !c.parent) return;
   fpv.pan = clamp(fpv.pan, -FPV_PAN, FPV_PAN); fpv.tilt = clamp(fpv.tilt, FPV_TILT_DOWN, FPV_TILT_UP);   // 可動域はここで一度だけ見る(共有リンクなど、ドラッグ以外から入ることもある)
-  const stab = fpv.stabilized;
-  const ex = (stab ? -body.tz : 0) + fpv.tilt;
-  const ez = stab ? body.tx : 0;
-  c.rotation.set(ex, fpv.pan, ez, 'YXZ');
+  if (!fpv.stabilized) { c.rotation.set(clamp(fpv.tilt, -Math.PI / 2 + 0.01, Math.PI / 2 - 0.01), fpv.pan, 0, 'YXZ'); return; }   // 止めると機体の姿勢がそのまま乗る
+  c.parent.updateWorldMatrix(true, false);
+  c.parent.getWorldQuaternion(_gq);
+  const f = _gv.set(0, 0, -1).applyQuaternion(_gq);                       // 機体の前方向
+  const yaw = Math.atan2(-f.x, -f.z);                                     // その水平成分＝機首の方位（ヨーだけは機体に追随させる）
+  _gq2.setFromEuler(_ge.set(fpv.tilt, yaw + fpv.pan, 0, 'YXZ'));          // 望みの世界姿勢: 水平のまま、パンとチルトだけ
+  c.quaternion.copy(_gq).invert().multiply(_gq2);
 }
 
 // ---------- カメラで見るための舞台 ----------
@@ -5642,14 +5670,14 @@ function fpvStageTheme() {
   const pos = far.geometry.attributes.position, col = far.geometry.attributes.color, c = new THREE.Color();
   for (let i = 0; i < pos.count; i++) {
     const r = Math.hypot(pos.getX(i), pos.getY(i));
-    c.copy(one).lerp(haze, clamp((r - 4) / (FPV_FAR - 4), 0, 1) ** 0.42);
+    c.copy(one).lerp(haze, clamp((0.25 - 1 / Math.max(r, 4)) / (0.25 - 1 / FPV_FAR), 0, 1));
     col.setXYZ(i, c.r, c.g, c.b);
   }
   col.needsUpdate = true;
   for (const m of fpvStage.rings) m.material.color.set(themeDark ? 0x8b939f : 0x69727f);
 }
 // 立ち位置と目印は画面の形で置き直す。縦長だと横の画角が26°ほどしかなく、外に置くと映らない
-function fpvPersonPos() { if (D.personGroup) D.personGroup.position.set(fpvTall() ? -0.9 : -1.1, -0.158, fpvTall() ? -9.0 : -5.4); }
+function fpvPersonPos() { if (D.personGroup) D.personGroup.position.set(fpvTall() ? 0.05 : -1.1, -0.158, fpvTall() ? -9.0 : -5.4); }   /* 縦画面は左右の上すみを数値が占めるので、人は正面（中央の空き）に置く */
 function fpvMarksPos() {
   const w = fpvTall() ? 11 : 20;
   fpvStage.marks.forEach((c, i) => { const a = THREE.MathUtils.degToRad([-w, w, -180 + w, 180 - w][i]); c.position.set(Math.sin(a) * 3, -0.158 + 0.13, -Math.cos(a) * 3); });
@@ -5673,23 +5701,28 @@ function fpvStageOn(on) {
   S.shadowDirty = S.csDirty = S.aoDirty = true;
 }
 
+function fpvExit() { if (fpv.on) { segSet($('#viewCol'), 'v', 'iso'); S.view = 'iso'; fpvOn(false); } }
 function fpvOn(on) {
   on = !!on;
   if (on === fpv.on) return;
   if (on) {
+    stopOthers('fpv');   /* 劇場・もしも・降ろし方・重さ・専門が裏で走っていると、舞台も電源も取り合いになる */
+    if (S.explode > 0.02) setExplode(0); if (S.mode === 'cut') setMode('normal');
     fpv.pan = 0; fpv.tilt = fpvTilt0();
     fpv.saved = { pos: camera.position.clone(), tgt: controls.target.clone(), fov: camera.fov, labels: S.labelsSuppressed, power: S.power, rot: controls.autoRotate };
     fpv.on = true; S.fpv = true; document.body.classList.add('fpv');
     S.camSpring = null; S.camInertia = null; controls.enabled = false; controls.autoRotate = false;
     S.labelsSuppressed = true; buildLabels();
     camera.fov = FPV_FOV; resize();
-    if (S.power === 0 && !theater.active && !whatif.active && !descent.active) { setPower(0.5, true); syncBodyMode(); }
+    if (S.power === 0) setPower(0.5, true);
+    syncBodyMode();
     fpvStageOn(true);
     $('#fpv').hidden = false; syncDockH();   /* 操作列を畳んだ高さをHUDに先に伝える(ResizeObserverは1コマ遅れる) */
     stepFpv(0);
-    if (!store.get('fpvSeen')) { store.set('fpvSeen', '1'); showToast('画面をドラッグするとジンバルの向きが変わります。床の輪は3m・10m・20mの目安です', 4600); }
+    if (!store.get('fpvSeen')) { store.set('fpvSeen', '1'); showToast('画面をドラッグするとジンバルの向きが変わります。床の輪は機体からの距離 3m・10m・20m です', 4600); }
   } else {
     fpv.on = false; S.fpv = false; document.body.classList.remove('fpv');
+    fpv.drag = null; canvas.classList.remove('push');   /* 掴んだまま抜けても離した扱いにする */
     fpvStageOn(false);
     $('#fpv').hidden = true; syncDockH();
     fpv.pan = 0; fpv.tilt = fpvTilt0(); updateGimbal();
@@ -5701,7 +5734,6 @@ function fpvOn(on) {
     if (s.pos) flyTo(s.pos, s.tgt, 700, false); else camHome();
   }
   for (const b of $$('#viewCol button[data-v]')) b.classList.toggle('on', fpv.on ? b.dataset.v === 'fpv' : b.classList.contains('on') && b.dataset.v !== 'fpv');
-  if (fpv.on) segSet($('#viewCol'), 'v', 'fpv');
 }
 
 // 毎フレーム: 本体のカメラの位置と向きを main camera に写す
@@ -5727,11 +5759,12 @@ function updateFpvHud() {
   set('#fpvAlt', `${Math.max(0, body.py).toFixed(2)} m`);
   set('#fpvSpd', `${spd.toFixed(2)} m/s`);
   set('#fpvHdg', `${hd.toFixed(0)}°`);
-  set('#fpvAtt', `${(body.tz * 180 / Math.PI).toFixed(0)}° / ${(-body.tx * 180 / Math.PI).toFixed(0)}°`);
+  set('#fpvAtt', `${(body.tz * 180 / Math.PI).toFixed(0)}° / ${(body.tx * 180 / Math.PI).toFixed(0)}°`);   // ロールは右バンクが正(専門タブのセンサーと揃える)
   set('#fpvGim', fpv.stabilized ? '水平を保つ' : '止めている');
-  const g = $('#fpvGimBtn'); if (g) { g.classList.toggle('off', !fpv.stabilized); g.setAttribute('aria-pressed', String(!fpv.stabilized)); }
+  const g = $('#fpvGimBtn'); if (g) { g.classList.toggle('off', !fpv.stabilized); g.setAttribute('aria-pressed', String(fpv.stabilized)); g.setAttribute('aria-label', `ジンバル: ${fpv.stabilized ? '水平を保つ' : '止めている'}`); }
   const sb = $('#fpvStickBtn'); if (sb) { sb.classList.toggle('on', !!S.sticks); sb.setAttribute('aria-pressed', String(!!S.sticks)); }
-  const pan = $('#fpvPan'); if (pan) pan.textContent = `パン ${(fpv.pan * 180 / Math.PI).toFixed(0)}° / チルト ${(fpv.tilt * 180 / Math.PI).toFixed(0)}°`;
+  const pan = $('#fpvPan'); if (pan) pan.textContent = `${(fpv.pan * 180 / Math.PI).toFixed(0)}° / ${(fpv.tilt * 180 / Math.PI).toFixed(0)}°`;
+  const fv = $('#fpvFov'); if (fv) { const h = 2 * Math.atan(Math.tan(FPV_FOV * Math.PI / 360) * innerWidth / Math.max(1, innerHeight)) * 180 / Math.PI; fv.textContent = `画角 縦${FPV_FOV}° / 横${h.toFixed(0)}°（例）`; }
 }
 
 // ---------- 画面をドラッグしてジンバルを振る ----------
@@ -5754,8 +5787,8 @@ function initFpv() {
     <div class="fpv-frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
     <div class="fpv-cross" aria-hidden="true"></div>
     <div class="fpv-head">
-      <div class="fpv-tl"><span class="fpv-tag">機体のカメラ</span><b id="fpvAlt">—</b><span>対地高度</span><b id="fpvSpd">—</b><span>対地速度</span><b id="fpvHdg">—</b><span>機首の方位</span></div>
-      <div class="fpv-tr"><b id="fpvAtt">—</b><span>ピッチ / ロール</span><button id="fpvCenter" class="fpv-mini" title="ジンバルを正面に戻す"><span id="fpvPan">—</span> ↺</button><span class="fpv-sub">画角 縦${FPV_FOV}°（例）</span></div>
+      <div class="fpv-tl"><span class="fpv-tag">機体のカメラ</span><b id="fpvAlt">—</b><span>対地高度</span><b id="fpvSpd">—</b><span>対地速度</span><b id="fpvHdg">—</b><span>機首の向き<span data-full>（離陸時0°）</span></span></div>
+      <div class="fpv-tr"><b id="fpvAtt">—</b><span>機体 ピッチ / ロール</span><button id="fpvCenter" class="fpv-mini" title="ジンバルを正面に戻す"><b id="fpvPan">—</b> ↺</button><span>ジンバル パン / チルト</span><span class="fpv-sub" id="fpvFov">—</span></div>
     </div>
     <div class="fpv-foot">
       <div class="fpv-row">
@@ -5763,7 +5796,7 @@ function initFpv() {
         <button id="fpvStickBtn" class="fpv-btn" aria-pressed="false">スティックで飛ばす</button>
         <button id="fpvOut" class="fpv-btn">外から見る</button>
       </div>
-      <p class="fpv-note"><b>この映像は法令上の「目視」には含まれません</b>。モニターや双眼鏡での監視は目視外飛行にあたります（教則${KYOSOKU.ver} 3.1.2）。</p>
+      <p class="fpv-note"><b>この映像は法令上の「目視」には含まれません</b>。双眼鏡・モニター（FPVを含む）や補助者による監視は「目視により常時監視」に当たりません。ただし残量確認などで一時的にモニターを見ることは目視飛行の範囲内とされています（教則${KYOSOKU.ver} 3.1.2）。<span data-full>映像に頼って飛ばすと目視外飛行にあたり、飛行の方法の承認（法132条の86第2項）が求められます。技能証明で飛ばすときは「目視内飛行の限定」の解除も確認します。床の輪は機体からの距離で、教則は〔一等〕の運航計画の例として、マルチローターの離陸地点を操縦者・補助者から3m以上、周囲の物件から30m以上離すことを挙げています（6.3。取扱説明書に推奨距離があればそちらに従います）。</span></p>
     </div>`;
   $('#fpvGimBtn').addEventListener('click', () => { fpv.stabilized = !fpv.stabilized; updateFpvHud(); showToast(fpv.stabilized ? 'ジンバル: 3つのモーターが機体の傾きを打ち消します' : 'ジンバル停止: カメラが機体と一緒に傾きます', 3200); });
   $('#fpvStickBtn').addEventListener('click', () => { setSticks(!S.sticks); updateFpvHud(); });
@@ -5922,18 +5955,23 @@ const store = { get: k => { try { return localStorage.getItem('drone3d.' + k); }
 let toastTimer = 0;
 function showToast(msg, ms = 2500) { if (share.restoring) return;   /* 共有リンクの読み戻し中は途中経過を出さない */
   const t = $('#toast'); t.textContent = msg; t.hidden = false; t.classList.remove('hide'); clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.classList.add('hide'); setTimeout(() => { t.hidden = true; }, 320); }, ms); }
-function segSet(seg, attr, val) { for (const b of $$('button', seg)) { const on = b.dataset[attr] === String(val); b.classList.toggle('on', on); if (b.getAttribute('role') === 'tab' || b.parentElement.getAttribute('role') === 'radiogroup') b.setAttribute('aria-selected', on); } }
+function segSet(seg, attr, val) { for (const b of $$(`button[data-${attr}]`, seg)) { const on = b.dataset[attr] === String(val); b.classList.toggle('on', on); if (b.getAttribute('role') === 'tab' || b.parentElement.getAttribute('role') === 'radiogroup') b.setAttribute('aria-selected', on); } }
 
 // ---------- 説明カード ----------
 function openPreview() { document.body.classList.add('print-preview'); $('#printSheet').removeAttribute('aria-hidden'); $('#previewClose').hidden = false; $('#previewClose').focus(); }
 function closePreview() { if (!document.body.classList.contains('print-preview')) return false; document.body.classList.remove('print-preview'); $('#printSheet').setAttribute('aria-hidden', 'true'); $('#previewClose').hidden = true; return true; }
+function renderNoteActions(list) {
+  const acts = $('#noteActions'); acts.innerHTML = '';
+  for (const a of (list || [])) { const btn = document.createElement('button'); btn.textContent = a.label; if (a.primary) btn.classList.add('primary'); btn.onclick = a.fn; acts.appendChild(btn); }
+  acts.hidden = !(list && list.length);
+}
 function renderNote(o) {
   const card = $('#noteCard'); $('#noteBody').onclick = null;   /* 前のカードが張った委譲を残さない */
   if (!o) { card.hidden = true; return; }
   $('#noteTitle').textContent = o.title || ''; const b = $('#noteBadge'); if (o.badge) { b.textContent = o.badge; b.hidden = false; } else b.hidden = true;
-  $('#noteBody').innerHTML = o.html || ''; const acts = $('#noteActions'); acts.innerHTML = '';
-  for (const a of (o.actions || [])) { const btn = document.createElement('button'); btn.textContent = a.label; if (a.primary) btn.classList.add('primary'); btn.onclick = a.fn; acts.appendChild(btn); }
-  acts.hidden = !(o.actions && o.actions.length); card.hidden = false; card.scrollTop = 0; card.dataset.kind = o.kind || '';
+  $('#noteBody').innerHTML = o.html || ''; renderNoteActions(o.actions);
+  card.hidden = false; if (card.dataset.kind !== (o.kind || '')) card.scrollTop = 0;   /* 同じ種類のカードを描き直すときは読んでいた位置を保つ */
+  card.dataset.kind = o.kind || '';
   if (o.onClose) card._onClose = o.onClose; else card._onClose = null;
 }
 $('#noteClose').addEventListener('click', () => { const c = $('#noteCard'); if (c._onClose) c._onClose(); c.hidden = true; });
@@ -5953,9 +5991,11 @@ function stopOthers(keep, arg) {
   if (keep !== 'scale' && S.scale) setScale(false);
   if (keep !== 'expert' && S.expert && typeof expertStop === 'function') expertStop();
   if (keep !== 'descent' && descent.active) stopDescent(true);
+  if (keep !== 'fpv' && typeof fpv === 'object' && fpv.on) fpvExit();
 }
 function setTab(tab) {
   $('#coach').hidden = true;
+  fpvExit();   /* 操作列を畳んだまま電源だけ切れると、映像の中から戻れなくなる */
   if ((theater.active || theater.done) && tab !== 'theater') { stopTheaterUI(); }
   if (whatif.active && tab !== 'theater') { stopWhatifUI(); }
   S.tab = tab; segSet($('#tabs'), 'tab', tab);
@@ -6403,7 +6443,7 @@ const endPush = e => {
   push = null; controls.enabled = true; canvas.classList.remove('push');
 };
 canvas.addEventListener('pointerup', e => { if (fpv.on) { fpvDrag(e, 'up'); return; } endPush(e); if (!pend) return; const moved = Math.hypot(e.clientX - pend.x, e.clientY - pend.y), dt = performance.now() - pend.t; const hit = pend.hit; pend = null; if (moved < 6 && dt < 700) { if (hit) select(hit, false); else if (S.selected) select(null); } });
-canvas.addEventListener('pointercancel', endPush);
+canvas.addEventListener('pointercancel', e => { if (fpv.on) { fpvDrag(e, 'up'); return; } endPush(e); });
 canvas.addEventListener('dblclick', e => { if (body.mode === 'free' || theater.active) return; const p = pickAt(e.clientX, e.clientY); if (p) focusOn([p.obj]); });
 canvas.addEventListener('pointerleave', () => { hoverAt = null; if (S.hovered) { setTint(S.hovered, HOVER_L, 0); S.hovered = null; } canvas.classList.remove('pick'); });
 function updateHover() {
@@ -6421,7 +6461,7 @@ document.addEventListener('keydown', e => {
   if (e.target.matches && e.target.matches('input, textarea, select')) return; const k = e.key.toLowerCase();
   if (S.lesson && lessonKey(e)) return;
   if (quiz.active && e.key === 'Escape') { quizStop(); return; }
-  if ((theater.active || whatif.active) && k !== 'escape') return;   // 再生中は表示モード等のキーを受けない
+  if ((theater.active || whatif.active || descent.active) && k !== 'escape') return;   // 再生中は表示モード等のキーを受けない
   if ((S.scale || S.expert) && (k === 'e' || /^[1-4]$/.test(k))) return;
   if (k === 'escape' && (!$('#askPop').hidden || !$('#settings').hidden)) { $('#askPop').hidden = true; $('#settings').hidden = true; return; }
   if (e.key === '/' && $('#partFind')) { e.preventDefault(); $('#inspector').classList.add('open'); if (S.selected) select(null); $('#partFind').focus(); $('#partFind').select(); return; }
@@ -6431,10 +6471,10 @@ document.addEventListener('keydown', e => {
   else if (k === 'l') $('#viewCol .tgl[data-t=labels]').click();
   else if (k === 'a') $('.ctx-row .tgl[data-t=air]').click();
   else if (k === 's') $('.ctx-row .tgl[data-t=slow]').click();
-  else if (k === ' ') { e.preventDefault(); if (S.tab !== 'fly') setTab('fly'); setPower(S.power === 0 ? 0.5 : 0); }
+  else if (k === ' ') { e.preventDefault(); if (fpv.on) return; if (S.tab !== 'fly') setTab('fly'); setPower(S.power === 0 ? 0.5 : 0); }
   else if (k === 'r') { segSet($('#viewCol'), 'v', 'iso'); S.view = 'iso'; setView('iso'); }
   else if (k === 'f' && S.selected) focusOn(S.selAll ? partsOf(S.selected.key).map(x => x.obj) : [S.selected.obj]);
-  else if (k === 'escape') { if (fpv.on) { segSet($('#viewCol'), 'v', 'iso'); S.view = 'iso'; fpvOn(false); } else if (theater.active) stopTheaterUI(); else if (S.question) { clearQuestion(); renderNote(null); } else if (S.flight) setFlight(null); else if (S.selected) select(null); else $('#inspector').classList.remove('open'); }
+  else if (k === 'escape') { if (fpv.on) fpvExit(); else if (descent.active) stopDescent(); else if (theater.active) stopTheaterUI(); else if (S.question) { clearQuestion(); renderNote(null); } else if (S.flight) setFlight(null); else if (S.selected) select(null); else $('#inspector').classList.remove('open'); }
 });
 
 // ---------- 設定 ----------

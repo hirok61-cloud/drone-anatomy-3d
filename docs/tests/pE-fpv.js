@@ -37,16 +37,28 @@ A(d.S.sticks && document.body.classList.contains('sticks-on'), 'スティック:
 for (const [a, b] of [['.fpv-head', '#stickL'], ['.fpv-head', '#stickR'], ['.fpv-foot', '#stickL'], ['.fpv-foot', '#stickR'], ['.fpv-head', '.fpv-foot'], ['.fpv-foot', '#dock'], ['.fpv-head', '#topbar']])
   A(!overlap(R(a), R(b)), '重なり: ' + a + ' と ' + b);
 
-// ジンバル: 機体を傾けて、同じコマで入切を比べる
+// ジンバル: 機体を傾けて、同じコマで入切を比べる。
+// パンを振った状態でも水平が保てること（オイラー角を足し引きすると、ここで崩れる）
 const st = d.body.stick; st.active = true; st.x = 0.9; d.step(1.1, 30);
 const roll = deg(d.body.tx);
-F.fpv.stabilized = true; F.stepFpv(0); const on = camRoll();
-F.fpv.stabilized = false; F.stepFpv(0); const off = camRoll();
-F.fpv.stabilized = true; F.stepFpv(0);
 A(Math.abs(roll) > 2, 'ジンバル: 機体が傾いている', roll.toFixed(1));
-A(Math.abs(on) < 0.8, 'ジンバル入: 水平を保つ', on.toFixed(2));
-A(Math.abs(off + roll) < 1.2, 'ジンバル切: 機体と一緒に傾く', off.toFixed(2), roll.toFixed(2));
-st.x = 0; st.active = false; d.step(1.6, 30);
+for (const pan of [0, 45, 95]) {
+  F.fpv.pan = pan * Math.PI / 180;
+  F.fpv.stabilized = true; F.stepFpv(0); const on = camRoll();
+  A(Math.abs(on) < 0.5, `ジンバル入: 水平を保つ（パン${pan}°）`, on.toFixed(2));
+  F.fpv.stabilized = false; F.stepFpv(0); const off = camRoll();
+  if (pan === 0) A(Math.abs(off + roll) < 1.2, 'ジンバル切: 機体と一緒に傾く', off.toFixed(2), roll.toFixed(2));
+  F.fpv.stabilized = true;
+}
+// 機首上げと横傾きを混ぜても水平
+st.y = -1; d.step(0.6, 30); F.fpv.pan = 0; F.stepFpv(0);
+A(Math.abs(deg(d.body.tz)) > 2 && Math.abs(deg(d.body.tx)) > 2, 'ジンバル: ピッチとロールが同時に出ている', deg(d.body.tz).toFixed(1), deg(d.body.tx).toFixed(1));
+A(Math.abs(camRoll()) < 0.5, 'ジンバル入: ピッチとロールが同時でも水平', camRoll().toFixed(2));
+// 真下を向けたまま機首を上げても裏返らない
+F.fpv.tilt = -88 * Math.PI / 180; F.stepFpv(0); d.camera.updateMatrixWorld(true);
+A(d.camera.matrixWorld.elements[5] > -0.2, '真下向き＋機首上げでも上下が反転しない', d.camera.matrixWorld.elements[5].toFixed(2));
+F.fpv.tilt = F.fpvTilt0();
+st.x = st.y = 0; st.active = false; d.step(1.6, 30);
 
 // 首振りと戻し
 F.fpv.pan = 9; F.fpv.tilt = -9; F.updateGimbal();
@@ -66,9 +78,26 @@ A(!ST.grp.visible && ground.scale.x === 1, '出る: 舞台と床が戻る', grou
 A(Math.abs(d.D.personGroup.position.z + 0.48) < 0.01, '出る: 人が元の位置へ', d.D.personGroup.position.z.toFixed(2));
 A(document.getElementById('fpv').hidden, '出る: HUDが消える');
 
-// Escでも出られる
+// 視点列のトグル（名・大）の点灯は、視点を切り替えても消えない
+const lt = document.querySelector('#viewCol .tgl[data-t=labels]');
+if (!lt.classList.contains('on')) { lt.click(); d.step(0.2, 30); }
+const ltWas = lt.classList.contains('on');
 document.querySelector('#viewCol [data-v=fpv]').click(); d.step(0.8, 30);
+A(lt.classList.contains('on') === ltWas, '視点を切り替えても「名」の点灯は残る');
 A(F.fpv.on, 'もう一度入れる');
+// タブを移ると出る（操作列が隠れたまま電源だけ切れると戻れない）
+document.querySelector('#tabs [data-tab=see]').click(); d.step(1.4, 30);
+A(!F.fpv.on && !document.body.classList.contains('fpv'), 'タブを移ると出る');
+document.querySelector('#tabs [data-tab=fly]').click(); d.step(0.3, 30);
+// 降ろし方の最中に入ると、場面が畳まれて舞台が出る
+document.querySelector('#descChips [data-dz=straight]').click(); d.step(1.0, 30);
+document.querySelector('#viewCol [data-v=fpv]').click(); d.step(1.2, 30);
+A(!window.__descent.descent.active, '場面の最中に入ると、場面は畳まれる');
+A(ST.grp.visible && Math.abs(d.body.py - 1.05) < 0.06, '場面のあとでも舞台が出て浮いている', d.body.py.toFixed(2));
+A(Math.abs(d.S.ts - 1) < 0.06, '場面の時間の伸ばしも戻る', d.S.ts.toFixed(2));
+document.getElementById('fpvOut').click(); d.step(1.2, 30);
+document.querySelector('#viewCol [data-v=fpv]').click(); d.step(0.8, 30);
+A(F.fpv.on, 'もう一度入れる（2回目）');
 window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
 document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
 d.step(1.2, 30);

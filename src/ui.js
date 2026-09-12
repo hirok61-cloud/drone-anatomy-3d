@@ -11,18 +11,23 @@ const store = { get: k => { try { return localStorage.getItem('drone3d.' + k); }
 let toastTimer = 0;
 function showToast(msg, ms = 2500) { if (share.restoring) return;   /* 共有リンクの読み戻し中は途中経過を出さない */
   const t = $('#toast'); t.textContent = msg; t.hidden = false; t.classList.remove('hide'); clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.classList.add('hide'); setTimeout(() => { t.hidden = true; }, 320); }, ms); }
-function segSet(seg, attr, val) { for (const b of $$('button', seg)) { const on = b.dataset[attr] === String(val); b.classList.toggle('on', on); if (b.getAttribute('role') === 'tab' || b.parentElement.getAttribute('role') === 'radiogroup') b.setAttribute('aria-selected', on); } }
+function segSet(seg, attr, val) { for (const b of $$(`button[data-${attr}]`, seg)) { const on = b.dataset[attr] === String(val); b.classList.toggle('on', on); if (b.getAttribute('role') === 'tab' || b.parentElement.getAttribute('role') === 'radiogroup') b.setAttribute('aria-selected', on); } }
 
 // ---------- 説明カード ----------
 function openPreview() { document.body.classList.add('print-preview'); $('#printSheet').removeAttribute('aria-hidden'); $('#previewClose').hidden = false; $('#previewClose').focus(); }
 function closePreview() { if (!document.body.classList.contains('print-preview')) return false; document.body.classList.remove('print-preview'); $('#printSheet').setAttribute('aria-hidden', 'true'); $('#previewClose').hidden = true; return true; }
+function renderNoteActions(list) {
+  const acts = $('#noteActions'); acts.innerHTML = '';
+  for (const a of (list || [])) { const btn = document.createElement('button'); btn.textContent = a.label; if (a.primary) btn.classList.add('primary'); btn.onclick = a.fn; acts.appendChild(btn); }
+  acts.hidden = !(list && list.length);
+}
 function renderNote(o) {
   const card = $('#noteCard'); $('#noteBody').onclick = null;   /* 前のカードが張った委譲を残さない */
   if (!o) { card.hidden = true; return; }
   $('#noteTitle').textContent = o.title || ''; const b = $('#noteBadge'); if (o.badge) { b.textContent = o.badge; b.hidden = false; } else b.hidden = true;
-  $('#noteBody').innerHTML = o.html || ''; const acts = $('#noteActions'); acts.innerHTML = '';
-  for (const a of (o.actions || [])) { const btn = document.createElement('button'); btn.textContent = a.label; if (a.primary) btn.classList.add('primary'); btn.onclick = a.fn; acts.appendChild(btn); }
-  acts.hidden = !(o.actions && o.actions.length); card.hidden = false; card.scrollTop = 0; card.dataset.kind = o.kind || '';
+  $('#noteBody').innerHTML = o.html || ''; renderNoteActions(o.actions);
+  card.hidden = false; if (card.dataset.kind !== (o.kind || '')) card.scrollTop = 0;   /* 同じ種類のカードを描き直すときは読んでいた位置を保つ */
+  card.dataset.kind = o.kind || '';
   if (o.onClose) card._onClose = o.onClose; else card._onClose = null;
 }
 $('#noteClose').addEventListener('click', () => { const c = $('#noteCard'); if (c._onClose) c._onClose(); c.hidden = true; });
@@ -42,9 +47,11 @@ function stopOthers(keep, arg) {
   if (keep !== 'scale' && S.scale) setScale(false);
   if (keep !== 'expert' && S.expert && typeof expertStop === 'function') expertStop();
   if (keep !== 'descent' && descent.active) stopDescent(true);
+  if (keep !== 'fpv' && typeof fpv === 'object' && fpv.on) fpvExit();
 }
 function setTab(tab) {
   $('#coach').hidden = true;
+  fpvExit();   /* 操作列を畳んだまま電源だけ切れると、映像の中から戻れなくなる */
   if ((theater.active || theater.done) && tab !== 'theater') { stopTheaterUI(); }
   if (whatif.active && tab !== 'theater') { stopWhatifUI(); }
   S.tab = tab; segSet($('#tabs'), 'tab', tab);
@@ -492,7 +499,7 @@ const endPush = e => {
   push = null; controls.enabled = true; canvas.classList.remove('push');
 };
 canvas.addEventListener('pointerup', e => { if (fpv.on) { fpvDrag(e, 'up'); return; } endPush(e); if (!pend) return; const moved = Math.hypot(e.clientX - pend.x, e.clientY - pend.y), dt = performance.now() - pend.t; const hit = pend.hit; pend = null; if (moved < 6 && dt < 700) { if (hit) select(hit, false); else if (S.selected) select(null); } });
-canvas.addEventListener('pointercancel', endPush);
+canvas.addEventListener('pointercancel', e => { if (fpv.on) { fpvDrag(e, 'up'); return; } endPush(e); });
 canvas.addEventListener('dblclick', e => { if (body.mode === 'free' || theater.active) return; const p = pickAt(e.clientX, e.clientY); if (p) focusOn([p.obj]); });
 canvas.addEventListener('pointerleave', () => { hoverAt = null; if (S.hovered) { setTint(S.hovered, HOVER_L, 0); S.hovered = null; } canvas.classList.remove('pick'); });
 function updateHover() {
@@ -510,7 +517,7 @@ document.addEventListener('keydown', e => {
   if (e.target.matches && e.target.matches('input, textarea, select')) return; const k = e.key.toLowerCase();
   if (S.lesson && lessonKey(e)) return;
   if (quiz.active && e.key === 'Escape') { quizStop(); return; }
-  if ((theater.active || whatif.active) && k !== 'escape') return;   // 再生中は表示モード等のキーを受けない
+  if ((theater.active || whatif.active || descent.active) && k !== 'escape') return;   // 再生中は表示モード等のキーを受けない
   if ((S.scale || S.expert) && (k === 'e' || /^[1-4]$/.test(k))) return;
   if (k === 'escape' && (!$('#askPop').hidden || !$('#settings').hidden)) { $('#askPop').hidden = true; $('#settings').hidden = true; return; }
   if (e.key === '/' && $('#partFind')) { e.preventDefault(); $('#inspector').classList.add('open'); if (S.selected) select(null); $('#partFind').focus(); $('#partFind').select(); return; }
@@ -520,10 +527,10 @@ document.addEventListener('keydown', e => {
   else if (k === 'l') $('#viewCol .tgl[data-t=labels]').click();
   else if (k === 'a') $('.ctx-row .tgl[data-t=air]').click();
   else if (k === 's') $('.ctx-row .tgl[data-t=slow]').click();
-  else if (k === ' ') { e.preventDefault(); if (S.tab !== 'fly') setTab('fly'); setPower(S.power === 0 ? 0.5 : 0); }
+  else if (k === ' ') { e.preventDefault(); if (fpv.on) return; if (S.tab !== 'fly') setTab('fly'); setPower(S.power === 0 ? 0.5 : 0); }
   else if (k === 'r') { segSet($('#viewCol'), 'v', 'iso'); S.view = 'iso'; setView('iso'); }
   else if (k === 'f' && S.selected) focusOn(S.selAll ? partsOf(S.selected.key).map(x => x.obj) : [S.selected.obj]);
-  else if (k === 'escape') { if (fpv.on) { segSet($('#viewCol'), 'v', 'iso'); S.view = 'iso'; fpvOn(false); } else if (theater.active) stopTheaterUI(); else if (S.question) { clearQuestion(); renderNote(null); } else if (S.flight) setFlight(null); else if (S.selected) select(null); else $('#inspector').classList.remove('open'); }
+  else if (k === 'escape') { if (fpv.on) fpvExit(); else if (descent.active) stopDescent(); else if (theater.active) stopTheaterUI(); else if (S.question) { clearQuestion(); renderNote(null); } else if (S.flight) setFlight(null); else if (S.selected) select(null); else $('#inspector').classList.remove('open'); }
 });
 
 // ---------- 設定 ----------

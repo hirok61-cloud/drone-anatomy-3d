@@ -1,7 +1,7 @@
 // ===== 降ろし方（地面効果とボルテックス・リング・ステート） =====
 // 教則 5.2 の2つの現象を、降下のしかたで結果が変わる形で見せる。
-//   地面効果: 対地高度がローター直径の数倍以内になると、吹きおろしが地面付近で滞留して揚力が増す
-//   ボルテックス・リング・ステート: 垂直に降りると自分の後流を吸い込み、回転翼の上下で空気が再循環して急に揚力を失う
+//   地面効果: 対地高度がローター直径の1〜2倍以内になると、吹きおろしが地面付近で滞留して揚力が増す（同時に機体は不安定になる）
+//   ボルテックス・リング・ステート: 垂直降下や降下を伴う低速前進で自分の吹きおろしを吸い込み、回転翼の上下で空気が再循環して急に揚力を失う
 // 数値は見やすさのために小さくしてあるが、「まっすぐ降ろすと落ちる／横に流すと落ちない」という関係は変えていない。
 const descent = {
   active: false, mode: null, t: 0, phase: 'idle', vy: 0, vx: 0, escaped: false, landed: 0,
@@ -49,14 +49,15 @@ function startDescent(mode) {
   descent.active = true; descent.mode = mode; descent.t = 0; descent.phase = 'hold'; descent.lastPhase = '';
   descent.vy = 0; descent.vx = mode === 'slide' ? 0.85 : 0; descent.escaped = false; descent.landed = 0;
   S.descent = descent;
-  setBodyMode('theater'); S.power = 0.5;
+  setBodyMode('theater'); setPower(0.5, true); setBodyMode('theater');   /* setPower→syncBodyMode が idle に戻すので、もう一度 theater に置く */
   body.px = mode === 'slide' ? -0.85 : 0; body.pz = 0; body.py = descTop();
   body.tx = body.tz = body.wx = body.wz = 0; body.yaw = 0; body.mult = [1, 1, 1, 1];
   D.motors.forEach(mo => { mo.rpmTarget = null; mo.rpmRate = 3.5; });
+  setSticks(false); if (S.selected) select(null);
   descent.saved.air = S.air; S.air = true; for (const x of $$('.tgl[data-t=air]')) x.classList.add('on');   /* 吹きおろしが見えないと、この2つは分からない */
   descent.band.visible = true; descent.line.visible = true;
   descent.savedTs = S.tsTarget; setTimeScale(0.5);   /* 実時間だと1秒で終わってしまう。降下率の数値は変わらない */
-  for (const b of $$('#descChips button')) b.classList.toggle('on', b.dataset.dz === mode);
+  for (const b of $$('#descChips button')) { b.classList.toggle('on', b.dataset.dz === mode); b.setAttribute('aria-pressed', String(b.dataset.dz === mode)); }
   const dist = (descTop() / 2 + 0.55) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * (narrow() ? 1.55 : 1.05);   /* 説明カードが覆うぶんだけ広く取る */
   const dir = new THREE.Vector3(1, 0.56, -1).normalize();
   const aim = new THREE.Vector3(0, descentAim(), 0);
@@ -67,17 +68,18 @@ function startDescent(mode) {
 function stopDescent(silent) {
   if (!descent.active) { if (!silent) renderDescent(); return; }
   descent.active = false; descent.mode = null; descent.phase = 'idle'; S.descent = null;
-  if (descent.rings) for (const r of descent.rings) r.material.opacity = 0;
+  if (descent.rings) for (const r of descent.rings) { r.material.opacity = 0; r.visible = false; }
   if (descent.band) descent.band.visible = false;
   if (descent.line) descent.line.visible = false;
   S.air = descent.saved.air; for (const x of $$('.tgl[data-t=air]')) x.classList.toggle('on', S.air);
   D.motors.forEach(mo => { mo.rpmTarget = null; mo.rpmRate = null; });
   body.tx = body.tz = 0; body.px = body.pz = 0; body.py = 0; body.vx = body.vz = 0;
-  for (const b of $$('#descChips button')) b.classList.remove('on');
+  for (const b of $$('#descChips button')) { b.classList.remove('on'); b.setAttribute('aria-pressed', 'false'); }
   setTimeScale(descent.savedTs != null ? descent.savedTs : 1);
-  S.power = 0; setBodyMode('idle'); syncBodyMode();
+  setPower(0, true); setBodyMode('idle'); syncBodyMode();
   S.shadowDirty = S.csDirty = S.aoDirty = true;
-  if (!silent) { if ($('#noteCard').dataset.kind === 'descent') renderNote(null); camHome(); }
+  if ($('#noteCard').dataset.kind === 'descent') renderNote(null);   /* タブを移っても死んだカードを残さない */
+  if (!silent) camHome();
 }
 function descentEscape() {
   if (!descent.active || descent.phase !== 'vrs') return;
@@ -94,7 +96,7 @@ function stepDescent(dtSim) {
   if (ph === 'hold') { if (descent.t > 0.9) { descent.phase = 'fall'; descent.t = 0; } }
   else if (ph === 'fall') {
     descent.vy = dl(descent.vy, -1.05, dtSim, 1.6);
-    if (descent.mode === 'straight' && !descent.escaped && -descent.vy > DESC_VRS_V && Math.abs(descent.vx) < DESC_SIDE && h > DESC_VRS_H) { descent.phase = 'vrs'; descent.t = 0; }
+    if (!descent.escaped && -descent.vy > DESC_VRS_V && Math.abs(descent.vx) < DESC_SIDE && h > DESC_VRS_H) { descent.phase = 'vrs'; descent.t = 0; }   /* 横に流しているかどうかは速さで決める(モードで免除しない) */
   } else if (ph === 'vrs') {
     if (descent.t < 0.05) setTimeScale(0.32);   /* 抜ける操作をする間をつくる */
     // 揚力を失って一気に沈む。姿勢も落ち着かない
@@ -112,13 +114,14 @@ function stepDescent(dtSim) {
   // 地面効果: 同じ回転数のままでも沈みが止まる
   if (inGE && ph !== 'vrs') {
     const k = 1 - h / DESC_GE;
-    descent.vy = dl(descent.vy, -0.22 * (1 - 0.7 * k), dtSim, 3.5);
+    const rate = 3.5 * clamp(1.25 - Math.abs(descent.vy) * 0.32, 0.22, 1);   /* 速く落ちているほど地面効果では止まらない。逃がすのが遅いと間に合わない */
+    descent.vy = dl(descent.vy, -0.22 * (1 - 0.7 * k), dtSim, rate);
     body.tx = dl(body.tx, 0, dtSim, 3); body.tz = dl(body.tz, 0, dtSim, 3);
   }
 
   body.py = Math.max(0, body.py + descent.vy * dtSim);
   body.px += descent.vx * dtSim;
-  if (body.px > 0.85) descent.vx = 0;   /* 画の中に収める */
+  if (Math.abs(body.px) > 0.85 && Math.sign(descent.vx) === Math.sign(body.px)) descent.vx = -descent.vx;   /* 画の中に収める。止めると水平移動が消えて説明と食い違う */
   body.vy = descent.vy; body.vx = descent.vx;
 
   if (body.py <= 0.0005 && descent.phase !== 'done') {
@@ -148,13 +151,13 @@ function stepDescent(dtSim) {
   if (!S.camSpring && !S.camInertia) { const k = 1 - Math.exp(-dtSim / 0.45); controls.target.y += (descentAim() - controls.target.y) * k; controls.target.x += (body.px * 0.65 - controls.target.x) * k; }
   if (descent.phase !== descent.lastPhase) { descent.lastPhase = descent.phase; renderDescent(); }
   updateDescentVals();
-  S.shadowDirty = S.csDirty = S.aoDirty = true;
+  if (descent.phase !== 'done') S.shadowDirty = S.csDirty = S.aoDirty = true;   /* 降り切ったら影とAOの焼き直しを止める */
 }
 function updateDescentVals() {
   const el = $('#descVals'); if (!el) return;
   const h = body.py, vy = -descent.vy, vx = Math.abs(descent.vx);
-  const state = descent.phase === 'vrs' ? '<b>渦に入った</b>' : h < DESC_GE && descent.phase !== 'hold' ? '<em>地面効果の中</em>' : '通常';
-  el.innerHTML = `<i class="dot" aria-hidden="true"></i><span>対地高度 ${h.toFixed(2)} m</span><span>降下率 ${vy.toFixed(2)} m/s</span><span>横の速さ ${vx.toFixed(2)} m/s</span><span>${state}</span>`;
+  const state = descent.phase === 'vrs' ? '<b>渦に入った（VRS）</b>' : (h < DESC_GE && descent.phase !== 'hold' && descent.phase !== 'done') ? '<em>地面効果の中</em>' : descent.phase === 'done' ? '接地' : '通常';
+  el.innerHTML = `<i class="dot" aria-hidden="true"></i><span>対地高度 ${h.toFixed(2)} m</span><span>降下率 ${vy.toFixed(2)} m/s</span><span>水平方向の速さ ${vx.toFixed(2)} m/s</span><span>${state}</span>`;
 }
 
 // ---------- 説明カード ----------
@@ -165,24 +168,30 @@ function renderDescent() {
   let body_ = '', actions = [{ label: 'やめる', fn: () => stopDescent() }];
   if (P === 'hold' || P === 'fall') {
     body_ = straight
-      ? '<p>まっすぐ下へ降ろします。降下率が上がると、自分が吹きおろした空気を上から吸い込み始めます。</p>'
-      : '<p>横へ流しながら降ろします。機体が新しい空気の中へ移り続けるので、自分の後流を吸い込みません。</p>';
+      ? '<p>まっすぐ下へ降ろします。降下率が上がると、自分が吹きおろした空気を上から吸い込み始めます。垂直に近いほど、また水平方向の速さが小さいほど起きやすくなります。</p>'
+      : '<p>横へ流しながら降ろします。機体が新しい空気の中へ移り続けるぶん、自分の吹きおろしを吸い込みにくくなります。教則は、降下の際に水平方向の移動を合わせて操作することを挙げています。ただし水平方向の速さが足りないと、降下を伴う低速前進でも渦に入るとされています。</p>';
   } else if (P === 'vrs') {
-    body_ = '<p><b>ボルテックス・リング・ステート。</b>回転翼の上下で空気が輪になって再循環し、回しているのに揚力が出ません。スロットルを上げても、吸い込む空気が増えるだけで悪化します。</p><p>抜けるには、横へ移して新しい空気の中に出します。</p>';
+    body_ = '<p><b>ボルテックス・リング・ステート。</b>吹きおろした空気が再び吸い込まれ、回転翼の上下で再循環が起きて急に揚力を失います。スロットルを上げると吹きおろしが強まり、かえって沈みが速くなります。</p><p>抜け方は、横へ流すか前進して、吹きおろしの外の新しい空気に出すこと。<span data-full>教則は「急激に高度が低下し回復できない危険性がある」としています。まず入らないこと（降下に水平方向の移動を合わせること）が第一です。</span></p>';
     actions = [{ label: '横へ逃がす', primary: true, fn: descentEscape }, { label: 'やめる', fn: () => stopDescent() }];
   } else if (P === 'recover') {
-    body_ = '<p>横へ流しました。機体が後流の外に出ると揚力が戻ります。</p>';
+    body_ = '<p>横へ流しました。機体が吹きおろしの外に出ると揚力が戻ります。</p>';
   } else if (P === 'done') {
-    const hard = descent.landed > 1.4;
-    body_ = hard
-      ? `<p><b>接地の速さ 毎秒 ${descent.landed.toFixed(1)} m。</b>渦に入ったまま降りると、この速さで地面に届きます。脚とジンバルが壊れる速さです。</p>`
-      : `<p>接地の速さ 毎秒 ${descent.landed.toFixed(2)} m。地面効果に入ってから沈みが止まり、そっと降りました。スロットルは変えていません。</p>`;
+    const v = descent.landed.toFixed(2);
+    body_ = descent.escaped && descent.landed > 0.6
+      ? `<p><b>接地の速さ ${v} m/s。</b>逃がすのが遅く、沈みが残ったまま地面に届きました。渦は入ってからでは戻しにくいので、まず入らないことが第一です。</p>`
+      : descent.landed > 1.2
+        ? `<p><b>接地の速さ ${v} m/s。</b>渦に入ったまま降りると、この速さで地面に届きます。教則は「地面に近づくにつれ、降下速度を遅くし、着陸による衝撃を抑えること。衝撃が大きい場合、脚部が変形又は破損するおそれがある」としています。</p>`
+        : `<p>接地の速さ ${v} m/s。スロットルを変えないまま、地面効果に入ってから沈みが弱まりました。地面効果だけを見せるためにスロットルは固定していますが、実際の着陸では対地高度に応じて降下速度を落とします（教則${KYOSOKU.ver} 5.2 離着陸時の操作）。</p>`;
     actions = [{ label: 'もう一度', primary: true, fn: () => startDescent(descent.mode) }, { label: straight ? '横に流して比べる' : 'まっすぐ降ろして比べる', fn: () => startDescent(straight ? 'slide' : 'straight') }, { label: 'やめる', fn: () => stopDescent() }];
+  }
+  // 位相が進むたびにカードを作り直すと、長い注記まで読み上げ直される（#noteCard は aria-live）
+  if ($('#noteCard').dataset.kind === 'descent' && $('#descBody') && $('#noteTitle').textContent === (straight ? 'まっすぐ降ろす' : '横に流しながら降ろす')) {
+    $('#descBody').innerHTML = body_; renderNoteActions(actions); updateDescentVals(); return;
   }
   renderNote({
     kind: 'descent', title: straight ? 'まっすぐ降ろす' : '横に流しながら降ろす',
-    html: `<div id="descVals" class="vals live" aria-live="off"><i class="dot" aria-hidden="true"></i></div>${body_}
-      <p class="hint">緑の帯は地面効果のおよその範囲で、この教材ではローター直径の2倍ほど（約 ${DESC_GE.toFixed(1)} m）に描いています。教則は1.5kg級の機体で対地1m程度を例に挙げています。渦に入る降下率は機体と条件で変わるので、ここの数値は見やすさを優先した目安です。</p>
+    html: `<div id="descVals" class="vals live" aria-live="off"><i class="dot" aria-hidden="true"></i></div><div id="descBody">${body_}</div>
+      <p class="hint">緑の帯は地面効果のおよその範囲で、この教材ではローター直径の2倍ほど（約 ${DESC_GE.toFixed(1)} m）に描いています。教則は1.5kg級の機体で対地1m程度を例に挙げています。地面効果は揚力が増える一方で機体が不安定にもなるため、教則は「離陸後は速やかに地面効果外まで上昇する」「地面効果範囲内のホバリングは避け、速やかに着陸させる」としています。<span data-full>渦に入る降下率も水平方向の速さも、この教材では場面が短く収まるよう実機より小さい値にしてあります。実際に入る条件は機体・重量・気象で変わるので、取扱説明書で指定された降下率の範囲に従ってください。</span></p>
       <small class="ky-src">教則${KYOSOKU.ver} 5.2 操縦者に求められる操縦知識（離着陸時の操作）</small>`,
     actions, onClose: () => stopDescent(),
   });
@@ -191,6 +200,7 @@ function renderDescent() {
 
 function initDescent() {
   const chips = $('#descChips');
-  if (chips) chips.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; if (descent.active && descent.mode === b.dataset.dz && descent.phase !== 'done') stopDescent(); else startDescent(b.dataset.dz);   /* 降り切ったあとは、同じボタンでもう一度 */ });
+  if (chips) chips.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; if (descent.active && descent.mode === b.dataset.dz) stopDescent(); else startDescent(b.dataset.dz);   /* 点いているチップをもう一度押す＝止める。やり直しはカードの「もう一度」 */
+    for (const x of $$('#descChips button')) x.setAttribute('aria-pressed', String(descent.active && descent.mode === x.dataset.dz)); });
   window.__descent = { descent, startDescent, stopDescent, descentEscape, DESC_GE, DESC_TOP };
 }
