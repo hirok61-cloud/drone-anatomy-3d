@@ -241,7 +241,7 @@ function makeMaterials(maxAniso) {
     cell: std({ color: 0xb9bcc3, metalness: 0.85, roughness: 0.35 }),
     escLabel: std({ map: canvasTex(escLabel(), { wrap: false }), roughness: 0.4, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 }),
     strap: phy({ map: canvasTex(strapCanvas(), { repeat: [10, 10] }), roughness: 0.85, sheen: 0.6, sheenRoughness: 0.7, sheenColor: new THREE.Color(0x8a8d93) }),
-    propCCW: propMat(1), propCW: propMat(-1),
+    propCCW: Object.assign(propMat(1), { userData: { flatTint: true } }), propCW: Object.assign(propMat(-1), { userData: { flatTint: true } }),
     propHub: phy({ color: 0x24252a, roughness: 0.55, roughnessMap: noiseRgh, clearcoat: 0.08, clearcoatRoughness: 0.6 }),
     propDiscCCW: new THREE.MeshBasicMaterial({ map: canvasTex(propDisc(1), { wrap: false }), transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }),
     propDiscCW: new THREE.MeshBasicMaterial({ map: canvasTex(propDisc(-1), { wrap: false }), transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }),

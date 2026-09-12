@@ -35,6 +35,7 @@ function stopOthers(keep, arg) {
   if (keep !== 'flight' && S.flight) setFlight(null);
   if (keep !== 'use' && S.use) setUse(null);
   if (keep !== 'scale' && S.scale) setScale(false);
+  if (keep !== 'expert' && S.expert && typeof expertStop === 'function') expertStop();
 }
 function setTab(tab) {
   $('#coach').hidden = true;
@@ -46,6 +47,8 @@ function setTab(tab) {
   if (tab !== 'fly') { setSticks(false); if (S.power > 0 && !theater.active) setPower(0, true); if (S.flight) setFlight(null); }
   if (tab !== 'use' && S.use) setUse(null);
   if (tab !== 'use' && S.scale) setScale(false);
+  if (tab !== 'expert' && S.expert) expertStop(true);
+  if (tab === 'expert' && !S.expert) expertStart(store.get('expertMode') || 'sensors');
   if (tab === 'mishap') { if (!store.get('mishapSeen')) { showToast('まちがえた機体を飛ばして、どこが壊れるか見てみよう', 3200); store.set('mishapSeen', '1'); } }
   syncBodyMode();
 }
@@ -74,7 +77,7 @@ $('#powerSeg').addEventListener('click', e => { const b = e.target.closest('butt
 function syncBodyMode() {
   if (theater.active) return setBodyMode('theater');
   if (S.flight) return setBodyMode('demo');
-  if (S.power > 0 && (S.tab === 'fly' || S.scale || alive.on || (S.lesson && lesson.hover))) return setBodyMode('free');
+  if (S.power > 0 && (S.tab === 'fly' || S.scale || alive.on || (S.lesson && lesson.hover) || S.expert === 'sensors')) return setBodyMode('free');
   setBodyMode('idle');
 }
 // 飛行の原理
@@ -141,6 +144,7 @@ function select(p, all = false, opts = {}) {
   renderDetail();
   if (p && narrow() && !opts.quiet && !S.lesson) $('#inspector').classList.add('open');
   if (S.lesson) renderLessonSel();
+  if (S.expert) renderExpertSel();
   if (S.scale) renderMassBar(p && p.key);
   codexOnSelect(p); updateBigBand();
   if (p && alive.speakAuto && !opts.quiet) speakPart(p);
@@ -454,7 +458,7 @@ document.addEventListener('keydown', e => {
   if (S.lesson && lessonKey(e)) return;
   if (quiz.active && e.key === 'Escape') { quizStop(); return; }
   if ((theater.active || whatif.active) && k !== 'escape') return;   // 再生中は表示モード等のキーを受けない
-  if (S.scale && (k === 'e' || /^[1-4]$/.test(k))) return;
+  if ((S.scale || S.expert) && (k === 'e' || /^[1-4]$/.test(k))) return;
   if (k === 'escape' && (!$('#askPop').hidden || !$('#settings').hidden)) { $('#askPop').hidden = true; $('#settings').hidden = true; return; }
   if (e.key === '?') { const st = $('#settings'); st.hidden = false; $('#askPop').hidden = true; const dt = st.querySelector('details'); if (dt) dt.open = true; return; }
   if (k === '1') setMode('normal'); else if (k === '2') setMode('xray'); else if (k === '3') setMode('wire'); else if (k === '4') setMode('cut');
@@ -476,7 +480,7 @@ $('#qualitySeg').addEventListener('click', e => { const b = e.target.closest('bu
 $('#envSlider').addEventListener('input', e => { S.envMul = e.target.value / 100; applyTheme(); });
 $('#expSlider').addEventListener('input', e => { S.exposureMul = e.target.value / 100; applyTheme(); });
 // モバイルシート
-$('#inspToggle').addEventListener('click', () => (S.lesson ? $('#lesson') : $('#inspector')).classList.add('open'));
+$('#inspToggle').addEventListener('click', () => (S.lesson ? $('#lesson') : S.expert ? $('#expert') : $('#inspector')).classList.add('open'));
 $('#inspClose').addEventListener('click', () => $('#inspector').classList.remove('open'));
 { const insp = $('#inspector'), grab = $('.grabber'); let drag = null;
   grab.addEventListener('pointerdown', e => { drag = { y0: e.clientY, hist: [[e.clientY, performance.now()]] }; grab.setPointerCapture(e.pointerId); insp.classList.add('dragging'); });

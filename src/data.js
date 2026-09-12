@@ -591,9 +591,9 @@ const WHATIF = [
 
 // ===== 言語 (パッケージ⑧): やさしい日本語 / English。段階1 = タブ・主要ボタン・8部品・12質問 =====
 const I18N = {
-  ja: { tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを回す', stop: '■ 止める', views: { iso: '斜', front: '前', top: '上', side: '横', inside: '内', labels: '名' }, big: '大', speak: '読み上げ',
+  ja: { tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも', expert: '専門' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを回す', stop: '■ 止める', views: { iso: '斜', front: '前', top: '上', side: '横', inside: '内', labels: '名' }, big: '大', speak: '読み上げ',
     ui: { parts: '部品一覧', script: '台本', focus: '注目', more: 'くわしく見る', explode: '分解', look: '見え方', normal: 'ふつう', xray: 'すけて見る', wire: '線だけ', cut: '切って見る' }, sec: { structure: '構造', trivia: '豆知識', role: '役割', analogy: 'たとえるなら' }, parts: {}, questions: {} },
-  easy: { tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを 回す', stop: '■ とめる', views: { iso: 'ななめ', front: 'まえ', top: 'うえ', side: 'よこ', inside: 'なか', labels: 'なまえ' }, big: 'おおきく', speak: 'よみあげ',
+  easy: { tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも', expert: 'せんもん' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを 回す', stop: '■ とめる', views: { iso: 'ななめ', front: 'まえ', top: 'うえ', side: 'よこ', inside: 'なか', labels: 'なまえ' }, big: 'おおきく', speak: 'よみあげ',
     ui: { parts: 'ぶひんの リスト', script: 'だいほん', focus: 'ちゅうもく', more: 'くわしく みる', explode: 'ばらばら', look: 'みえかた', normal: 'ふつう', xray: 'すけて みる', wire: 'せんだけ', cut: 'きって みる' }, sec: { structure: 'つくり', trivia: 'まめちしき', role: 'やくわり', analogy: 'たとえると' },
     parts: {
       prop:        { name: 'プロペラ',           role: 'まわって、空気を 下に おします。おした ぶんだけ、ドローンは 上に おされて うきます。', analogy: 'せんぷうきを 下に むけて、じぶんが ふわっと うくような もの' },
@@ -606,7 +606,7 @@ const I18N = {
       camera:      { name: 'カメラ',             role: '上から しゃしんや ビデオを とります。ゆれない ように、ゴムに ぶらさがって います。', analogy: 'スマホの カメラを、ゆれない だいに のせた もの' },
     },
     questions: { lift: 'どうして うくの？', fwd: 'どうして 前に すすむの？', ccw: 'どうして 4まい ぜんぶ おなじ むきに まわさないの？', time: '何分 とべるの？', rain: '雨の日は とべるの？', radio: 'でんぱが きれたら どうなるの？', where: 'どうやって じぶんの ばしょを 知るの？', weight: 'どのくらい おもいの？', crash: 'おちたら どこが こわれるの？', oneout: 'モーターが 1つ とまったら？', shake: 'カメラは どうして ゆれないの？', night: 'よるも とべるの？' } },
-  en: { tabs: { see: 'Look', fly: 'Fly', use: 'Use', mishap: 'What if' }, depth: { simple: 'Basic', full: 'Details' }, ask: 'Ask', power: '▶ Spin props', stop: '■ Stop', views: { iso: '3D', front: 'Front', top: 'Top', side: 'Side', inside: 'Inside', labels: 'Name' }, big: 'Big', speak: 'Read aloud',
+  en: { tabs: { see: 'Look', fly: 'Fly', use: 'Use', mishap: 'What if', expert: 'Expert' }, depth: { simple: 'Basic', full: 'Details' }, ask: 'Ask', power: '▶ Spin props', stop: '■ Stop', views: { iso: '3D', front: 'Front', top: 'Top', side: 'Side', inside: 'Inside', labels: 'Name' }, big: 'Big', speak: 'Read aloud',
     ui: { parts: 'Parts', script: 'Script', focus: 'Focus', more: 'More details', explode: 'Explode', look: 'View', normal: 'Normal', xray: 'X-ray', wire: 'Lines', cut: 'Cut' }, sec: { structure: 'Structure (Japanese)', trivia: 'Fun fact (Japanese)', role: 'Role', analogy: 'Like…' },
     parts: {
       prop:        { name: 'Propeller', role: 'It spins and pushes air down. The air pushes back, and that lifts the drone.', analogy: 'Like pointing a fan at the floor until you float.' },
@@ -678,4 +678,34 @@ const TRIVIA_ACT = {
   led: { question: 'night' }, damper: { question: 'shake' }, gimbal: { question: 'shake' }, camera: { question: 'shake' },
   rx: { whatif: 'signal' }, gps: { whatif: 'gps' }, telemetry: { whatif: 'battery' }, buzzer: { whatif: 'battery' }, pdb: { whatif: 'battery' },
   wiring: { mode: 'xray' }, capacitor: { mode: 'xray' },
+};
+
+// ===== 1000フライト早送り (パッケージ⑫): 消耗の区分と交換目安[フライト回数の幅]。典型例であり順番を見るためのもの =====
+const WEAR = {
+  battery:     { cls: 'must',  lo: 150,  hi: 300,  effect: '容量が2割減る' },
+  prop:        { cls: 'must',  lo: 100,  hi: 300,  effect: '縁の欠け・振動' },
+  xt60:        { cls: 'must',  lo: 200,  hi: 400,  effect: '接点の焼け・はんだの微小クラック' },
+  shaft:       { cls: 'wear',  lo: 300,  hi: 600,  effect: 'ベアリングのガタ・異音' },
+  damper:      { cls: 'wear',  lo: 200,  hi: 500,  effect: 'ゴムが硬くなり振動が伝わる' },
+  strap:       { cls: 'wear',  lo: 150,  hi: 400,  effect: '面ファスナーが甘くなる' },
+  screws:      { cls: 'wear',  lo: 300,  hi: 600,  effect: '振動でゆるむ' },
+  propNut:     { cls: 'wear',  lo: 300,  hi: 600,  effect: 'ねじ山の摩耗' },
+  balance:     { cls: 'wear',  lo: 300,  hi: 800,  effect: '接触不良' },
+  capacitor:   { cls: 'wear',  lo: 800,  hi: 1500, effect: '電解液の劣化' },
+  wiring:      { cls: 'wear',  lo: 600,  hi: 1200, effect: '曲げ疲労で芯線が切れる' },
+  landingGear: { cls: 'crash', lo: 200,  hi: 600,  effect: '着陸の衝撃で曲がる' },
+  arm:         { cls: 'crash', lo: 400,  hi: 1000, effect: '根元の白化（層間はく離）' },
+  gimbal:      { cls: 'crash', lo: 300,  hi: 800,  effect: '軸のガタ' },
+  camera:      { cls: 'crash', lo: 500,  hi: 1000, effect: 'レンズの傷・衝撃' },
+  motorMount:  { cls: 'crash', lo: 500,  hi: 1200, effect: '転倒で割れる' },
+  esc:         { cls: 'robust', lo: 1500, hi: 3000, effect: '熱で寿命が決まる' },
+  motor:       { cls: 'robust', lo: 1000, hi: 2500, effect: '巻線の絶縁劣化' },
+  winding:     { cls: 'robust', lo: 1000, hi: 2500, effect: '絶縁劣化' },
+  fc:          { cls: 'robust', lo: 2000, hi: 5000, effect: '' }, pdb: { cls: 'robust', lo: 2000, hi: 5000, effect: '' },
+  frameTop:    { cls: 'robust', lo: 2000, hi: 5000, effect: '' }, frameBottom: { cls: 'robust', lo: 2000, hi: 5000, effect: '' },
+  armClamp:    { cls: 'robust', lo: 2000, hi: 5000, effect: '' }, standoff: { cls: 'robust', lo: 3000, hi: 6000, effect: '' },
+  bell:        { cls: 'robust', lo: 1500, hi: 3000, effect: '' }, stator: { cls: 'robust', lo: 2000, hi: 5000, effect: '' }, magnet: { cls: 'robust', lo: 1500, hi: 3000, effect: '欠けは事故時' }, motorBase: { cls: 'robust', lo: 3000, hi: 6000, effect: '' },
+  gps: { cls: 'robust', lo: 2000, hi: 5000, effect: '' }, rx: { cls: 'robust', lo: 2000, hi: 5000, effect: '' }, vtx: { cls: 'robust', lo: 1500, hi: 3000, effect: '熱' }, led: { cls: 'robust', lo: 2000, hi: 5000, effect: '' },
+  telemetry: { cls: 'robust', lo: 2000, hi: 5000, effect: '' }, remoteId: { cls: 'robust', lo: 2000, hi: 5000, effect: '' }, regMark: { cls: 'robust', lo: 3000, hi: 6000, effect: '色あせ' }, batteryTray: { cls: 'robust', lo: 2000, hi: 5000, effect: '' },
+  propAdapter: { cls: 'robust', lo: 1500, hi: 3000, effect: '' }, buzzer: { cls: 'robust', lo: 2000, hi: 5000, effect: '' }, cells: { cls: 'must', lo: 150, hi: 300, effect: '容量低下' },
 };

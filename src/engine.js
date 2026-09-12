@@ -15,7 +15,7 @@ const S = {
   mode: 'normal', explode: 0, explodeT: 0, power: 0, flight: null, flightT: 0, depth: 'simple', tab: 'see',
   labels: true, arrows: false, air: false, autoRotate: !reduceMotion, shadows: true, slow: false, ts: 1, logTs: 0, tsTarget: 1,
   selected: null, selAll: false, hovered: null, isolated: null, quality: 'auto', qLevel: 3, lastInteract: performance.now(), lastSelect: -1e9,
-  camSpring: null, camInertia: null, sticks: false, tilt: false, theater: null, overlay: null, question: null, use: null, scale: false, price: false, whatif: null, labelOnly: null, labelsSuppressed: false, alive: true, big: false, lang: 'ja', lesson: null,
+  camSpring: null, camInertia: null, sticks: false, tilt: false, theater: null, overlay: null, question: null, use: null, scale: false, price: false, whatif: null, labelOnly: null, labelsSuppressed: false, expert: null, alive: true, big: false, lang: 'ja', lesson: null,
   aoDirty: true, shadowDirty: true, csDirty: true, envMul: 1, exposureMul: 1,
 };
 
@@ -210,7 +210,7 @@ function setTint(part, color, k) {
   for (const m of part.meshes) {
     const o = m.userData.origMat; if (Array.isArray(o) || !o.isMeshStandardMaterial) continue;
     if (k <= 0) { m.userData.tint = null; if (m.material === m.userData.tintMat) m.material = o; continue; }
-    const t = tintMat(m, o); t.color.copy(o.color).lerp(color, 0.65 * k); t.emissive.copy(color); t.emissiveIntensity = 0.28 * k; if (o.map && 'emissiveMap' in t) t.emissiveMap = o.map; m.userData.tint = t;
+    const t = tintMat(m, o); t.color.copy(o.color).lerp(color, 0.65 * k); t.emissive.copy(color); t.emissiveIntensity = (o.userData.flatTint ? 0.6 : 0.28) * k; if (o.map && !o.userData.flatTint && 'emissiveMap' in t) t.emissiveMap = o.map; /* 黒いテクスチャ(プロペラ)は模様を掛けると色が消えるので一様に光らせる */ m.userData.tint = t;
     if (m.material === o) m.material = t;
   }
 }
