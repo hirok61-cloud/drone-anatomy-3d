@@ -516,7 +516,11 @@ function onQualityChanged(level) { if (air.mesh && air.N !== Q.particles) rebuil
   const fold = () => {   /* シートが open/tall のときは視点バー(tall ではタイトルバーも)を畳む。peek は機体を見る段なので戻す */
     const st = sheets.map(el => (el.hidden || !el.classList.contains('open')) ? -1 : sheetState(el)); const mx = Math.max(...st);
     document.body.classList.toggle('sheet-open', mx >= 1); document.body.classList.toggle('sheet-tall', mx >= 2);
+    // 下から覆っている高さを CSS にも渡す(大きな部品名の帯 #bigBand をシートの上に置くため)。transform は高さに出ないので offsetHeight で測れる
+    let h = 0; for (const el of sheets) if (!el.hidden && el.classList.contains('open')) h = Math.max(h, el.offsetHeight);
+    if (h > 0) document.documentElement.style.setProperty('--sheet-h', h + 'px'); else document.documentElement.style.removeProperty('--sheet-h');
   };
+  fold();
   const mo = new MutationObserver(() => { fold(); kick(); setTimeout(kick, 420); });
   for (const el of watch) { mo.observe(el, { attributes: true, attributeFilter: ['class', 'hidden', 'style'] }); el.addEventListener('transitionend', e => { if (e.propertyName === 'transform' || e.propertyName === 'height') kick(); }); }
 }
