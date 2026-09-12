@@ -59,7 +59,7 @@ $('#tabs').addEventListener('click', e => { const b = e.target.closest('button')
 function setDepth(d) {
   S.depth = d; store.set('depth', d); document.body.classList.toggle('full', d === 'full'); segSet($('#depthSeg'), 'd', d); $('#coach').hidden = true;
   buildList(); renderDetail(); buildLabels(); buildMishapCards(); buildAsk(); updateBigBand(); if (S.scale) renderMassBar(S.selected && S.selected.key);
-  buildWhatifCards(); if (typeof syncRegToggle === 'function') syncRegToggle();
+  buildWhatifCards(); if (typeof syncRegToggle === 'function') { syncRegToggle(); if (S.scale && typeof regGhosts === 'function') regGhosts(true); }
   if (d === 'full') showToast('くわしく: 部品40種の仕様例と点検ポイントも見られます'); 
 }
 $('#depthSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setDepth(b.dataset.d); });
@@ -494,6 +494,12 @@ new ResizeObserver(() => document.documentElement.style.setProperty('--dock-h', 
 
 function onThemeChanged(dark) { airflowTheme(dark); }
 function onQualityChanged(level) { if (air.mesh && air.N !== Q.particles) rebuildAirflow(); $('#perfInfo').textContent = `品質 ${level}`; }
+{ // シートの開閉・カードの出入りで、3Dの見える帯が変わるたびに視錐台を合わせ直す
+  const watch = ['#inspector', '#lesson', '#expert', '#noteCard', '#massBar'].map(s => $(s)).filter(Boolean);
+  let t = 0; const kick = () => { clearTimeout(t); t = setTimeout(() => { if (narrow()) resize(); }, 60); };   /* シートは .38s かけて動くので、動き終わりにも測り直す */
+  const mo = new MutationObserver(() => { kick(); setTimeout(kick, 420); });
+  for (const el of watch) { mo.observe(el, { attributes: true, attributeFilter: ['class', 'hidden', 'style'] }); el.addEventListener('transitionend', e => { if (e.propertyName === 'transform') kick(); }); }
+}
 function onResized() {
   if (S.scale) { if (D.personGroup) D.personGroup.visible = !compact(); renderMassBar(S.selected && S.selected.key); } for (const L of labelEls) L.w = 0; if (!S.labelsTouched) { S.labels = !narrow(); for (const x of $$('.tgl[data-t=labels]')) x.classList.toggle('on', S.labels); } }
 function initUI() {

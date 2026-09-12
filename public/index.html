@@ -229,13 +229,13 @@ button, .tabs, .seg, .chips { touch-action: manipulation; -webkit-user-select: n
 /* ---- responsive ---- */
 @media (max-width: 1100px) {
   :root { --insp-w: 0px; }
-  #inspector, #lesson, #expert { top: auto; right: 0; left: 0; bottom: 0; width: auto; height: min(78vh, 640px); border-radius: 20px 20px 0 0; transform: translateY(102%); transition: transform .38s cubic-bezier(.32,.72,0,1); will-change: transform; z-index: 14; }
+  #inspector, #lesson, #expert { top: auto; right: 0; left: 0; bottom: 0; width: auto; height: min(62vh, 560px);   /* 3Dが3割は見えるように。深く読むときはつまみを上へ */ border-radius: 20px 20px 0 0; transform: translateY(102%); transition: transform .38s cubic-bezier(.32,.72,0,1); will-change: transform; z-index: 14; }
   #inspector.open, #lesson.open, #expert.open { transform: translateY(0); } #inspector.dragging, #lesson.dragging, #expert.dragging { transition: none; }
   .grabber { display: block; width: 40px; height: 5px; border-radius: 3px; background: var(--hair2); margin: 8px auto 0; position: relative; }
   .grabber::before { content: ''; position: absolute; inset: -22px -60px; }
   #inspClose { display: grid; }
   .compact-only { display: inline-flex; }
-  #expert { height: min(46vh, 420px); } #expert.tall { height: min(78vh, 640px); } .xsegm { margin: 0 14px 6px; align-self: flex-start; } #expertClose { display: grid; }   /* 専門シートは機体が見える高さに留め、モード切替をシート内にも置く(ドックがシートの下に隠れるため) */
+  #expert { height: min(46vh, 420px); } #expert.tall, #inspector.tall, #lesson.tall { height: min(80vh, 660px); } .xsegm { margin: 0 14px 6px; align-self: flex-start; } #expertClose { display: grid; }   /* 専門シートは機体が見える高さに留め、モード切替をシート内にも置く(ドックがシートの下に隠れるため) */
   #dock { right: 14px; margin: 0; } #viewCol { right: 14px; } #noteCard { width: min(420px, calc(100vw - 90px)); }
 }
 @media (max-width: 760px), (max-height: 520px) {
@@ -447,7 +447,7 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
   #expert .xsegm { position: sticky; top: 0; z-index: 1; background: var(--glass); }
 }
 @media (max-width: 760px) {
-  .mb-reg .tick span { display: none; } .mb-reg .tick b { font-size: calc(10.5px * var(--fs, 1)); } .mb-reg .axis { margin: 4px 30px 0 20px; height: 30px; } #massBar { overflow-y: auto; }
+  .mb-reg .tick b { font-size: calc(10.5px * var(--fs, 1)); } .mb-reg .axis { margin: 4px 30px 0 20px; height: 30px; } #massBar { overflow-y: auto; }
   body.scale #noteCard { bottom: calc(var(--dock-h) + 16px + var(--massbar-h, 42vh) + var(--sab)); max-height: 26vh; }   /* 重さの帯と重ねない */
   #noteCard, #massBar { bottom: calc(var(--dock-h) + 8px + var(--sab)); }
   .tabs button { min-height: var(--tap); }
@@ -467,11 +467,12 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
 .rep { margin-top: 10px; border: 1px solid var(--hair); border-radius: 10px; padding: 6px 10px; font-size: calc(12.5px * var(--fs, 1)); } .rep summary { cursor: pointer; font-weight: 600; color: var(--accent-text); } .rep .rep-h { margin: 8px 0 2px; font-weight: 700; font-size: calc(12px * var(--fs, 1)); color: var(--ink2); } .rep ul { margin: 0; padding-left: 1.1em; } .rep li, .rep p { margin: 3px 0; line-height: 1.55; }
 .rep-q { font-family: var(--mono); font-size: calc(11.5px * var(--fs, 1)); background: var(--seg-bg); border-radius: 8px; padding: 8px 10px; line-height: 1.6; }
 .mb-reg { border-top: 1px solid var(--hair); padding-top: 8px; margin-top: 6px; font-size: calc(11.5px * var(--fs, 1)); color: var(--ink2); } .mb-reg p { margin: 6px 0 0; line-height: 1.55; } .mb-reg small { display: block; color: var(--ink3); margin-top: 4px; }
-.mb-reg .axis { position: relative; height: 46px; margin: 6px 6px 0; border-bottom: 2px solid var(--hair2); } .mb-reg .tick { position: absolute; bottom: -2px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; font-style: normal; } .mb-reg .tick::after { content: ''; width: 2px; height: 8px; background: var(--ink3); margin-top: 2px; } .mb-reg .tick b { font-size: calc(11.5px * var(--fs, 1)); color: var(--ink); white-space: nowrap; } .mb-reg .tick span { font-size: calc(10px * var(--fs, 1)); color: var(--ink3); white-space: nowrap; } .mb-reg .tick.me b { color: var(--accent-text); } .mb-reg .tick.me::after { background: var(--accent); height: 12px; }
+.mb-reg .axis { position: relative; height: 46px; margin: 6px 6px 0; border-bottom: 2px solid var(--hair2); } .mb-reg .tick { position: absolute; bottom: -2px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; font-style: normal; } .mb-reg .tick::after { content: ''; width: 2px; height: 8px; background: var(--ink3); margin-top: 2px; } .mb-reg .tick b { font-size: calc(11.5px * var(--fs, 1)); color: var(--ink); white-space: nowrap; } .mb-reg .tick span { display: none; }   /* 幅212pxのバーでは重なるので、説明は下の段落に任せる */ .mb-reg .tick.me b { color: var(--accent-text); } .mb-reg .tick.me::after { background: var(--accent); height: 12px; }
 .reg-srcs p { font-size: calc(11.5px * var(--fs, 1)); color: var(--ink2); line-height: 1.55; margin: 6px 0; } .src-list { margin: 0; padding-left: 1.1em; font-size: calc(11.5px * var(--fs, 1)); line-height: 1.7; }
 .ky-course b::before { content: '⚖ '; }
 #noteBody .tbl { overflow-x: auto; margin: 8px 0; } table.ky-tbl { border-collapse: collapse; width: 100%; font-size: calc(12px * var(--fs, 1)); min-width: 360px; } table.ky-tbl th, table.ky-tbl td { text-align: left; vertical-align: top; padding: 5px 8px; border-bottom: 1px solid var(--hair); } table.ky-tbl th { color: var(--ink3); font-weight: 600; } .ky-list { margin: 6px 0 0; padding-left: 1.1em; font-size: calc(12px * var(--fs, 1)); line-height: 1.6; }
-#printSheet .ps-ky ul, #printSheet .ps-repl { margin: 4pt 0; padding-left: 1.2em; } #printSheet .ps-small { font-size: 9.5pt; color: #333; } #printSheet .ps-repl li { display: flex; gap: 8pt; align-items: flex-end; margin: 6pt 0; } #printSheet .ps-repl li span:first-child { flex: none; width: 15em; } #printSheet .ps-repl .fill-line { flex: 1; border-bottom: 1px solid #000; height: 1.2em; }
+#printSheet .ps-ky, #printSheet .ps-rep, #printSheet .ps-review { break-inside: avoid; page-break-inside: avoid; } #printSheet .ps-rep { break-before: page; page-break-before: always; }
+#printSheet .ps-ky ul, #printSheet .ps-repl { margin: 4pt 0; padding-left: 1.2em; } #printSheet .ps-small { font-size: 9.5pt; color: #333; } #printSheet .ps-repl li { display: flex; gap: 8pt; align-items: flex-end; margin: 6pt 0; } #printSheet .ps-repl li span:first-child { flex: none; width: 12em; } #printSheet .ps-repl .fill-line { flex: 1; border-bottom: 1px solid #000; height: 1.2em; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation-duration: .01s !important; } }
 
@@ -1424,6 +1425,7 @@ const REG_SOURCES = {
   log:     { name: '国土交通省 飛行計画の通報・飛行日誌', url: 'https://www.mlit.go.jp/koku/operation.html' },
   accident:{ name: '国土交通省 事故等の報告・負傷者救護義務', url: 'https://www.mlit.go.jp/koku/accident_report.html' },
   soumu:   { name: '総務省 電波利用ホームページ（ドローンの無線）', url: 'https://www.tele.soumu.go.jp/j/sys/others/drone/notes/' },
+  soumuPriv: { name: '総務省 ドローンによる撮影映像等の取扱いに係るガイドライン', url: 'https://www.soumu.go.jp/main_sosiki/joho_tsusin/d_syohi/ihoyugai_02.html' },
   jtsb:    { name: '運輸安全委員会', url: 'https://www.mlit.go.jp/jtsb/' },
 };
 // 部品 → 制度タグ。text は判定ではなく「求められている」「確認する」で止める
@@ -1449,20 +1451,20 @@ const REG = {
     { text: '飛行前点検の項目に「バッテリーの残量の確認」が含まれる。飛行後は安全な状態で保管し、墜落時は発火に注意して電源を切る。', ky: '2.2', src: 'mlit' },
     { text: '機体の飛行のために必要な電池は、輸送が原則禁止される「危険物」の対象にならない。', ky: '3.1', src: 'mlit' }],
   prop: [
-    { text: '飛行後は機体に不具合がないか点検し、次回に備える。特定飛行では日常点検記録に残す。', ky: '4.6', src: 'log' }],
+    { text: '欠け・ひび・取り付けの向きは飛行前点検の項目。飛行後も点検し、特定飛行では日常点検記録に残す。', ky: '4.6', src: 'log' }],
   motor: [
-    { text: '飛行後は機体に不具合がないか点検し、次回に備える。特定飛行では日常点検記録に残す。', ky: '4.6', src: 'log' }],
+    { text: '飛行前後に異音・ガタを確認し、特定飛行では日常点検記録に残す。整備や改造をしたときは点検整備記録にも書く。', ky: '4.6', src: 'log' }],
   camera: [
-    { text: '撮影した映像を公開するときは、人の顔や表札などプライバシーへの配慮が求められる（総務省のガイドライン）。', ky: '3.2', src: 'mlit' }],
+    { text: '撮影した映像をインターネットで公開するときは、人の顔や表札、車のナンバーなどが写り込まないよう配慮することが求められる（総務省のガイドライン）。', ky: '3.2', src: 'soumuPriv' }],
   frameTop: [
     { text: 'この機体は最大離陸重量25kg未満の区分。25kg以上になると、登録記号は25mm以上、特定飛行はカテゴリーⅡA（許可・承認の審査がより厳格）になり、第三者賠償責任保険への加入が求められる（第5版で追記）。', ky: '3.1', src: 'mlit' }],
 };
-REG.frameBottom = REG.frameTop; REG.esc = REG.motor;
+REG.frameBottom = REG.frameTop;   /* 下フレームも「機体全体」の区分の話を出す。ESC は固有の制度事項がないので付けない */
 // 部品 → 教則の章（チップに出す）
 const KY_PART = { frameTop: '4.1', frameBottom: '4.1', arm: '4.1', armClamp: '4.1', motorMount: '4.1', standoff: '4.1', screws: '4.6', landingGear: '4.1', batteryTray: '4.4',
   motor: '4.4', bell: '4.4', stator: '4.4', winding: '4.4', magnet: '4.4', shaft: '4.6', prop: '4.4', propNut: '4.6', propAdapter: '4.4', esc: '4.4', capacitor: '4.4',
   fc: '4.4', pdb: '4.4', buzzer: '4.4', battery: '4.4', cells: '4.4', xt60: '4.4', balance: '4.4', strap: '4.6', wiring: '4.4',
-  gps: '4.5', rx: '4.5', vtx: '3.2', telemetry: '4.5', remoteId: '3.1', regMark: '3.1', led: '4.2', damper: '4.4', gimbal: '4.4', camera: '4.4' };
+  gps: '4.5', rx: '4.5', vtx: '3.2', telemetry: '4.5', remoteId: '3.1', regMark: '3.1', led: '4.2', damper: '4.4', gimbal: '4.4', camera: '4.4', motorBase: '4.1' };
 // 画面 → 教則の章
 const KY_TAB = [
   { screen: 'みる（部品・構造・分解・見え方）', ky: ['4.1', '4.4'], note: '40部品の解説がそのまま対応する' },
@@ -1488,7 +1490,7 @@ const REG_REPORT = {
   incident: ['航空機との衝突・接触のおそれがあったと認めた事態', '重傷に至らない人の負傷', '機体の制御が不能となった事態', '飛行中の発火'],
   how: 'DIPS2.0 の事故等報告機能で、速やかに報告する（やむを得ない場合は様式で官署へ）。当てはまらない不具合は報告ではなく、点検整備記録に残す。',
   items: '操縦者の氏名・所属・住所、技能証明書番号、発生日時と場所（周辺地図を添付）、許可・承認の年月日と番号、登録記号、機体の種類と型式、飛行の目的と経過、損壊した部位、負傷者の状況、その後の対応。',
-  law: '報告義務違反は30万円以下の罰金。負傷者の救護など危険防止の措置を怠ると2年以下の懲役または100万円以下の罰金。',
+  law: '報告義務違反は30万円以下の罰金。負傷者の救護など危険防止の措置を怠ったときの罰則も定められている（2025年6月の刑法改正で懲役・禁錮は拘禁刑に一本化）。',
   src: 'accident',
 };
 // 組み間違い・もしも → 報告書の記述例（部品名は画面と同じ言葉で）
@@ -2537,7 +2539,7 @@ class GtaoLite extends GTAOPass {
     const fresh = S.aoDirty || (++this._n % this.every === 0);
     try {
       if (fresh) {
-        this.overrideVisibility(); this.renderOverride(renderer, this.normalMaterial, this.normalRenderTarget, 0x7777ff, 1.0); this.restoreVisibility();
+        try { this.overrideVisibility(); this.renderOverride(renderer, this.normalMaterial, this.normalRenderTarget, 0x7777ff, 1.0); } finally { this.restoreVisibility(); }   // 例外でも必ず戻す(戻し損ねるとLED・気流・輪が消えたままになる)
         const u = this.gtaoMaterial.uniforms; u.cameraNear.value = this.camera.near; u.cameraFar.value = this.camera.far;
         u.cameraProjectionMatrix.value.copy(this.camera.projectionMatrix); u.cameraProjectionMatrixInverse.value.copy(this.camera.projectionMatrixInverse); u.cameraWorldMatrix.value.copy(this.camera.matrixWorld);
         this.renderPass(renderer, this.gtaoMaterial, this.gtaoRenderTarget, 0xffffff, 1.0);
@@ -2651,7 +2653,7 @@ function applyMode() {
   const cutOn = S.mode === 'cut';
   for (const c of cut.list) { if (!cutOn) c.mat.clippingPlanes[0].copy(cut.far); }
   { const on = !isWireMode(); for (const p of D.parts) if (p.key === 'led') { const u = p.obj.userData; if (u.core) u.core.visible = on; if (u.halo) u.halo.visible = on; } }   // 線画/設計図ではLEDの光を消す
-  renderer.shadowMap.enabled = key.castShadow = S.shadows && S.mode !== 'xray' && !isWireMode();
+  renderer.shadowMap.enabled = key.castShadow = S.shadows && S.qLevel >= 1 && S.mode !== 'xray' && !isWireMode();
   gridU.uGrid.value = (S.mode === 'xray' || isWireMode()) ? 1 : 0;
   S.shadowDirty = S.csDirty = S.aoDirty = true;
 }
@@ -2712,13 +2714,24 @@ function stepCamera(dt) {
   // 防護: 非有限値や暴走の復帰
   const p = camera.position, t = controls.target;
   if (!Number.isFinite(p.x + p.y + p.z + t.x + t.y + t.z)) { S.camSpring = null; S.camInertia = null; cam.v.set(0, 0, 0); cam.tv.set(0, 0, 0); t.set(0, 0, 0); p.set(0.78, 0.50, -0.82); }
+  if (!S.camSpring && !S.camInertia && controls.maxDistance > camMax()) controls.maxDistance = Math.max(camMax(), controls.maxDistance - (controls.maxDistance - camMax()) * (1 - Math.exp(-dt / 0.5)));   // 場面を抜けたら上限をゆっくり戻す
   if (t.length() > 3) t.clampLength(0, 3);
   const lim = Math.max(4, controls.maxDistance); const off = tmpV.copy(p).sub(t); if (off.length() > lim) p.copy(t).addScaledVector(off.normalize(), lim);   // 上限は画面の縦横比と台本の引きに合わせる(固定4mだと縦画面で場面が枠に入らない)
 }
 function onCamInterrupt() { if (S.camSpring) { S.camSpring = null; S.camInertia = { v: cam.v.clone().clampLength(0, 2), t: 0.3 }; cam.v.set(0, 0, 0); cam.tv.set(0, 0, 0); } }
+// 画面下でシートやドックが覆っている高さ(CSSピクセル)
+function bottomCover() {
+  const H2 = window.innerHeight; let cov = 0;
+  for (const sel of ['#dock', '#inspector.open', '#lesson.open', '#expert.open', '#noteCard', '#massBar']) {
+    const el = document.querySelector(sel); if (!el || el.hidden) continue;
+    const r = el.getBoundingClientRect(); if (r.height < 4 || r.top > H2 - 8 || r.bottom < H2 * 0.6) continue;
+    cov = Math.max(cov, H2 - r.top);
+  }
+  return Math.min(cov, H2 * 0.62);
+}
 function viewScale() { const a = W / H; return a < 1 ? Math.min(2.0, Math.pow(1 / a, 0.9)) : 1; }
 function camMax() { return 3.2 * viewScale(); }   // 縦長の画面ほど引かないと同じ画が入らない
-function camHome() { controls.maxDistance = camMax(); if (camera.position.distanceTo(controls.target) > camMax() * 0.75) focusOn([D.root], { pull: true }); }   // 広い場面(人が近づく等)から戻ったら機体の枠に戻す
+function camHome() { if (camera.position.distanceTo(controls.target) > camMax() * 0.75) focusOn([D.root], { pull: true }); }   // 上限は stepCamera がゆっくり戻す(即座に下げると引きから瞬間移動する)   // 広い場面(人が近づく等)から戻ったら機体の枠に戻す
 function focusOn(objs, opts = {}) {
   const box = new THREE.Box3(), tb = new THREE.Box3(), pts = [];   // 本体メッシュだけで枠を決める(気流・ゴースト・スプライトは除外)。各メッシュの8隅を集めて実投影で距離を決める
   for (const o of objs) { o.updateWorldMatrix(true, true); o.traverseVisible(c => { if (!c.isMesh || c.userData.noPart || !c.geometry) return; if (!c.geometry.boundingBox) c.geometry.computeBoundingBox(); const b = c.geometry.boundingBox; if (c.isInstancedMesh) { if (!c.boundingBox) c.computeBoundingBox(); tb.copy(c.boundingBox).applyMatrix4(c.matrixWorld); } else tb.copy(b).applyMatrix4(c.matrixWorld); box.union(tb); for (let i = 0; i < 8; i++) pts.push(new THREE.Vector3(i & 1 ? tb.max.x : tb.min.x, i & 2 ? tb.max.y : tb.min.y, i & 4 ? tb.max.z : tb.min.z)); }); } if (box.isEmpty()) return;
@@ -2758,6 +2771,7 @@ function applyTheme() {
   finishPass.uniforms.vig.value = T.vig; csPlane.material.opacity = T.cs;
   xrayMat.uniforms.color.value.set(T.xray); xrayMat.uniforms.opacity.value = themeDark ? 0.75 : 0.72; xrayMat.uniforms.base.value = themeDark ? 0.02 : 0.025; xrayMat.uniforms.power.value = themeDark ? 2.2 : 2.0;   // 明るいテーマは重ねたときに中心が黒く潰れないよう薄く xrayMat.blending = themeDark ? THREE.AdditiveBlending : THREE.NormalBlending; xrayMat.needsUpdate = true;
   wireMat.color.set(T.wire); paperMat.color.set(T.paper);
+  if (D.cgMarker) { const dark = themeDark; D.cgMarker.traverse(o => { if (!o.isMesh) return; const c = o.material.color.getHex(); if (c === 0x1b1f27 || c === 0x9aa3b0) o.material.color.set(dark ? 0x9aa3b0 : 0x1b1f27); }); }   // 重心の黒がダークの床に沈まないように
   arrowNeutral = themeDark ? 0xf2f4f8 : 0x30343c;
   D.parts.filter(p => p.key === 'led').forEach(p => { if (p.obj.userData.halo) p.obj.userData.halo.material.opacity = T.halo; });
   applyBlueprint();
@@ -2790,9 +2804,11 @@ function resize() {
   W = canvas.clientWidth || 1; H = canvas.clientHeight || 1;
   const dpr = dprFor(S.qLevel); if (dpr !== DPR) { DPR = dpr; renderer.setPixelRatio(DPR); composer.setPixelRatio(DPR); }
   renderer.setSize(W, H, false); composer.setSize(W, H);
-  if (!narrow()) { const inspW = 344 + 40; camera.aspect = (W - inspW) / H; camera.setViewOffset(W - inspW, H, 0, 0, W, H); } else { camera.clearViewOffset(); camera.aspect = W / H; }
+  camera.aspect = narrow() ? W / H : (W - 384) / H;
+  if (!narrow()) camera.setViewOffset(W - 384, H, 0, 0, W, H);   /* 右パネルの分だけ左に寄せる */
+  else { const cov = bottomCover(); if (cov > 24) camera.setViewOffset(W, H, 0, cov * 0.5, W, H); else camera.clearViewOffset(); }   /* 下のシートに隠れないよう、画を上へずらす(大きさは変えない) */
   camera.updateProjectionMatrix();
-  controls.maxDistance = Math.max(camMax(), camera.position.distanceTo(controls.target));
+  controls.maxDistance = Math.max(camMax(), camera.position.distanceTo(controls.target), S.camSpring ? S.camSpring.p1.distanceTo(S.camSpring.q1) * 1.02 : 0);   // 飛行中の目標も含める
   if (typeof onResized === 'function') onResized();
   S.aoDirty = true;
 }
@@ -2805,7 +2821,7 @@ function perfP90() { if (perf.n < 30) return 0; const a = Array.from(perf.ring.s
 
 // ---------- 起動時ウォームアップ (RTを合わせて非同期コンパイル) ----------
 async function warmCompile() {
-  const warm = new THREE.Group(); warm.visible = false; const q = new THREE.PlaneGeometry(0.01, 0.01);
+  const warm = new THREE.Group(); warm.scale.setScalar(1e-4); warm.position.set(0, -50, 0); const q = new THREE.PlaneGeometry(0.01, 0.01);   // visible=false だと compileAsync が飛ばすので、極小にして遠くへ置く
   const depthOf = (o) => Object.assign(new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking }), o);
   warm.add(new THREE.Mesh(q, xrayMat), new THREE.Mesh(q, paperMat), new THREE.Mesh(q, wireMat), new THREE.Mesh(q, depthOf({ side: THREE.BackSide })), new THREE.Mesh(q, depthOf({ side: THREE.DoubleSide })), new THREE.InstancedMesh(q, depthOf({ side: THREE.BackSide }), 1));
   scene.add(warm);
@@ -3258,6 +3274,7 @@ function whatifStageIndex() { return clamp(whatif.phase, 0, WHATIF_STAGES.length
 function startWhatif(id) {
   const def = WHATIF.find(w => w.id === id); if (!def) return;
   stopTheater(true); stopWhatif(true);
+  theater.cam = true;   // 劇場で視点をドラッグすると false のままになるので、場面の頭で必ず戻す
   whatif.active = true; whatif.def = def; whatif.phase = 0; whatif.t = 0; whatif.litIdx = -1; whatif.blink = 0; whatif.seq = [];
   S.whatif = whatif; setBodyMode('theater');
   body.px = body.pz = 0; body.py = free.hoverY; body.tx = body.tz = body.wx = body.wz = 0; body.yaw = 0; body.mult = [1, 1, 1, 1];
@@ -3271,7 +3288,7 @@ function startWhatif(id) {
   }
   if (D.personGroup) { whatif.saved.personPos = D.personGroup.position.clone(); whatif.saved.personVis = D.personGroup.visible; }
   const vs = viewScale();
-  if (def.motion === 'tachiiri') { tachiiriSetup(); const dv = vs > 1 ? 1.35 : 1; theaterCamera(new THREE.Vector3(4.6 * dv, 4.4 * dv, 4.6 * dv), new THREE.Vector3(-1.4, 0.2, -1.4), 900); }   // 近づく向きに沿って奥を見る俯瞰。区画(直径6m)と3人が縦にも横にも入る
+  if (def.motion === 'tachiiri') { tachiiriSetup(); const dv = vs > 1 ? 1.3 : 1; theaterCamera(new THREE.Vector3(4.6 * dv, 4.4 * dv, 4.6 * dv), new THREE.Vector3(-1.4, 0.2, -1.4), 900); }   /* 近づく向きに沿って奥を見る俯瞰。3人を奥行き方向に並べるので縦画面でも入る */
   else if (def.motion === 'person') theaterCamera(new THREE.Vector3(3.2 * vs, 1.6 * vs, -2.6 * vs), new THREE.Vector3(-0.35, 0.72, -0.35), 900);   // 人型(1.7m)が全身で入る引き(約4.4m)
   else theaterCamera(new THREE.Vector3(1.05 * vs, 0.55 * vs, -1.05 * vs), new THREE.Vector3(0, 0.03, 0), 800);
   if (typeof onWhatifChanged === 'function') onWhatifChanged();
@@ -3286,7 +3303,9 @@ function stopWhatif(silent) {
   for (let i = 0; i < 4; i++) body.mult[i] = 1;
   air.windOverride = null; S.air = whatif.saved.air; for (const x of $$('.tgl[data-t=air]')) x.classList.toggle('on', S.air);
   if (D.personGroup) { if (whatif.saved.personPos) D.personGroup.position.copy(whatif.saved.personPos); D.personGroup.visible = whatif.saved.personVis; if (D.personGroup.userData.rest) D.personGroup.userData.rest(); if (D.personGroup.userData.face) D.personGroup.userData.face(0, 0); }
-  if (whatif.people) for (const g of whatif.people) g.visible = false; if (whatif.ring2) whatif.ring2.visible = false;
+  if (whatif.people) for (const g of whatif.people) { g.visible = false; if (g.userData.foot) g.userData.foot.visible = false; }
+  if (whatif.ring2) whatif.ring2.visible = false;
+  if (whatif.groundScale) { ground.scale.set(whatif.groundScale, 1, whatif.groundScale); whatif.groundScale = null; }
   S.labelsSuppressed = false; S.labelOnly = null; buildLabels();
   whatif.active = false; whatif.def = null; whatif.phase = 0; S.whatif = null;
   S.power = 0; setBodyMode('idle');
@@ -3349,11 +3368,12 @@ const WHATIF_MOTION = {
   // 人を入れない → 第三者は補助者の手前で止まり、機体はその場に降りる
   tachiiri(t, dt) {
     const P = whatif.people; if (!P) return t > 5.0;
-    const th = P[2]; const k = smoothstep(1.0, 3.6, t), dd = 6.0 - 2.2 * k, walking = t > 1.0 && k < 1;   // 半径6.0m → 3.8m（区画の外で止まる）
+    const th = P[2]; const k = smoothstep(1.0, 3.6, t), dd = 6.0 - 2.2 * k, walking = t > 1.0 && k < 1;   /* 半径6.0m → 3.8m（区画の外で止まる） */
     const phase = 2 * Math.PI * (2.2 * k) / 1.3;
     th.position.set(-0.894 * dd, -0.158 + (walking ? 0.012 * Math.abs(Math.sin(phase)) : 0), -0.447 * dd);
     th.userData.face(P[1].position.x, P[1].position.z);
     if (walking) th.userData.walk(phase, 1); else th.userData.rest(dt);
+    if (th.userData.foot) th.userData.foot.position.set(th.position.x, -0.1555, th.position.z);
     if (t < 3.8) body.py = free.hoverY + 0.03;
     else { const k2 = smoothstep(3.8, 5.0, t); body.py = (free.hoverY + 0.03) * (1 - k2); if (t > 4.6) D.motors.forEach(mo => { mo.rpmTarget = 0; }); }
     if (t > 3.6) { const b = 0.5 + 0.5 * Math.sin((t - 3.6) * 2 * Math.PI / 0.6); for (const p of partsOf('led')) { setTint(p, RED, 0.6 * b); const h = p.obj.userData.halo; if (h) { h.material.color.copy(RED); h.material.opacity = 0.06 + 0.4 * b; } } }
@@ -3376,24 +3396,35 @@ const WHATIF_MOTION = {
 };
 
 // ---------- 立入管理措置: 操縦者・補助者・第三者と区画の輪 ----------
+function footShadowTex() {
+  const cv = document.createElement('canvas'); cv.width = cv.height = 64; const g = cv.getContext('2d');
+  const grd = g.createRadialGradient(32, 32, 2, 32, 32, 32); grd.addColorStop(0, 'rgba(0,0,0,0.55)'); grd.addColorStop(0.55, 'rgba(0,0,0,0.22)'); grd.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = grd; g.fillRect(0, 0, 64, 64); const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
 function tachiiriSetup() {
   if (!whatif.people) {
     whatif.people = [0, 1, 2].map(() => { const g = buildPerson(); g.traverse(o => { o.userData.noPick = true; }); scene.add(g); return g; });
-    const rg = new THREE.Mesh(new THREE.TorusGeometry(3.0, 0.012, 8, 160), new THREE.MeshBasicMaterial({ color: 0xe8a33d, transparent: true, opacity: 0.85, toneMapped: false }));
+    const rg = new THREE.Mesh(new THREE.TorusGeometry(3.0, 0.02, 8, 200), new THREE.MeshBasicMaterial({ color: 0xe8a33d, transparent: true, opacity: 0.9, toneMapped: false }));
     rg.rotation.x = Math.PI / 2; rg.position.y = -0.156; rg.userData.noPart = rg.userData.noPick = rg.userData.noAO = rg.userData.noShadow = true; scene.add(rg); whatif.ring2 = rg;
+    // 足元の影: 影マップの枠を広げると粗くなるので、人には柔らかい円を敷く
+    const ftex = footShadowTex();
+    for (const g of whatif.people) { const f = new THREE.Mesh(new THREE.CircleGeometry(0.26, 32), new THREE.MeshBasicMaterial({ map: ftex, transparent: true, depthWrite: false, toneMapped: false })); f.rotation.x = -Math.PI / 2; f.position.y = -0.1555; f.renderOrder = -1; f.userData.noPart = f.userData.noPick = f.userData.noAO = f.userData.noShadow = true; scene.add(f); g.userData.foot = f; }
   }
   const [op, as, th] = whatif.people;
-  op.position.set(0.6, -0.158, 1.35); op.userData.face(0, 0); op.userData.rest(); op.visible = true;            // 操縦者: 機体の手前(カメラ側)
-  as.position.set(-2.05, -0.158, -2.05); as.userData.face(-6, -6); as.userData.rest(); as.visible = true;        // 補助者: 区画の境目で外を向く
-  th.position.set(-5.36, -0.158, -2.68); th.userData.face(-2.05, -2.05); th.userData.rest(); th.visible = true;   // 第三者: 補助者の横から近づく(画面上で重ならない向き)
+  op.position.set(0.6, -0.158, 1.35); op.userData.face(0, 0); op.userData.rest(); op.visible = true;            /* 操縦者: 機体の手前(カメラ側) */
+  as.position.set(-2.05, -0.158, -2.05); as.userData.face(-6, -6); as.userData.rest(); as.visible = true;        /* 補助者: 区画の境目で外を向く */
+  th.position.set(-5.36, -0.158, -2.68); th.userData.face(-2.05, -2.05); th.userData.rest(); th.visible = true;   /* 第三者: 補助者の横から近づく(画面上で重ならない向き) */
   whatif.ring2.visible = true;
+  if (!whatif.groundScale) { whatif.groundScale = ground.scale.x; ground.scale.set(2.6, 1, 2.6); }   /* 床(半径2.8m)のままだと区画も人も虚空に立つ */
+  for (const g of whatif.people) if (g.userData.foot) { g.userData.foot.visible = true; g.userData.foot.position.set(g.position.x, -0.1555, g.position.z); }
 }
 function stepWhatif(dtSim, dtReal) {
   if (!whatif.active) return;
   whatif.t += dtSim; const def = whatif.def;
   if (whatif.phase === 1) {
     const done = WHATIF_MOTION[def.motion](whatif.t, dtSim);
-    if (done) { whatif.phase = 2; whatif.t = 0; whatif.litIdx = -1; whatif.seq = []; S.labelsSuppressed = false; if (typeof onWhatifChanged === 'function') onWhatifChanged(); }
+    if (done) { whatif.phase = 2; whatif.t = 0; whatif.litIdx = -1; whatif.seq = []; S.labelsSuppressed = false;
+      if (def.motion === 'tachiiri') { const vs2 = viewScale(); theaterCamera(new THREE.Vector3(1.05 * vs2, 0.55 * vs2, -1.05 * vs2), new THREE.Vector3(0, 0.03, 0), 900); }   /* 俯瞰のままだと部品が小さすぎるので寄る */ if (typeof onWhatifChanged === 'function') onWhatifChanged(); }
   } else if (whatif.phase === 2) {
     const idx = Math.min(def.parts.length - 1, Math.floor(whatif.t / 1.2));
     if (idx !== whatif.litIdx) {
@@ -3478,7 +3509,7 @@ function setScale(on) {
   if (on) {
     if (S.use) setUse(null);
     if (S.explode > 0.02) setExplode(0);
-    if (S.mode === 'cut') setMode('normal');
+    if (S.mode !== 'normal') setMode('normal');   /* X線・線画・断面のまま実寸に入ると、人型と区分の形だけ実体で浮く */
     if (D.cgMarker) D.cgMarker.visible = true;
     if (D.personGroup) { D.personGroup.visible = !compact(); if (D.personGroup.userData.face) D.personGroup.userData.face(0, 0); if (D.personGroup.userData.rest) D.personGroup.userData.rest(); if (D.personGroup.userData.setGhost) D.personGroup.userData.setGhost(true); }
     setPayload(scale.payload); renderMassBar(); setPower(0.5, true); regGhosts(true);
@@ -4411,8 +4442,8 @@ function bladeDiscs(on) {
       const m = new THREE.Mesh(new THREE.CircleGeometry(0.156, 96), new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.5, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }));
       m.rotation.x = -Math.PI / 2; m.position.set(0, 0.038, 0); m.renderOrder = 5; m.userData.noPart = m.userData.noPick = m.userData.noAO = m.userData.noShadow = true; m.userData.cv = cv; m.userData.tex = tex; mo.group.add(m); expert.bladeDiscs.push(m);
     }
-    for (const mo of D.motors) { if (mo.propMesh.userData.ro0 == null) mo.propMesh.userData.ro0 = mo.propMesh.renderOrder; mo.propMesh.renderOrder = 6; }
   }
+  if (on) for (const mo of D.motors) { if (mo.propMesh.userData.ro0 == null) mo.propMesh.userData.ro0 = mo.propMesh.renderOrder; mo.propMesh.renderOrder = 6; }   /* 2回目以降の ON でも効くよう生成ブロックの外で設定する */
   for (const m of expert.bladeDiscs) m.visible = !!on;
   if (!on) for (const mo of D.motors) { if (mo.propMesh.userData.ro0 != null) mo.propMesh.renderOrder = mo.propMesh.userData.ro0; }
   expertArrows(!!on || expert.heat > 0.05);
@@ -4734,7 +4765,7 @@ $('#tabs').addEventListener('click', e => { const b = e.target.closest('button')
 function setDepth(d) {
   S.depth = d; store.set('depth', d); document.body.classList.toggle('full', d === 'full'); segSet($('#depthSeg'), 'd', d); $('#coach').hidden = true;
   buildList(); renderDetail(); buildLabels(); buildMishapCards(); buildAsk(); updateBigBand(); if (S.scale) renderMassBar(S.selected && S.selected.key);
-  buildWhatifCards(); if (typeof syncRegToggle === 'function') syncRegToggle();
+  buildWhatifCards(); if (typeof syncRegToggle === 'function') { syncRegToggle(); if (S.scale && typeof regGhosts === 'function') regGhosts(true); }
   if (d === 'full') showToast('くわしく: 部品40種の仕様例と点検ポイントも見られます'); 
 }
 $('#depthSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setDepth(b.dataset.d); });
@@ -5169,6 +5200,12 @@ new ResizeObserver(() => document.documentElement.style.setProperty('--dock-h', 
 
 function onThemeChanged(dark) { airflowTheme(dark); }
 function onQualityChanged(level) { if (air.mesh && air.N !== Q.particles) rebuildAirflow(); $('#perfInfo').textContent = `品質 ${level}`; }
+{ // シートの開閉・カードの出入りで、3Dの見える帯が変わるたびに視錐台を合わせ直す
+  const watch = ['#inspector', '#lesson', '#expert', '#noteCard', '#massBar'].map(s => $(s)).filter(Boolean);
+  let t = 0; const kick = () => { clearTimeout(t); t = setTimeout(() => { if (narrow()) resize(); }, 60); };   /* シートは .38s かけて動くので、動き終わりにも測り直す */
+  const mo = new MutationObserver(() => { kick(); setTimeout(kick, 420); });
+  for (const el of watch) { mo.observe(el, { attributes: true, attributeFilter: ['class', 'hidden', 'style'] }); el.addEventListener('transitionend', e => { if (e.propertyName === 'transform') kick(); }); }
+}
 function onResized() {
   if (S.scale) { if (D.personGroup) D.personGroup.visible = !compact(); renderMassBar(S.selected && S.selected.key); } for (const L of labelEls) L.w = 0; if (!S.labelsTouched) { S.labels = !narrow(); for (const x of $$('.tgl[data-t=labels]')) x.classList.toggle('on', S.labels); } }
 function initUI() {
@@ -5196,7 +5233,9 @@ function tick(now) {
   controls.update();
   // 分解
   S.explodeT += (S.explode - S.explodeT) * (1 - Math.exp(-dt * 9)); if (Math.abs(S.explode - S.explodeT) < 0.0005) S.explodeT = S.explode; if (S.explode < 0.05 && S.explodedCam) { S.explodedCam = false; S.explodeFrame = true; }   // 戻したら組み上がった機体を再フレーミング
-  { const fs = 0.5 + 0.45 * S.explodeT + 0.3 * Math.max(0, body.py) + (S.scale && D.personGroup && D.personGroup.visible ? 0.8 : 0); const c = key.shadow.camera; if (Math.abs(c.right - fs) > 0.01) { c.left = c.bottom = -fs; c.right = c.top = fs; c.updateProjectionMatrix(); S.shadowDirty = true; } const si = 1 - 0.55 * S.explodeT; if (Math.abs((key.shadow.intensity ?? 1) - si) > 0.01) { key.shadow.intensity = si; S.shadowDirty = true; } }
+  { const fs = 0.5 + 0.45 * S.explodeT + 0.3 * Math.max(0, body.py) + (S.scale && D.personGroup && D.personGroup.visible ? 0.8 : 0) + (S.scale && typeof regGhost === 'object' && regGhost.grp && regGhost.grp.visible ? 0.45 : 0);
+    const c = key.shadow.camera; if (Math.abs(c.right - fs) > 0.01) { c.left = c.bottom = -fs; c.right = c.top = fs; const kd = key.position.length(); c.near = Math.max(0.05, kd - fs * 1.8); c.far = kd + fs * 1.8; key.shadow.normalBias = 0.0006 * Math.max(1, fs / 0.5); c.updateProjectionMatrix(); S.shadowDirty = true; }   /* 枠を広げたら near/far とバイアスも合わせる(人型や区画が影から外れる・縞が出るのを防ぐ) */
+    const si = 1 - 0.55 * S.explodeT; if (Math.abs((key.shadow.intensity ?? 1) - si) > 0.01) { key.shadow.intensity = si; S.shadowDirty = true; } }
   applyExplode();
   if (S.scale) stepScale();
   if (S.explodeFrame && Math.abs(S.explode - S.explodeT) < 0.01 && performance.now() - (S.explodeAt || 0) > 350) { S.explodeFrame = false; D.root.updateWorldMatrix(true, true); focusOn(D.parts.filter(p => partVisible(p) && effVisible(p.obj)).map(p => p.obj), { pull: true }); }   // 分解が落ち着いたら全体をフレーミング

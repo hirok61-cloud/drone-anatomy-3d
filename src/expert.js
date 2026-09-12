@@ -259,8 +259,8 @@ function bladeDiscs(on) {
       const m = new THREE.Mesh(new THREE.CircleGeometry(0.156, 96), new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.5, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }));
       m.rotation.x = -Math.PI / 2; m.position.set(0, 0.038, 0); m.renderOrder = 5; m.userData.noPart = m.userData.noPick = m.userData.noAO = m.userData.noShadow = true; m.userData.cv = cv; m.userData.tex = tex; mo.group.add(m); expert.bladeDiscs.push(m);
     }
-    for (const mo of D.motors) { if (mo.propMesh.userData.ro0 == null) mo.propMesh.userData.ro0 = mo.propMesh.renderOrder; mo.propMesh.renderOrder = 6; }
   }
+  if (on) for (const mo of D.motors) { if (mo.propMesh.userData.ro0 == null) mo.propMesh.userData.ro0 = mo.propMesh.renderOrder; mo.propMesh.renderOrder = 6; }   /* 2回目以降の ON でも効くよう生成ブロックの外で設定する */
   for (const m of expert.bladeDiscs) m.visible = !!on;
   if (!on) for (const mo of D.motors) { if (mo.propMesh.userData.ro0 != null) mo.propMesh.renderOrder = mo.propMesh.userData.ro0; }
   expertArrows(!!on || expert.heat > 0.05);

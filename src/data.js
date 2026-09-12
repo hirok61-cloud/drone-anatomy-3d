@@ -742,6 +742,7 @@ const REG_SOURCES = {
   log:     { name: '国土交通省 飛行計画の通報・飛行日誌', url: 'https://www.mlit.go.jp/koku/operation.html' },
   accident:{ name: '国土交通省 事故等の報告・負傷者救護義務', url: 'https://www.mlit.go.jp/koku/accident_report.html' },
   soumu:   { name: '総務省 電波利用ホームページ（ドローンの無線）', url: 'https://www.tele.soumu.go.jp/j/sys/others/drone/notes/' },
+  soumuPriv: { name: '総務省 ドローンによる撮影映像等の取扱いに係るガイドライン', url: 'https://www.soumu.go.jp/main_sosiki/joho_tsusin/d_syohi/ihoyugai_02.html' },
   jtsb:    { name: '運輸安全委員会', url: 'https://www.mlit.go.jp/jtsb/' },
 };
 // 部品 → 制度タグ。text は判定ではなく「求められている」「確認する」で止める
@@ -767,20 +768,20 @@ const REG = {
     { text: '飛行前点検の項目に「バッテリーの残量の確認」が含まれる。飛行後は安全な状態で保管し、墜落時は発火に注意して電源を切る。', ky: '2.2', src: 'mlit' },
     { text: '機体の飛行のために必要な電池は、輸送が原則禁止される「危険物」の対象にならない。', ky: '3.1', src: 'mlit' }],
   prop: [
-    { text: '飛行後は機体に不具合がないか点検し、次回に備える。特定飛行では日常点検記録に残す。', ky: '4.6', src: 'log' }],
+    { text: '欠け・ひび・取り付けの向きは飛行前点検の項目。飛行後も点検し、特定飛行では日常点検記録に残す。', ky: '4.6', src: 'log' }],
   motor: [
-    { text: '飛行後は機体に不具合がないか点検し、次回に備える。特定飛行では日常点検記録に残す。', ky: '4.6', src: 'log' }],
+    { text: '飛行前後に異音・ガタを確認し、特定飛行では日常点検記録に残す。整備や改造をしたときは点検整備記録にも書く。', ky: '4.6', src: 'log' }],
   camera: [
-    { text: '撮影した映像を公開するときは、人の顔や表札などプライバシーへの配慮が求められる（総務省のガイドライン）。', ky: '3.2', src: 'mlit' }],
+    { text: '撮影した映像をインターネットで公開するときは、人の顔や表札、車のナンバーなどが写り込まないよう配慮することが求められる（総務省のガイドライン）。', ky: '3.2', src: 'soumuPriv' }],
   frameTop: [
     { text: 'この機体は最大離陸重量25kg未満の区分。25kg以上になると、登録記号は25mm以上、特定飛行はカテゴリーⅡA（許可・承認の審査がより厳格）になり、第三者賠償責任保険への加入が求められる（第5版で追記）。', ky: '3.1', src: 'mlit' }],
 };
-REG.frameBottom = REG.frameTop; REG.esc = REG.motor;
+REG.frameBottom = REG.frameTop;   /* 下フレームも「機体全体」の区分の話を出す。ESC は固有の制度事項がないので付けない */
 // 部品 → 教則の章（チップに出す）
 const KY_PART = { frameTop: '4.1', frameBottom: '4.1', arm: '4.1', armClamp: '4.1', motorMount: '4.1', standoff: '4.1', screws: '4.6', landingGear: '4.1', batteryTray: '4.4',
   motor: '4.4', bell: '4.4', stator: '4.4', winding: '4.4', magnet: '4.4', shaft: '4.6', prop: '4.4', propNut: '4.6', propAdapter: '4.4', esc: '4.4', capacitor: '4.4',
   fc: '4.4', pdb: '4.4', buzzer: '4.4', battery: '4.4', cells: '4.4', xt60: '4.4', balance: '4.4', strap: '4.6', wiring: '4.4',
-  gps: '4.5', rx: '4.5', vtx: '3.2', telemetry: '4.5', remoteId: '3.1', regMark: '3.1', led: '4.2', damper: '4.4', gimbal: '4.4', camera: '4.4' };
+  gps: '4.5', rx: '4.5', vtx: '3.2', telemetry: '4.5', remoteId: '3.1', regMark: '3.1', led: '4.2', damper: '4.4', gimbal: '4.4', camera: '4.4', motorBase: '4.1' };
 // 画面 → 教則の章
 const KY_TAB = [
   { screen: 'みる（部品・構造・分解・見え方）', ky: ['4.1', '4.4'], note: '40部品の解説がそのまま対応する' },
@@ -806,7 +807,7 @@ const REG_REPORT = {
   incident: ['航空機との衝突・接触のおそれがあったと認めた事態', '重傷に至らない人の負傷', '機体の制御が不能となった事態', '飛行中の発火'],
   how: 'DIPS2.0 の事故等報告機能で、速やかに報告する（やむを得ない場合は様式で官署へ）。当てはまらない不具合は報告ではなく、点検整備記録に残す。',
   items: '操縦者の氏名・所属・住所、技能証明書番号、発生日時と場所（周辺地図を添付）、許可・承認の年月日と番号、登録記号、機体の種類と型式、飛行の目的と経過、損壊した部位、負傷者の状況、その後の対応。',
-  law: '報告義務違反は30万円以下の罰金。負傷者の救護など危険防止の措置を怠ると2年以下の懲役または100万円以下の罰金。',
+  law: '報告義務違反は30万円以下の罰金。負傷者の救護など危険防止の措置を怠ったときの罰則も定められている（2025年6月の刑法改正で懲役・禁錮は拘禁刑に一本化）。',
   src: 'accident',
 };
 // 組み間違い・もしも → 報告書の記述例（部品名は画面と同じ言葉で）

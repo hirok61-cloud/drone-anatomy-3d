@@ -63,7 +63,7 @@ function setScale(on) {
   if (on) {
     if (S.use) setUse(null);
     if (S.explode > 0.02) setExplode(0);
-    if (S.mode === 'cut') setMode('normal');
+    if (S.mode !== 'normal') setMode('normal');   /* X線・線画・断面のまま実寸に入ると、人型と区分の形だけ実体で浮く */
     if (D.cgMarker) D.cgMarker.visible = true;
     if (D.personGroup) { D.personGroup.visible = !compact(); if (D.personGroup.userData.face) D.personGroup.userData.face(0, 0); if (D.personGroup.userData.rest) D.personGroup.userData.rest(); if (D.personGroup.userData.setGhost) D.personGroup.userData.setGhost(true); }
     setPayload(scale.payload); renderMassBar(); setPower(0.5, true); regGhosts(true);

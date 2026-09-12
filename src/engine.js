@@ -149,7 +149,7 @@ class GtaoLite extends GTAOPass {
     const fresh = S.aoDirty || (++this._n % this.every === 0);
     try {
       if (fresh) {
-        this.overrideVisibility(); this.renderOverride(renderer, this.normalMaterial, this.normalRenderTarget, 0x7777ff, 1.0); this.restoreVisibility();
+        try { this.overrideVisibility(); this.renderOverride(renderer, this.normalMaterial, this.normalRenderTarget, 0x7777ff, 1.0); } finally { this.restoreVisibility(); }   // 例外でも必ず戻す(戻し損ねるとLED・気流・輪が消えたままになる)
         const u = this.gtaoMaterial.uniforms; u.cameraNear.value = this.camera.near; u.cameraFar.value = this.camera.far;
         u.cameraProjectionMatrix.value.copy(this.camera.projectionMatrix); u.cameraProjectionMatrixInverse.value.copy(this.camera.projectionMatrixInverse); u.cameraWorldMatrix.value.copy(this.camera.matrixWorld);
         this.renderPass(renderer, this.gtaoMaterial, this.gtaoRenderTarget, 0xffffff, 1.0);
@@ -263,7 +263,7 @@ function applyMode() {
   const cutOn = S.mode === 'cut';
   for (const c of cut.list) { if (!cutOn) c.mat.clippingPlanes[0].copy(cut.far); }
   { const on = !isWireMode(); for (const p of D.parts) if (p.key === 'led') { const u = p.obj.userData; if (u.core) u.core.visible = on; if (u.halo) u.halo.visible = on; } }   // 線画/設計図ではLEDの光を消す
-  renderer.shadowMap.enabled = key.castShadow = S.shadows && S.mode !== 'xray' && !isWireMode();
+  renderer.shadowMap.enabled = key.castShadow = S.shadows && S.qLevel >= 1 && S.mode !== 'xray' && !isWireMode();
   gridU.uGrid.value = (S.mode === 'xray' || isWireMode()) ? 1 : 0;
   S.shadowDirty = S.csDirty = S.aoDirty = true;
 }
@@ -324,13 +324,24 @@ function stepCamera(dt) {
   // 防護: 非有限値や暴走の復帰
   const p = camera.position, t = controls.target;
   if (!Number.isFinite(p.x + p.y + p.z + t.x + t.y + t.z)) { S.camSpring = null; S.camInertia = null; cam.v.set(0, 0, 0); cam.tv.set(0, 0, 0); t.set(0, 0, 0); p.set(0.78, 0.50, -0.82); }
+  if (!S.camSpring && !S.camInertia && controls.maxDistance > camMax()) controls.maxDistance = Math.max(camMax(), controls.maxDistance - (controls.maxDistance - camMax()) * (1 - Math.exp(-dt / 0.5)));   // 場面を抜けたら上限をゆっくり戻す
   if (t.length() > 3) t.clampLength(0, 3);
   const lim = Math.max(4, controls.maxDistance); const off = tmpV.copy(p).sub(t); if (off.length() > lim) p.copy(t).addScaledVector(off.normalize(), lim);   // 上限は画面の縦横比と台本の引きに合わせる(固定4mだと縦画面で場面が枠に入らない)
 }
 function onCamInterrupt() { if (S.camSpring) { S.camSpring = null; S.camInertia = { v: cam.v.clone().clampLength(0, 2), t: 0.3 }; cam.v.set(0, 0, 0); cam.tv.set(0, 0, 0); } }
+// 画面下でシートやドックが覆っている高さ(CSSピクセル)
+function bottomCover() {
+  const H2 = window.innerHeight; let cov = 0;
+  for (const sel of ['#dock', '#inspector.open', '#lesson.open', '#expert.open', '#noteCard', '#massBar']) {
+    const el = document.querySelector(sel); if (!el || el.hidden) continue;
+    const r = el.getBoundingClientRect(); if (r.height < 4 || r.top > H2 - 8 || r.bottom < H2 * 0.6) continue;
+    cov = Math.max(cov, H2 - r.top);
+  }
+  return Math.min(cov, H2 * 0.62);
+}
 function viewScale() { const a = W / H; return a < 1 ? Math.min(2.0, Math.pow(1 / a, 0.9)) : 1; }
 function camMax() { return 3.2 * viewScale(); }   // 縦長の画面ほど引かないと同じ画が入らない
-function camHome() { controls.maxDistance = camMax(); if (camera.position.distanceTo(controls.target) > camMax() * 0.75) focusOn([D.root], { pull: true }); }   // 広い場面(人が近づく等)から戻ったら機体の枠に戻す
+function camHome() { if (camera.position.distanceTo(controls.target) > camMax() * 0.75) focusOn([D.root], { pull: true }); }   // 上限は stepCamera がゆっくり戻す(即座に下げると引きから瞬間移動する)   // 広い場面(人が近づく等)から戻ったら機体の枠に戻す
 function focusOn(objs, opts = {}) {
   const box = new THREE.Box3(), tb = new THREE.Box3(), pts = [];   // 本体メッシュだけで枠を決める(気流・ゴースト・スプライトは除外)。各メッシュの8隅を集めて実投影で距離を決める
   for (const o of objs) { o.updateWorldMatrix(true, true); o.traverseVisible(c => { if (!c.isMesh || c.userData.noPart || !c.geometry) return; if (!c.geometry.boundingBox) c.geometry.computeBoundingBox(); const b = c.geometry.boundingBox; if (c.isInstancedMesh) { if (!c.boundingBox) c.computeBoundingBox(); tb.copy(c.boundingBox).applyMatrix4(c.matrixWorld); } else tb.copy(b).applyMatrix4(c.matrixWorld); box.union(tb); for (let i = 0; i < 8; i++) pts.push(new THREE.Vector3(i & 1 ? tb.max.x : tb.min.x, i & 2 ? tb.max.y : tb.min.y, i & 4 ? tb.max.z : tb.min.z)); }); } if (box.isEmpty()) return;
@@ -370,6 +381,7 @@ function applyTheme() {
   finishPass.uniforms.vig.value = T.vig; csPlane.material.opacity = T.cs;
   xrayMat.uniforms.color.value.set(T.xray); xrayMat.uniforms.opacity.value = themeDark ? 0.75 : 0.72; xrayMat.uniforms.base.value = themeDark ? 0.02 : 0.025; xrayMat.uniforms.power.value = themeDark ? 2.2 : 2.0;   // 明るいテーマは重ねたときに中心が黒く潰れないよう薄く xrayMat.blending = themeDark ? THREE.AdditiveBlending : THREE.NormalBlending; xrayMat.needsUpdate = true;
   wireMat.color.set(T.wire); paperMat.color.set(T.paper);
+  if (D.cgMarker) { const dark = themeDark; D.cgMarker.traverse(o => { if (!o.isMesh) return; const c = o.material.color.getHex(); if (c === 0x1b1f27 || c === 0x9aa3b0) o.material.color.set(dark ? 0x9aa3b0 : 0x1b1f27); }); }   // 重心の黒がダークの床に沈まないように
   arrowNeutral = themeDark ? 0xf2f4f8 : 0x30343c;
   D.parts.filter(p => p.key === 'led').forEach(p => { if (p.obj.userData.halo) p.obj.userData.halo.material.opacity = T.halo; });
   applyBlueprint();
@@ -402,9 +414,11 @@ function resize() {
   W = canvas.clientWidth || 1; H = canvas.clientHeight || 1;
   const dpr = dprFor(S.qLevel); if (dpr !== DPR) { DPR = dpr; renderer.setPixelRatio(DPR); composer.setPixelRatio(DPR); }
   renderer.setSize(W, H, false); composer.setSize(W, H);
-  if (!narrow()) { const inspW = 344 + 40; camera.aspect = (W - inspW) / H; camera.setViewOffset(W - inspW, H, 0, 0, W, H); } else { camera.clearViewOffset(); camera.aspect = W / H; }
+  camera.aspect = narrow() ? W / H : (W - 384) / H;
+  if (!narrow()) camera.setViewOffset(W - 384, H, 0, 0, W, H);   /* 右パネルの分だけ左に寄せる */
+  else { const cov = bottomCover(); if (cov > 24) camera.setViewOffset(W, H, 0, cov * 0.5, W, H); else camera.clearViewOffset(); }   /* 下のシートに隠れないよう、画を上へずらす(大きさは変えない) */
   camera.updateProjectionMatrix();
-  controls.maxDistance = Math.max(camMax(), camera.position.distanceTo(controls.target));
+  controls.maxDistance = Math.max(camMax(), camera.position.distanceTo(controls.target), S.camSpring ? S.camSpring.p1.distanceTo(S.camSpring.q1) * 1.02 : 0);   // 飛行中の目標も含める
   if (typeof onResized === 'function') onResized();
   S.aoDirty = true;
 }
@@ -417,7 +431,7 @@ function perfP90() { if (perf.n < 30) return 0; const a = Array.from(perf.ring.s
 
 // ---------- 起動時ウォームアップ (RTを合わせて非同期コンパイル) ----------
 async function warmCompile() {
-  const warm = new THREE.Group(); warm.visible = false; const q = new THREE.PlaneGeometry(0.01, 0.01);
+  const warm = new THREE.Group(); warm.scale.setScalar(1e-4); warm.position.set(0, -50, 0); const q = new THREE.PlaneGeometry(0.01, 0.01);   // visible=false だと compileAsync が飛ばすので、極小にして遠くへ置く
   const depthOf = (o) => Object.assign(new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking }), o);
   warm.add(new THREE.Mesh(q, xrayMat), new THREE.Mesh(q, paperMat), new THREE.Mesh(q, wireMat), new THREE.Mesh(q, depthOf({ side: THREE.BackSide })), new THREE.Mesh(q, depthOf({ side: THREE.DoubleSide })), new THREE.InstancedMesh(q, depthOf({ side: THREE.BackSide }), 1));
   scene.add(warm);

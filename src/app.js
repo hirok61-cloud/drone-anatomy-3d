@@ -17,7 +17,9 @@ function tick(now) {
   controls.update();
   // 分解
   S.explodeT += (S.explode - S.explodeT) * (1 - Math.exp(-dt * 9)); if (Math.abs(S.explode - S.explodeT) < 0.0005) S.explodeT = S.explode; if (S.explode < 0.05 && S.explodedCam) { S.explodedCam = false; S.explodeFrame = true; }   // 戻したら組み上がった機体を再フレーミング
-  { const fs = 0.5 + 0.45 * S.explodeT + 0.3 * Math.max(0, body.py) + (S.scale && D.personGroup && D.personGroup.visible ? 0.8 : 0); const c = key.shadow.camera; if (Math.abs(c.right - fs) > 0.01) { c.left = c.bottom = -fs; c.right = c.top = fs; c.updateProjectionMatrix(); S.shadowDirty = true; } const si = 1 - 0.55 * S.explodeT; if (Math.abs((key.shadow.intensity ?? 1) - si) > 0.01) { key.shadow.intensity = si; S.shadowDirty = true; } }
+  { const fs = 0.5 + 0.45 * S.explodeT + 0.3 * Math.max(0, body.py) + (S.scale && D.personGroup && D.personGroup.visible ? 0.8 : 0) + (S.scale && typeof regGhost === 'object' && regGhost.grp && regGhost.grp.visible ? 0.45 : 0);
+    const c = key.shadow.camera; if (Math.abs(c.right - fs) > 0.01) { c.left = c.bottom = -fs; c.right = c.top = fs; const kd = key.position.length(); c.near = Math.max(0.05, kd - fs * 1.8); c.far = kd + fs * 1.8; key.shadow.normalBias = 0.0006 * Math.max(1, fs / 0.5); c.updateProjectionMatrix(); S.shadowDirty = true; }   /* 枠を広げたら near/far とバイアスも合わせる(人型や区画が影から外れる・縞が出るのを防ぐ) */
+    const si = 1 - 0.55 * S.explodeT; if (Math.abs((key.shadow.intensity ?? 1) - si) > 0.01) { key.shadow.intensity = si; S.shadowDirty = true; } }
   applyExplode();
   if (S.scale) stepScale();
   if (S.explodeFrame && Math.abs(S.explode - S.explodeT) < 0.01 && performance.now() - (S.explodeAt || 0) > 350) { S.explodeFrame = false; D.root.updateWorldMatrix(true, true); focusOn(D.parts.filter(p => partVisible(p) && effVisible(p.obj)).map(p => p.obj), { pull: true }); }   // 分解が落ち着いたら全体をフレーミング
