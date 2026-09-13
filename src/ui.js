@@ -128,6 +128,7 @@ document.addEventListener('click', e => {
   else if (t === 'slow') { setTimeScale(on ? 1 / 50 : 1); if (on) { if (S.power === 0) setPower(0.5); showLegend(); } }
   else if (t === 'air') { S.air = on; if (on) { if (S.power === 0) setPower(0.5); if (!store.get('airSeen')) { showToast('プロペラが空気を下に押しています。押した分だけ、機体は上に押し返されます。', 3600); store.set('airSeen', '1'); } } }
   else if (t === 'sticks') setSticks(on);
+  else if (t === 'sound') { sndOn(on); if (on && !store.get('soundSeen')) { showToast('モーターの音は回転数そのものです（羽根2枚 × 毎秒の回転数）。4基の回転差で、あのうなりが出ます。', 4200); store.set('soundSeen', '1'); } }
   else if (t === 'tilt') setTilt(on);
   else if (t === 'shadows') { S.shadows = on; applyMode(); }
   else if (t === 'alive') setAlive(on);
@@ -218,7 +219,7 @@ function renderDetail() {
   const hidden = partsOf(p.key).some(x => x.hidden);
   let h = `<div class="d-group" style="--c:${g.color}"><i></i>${g.name}${partKyChip(p.key)}</div><div class="d-title"><h3>${partName(p)}</h3>${hasSpeech ? '<button id="detailSpeak" class="icon-btn sm speak" aria-label="読み上げ" title="読み上げ">🔊</button>' : ''}</div><p class="d-en">${S.lang === 'en' ? d.name : d.en}${d.count > 1 ? ` · ×${d.count}` : ''}${inst}</p>`;
   h += codexHead(p.key);
-  h += `<div class="d-actions"><button id="dFocus" class="primary">${t('ui.focus')}</button>${simple ? '' : `<button id="dIsolate">${S.isolated === p.key ? '単独表示を解除' : '単独表示'}</button><button id="dHide">${hidden ? '表示する' : '非表示'}</button>`}</div>`;
+  h += `<div class="d-actions"><button id="dFocus" class="primary">${t('ui.focus')}</button>${p.key === 'buzzer' ? '<button id="dBeep">🔊 鳴らしてみる</button>' : ''}${simple ? '' : `<button id="dIsolate">${S.isolated === p.key ? '単独表示を解除' : '単独表示'}</button><button id="dHide">${hidden ? '表示する' : '非表示'}</button>`}</div>`;
   h += `<section><h4>${t('sec.role')}</h4><p>${simple && sd ? partRole(p.key) : d.role}</p></section>`;
   if (!simple || !langEntry(p.key)) h += langNote();
   h += regSection(p.key);
@@ -235,6 +236,8 @@ function renderDetail() {
   $('#dFocus').onclick = () => focusOn(S.selAll ? partsOf(p.key).map(x => x.obj) : [p.obj]);
   const iso = $('#dIsolate'); if (iso) iso.onclick = () => { S.isolated = S.isolated === p.key ? null : p.key; applyVisibility(); renderDetail(); if (S.isolated) focusOn(partsOf(p.key).map(x => x.obj)); };
   const hd = $('#dHide'); if (hd) hd.onclick = () => toggleHidden(p.key);
+  // ブザーは音が役目の部品。読むより鳴らしたほうが早い（音が切のままでも、押した人の意思なので鳴らす）
+  const bz = $('#dBeep'); if (bz) bz.onclick = () => { if (sndBeep(1.8)) showToast('圧電ブザーの音（約2.7kHz）。機体を見失ったときに位置を知らせます', 3200); };
   const more = $('#dMore'); if (more) more.onclick = () => setDepth('full');
   const sp = $('#detailSpeak'); if (sp) sp.onclick = () => speakPart(p);
   const tg = $('#triviaGo'); if (tg) tg.onclick = () => triviaAct(p.key);

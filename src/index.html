@@ -32,6 +32,7 @@
         <button class="tgl" data-t="air" aria-pressed="false"><i></i>風をみる</button>
         <button class="tgl" data-t="arrows" aria-pressed="false"><i></i>まわる向き</button>
         <button class="tgl" data-t="sticks" aria-pressed="false"><i></i>スティック</button>
+        <button class="tgl" data-t="sound" aria-pressed="false" aria-label="音を出す"><i></i>音</button>
         <button class="tgl" data-t="tilt" id="tiltBtn" hidden aria-pressed="false"><i></i>かたむき</button>
       </div>
       <div class="dock-group"><span class="dg-label">降ろし方</span><div class="chips" id="descChips" role="group" aria-label="降ろし方"><button data-dz="straight" aria-pressed="false">まっすぐ降ろす</button><button data-dz="slide" aria-pressed="false">横に流しながら</button></div></div>
@@ -88,6 +89,8 @@
   <div class="pop-row speakrow"><span>読み上げ</span><button class="tgl speak" data-t="speakAuto" aria-pressed="false"><i></i>部品を選ぶと読み上げる</button></div>
   <div class="pop-row"><span>テーマ</span><div class="seg small" id="themeSeg" role="radiogroup" aria-label="テーマ"><button data-th="auto" class="on">システム</button><button data-th="light">ライト</button><button data-th="dark">ダーク</button></div></div>
   <div class="pop-row"><span>動き</span><button class="tgl on" data-t="alive" aria-pressed="true"><i></i>機体を浮かせておく</button></div>
+  <div class="pop-row"><span>音</span><button class="tgl" data-t="sound" aria-pressed="false"><i></i>モーター・風・警報の音を出す</button></div>
+  <div class="pop-row"><span>音の大きさ</span><input type="range" id="volSlider" min="0" max="100" value="55" aria-label="音の大きさ"></div>
   <div class="pop-row"><span>制度</span><button class="tgl" data-t="reg" aria-pressed="false"><i></i>制度の注記を出す（教則の章・法令の要点）</button></div>
   <details class="pop-more"><summary>制度の出典と基準日</summary><div id="regSources" class="reg-srcs"></div></details>
   <p class="pop-foot" id="aliveNote" hidden>軽量・標準の画質では浮かせられません（品質を「高」以上に）</p>
@@ -125,7 +128,7 @@
 
 <div id="viewCol" class="glass" aria-label="視点">
   <button data-v="iso" class="on" title="斜め" data-i18n="views.iso">斜</button><button data-v="front" title="前" data-i18n="views.front">前</button><button data-v="top" title="上" data-i18n="views.top">上</button><button data-v="side" title="横" data-full data-i18n="views.side">横</button><button data-v="inside" title="モーター内部" data-full data-i18n="views.inside">内</button><button data-v="fpv" title="機体のカメラから見る" aria-label="機体のカメラから見る">眼</button>
-  <hr><button class="tgl on" data-t="labels" aria-pressed="true" title="ラベル"><i></i><span data-i18n="views.labels">名</span></button><button id="bigBtn" title="大きく読む" aria-label="大きく読む" aria-pressed="false" data-i18n="big">大</button><button id="shareBtn" title="この画面のリンク" aria-label="この画面のリンクをコピー">🔗</button><button id="photoBtn" title="記念写真" aria-label="記念写真を撮る">📷</button><button id="fsBtn" title="全画面">⤢</button>
+  <hr><button class="tgl on" data-t="labels" aria-pressed="true" title="ラベル"><i></i><span data-i18n="views.labels">名</span></button><button id="bigBtn" title="大きく読む" aria-label="大きく読む" aria-pressed="false" data-i18n="big">大</button><button class="tgl" data-t="sound" aria-pressed="false" title="音を出す" aria-label="音を出す"><i></i>音</button><button id="shareBtn" title="この画面のリンク" aria-label="この画面のリンクをコピー">🔗</button><button id="photoBtn" title="記念写真" aria-label="記念写真を撮る">📷</button><button id="fsBtn" title="全画面">⤢</button>
 </div>
 
 <div id="noteCard" class="glass" hidden aria-live="polite">
