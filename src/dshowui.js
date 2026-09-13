@@ -34,7 +34,7 @@ function dshowPick(id) {
   }
   const h = DSHOW_HOW.find(x => x.id === dsUI.pick);
   if (typeof dshowLayer === 'function') dshowLayer(h ? h.layer : null);
-  // ④時計だけは例外。図形が移り変わらないと時計のずれは現れないので、自動送りを続ける
+  // ③時計だけは例外。図形が移り変わらないと時計のずれは現れないので、自動送りを続ける
   dshowAuto(h && h.layer === 'sync' ? true : (!dsUI.pick && !dsUI.open ? null : false));
   if (dsUI.open) { dsUI.tab = 'how'; dsRenderPanel(); if (h) { const el = $('#ds-' + h.id); if (el) el.scrollIntoView({ block: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });   /* start だと押したボタンが画面外へ飛び、取り消し方が分からなくなる */ } }
   updateDshowVals();
@@ -55,7 +55,7 @@ function dshowPanelOpen(on, tab) {
   if (dsUI.open) {
     el.hidden = false; dsRenderPanel();
     setTimeout(() => { if (dsUI.open) setSheetState(el, 1); }, 0);   /* hidden を外した後で開く。rAF はタブが裏だと回らない */
-    { const h = DSHOW_HOW.find(x => x.id === dsUI.pick);   /* 読むと宣言した以上、下で図形が変わらないほうがよい（④だけは変わらないと話が成り立たない） */
+    { const h = DSHOW_HOW.find(x => x.id === dsUI.pick);   /* 読むと宣言した以上、下で図形が変わらないほうがよい（③だけは変わらないと話が成り立たない） */
       dshowAuto(!!(h && h.layer === 'sync')); }
     $('#dsPanelTitle').focus({ preventScroll: true });
   } else {

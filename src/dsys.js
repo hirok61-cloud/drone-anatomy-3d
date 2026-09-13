@@ -101,7 +101,7 @@ function dsysPath() {   // ①経路: 並べた場所から上がり、つぎの
     }
   }
 }
-function dsysPair() {   // ③間隔: 隣り合う機体の「間」を見せる
+function dsysPair() {   // ④間隔: 隣り合う機体の「間」を見せる
   // 輪郭の図形（星・ハート・輪）は等間隔に並べるので、機数を増やすほど間隔は 0.5〜1.1px まで縮む。
   // 2機を球で示す方式では物理的に見えないので、「一区画だけ明るく残す」方式にする
   const n = dshow.n, to = dshow.to;
@@ -323,7 +323,7 @@ function stepDsys(dtReal) {
   const w = reduceMotion ? 0.5 : 0.5 + 0.5 * Math.sin(dsys.t * 3.2);
   if (dsys.cur === 'link' || dsys.cur === 'rtk') dsys.mats.faint.opacity = 0.20 + 0.30 * w;
   else dsys.mats.faint.opacity = 0.42;
-  // ④は「1機だけ遅れる」から「形が崩れる」までを、8秒かけて見せる
+  // ③は「1機だけ遅れる」から「形が崩れる」までを、8秒かけて見せる
   // ⑤の玉は線の上を上がり、⑥の1機は枠へ出て帰る
   if (dsys.beads) { const T = reduceMotion ? 0.5 : dsys.t;
     const up = reduceMotion ? 1 : (T % 7) < 1.6 ? 1 : 0;   /* 「止まれ」は要るときだけ。ずっと流れていると主従が読めない */
@@ -364,7 +364,7 @@ function stepDsys(dtReal) {
       dshow.landAim = la; dshowFrame(600);
     }
   }
-  // ④ 時計のずれは「移り変わりの最中」にしか現れない（静止中は全機が行き先に着いている）。
+  // ③ 時計のずれは「移り変わりの最中」にしか現れない（静止中は全機が行き先に着いている）。
   // このレイヤーの間だけ図形を送り続け、1回おきに時計をずらして、揃う回と崩れる回を見比べさせる
   if (dsys.cur === 'sync' && dshow.mat) {
     if (dsys.syncFig !== dshow.fig) { dsys.syncFig = dshow.fig; dsys.syncBad = !dsys.syncBad; }
