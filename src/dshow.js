@@ -222,16 +222,17 @@ function dshowBuild() {
   const mat = new THREE.ShaderMaterial({
     uniforms: {
       uSize: { value: DSHOW_GLOW }, uPxPerM: { value: 900 }, uGain: { value: 1 },
-      uProg: { value: 1 }, uTime: { value: 0 }, uWave: { value: 1 }, uSkew: { value: 0 },
+      uProg: { value: 1 }, uTime: { value: 0 }, uWave: { value: 1 }, uSkew: { value: 0 }, uSkewFrac: { value: 0.03 },
     },
     // 位置と色は頂点シェーダで作る。CPU は図形が変わる瞬間しか働かない
     vertexShader: `
       attribute vec3 aTo, aColA, aColB;
       attribute float aLag, aRnd, bright;
-      uniform float uSize, uPxPerM, uProg, uTime, uWave, uSkew;
+      uniform float uSize, uPxPerM, uProg, uTime, uWave, uSkew, uSkewFrac;
       varying vec3 vCol; varying float vB;
       void main() {
-        float u = clamp((uProg + aRnd * uSkew - aLag) / max(0.10, 1.0 - aLag), 0.0, 1.0);   // uSkew: わざと時計をずらして、形が崩れるのを見せる
+        float late = step(1.0 - uSkewFrac, abs(aRnd));   // 時計がずれているのは一部の機体だけ（全機だと砂嵐に見える）
+        float u = clamp((uProg + late * aRnd * uSkew - aLag) / max(0.10, 1.0 - aLag), 0.0, 1.0);
         float e = u * u * (3.0 - 2.0 * u);          // なめらかに出て、なめらかに止まる
         vec3 p = mix(position, aTo, e);
         vec3 d = aTo - position; float L = length(d);
@@ -269,7 +270,15 @@ function dshowBuild() {
   const pts = new THREE.Points(geo, mat); pts.frustumCulled = false; pts.renderOrder = 6;
   pts.userData.noPart = pts.userData.noPick = pts.userData.noShadow = pts.userData.noAO = true;
   pts.visible = false; scene.add(pts);
-  dshow.geo = geo; dshow.mat = mat; dshow.pts = pts;
+  // 2枚目。同じ点を 2.5倍の大きさ・1/4の明るさで重ねて、光の「裾」を作る。
+  // これが無いと数珠つなぎの玉に見える（実写のショーは光の線が発光して見える）。
+  // uSize と uGain 以外の uniform は同じ入れ物を共有するので、毎フレームの写しが要らない
+  const haloMat = mat.clone();
+  for (const key of ['uPxPerM', 'uProg', 'uTime', 'uWave', 'uSkew', 'uSkewFrac']) haloMat.uniforms[key] = mat.uniforms[key];
+  const halo = new THREE.Points(geo, haloMat); halo.frustumCulled = false; halo.renderOrder = 5;
+  halo.userData.noPart = halo.userData.noPick = halo.userData.noShadow = halo.userData.noAO = true;
+  pts.add(halo);
+  dshow.geo = geo; dshow.mat = mat; dshow.pts = pts; dshow.halo = halo; dshow.haloMat = haloMat;
   dshow.fig = 0;
   dshowShape(DSHOW_FIGS[0].id, n, dshow.to); dshow.from.set(dshow.to);
   dshowSetColor(0, dshow.to, dshow.colTo, n); dshow.colFrom.set(dshow.colTo);
@@ -280,11 +289,20 @@ function dshowUpload() {
   for (const k of ['position', 'aTo', 'aColA', 'aColB', 'aLag']) dshow.geo.attributes[k].needsUpdate = true;
 }
 // 画面の広さと画素密度から、1m が何画素になるかを出す（点の大きさはこれで決まる）
+// にじみの2枚目を本体に合わせる。2.5倍を超えると1機ずつが読めなくなる（＝事実と違う見え方）ので上限にする
+const DSHOW_HALO = () => (S.qLevel <= 1 ? 2.1 : 2.5);
+function dshowGlowSync() {
+  if (!dshow.haloMat) return;
+  const h = DSHOW_HALO();
+  dshow.haloMat.uniforms.uSize.value = DSHOW_GLOW * dshow.k * h;
+  dshow.haloMat.uniforms.uGain.value = dshow.mat.uniforms.uGain.value * (0.60 / h);
+}
 function dshowPixels() {
   const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   dshow.mat.uniforms.uPxPerM.value = (H * DPR) / (2 * tanV);
   // ブルームは無いので、光の飽和はトーンマッピングに任せる。中間バッファが 8bit の環境では 1 を超えた分が消えるので抑える
   dshow.mat.uniforms.uGain.value = (HF && !Q.direct) ? 2.6 : 1.15;
+  dshowGlowSync();
 }
 
 // ---------- 画の決め方 ----------
@@ -346,7 +364,7 @@ function dshowFrame(ms) {
 function dshowApplyK() {
   const k = dshow.k;
   if (dshow.pts) { dshow.pts.scale.setScalar(k); dshow.pts.position.y = DSHOW_H * (1 - k) * (1 - dshow.gz); }
-  if (dshow.mat) dshow.mat.uniforms.uSize.value = DSHOW_GLOW * k;   /* 光の玉も一緒に縮める。画面上の見え方を揃えるため */
+  if (dshow.mat) { dshow.mat.uniforms.uSize.value = DSHOW_GLOW * k; dshowGlowSync(); }   /* 光の玉も一緒に縮める。画面上の見え方を揃えるため */
   if (typeof dsysLayout === 'function') dsysLayout();
 }
 // 手前の1機は「観客のすぐ前を飛んでいる1機」。カメラからの距離で置くので、
@@ -426,11 +444,19 @@ function dshowSky() {
   renderer.toneMappingExposure = 1.12 * S.exposureMul;
   groundMat.color.set('#070b12');
   D.parts.filter(p => p.key === 'led').forEach(p => { if (p.obj.userData.halo) p.obj.userData.halo.material.opacity = 0.42; });
-  farGroundTheme(new THREE.Color(1.25, 1.3, 1.6));   /* 夜は遠くをほんの少しだけ持ち上げる。上げすぎると地面が昼のように光る */
+  dshowGroundTint();
   if (dshow.mat) dshowPixels();
   S.shadowDirty = S.csDirty = S.aoDirty = true;
 }
 
+// 遠くの地面に、いまの図形の色をほんの少し乗せる。
+// 3000機が3.6m上で光っていれば、その真下の地面はわずかに染まる（描画の追加はゼロ）
+const _dgBase = new THREE.Color(1.25, 1.3, 1.6), _dgTmp = new THREE.Color();
+function dshowGroundTint() {
+  const f = DSHOW_FIGS[dshow.fig];
+  _dgTmp.set(f.col[0]).multiplyScalar(1.55);
+  farGroundTheme(_dgBase.clone().lerp(_dgTmp, 0.34));
+}
 // 次の図形の下ごしらえ。対応づけは機数に比例して重い（3200機で15ms前後）ので、
 // 静止している間に済ませておく。動き出す瞬間にやると、そこだけ画が飛ぶ
 function dshowPrepare() {
@@ -454,6 +480,7 @@ function dshowAdvance() {
   dshow.phase = 'move'; dshow.figT = 0; dshow.mat.uniforms.uProg.value = 0;
   if (typeof dsysRefresh === 'function') dsysRefresh();
   showDroneColor(DSHOW_FIGS[dshow.fig].col[0]);
+  dshowGroundTint();
   renderDshow();
 }
 

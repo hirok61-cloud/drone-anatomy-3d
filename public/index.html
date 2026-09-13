@@ -2015,61 +2015,64 @@ const beaufort = (v) => { let n = 0; while (n < BEAUFORT.length && v >= BEAUFORT
 // ===== ショーのしくみ（7項目） =====
 // 「大量の機体をどうやって一斉に飛ばしているのか」。制度（DSHOW_REG）とは性質が違うので分けて持つ。
 // しくみ側は「そういう作りになっている」で止め、要件は制度側に置く。
-// 教則に書いてあることと、教則の外のことは、本文の中で必ず分ける。
+// 教則に書いてあることと、教則の外のことは、段落ごとに必ず分ける（.hint は「ここから先は教則の外」の目印）。
 const DSHOW_HOW = [
   {
     id: 'plan', no: '①', chip: '経路', layer: 'path',
     head: '1機ずつ操縦していない ― 経路は飛ばす前に作る',
     lead: '何百人もで操縦しているのではありません。経路は飛ばす前に作ってあります。',
     body: `<p>ドローンショーは<b>自動操縦</b>です。教則は自動操縦を「プログラムにより自動的に操縦を行うこと」と定義しています（3.1.1）。</p>
-      <p>教則は自動操縦のやり方をこう説明しています（5.2.2）。<b>「飛行を制御するアプリケーションソフトに搭載されている地図情報に、予め複数の飛行時のウエイポイント（経過点）を設定し飛行経路を作成する。ウェイポイントは地図上の位置情報の設定だけでなく、機体の向きや高度、速度など詳細な設定が可能である」</b>。そして「手動操縦に比較して、再現性の高い飛行を行うことができる」としています。</p>
-      <p class="hint">ここから先は教則の外です。ショーでは、この「経過点の列」を<b>全機ぶん</b>作ります。1機ぶんのデータは、時刻ごとの位置と灯りの色が並んだ表です。作ったデータは、飛ばす前にそれぞれの機体へ読み込ませます。飛んでいる間に地上から経路を送っているのではありません。</p>
+      <p>教則は自動操縦のやり方をこう説明しています（5.2.2(1)3)）。<b>「飛行を制御するアプリケーションソフトに搭載されている地図情報に、予め複数の飛行時のウエイポイント（経過点）を設定し飛行経路を作成する。ウェイポイントは地図上の位置情報の設定だけでなく、機体の向きや高度、速度など詳細な設定が可能である」</b>。そして「手動操縦に比較して、再現性の高い飛行を行うことができる」としています。</p>
+      <p>教則は、プログラムで飛ぶ機体の弱点にも触れています（5.1.4(2)）。<b>「無人航空機にはプログラムに基づき自動又は自律で飛行するものも多くあり、そのようなものは、プログラムを不正に書き換えられる等により、当該無人航空機が奪取されたり操縦者の意図に反して悪用されたりする可能性がある」</b>。飛ばす前にデータを入れる作りは、そのデータを守ることとひと組です。</p>
+      <p class="hint">ここから先は教則の外です。ショーの振り付けは 3D ソフト（Blender など）の上で作ります。1機ずつの目標位置を並べて図形を作り、それを時間順に並べた台本にして、<b>1個のショーファイル</b>に書き出します。中には全機の飛行経路、LEDの色の変化、花火の発火時刻、推奨されるジオフェンス、音楽までが入ります（Skybrush の公開資料）。当日飛ぶのはこの書き出したデータで、操縦者は送信機で機体を動かすのではなく、開始・中断・帰還といった<b>群全体への指令</b>を出します。</p>
       <p class="hint">この教材の「文字を描く」も同じことをしています。あなたが文字を決めると、その場で全機ぶんの配置を計算し、どの機体がどこへ行くかを決めてから動かしています。</p>
       <button class="ds-see" data-act="text">文字を決めて描かせる ›</button>`,
-    ky: '教則 3.1.1（自動操縦の定義）・5.2.2（手動操縦及び自動操縦）',
+    ky: '教則 3.1.1（自動操縦の定義）・5.2.2(1)3)（自動操縦の特徴とメリット）・5.1.4(2)（セキュリティ）',
   },
   {
     id: 'rtk', no: '②', chip: '位置', layer: 'rtk',
     head: '位置は数十mからcmへ ― 地上に基準局を置く（RTK）',
-    lead: '機体の間隔は1m前後。単独測位のままでは、そもそも並べません。',
-    body: `<p>教則は測位の精度をこう書いています（4.5.3）。<b>「GPS測位での受信機1台の単独測位の精度は数十mの精度である。測位方式として固定局と移動局の2つの受信機を使用するRTKやDGPSなどの技術が確立され、これらの測位方式は数cm〜数mレベルの精度の高い測位が可能である」</b>。</p>
-      <p>つまり RTK は、<b>動かない受信機（基準局）を地上に置いて</b>、そこで分かった誤差を飛んでいる受信機に伝える方式です。1台だけで測るより桁違いに細かく位置が分かります。</p>
-      <p>教則は、自動操縦では手動操作よりも高精度な測位が必要だとしたうえで、<b>「あらかじめ地図上で設定したWay PointはGNSSの測位精度の影響を受けるため、精度が悪化した場合は実際の飛行経路の誤差が大きくなる」</b>としています。精度に影響するものとして、衛星の時計の精度・捕捉している衛星の数・障害物によるマルチパス・受信環境のノイズを挙げ、<b>「一般的に位置精度は、水平方向に比べ高度方向の誤差が大きくなる」</b>とも書いています。</p>
-      <p class="hint">ここから先は教則の外です。国内で使われているショー機の飛行間隔は、公表されているもので0.8m〜1.5mです。数十mの誤差では隣とぶつかりますし、そもそも図形になりません。屋内では衛星が届かないので、電波や光を使った別の測位（UWBなど）に置き換わります。</p>`,
-    ky: '教則 4.5.3（GNSS）(2)測位の精度・(3)飛行における注意事項',
+    lead: '機体の飛行間隔は1m前後。単独測位のままでは、そもそも並べません。',
+    body: `<p>教則は測位の精度をこう書いています（4.5.3(2) GNSSとRTKの精度）。<b>「GPS測位での受信機1台の単独測位の精度は数十mの精度である。測位方式として固定局と移動局の2つの受信機を使用するRTK(Real Time Kinematic)やDGPS(Differential Global Positioning System)などの技術が確立され、これらの測位方式は数cm〜数mレベルの精度の高い測位が可能である」</b>。</p>
+      <p>つまり RTK は、<b>動かない受信機（固定局）を地上に置いて</b>、そこで分かった誤差を飛んでいる受信機（移動局）に伝える方式です。1台だけで測るより桁違いに細かく位置が分かります。</p>
+      <p>教則は、自動操縦では手動操作よりも高精度な測位が必要だとしたうえで、<b>「あらかじめ地図上で設定したWay PointはGNSSの測位精度の影響を受けるため、精度が悪化した場合は実際の飛行経路の誤差が大きくなる」</b>としています（4.5.3(3)）。精度に影響するものとして、衛星の時計の精度・捕捉している衛星の数・障害物によるマルチパス・受信環境のノイズを挙げ、<b>「一般的に位置精度は、水平方向に比べ高度方向の誤差が大きくなる」</b>とも書いています。</p>
+      <p class="hint">ここから先は教則の外です。国内で使われているショー機の<b>飛行間隔</b>は、公表されているもので0.8m〜1.5mです。数十mの誤差では隣とぶつかりますし、そもそも図形になりません。日本で補正を得る方法は3つあります。<b>(1)自前の基準局</b>を現場に据える（通信回線に依存しない）、<b>(2)ネットワーク型RTK</b>＝国土地理院の電子基準点（全国約1,300か所）のデータから事業者が仮想の基準局を作って携帯回線で配信する、<b>(3)みちびきCLAS</b>＝同じ電子基準点から作った補正を衛星のL6D信号で放送する（基準局も地上通信も不要だが専用受信機が要り、公称精度は移動体で水平12cm・垂直24cm（95%）と一段粗く、補正の送信まで十数秒の遅れがある。内閣府）。</p>
+      <p class="caveat">補正が届かなくなると、精度は単独測位まで一気に落ちます。ある事業者の公開資料は「補正が途切れると精度が約3mまで劣化し、これは設計上の機体間距離をはるかに超えるので衝突しうる」としています。屋内では衛星が届かないので、電波や光を使った別の測位（UWBなど）に置き換わります。</p>`,
+    ky: '教則 4.5.3（GNSS）(2)GNSSとRTKの精度・(3)飛行における注意事項',
   },
   {
     id: 'clear', no: '③', chip: '間隔', layer: 'pair',
     head: 'ぶつからないのは、飛ぶ前に間隔を確かめてあるから',
     lead: '飛びながらよけているのではありません。交差しない経路を先に作っています。',
-    body: `<p>教則は、自動操縦で起きやすい間違いをこう書いています（5.2.2）。<b>「ウェイポイント設定時、飛行経路上の障害物等の確認不足によって衝突や墜落が発生することが想定できる。設定した飛行経路上の障害物等は事前に現地確認を行うこと」</b>。</p>
-      <p>ショーでは、この「障害物」に<b>他の機体</b>が加わります。数百〜数千の経路が、どの瞬間にも決めた間隔より近づかないことを、飛ばす前に確かめます。機体にぶつからないためのセンサーが付いていて飛びながらよけている、という作りではありません。</p>
-      <p class="hint">ここから先は教則の外です。海外では、この「飛ばす前のデータ」を間違えた事故が起きています。米国の事例（2024年12月・500機）では、①最後の経路のデータが機体に送られていなかった ②ショーの座標が7度回っていた ③安全の枠を社内の基準と違う値にしていた、という3つが重なり、離陸直後に機体同士が衝突して落下し、観客1名が重傷を負いました。機体が壊れた事故ではなく、<b>飛ばす前に作るデータの事故</b>です（米国 NTSB の予備報告書。原因の認定はまだ出ていません）。</p>
-      <p class="hint">〔一等〕教則は、カテゴリーⅢ飛行で自動操縦を使うときの注意点として「可能な限り第三者の立入りが少ない飛行経路及び送電線や構造物が障害とならない飛行範囲を事前に確認し設定すること」「緊急着陸地点や不時着エリアを予め設定すること」を挙げています（5.2.2(5)）。</p>
-      <p class="hint">なお、飛んでいる機体が落ちたときにどこまで飛ぶかは、教則が式で示しています。〔一等〕高度 h を速度 v で飛ぶ機体が揚力を失ったときの水平到達距離は <b>x = v√(2h/g)</b>（空気抵抗を無視した水平投射）です（4.3）。高度50m・速度10m/s なら約32mになります。国土交通省の<b>審査要領</b>（教則の外）は、催しの上空について、飛行の高度に応じた立入禁止区画を表で定めています（20m未満は飛行範囲の外周から30m以内、20〜50mは40m、50〜100mは60m、100〜150mは70m、150m以上は製造者等が保証した落下距離（70m未満なら70m）以内）。</p>`,
-    ky: '教則 5.2.2(2)（自動操縦におけるヒューマンエラーの傾向）・5.2.2(5)〔一等〕',
+    body: `<p>教則は、他の無人航空機との衝突防止を<b>飛行の方法の義務</b>として挙げています（3.1.2(3)1)c.）。<b>「飛行中の他の無人航空機を確認した場合には、当該無人航空機との間に安全な間隔を確保して飛行させ、接近又は衝突のおそれがあると認められる場合には地上に降下させるなど適切な措置を取るとともに、飛行日時、飛行経路、飛行高度等について、他の無人航空機を飛行させる者と調整を行うこと」</b>。これをしなかったときは50万円以下の罰金です（3.1.2(3)4)）。</p>
+      <p>教則は、自動操縦で起きやすい間違いもこう書いています（5.2.2(2)）。<b>「ウェイポイント設定時、飛行経路上の障害物等の確認不足によって衝突や墜落が発生することが想定できる。設定した飛行経路上の障害物等は事前に現地確認を行うこと」</b>。〔一等〕では「可能な限り第三者の立入りが少ない飛行経路及び送電線や構造物が障害とならない飛行範囲を事前に確認し設定すること」「飛行経路付近に地上の第三者の立入りが少ないこと等の条件を考慮した緊急着陸地点や不時着エリアを予め設定すること」も挙げています（5.2.2(5)）。</p>
+      <p class="hint">ここから先は教則の外（ショーの作り）です。ショーでは、この「障害物」に<b>他の機体</b>が加わります。数百〜数千の経路が、どの瞬間にも決めた間隔より近づかないことを、飛ばす前に検査します。検査するのは、機体どうしの最接近距離・高度の上下限・水平と上下の速度・加速度・ヨー角速度で、これを全時刻について調べます（Skybrush の既定値は順に3m／150mと2.5m／10m/sと2m/s／4m/s²／30度毎秒）。ある事業者のソフトでは、この検査に1つでも落ちると<b>ショーファイルの書き出しそのものができません</b>。</p>
+      <p class="caveat">この距離は<b>機体の中心どうし</b>で測っています。ソフトは機体の大きさを知らないので、アーム長とプロペラの分は設計者が上乗せして見込みます。アーム長45cmの機体なら、3mの設定でも実際の隙間は2mを切ります。</p>
+      <p class="hint">海外では、この「飛ばす前のデータ」を間違えた事故が起きています。米国の事例（2024年12月21日・フロリダ州オーランド・500機）では、<b>最後の経路のデータが機体に送られておらず</b>、離陸で層が揃わないまま最初の図形へ動いた時点で位置と高度がずれ、機体同士が衝突して制御を失いました。これとは別に、<b>ショーの位置が7度回っていた</b>ことと、<b>外側の枠を社内標準の1mではなく5mにしていた</b>ことが重なって、観客を入れない安全区域が縮んでいました。落下した機体が当たり、子ども1名が重傷を負っています。機体が壊れた事故ではなく、<b>飛ばす前に作るデータの事故</b>です（米国NTSB予備報告書 DCA25LA065。<b>原因の認定はまだ出ていません</b>）。</p>`,
+    ky: '教則 3.1.2(3)1)c.（他の無人航空機との衝突防止）・5.2.2(2)・5.2.2(5)〔一等〕',
   },
   {
     id: 'clock', no: '④', chip: '時計', layer: 'sync',
     head: '全機の時計を合わせる ― ずれると図形が崩れる',
     lead: '同じ時刻に、決めた場所にいること。それだけで図形になります。',
     body: `<p class="caveat">この項目は教則には書かれていません。機体側のしくみの話です。</p>
-      <p>各機は「いま何秒の位置にいるべきか」を自分の時計で決めています。地上から「そこへ行け」と1機ずつ言われているのではありません。だから<b>全機の時計が合っていること</b>が、図形が図形として見える条件になります。</p>
-      <p>時計合わせには衛星の時刻が使えます。GNSS の受信機は位置を出すために衛星の時刻を受け取っているので、位置と時刻を同時に得られます。教則も、測位の精度に影響するものとして「GNSS衛星の時計の精度」を挙げています（4.5.3）。</p>
+      <p>各機は「いま何秒の位置にいるべきか」を<b>自分の時計</b>で決めています。互いに通信し合って歩調を合わせているのではありません。だから全機の時計が合っていることが、図形が図形として見える条件になります。</p>
+      <p>時計合わせには<b>測位衛星の時刻</b>を使います。衛星測位は「電波が届くまでの時間」で位置を出す仕組みなので、信号にはもともと極めて正確な時刻が乗っています。教則も、測位の精度に影響するものとして「GNSS衛星の時計の精度」を挙げています（4.5.3(3)）。</p>
+      <p class="hint">ここから先は教則の外です。ショーの開始時刻は「<b>未来のある時刻</b>」として全機に配られ、各機はその時刻が来たら自分の台本を再生し始めます。あるソフトでは、この時刻をGPSの週内秒（0〜604799秒）で指定します。地上のパソコンの時計がずれていると、表示どおりの時刻に始まらず、音楽や花火とずれます。</p>
       <p>ずれると、その機体だけ図形から外れて見えます。少しのずれなら「1機だけ遅れている」ように、大きくずれると形そのものが崩れます。</p>`,
-    ky: '教則の外（4.5.3 が「衛星の時計の精度」に触れているのみ）',
+    ky: '教則の外（4.5.3(3) が「GNSS衛星の時計の精度」に触れているのみ）',
   },
   {
     id: 'gcs', no: '⑤', chip: '地上局', layer: 'link',
     head: '地上局は見張りと非常停止 ― 操縦桿を握ってはいない',
     lead: '地上局から届いているのは、経路ではなく「止まれ」です。',
-    body: `<p>飛んでいる間、地上局と機体の間には電波が通っています。ただしそれは経路を送るためではなく、<b>各機の状態を受け取り、必要なときに止めるため</b>のものです。</p>
+    body: `<p class="hint">この段落は教則の外（ショーの作り）です。飛んでいる間、地上局と機体の間には電波が通っています。ただしそれは経路を送るためではなく、<b>各機の状態を受け取り、必要なときに止めるため</b>のものです。あるメーカーの安全規範は、演目のデータは飛ばす前に各機の内蔵メモリへ入れてあり、<b>演目の進行そのものは通信に依存しない</b>としています（同社は2.4GHz・5.8GHz・850MHz の三重の無線を持たせています）。地上局が失うのは「見えること」と「止められること」です。</p>
       <p>教則は、自動操縦中に手動操縦へ切り替える場合として「作業指示による手動操作」「何らかの原因で不安定な飛行と判断した場合」を挙げ、切り替えた後は急な飛行速度の低下や失速に備えた操作準備、障害物への接近を避けるための機体方向の確認、ホバリングしての安定性と周囲の安全の確認が必要だとしています（5.2.2(4)）。</p>
-      <p class="hint">ここから先は教則の外です。国土交通省の<b>審査要領</b>は、自動操縦の機体について「あらかじめ設定された飛行プログラムにかかわらず、<b>常時、不具合発生時等において、無人航空機を飛行させる者が機体を安全に着陸させられるよう、強制的に操作介入ができる設計であること</b>」を求めています。数千機であっても、止める手段は人の側に残っている、という作りです。</p>
-      <p class="hint">メーカーが公開している安全規範では、演目のデータは飛ばす前に各機の内蔵メモリへ入れてあり、<b>演目の進行そのものは通信に依存しない</b>としています。監視の通信が切れても、機体は自分の中の予定どおりに飛び続けます。地上局が失うのは「見えること」と「止められること」です。だから通信は二重・三重にしてあります（ある社は2.4GHz・5.8GHz・850MHz の三重）。</p>
-      <p class="hint">「1人で何機まで見てよいか」を定めた明文の規定は、航空法・施行規則・審査要領・標準マニュアルのいずれにもありません。国土交通省が使う用語は「一斉飛行」でも「群飛行」でもなく<b>「多数機同時運航」</b>で、そのガイドライン（令和8年6月・第二版）は、ドローンショーのような目視内（レベル1・2）の多数機同時運航を<b>対象外</b>としています。ガイドラインにある1:5・1:8・1:10 という数字は、レベル3・3.5 の実証に基づくもので、ショーの基準ではありません。</p>
-      <p class="hint">参考までに米国では、1人が同時に2機以上に関与することを規則で禁じたうえで（14 CFR 107.35）、ショーごとに個別の免除を出しています。その解説文書には「<b>自動化を使っても、1人が複数機を同時に運用してよいことにはならない</b>」と明記されており、実際に出ている免除では補助者を機数に比例して置くこと（250〜500機に1名）が条件になっています。</p>`,
-    ky: '教則 5.2.2(4)（切り替えの注意）／教則の外: 審査要領 4-1-1(5)・多数機同時運航ガイドライン',
+      <p>教則は<b>補助者</b>についてもこう書いています（5.4.2）。<b>「無人航空機を飛行させる操縦者は機体の動きや操縦に集中する必要があり、離着陸エリアを含めた飛行経路の管理を操縦と同時に行うことが困難であるため、飛行準備や飛行経路の安全管理、第三者の立入管理などは補助者が主として行う必要がある」</b>。そして<b>「無人航空機の飛行経路や範囲に応じ補助者の数や配置、各人の担当範囲や役割、異常運航時の対応方法も決めておく必要がある」</b>としています。</p>
+      <p class="hint">ここから先は教則の外です。国土交通省の審査要領（4-1-1(5)）は、自動操縦の機体について「あらかじめ設定された飛行プログラムにかかわらず、常時、不具合発生時等において、無人航空機を飛行させる者が機体を安全に着陸させられるよう、強制的に操作介入ができる設計であること」を挙げています。ただし同じ条には「操作介入等を必要としない機能を有する設計であり、かつ、その機能に関しては十分な信頼性を有することを製造者が証明できる場合はこの限りではない」という但し書きが付きます。</p>
+      <p class="hint">「1人で何機まで見てよいか」を定めた明文の規定は、航空法・施行規則・審査要領・標準マニュアルのいずれにもありません。ただし審査要領は「複数の無人航空機を飛行させる場合には、全ての機体について記載又は添付すること」を求めており、<b>機数そのものは許可・承認の中身として審査されます</b>。国土交通省が使う用語は「一斉飛行」でも「群飛行」でもなく<b>「多数機同時運航」</b>で、そのガイドライン（令和8年6月・第二版）は、ドローンショーのような目視内（レベル1・2）の多数機同時運航を<b>対象外</b>としています。ガイドラインにある1:5・1:8・1:10 という数字は、レベル3・3.5 の実証に基づくもので、ショーの基準ではありません。</p>
+      <p class="hint">参考までに米国では、1人が同時に2機以上に関与すること（操縦操作をする者・遠隔操縦者・補助者のいずれも）を規則で禁じたうえで（14 CFR 107.35）、ショーごとに個別の免除を出しています。解説文書（AC 107-2A 5.2.3.2）には「<b>自動化を使っても、1人が複数機を同時に運用してよいことにはならない</b>」と明記されています。実際の免除では補助者の人数を機数に比例させることが条件になっており、たとえば2025年に交付された1件（107W-2025-01425）は「ショーの規模に応じて増やす（200機に1名）」で、1人の操縦者が扱える機数は1,000機までとされています。比率は免除ごとに違うので、この数字を一般の基準として覚えないでください。</p>`,
+    ky: '教則 5.2.2(4)（切り替えの注意）・5.4.2（補助者の必要性、役割及び配置）／教則の外: 審査要領 4-1-1(5)・多数機同時運航ガイドライン第二版',
   },
   {
     id: 'fail', no: '⑥', chip: '異常時', layer: 'fence',
@@ -2077,39 +2080,39 @@ const DSHOW_HOW = [
     lead: '止まるための決めごとが、飛ばす前に機体へ入っています。',
     body: `<p>教則は、機体のフェールセーフ機能をこう説明しています（5.2.3(1)）。<b>「送信電波や電源容量の減少などにより飛行が継続できない場合、又は継続できないことが予想される場合は、予め飛行制御アプリケーションのフェールセーフ機能により、自動帰還モードへ切り替わり、離陸地点へ飛行する。さらにバッテリー残量が極端に少ない場合などはその場で自動着陸を試みる」</b>。ホバリング・その地点での着陸・自動帰還のどれにするかを設定できる機体もあるとしています。</p>
       <p>そして緊急時の原則として、<b>「緊急時には、離陸地点などに戻すことを前提とせず、速やかに近くの安全な無人地帯へ不時着させる」</b>と書いています（5.2.3）。</p>
-      <p class="hint">ここから先は教則の外です。ショーでは、飛んでよい範囲を立体の枠（ジオフェンス）として機体に入れておきます。内側の枠を越えたら帰還や着陸に切り替わり、外側の枠を越えたら停止する、という二段の作りが使われています。</p>
+      <p>飛行の逸脱を防ぐ手立てとして、教則は<b>ジオフェンス</b>を挙げています（6.1.1(1)2)）。<b>「ジオフェンス機能を使用することにより、飛行禁止空域を設定する」</b>。〔一等〕では、ジオフェンスの設定に「当日の他の航空機との空域調整結果が反映されていることを確認する」ことも挙げています（6.1.3(2)）。</p>
+      <p class="hint">ここから先は教則の外です。ショーでは、この枠を<b>内側と外側の二段</b>に分ける作りが使われています。内側を越えたら帰還や着陸に切り替わり、外側を越えたら<b>モーターを切ります</b>（＝落ちます）。だから外側のさらに外に、落ちた機体が届く範囲を計算して、人を入れない区画を取ります。</p>
       <p class="caveat">枠は<b>設定</b>であって保証ではありません。枠の値を間違えれば、枠は間違えた場所にできます（③の事例）。</p>
-      <p class="hint">機体そのものに求められる基準も、教則の外にあります。国土交通省の機体認証の検査要領は、<b>「単一の起こり得る故障によって機体の制御不能又は想定飛行範囲からの逸脱を生じないように設計されなければならない」</b>とし、これを試験で実証することを求めています。その試験は「最も厳しい操縦者と無人航空機数の比率」で行うこととされ、確認すべき能力として「操縦者による安全な飛行中断能力」「すべての運用条件において機体を指定されたエリア内に留めるジオ・フェンス機能」が挙げられています。</p>
-      <p class="caveat">ただし「<b>1機の故障が他の機体に波及しない</b>」ことを保証する記述は、広く使われている自動操縦ソフトの公式文書には見当たりません。地上局と通信が全機で共通であること自体が、1つの弱点になり得ます。</p>`,
-    ky: '教則 5.2.3（緊急時の対応）(1) 機体のフェールセーフ機能',
+      <p class="hint">機体そのものの基準も教則の外にあります。国土交通省の検査要領（型式認証等の安全基準 No.8-001）は、<b>第一種</b>について「単一の起こり得る故障によって機体の制御不能又は想定飛行範囲からの逸脱を生じないように設計されなければならない」とし、試験での実証を求めています。<b>第二種</b>では対象が「目視外飛行を行う25kg未満の機体及び25kg以上の機体」に絞られ、文言も「想定飛行範囲からの逸脱」だけになります。試験は「最も厳しい操縦者と無人航空機数の比率」で行うこととされ、試験条件の一つに「操縦者に対する機体の数（1対1, 1対複数等）」が挙げられています。なお「操縦者による安全な飛行中断能力」は必須ですが、「すべての運用条件において機体を指定されたエリア内に留めるジオ・フェンス機能」は<b>その認証を得ようとする場合に実証する</b>任意の項目です。ショー機で型式認証を受けたものは、公表資料の範囲では確認できていません。</p>`,
+    ky: '教則 5.2.3（緊急時の対応）(1)・6.1.1(1)2)（飛行の逸脱防止）・6.1.3(2)〔一等〕',
   },
   {
     id: 'launch', no: '⑦', chip: '離着陸', layer: 'grid',
     head: '箱から出て、箱に戻る ― 並べ方・着陸・充電',
     lead: '地面に格子で並べ、真上に上がり、同じ場所へ戻ります。',
-    body: `<p class="caveat">この項目は教則には書かれていません。機体と運用の話です。</p>
-      <p>ショー機は、地面に<b>格子状に並べて</b>離陸します。公表されている地上の配置間隔は0.8m〜1.5m程度です。真上に上がって隊列に入り、終わったら同じ場所へ降りてきます。箱に収めたまま出し入れする方式もあり、着陸後にそのまま充電する機体もあります。</p>
-      <p>この運用だから、ショー機には<b>脚がありません</b>。着地するのはプロペラを囲む輪の下縁です。手前の1機を見てください。脚も、カメラも、ジンバルもありません。</p>
-      <p>必要な地面の広さは機数で決まります。メーカーが公開している算定式は<b>「離着陸エリアの総面積 ＝ 0.5m × 0.5m × 機数」</b>で、1,000機なら約250平方メートル（およそ16m四方）です。同じ資料は、離陸場所と演技場所の水平距離を300m以内に収めること、観客席を離陸区域と飛行経路の真下から50m以内に置かないこと、飛行経路の真下から15m以内に人も車も置かないこと、離陸高度を周囲の建物や樹木より10m以上高くとることも挙げています。</p>
-      <p class="hint">箱に入れたまま出し入れする方式では、この間隔をさらに詰められます（ある社は箱方式で0.4m）。ショーそのものより、地面と、そこへ人を入れない仕組みのほうが手間だと言われます。</p>`,
-    ky: '教則の外（機体と運用）',
+    body: `<p>離着陸場所の選び方は教則が扱っています。<b>「飛行経路を考慮し、周辺及び上方に障害物がない水平な場所を離着陸場所と設定する」「緊急時などに一時的な着陸が可能なスペースを、前もって確認・確保しておく」</b>（6.1.1(1)1)）。〔一等〕では「離陸地点は操縦者及び補助者との距離を3m以上保つか、機体の取扱説明書に推奨距離が記載されている場合はその指示に従う」「離陸地点は周囲の物件から30m以上離すことができる場所を選定する。距離が確保できない場合は、補助者を配置するなどの安全対策を講じる」としています（6.3.3(3)1)）。</p>
+      <p class="hint">ここから先は教則の外です。ショー機は地面に<b>格子状に並べて</b>離陸します。ある事業者の公開資料（深圳大漠大智控技術『無人機集群飛行表演安全規範』2025年11月）は、離着陸エリアの面積を<b>「0.5m × 0.5m × 機数」</b>で見積もるとしており、1,000機なら約250平方メートル（およそ16m四方）です。同じ資料は、離陸場所と演技場所の水平距離を300m以内に収めること、観客区域を離陸区域と飛行経路の真下から50m以内に設けないこと、飛行経路の真下から15m以内に人も車も置かないこと、離陸高度を周囲の建物や樹木より10m以上高くとることも挙げています。国内では、ドローンショー・ジャパンが DSJ MODEL-X の地上配置間隔を0.8×0.5mと公表しています。箱に入れたまま出し入れする方式では、さらに詰められます（ある社は箱方式で0.4m）。</p>
+      <p class="hint">この運用なので、<b>この教材の機体には脚がありません</b>。着地するのはプロペラを囲む輪の下縁です。手前の1機を見てください。脚も、カメラも、ジンバルもありません。ただしショー機の形は一つではなく、<b>輪で囲う型</b>（レッドクリフ EMO・Nova Star・EHang GD4.0 など）と、<b>ガードを持たず短い脚で降りる型</b>（Verge Aero X1/X7・UVify IFO・Firefly Gen2 など）に分かれます。</p>
+      <p class="hint">教則は、離着陸エリアの広さについて「回転翼航空機（ヘリコプター）は、構造上プロペラガードがない機体が一般的であるため、安全のためにプロペラガード付きの回転翼航空機（マルチローター）よりも広い離着陸エリアが必要である」としています（6.3.2(1)）。ガードの有無は、飛んでいるときだけでなく、地面の広さにも効きます。</p>`,
+    ky: '教則 6.1.1(1)1)（安全マージン）・6.3.2(1)・6.3.3(3)1)〔一等〕／格子と箱の方式は教則の外',
   },
 ];
-const DSHOW_HOW_SRC = 'この教材の隊列・ジオフェンス・基準局は、箱庭の広さに合わせて縮めています（実際のショーは数百〜数千機で、高さも広さも桁が違います）／出典は各項目に記載';
+const DSHOW_HOW_SRC = 'この教材の隊列・ジオフェンス・基準局・離陸の格子は、箱庭の広さに合わせて縮めています（実際のショーは数百〜数千機で、高さも広さも桁が違います）／出典は各項目に記載';
 const DSHOW_REG = {
   lead: '教則は「多数の者の集合する催し」に<b>該当する例</b>として、祭礼や花火大会と並べて<b>ドローンショー</b>を挙げています。ただし「自社敷地内、無人の競技場内等、第三者の立入管理措置が行われていることが明白である場所での事前練習や企業向けの配信用撮影等を除く」という括弧書きが付きます。該当するかどうかは、催し場所上空で機体が落下することにより地上等の人に危害を及ぼすことを防止するという趣旨に照らし、人数や規模だけでなく、特定の場所や日時に開催されるかどうかによって総合的に判断されるとされています。',
   items: [
     '催し場所上空の飛行は、<b>立入管理措置を講じたうえで行う場合</b>、リスクの高いものとして<b>カテゴリーⅡA飛行</b>に位置づけられます（立入管理措置を講じない第三者上空の飛行はカテゴリーⅢです）。ⅡAでは、技能証明を受けた者が機体認証を受けた機体を飛行させる場合<b>であっても</b>、あらかじめ運航管理の方法について国土交通大臣の審査を受け、飛行の許可・承認を受けることが求められます。',
-    '催しの上空では、<b>風速5m/s以上の場合は飛行を中止すること</b>と、機体が第三者及び物件に接触した場合の<b>危害を軽減する構造</b>を用意していることが必要とされています。',
-    '夜間（日没から日出までの間）の飛行は特定飛行で、原則は<b>承認</b>の対象です。日出・日没は国立天文台が発表する時刻で、地域により異なるため事前に確認します。この場面は催し場所上空でもあるため、いずれにせよ運航管理の方法の審査を受けて許可・承認を受けることになります。なお教則は、技能証明の限定（昼間（日中）飛行／目視内飛行）について「飛行の許可・承認を受けて特定飛行を行う場合を除く」としています。',
+    '催しの上空では、<b>風速5m/s以上の場合は飛行を中止すること</b>と、機体が第三者及び物件に接触した場合の<b>危害を軽減する構造</b>を用意していることが必要とされています。教則の外ですが、国土交通省の審査要領は危害を軽減する機能の例として<b>プロペラガード／衝突した際の衝撃を緩和する素材の使用又はカバーの装着／衝突防止センサー（正常に機能していること及び有効範囲や性能上の限界等の範囲内である場合に限る）</b>を挙げ、あわせて<b>飛行速度と風速の和が7m/s以上となる場合には飛行を行わないこと</b>も求めています。',
+    '夜間（日没から日出までの間）の飛行は特定飛行で、原則は<b>承認</b>の対象です。日出・日没は国立天文台が発表する時刻で、地域により異なるため事前に確認します。催し場所上空に該当する場合は、いずれにせよ運航管理の方法の審査を受けて許可・承認を受けることになります。なお教則は、技能証明の限定（昼間（日中）飛行／目視内飛行）について「飛行の許可・承認を受けて特定飛行を行う場合を除く」としています。',
     '夜間の必須装備は、機体の<b>姿勢及び方向が正確に視認できる灯火</b>です。ただし飛行範囲が照明等で十分照らされている場合はこの限りではない、という但し書きも置かれています。灯火は夜間の要件、危害を軽減する構造は催しの要件で、出どころが違います。',
     '夜間飛行では<b>原則として目視外飛行は実施せず</b>、機体の向きを視認できる灯火が装備された機体を使用するとされています。操縦者は事前に、第三者の立入りの無い安全な場所で<b>訓練を実施すること</b>、離着陸地点を含め回避すべき障害物などには安全確保のため照明が必要であることも挙げられています。',
-    '<b>許可・承認の有無によらず</b>、想定していない催しの開催が明らかになり、飛行場所に第三者の立入り又はそのおそれを確認したときは、直ちに飛行を停止し、経路の変更や安全な場所への着陸その他の必要な措置を講じなければならないとされています。',
+    '<b>許可・承認の有無によらず</b>、<b>飛行予定経路下において</b>想定していない催しの開催が明らかになり、飛行場所に第三者の立入り又はそのおそれを確認したときは、直ちに飛行を停止し、経路の変更や安全な場所への着陸その他の必要な措置を講じなければならないとされています。',
     '1人の操縦者が複数機を同時に飛ばすことについて、<b>教則に記述はありません</b>。教則が扱うのは、自動操縦（プログラムにより自動的に操縦を行うこと）と、操縦と安全管理の役割を分ける運航体制までです。',
     '100グラム以上の機体は1機ずつ国の登録を受け、登録記号を表示し、一部の例外を除きリモートID機能を備えることが求められます。台数分すべてが対象です。',
+    '<b>台数分かかるのは登録だけではありません。</b>飛行前には機体ごとに外部点検・作動点検、空域と周囲の状況、気象、バッテリー残量、<b>リモートID機能の作動状況</b>を確認します（3.1.2(3)1)b.）。特定飛行は<b>飛行計画をあらかじめ通報</b>し（記載事項に登録記号・種類・型式、立入管理措置の有無と内容、保険契約の有無と内容を含む）、通報した計画に従って飛行させます。違反は30万円以下の罰金です。<b>飛行日誌</b>（飛行記録・日常点検記録・点検整備記録）も機体ごとに備え、記載します。違反は10万円以下の罰金です（3.1.2(3)2)）。',
   ],
-  src: '教則第5版 3.1.1（自動操縦の定義）・3.1.2（催し場所上空・夜間・立入管理措置）・4.2.1（夜間の装備）・5.2.2（手動操縦及び自動操縦）・6.1.1（安全マージン・運航体制）・6.4.1（夜間の運航）',
-  outside: '教則の中: 6.1.1 は、飛行領域に<b>危険半径（高度と同じ数値、または30mのいずれか長い方）</b>を加えた範囲を、立入管理措置を講じて無人地帯としたうえで飛行する、としています。教則の外: 飛行高度に応じた立入禁止区画の表（飛行範囲の外周から30〜70mなど）は、国土交通省の<b>審査要領</b>に置かれています。多数機同時運航のガイドライン（国土交通省）がドローンショーを対象外としている点も、教則の外の資料です。',
+  src: '教則第5版 3.1.1(2)3)5)（カテゴリー分け・許可承認）・3.1.1（自動操縦の定義）・3.1.2（催し場所上空・夜間・立入管理措置・飛行計画・飛行日誌）・3.1.2(4)1)・4.2.1（夜間の装備）・5.2.2（手動操縦及び自動操縦）・6.1.1（安全マージン・運航体制）・6.4.1（夜間の運航）',
+  outside: '教則の中: 6.1.1 は、飛行領域に<b>危険半径（高度と同じ数値又は30mのいずれか長い方）</b>を加えた範囲を、立入管理措置を講じて無人地帯としたうえで飛行する、としています。教則の外: 飛行高度に応じた立入禁止区画の表（飛行範囲の外周から30〜70mなど）は、国土交通省の<b>審査要領</b>に置かれています。多数機同時運航のガイドライン（国土交通省）がドローンショーを対象外としている点も、教則の外の資料です。',
 };
 
 // ===== 手続き生成テクスチャと材質 (v2: 製品レンダリング品質) =====
@@ -3513,7 +3516,7 @@ async function warmCompile() {
 // 教則が催し場所上空に求める「危害を軽減する構造」（審査要領はプロペラガードを例に挙げる）を、
 // 形として見えるようにしてある。ガードの下縁がそのまま脚（着地面）で、脚は別に付いていない。
 const SD = {
-  root: null, built: false, leds: [], discs: [], props: [], mat: null,
+  root: null, built: false, leds: [], discs: [], props: [], mat: null, light: null,
   W: 0.310, WB: 0.232, HGT: 0.113, PROP: 0.127, MASS: 530,   // 外形(m) / モーター間(m) / 全高(m) / プロペラ径(m) / 質量(g)
 };
 function buildShowDrone(M) {
@@ -3524,8 +3527,8 @@ function buildShowDrone(M) {
   const RG = 0.0730, TG = 0.0030;          // ガードの輪の半径 / 太さ。外形 (0.0820+0.0730)*2 = 0.310m
   const Y_LO = 0.0030, Y_HI = 0.0530;      // 下の輪 / 上の輪の高さ。下の輪の最下点が y=0（＝着地面）
   const Y_PROP = 0.0355;
-  const white = new THREE.MeshStandardMaterial({ color: 0xeef0f3, roughness: 0.52, metalness: 0.0 });
-  const cage = new THREE.MeshStandardMaterial({ color: 0xe4e7ec, roughness: 0.86, metalness: 0.0 });
+  const white = new THREE.MeshStandardMaterial({ color: 0x9aa2ad, roughness: 0.66, metalness: 0.0 });   /* 夜は機体が灯りに勝ってはいけない */
+  const cage = new THREE.MeshStandardMaterial({ color: 0x8d95a0, roughness: 0.90, metalness: 0.0 });
   const dark = new THREE.MeshStandardMaterial({ color: 0x2a2d34, roughness: 0.42, metalness: 0.6 });
   SD.mat = { white, cage, dark };
   const put = (m, x, y, z) => { m.position.set(x, y, z); m.castShadow = false; m.receiveShadow = false; m.userData.noShadow = m.userData.noPick = m.userData.noPart = true; return m; };
@@ -3581,7 +3584,7 @@ function buildShowDrone(M) {
     for (let k = 0; k < 4; k++) {
       const cx = (k === 0 || k === 3 ? 1 : -1) * MO, cz = (k < 2 ? 1 : -1) * MO;
       const ccw = (k === 0 || k === 2);
-      const dm = (ccw ? M.propDiscCCW : M.propDiscCW).clone(); dm.opacity = 0.34;   /* 飛んでいる状態。ぼかし円盤で回転を表す */
+      const dm = (ccw ? M.propDiscCCW : M.propDiscCW).clone(); dm.opacity = 0.13; dm.blending = THREE.AdditiveBlending; dm.toneMapped = false;   /* 飛んでいる状態。ぼかし円盤で回転を表す */
       const d = new THREE.Mesh(discGeo, dm); d.renderOrder = 5;
       g.add(put(d, cx, Y_PROP, cz)); SD.discs.push(d);
     }
@@ -3595,7 +3598,7 @@ function buildShowDrone(M) {
       const o = put(mesh(geo, m), 0, y, z); o.userData.noAO = true; o.userData.flatTint = true;
       g.add(o); SD.leds.push({ obj: o, mat: m, scale: r });
     }
-    g.add(put(mesh(cylGeo(0.0200, 0.0188, 0.0075, 24), new THREE.MeshStandardMaterial({ color: 0xb9bec7, roughness: 0.55, metalness: 0.35 })), 0, 0.0225, 0));   /* 放熱のえり */
+    g.add(put(mesh(cylGeo(0.0162, 0.0152, 0.0068, 24), new THREE.MeshStandardMaterial({ color: 0xb9bec7, roughness: 0.55, metalness: 0.35 })), 0, 0.0225, 0));   /* 放熱のえり */
     for (const s of SD.leds) {                          // 加算スプライトの2枚重ね（主役機の航法灯と同じ組み方）
       const core = new THREE.Sprite(M.glowCore('#ffffff')); core.scale.setScalar(0.060 * s.scale);
       const halo = new THREE.Sprite(M.glowHalo('#ffffff')); halo.scale.setScalar(0.190 * s.scale);
@@ -3604,6 +3607,10 @@ function buildShowDrone(M) {
       s.core = core; s.halo = halo;
     }
   }
+  // 灯りそのものを光源にする。three.js はライトの本数が変わると材質を全部コンパイルし直すので、
+  // 作るのは1回だけ。消すときは intensity を 0 にしてシーンからは外さない
+  { const pl = new THREE.PointLight(0xffffff, 0.0, 0.55, 2); pl.position.set(0, 0.016, 0); pl.castShadow = false;
+    g.add(pl); SD.light = pl; }
   // --- 登録記号。100g以上は1機ずつ登録して表示する。台数分すべてが対象 ---
   { const d = new THREE.Mesh(new THREE.PlaneGeometry(0.030, 0.0062), M.regLabel);
     d.rotation.x = -Math.PI / 2; g.add(put(d, 0, 0.0632, 0.030)); }
@@ -3617,6 +3624,7 @@ const _sdCol = new THREE.Color();
 function showDroneColor(hex) {
   if (!SD.built) return;
   _sdCol.set(hex);
+  if (SD.light) SD.light.color.copy(_sdCol);
   for (const s of SD.leds) {
     s.mat.emissive.copy(_sdCol); s.mat.color.copy(_sdCol).lerp(new THREE.Color(1, 1, 1), 0.55);
     s.core.material.color.copy(_sdCol).lerp(new THREE.Color(1, 1, 1), 0.6);
@@ -3634,6 +3642,7 @@ function showDroneOn(on) {
   if (!SD.built) return;
   SD.root.visible = !!on;
   D.root.visible = !on;
+  if (SD.light) SD.light.intensity = on ? 0.55 : 0;
   if (on) showDroneFollow();
   S.shadowDirty = S.csDirty = S.aoDirty = true;
 }
@@ -6778,16 +6787,17 @@ function dshowBuild() {
   const mat = new THREE.ShaderMaterial({
     uniforms: {
       uSize: { value: DSHOW_GLOW }, uPxPerM: { value: 900 }, uGain: { value: 1 },
-      uProg: { value: 1 }, uTime: { value: 0 }, uWave: { value: 1 }, uSkew: { value: 0 },
+      uProg: { value: 1 }, uTime: { value: 0 }, uWave: { value: 1 }, uSkew: { value: 0 }, uSkewFrac: { value: 0.03 },
     },
     // 位置と色は頂点シェーダで作る。CPU は図形が変わる瞬間しか働かない
     vertexShader: `
       attribute vec3 aTo, aColA, aColB;
       attribute float aLag, aRnd, bright;
-      uniform float uSize, uPxPerM, uProg, uTime, uWave, uSkew;
+      uniform float uSize, uPxPerM, uProg, uTime, uWave, uSkew, uSkewFrac;
       varying vec3 vCol; varying float vB;
       void main() {
-        float u = clamp((uProg + aRnd * uSkew - aLag) / max(0.10, 1.0 - aLag), 0.0, 1.0);   // uSkew: わざと時計をずらして、形が崩れるのを見せる
+        float late = step(1.0 - uSkewFrac, abs(aRnd));   // 時計がずれているのは一部の機体だけ（全機だと砂嵐に見える）
+        float u = clamp((uProg + late * aRnd * uSkew - aLag) / max(0.10, 1.0 - aLag), 0.0, 1.0);
         float e = u * u * (3.0 - 2.0 * u);          // なめらかに出て、なめらかに止まる
         vec3 p = mix(position, aTo, e);
         vec3 d = aTo - position; float L = length(d);
@@ -6825,7 +6835,15 @@ function dshowBuild() {
   const pts = new THREE.Points(geo, mat); pts.frustumCulled = false; pts.renderOrder = 6;
   pts.userData.noPart = pts.userData.noPick = pts.userData.noShadow = pts.userData.noAO = true;
   pts.visible = false; scene.add(pts);
-  dshow.geo = geo; dshow.mat = mat; dshow.pts = pts;
+  // 2枚目。同じ点を 2.5倍の大きさ・1/4の明るさで重ねて、光の「裾」を作る。
+  // これが無いと数珠つなぎの玉に見える（実写のショーは光の線が発光して見える）。
+  // uSize と uGain 以外の uniform は同じ入れ物を共有するので、毎フレームの写しが要らない
+  const haloMat = mat.clone();
+  for (const key of ['uPxPerM', 'uProg', 'uTime', 'uWave', 'uSkew', 'uSkewFrac']) haloMat.uniforms[key] = mat.uniforms[key];
+  const halo = new THREE.Points(geo, haloMat); halo.frustumCulled = false; halo.renderOrder = 5;
+  halo.userData.noPart = halo.userData.noPick = halo.userData.noShadow = halo.userData.noAO = true;
+  pts.add(halo);
+  dshow.geo = geo; dshow.mat = mat; dshow.pts = pts; dshow.halo = halo; dshow.haloMat = haloMat;
   dshow.fig = 0;
   dshowShape(DSHOW_FIGS[0].id, n, dshow.to); dshow.from.set(dshow.to);
   dshowSetColor(0, dshow.to, dshow.colTo, n); dshow.colFrom.set(dshow.colTo);
@@ -6836,11 +6854,20 @@ function dshowUpload() {
   for (const k of ['position', 'aTo', 'aColA', 'aColB', 'aLag']) dshow.geo.attributes[k].needsUpdate = true;
 }
 // 画面の広さと画素密度から、1m が何画素になるかを出す（点の大きさはこれで決まる）
+// にじみの2枚目を本体に合わせる。2.5倍を超えると1機ずつが読めなくなる（＝事実と違う見え方）ので上限にする
+const DSHOW_HALO = () => (S.qLevel <= 1 ? 2.1 : 2.5);
+function dshowGlowSync() {
+  if (!dshow.haloMat) return;
+  const h = DSHOW_HALO();
+  dshow.haloMat.uniforms.uSize.value = DSHOW_GLOW * dshow.k * h;
+  dshow.haloMat.uniforms.uGain.value = dshow.mat.uniforms.uGain.value * (0.60 / h);
+}
 function dshowPixels() {
   const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   dshow.mat.uniforms.uPxPerM.value = (H * DPR) / (2 * tanV);
   // ブルームは無いので、光の飽和はトーンマッピングに任せる。中間バッファが 8bit の環境では 1 を超えた分が消えるので抑える
   dshow.mat.uniforms.uGain.value = (HF && !Q.direct) ? 2.6 : 1.15;
+  dshowGlowSync();
 }
 
 // ---------- 画の決め方 ----------
@@ -6902,7 +6929,7 @@ function dshowFrame(ms) {
 function dshowApplyK() {
   const k = dshow.k;
   if (dshow.pts) { dshow.pts.scale.setScalar(k); dshow.pts.position.y = DSHOW_H * (1 - k) * (1 - dshow.gz); }
-  if (dshow.mat) dshow.mat.uniforms.uSize.value = DSHOW_GLOW * k;   /* 光の玉も一緒に縮める。画面上の見え方を揃えるため */
+  if (dshow.mat) { dshow.mat.uniforms.uSize.value = DSHOW_GLOW * k; dshowGlowSync(); }   /* 光の玉も一緒に縮める。画面上の見え方を揃えるため */
   if (typeof dsysLayout === 'function') dsysLayout();
 }
 // 手前の1機は「観客のすぐ前を飛んでいる1機」。カメラからの距離で置くので、
@@ -6982,11 +7009,19 @@ function dshowSky() {
   renderer.toneMappingExposure = 1.12 * S.exposureMul;
   groundMat.color.set('#070b12');
   D.parts.filter(p => p.key === 'led').forEach(p => { if (p.obj.userData.halo) p.obj.userData.halo.material.opacity = 0.42; });
-  farGroundTheme(new THREE.Color(1.25, 1.3, 1.6));   /* 夜は遠くをほんの少しだけ持ち上げる。上げすぎると地面が昼のように光る */
+  dshowGroundTint();
   if (dshow.mat) dshowPixels();
   S.shadowDirty = S.csDirty = S.aoDirty = true;
 }
 
+// 遠くの地面に、いまの図形の色をほんの少し乗せる。
+// 3000機が3.6m上で光っていれば、その真下の地面はわずかに染まる（描画の追加はゼロ）
+const _dgBase = new THREE.Color(1.25, 1.3, 1.6), _dgTmp = new THREE.Color();
+function dshowGroundTint() {
+  const f = DSHOW_FIGS[dshow.fig];
+  _dgTmp.set(f.col[0]).multiplyScalar(1.55);
+  farGroundTheme(_dgBase.clone().lerp(_dgTmp, 0.34));
+}
 // 次の図形の下ごしらえ。対応づけは機数に比例して重い（3200機で15ms前後）ので、
 // 静止している間に済ませておく。動き出す瞬間にやると、そこだけ画が飛ぶ
 function dshowPrepare() {
@@ -7010,6 +7045,7 @@ function dshowAdvance() {
   dshow.phase = 'move'; dshow.figT = 0; dshow.mat.uniforms.uProg.value = 0;
   if (typeof dsysRefresh === 'function') dsysRefresh();
   showDroneColor(DSHOW_FIGS[dshow.fig].col[0]);
+  dshowGroundTint();
   renderDshow();
 }
 
@@ -7167,7 +7203,8 @@ function initDshow() {
 //   dsys.world … 地面のもの（基準局・地上局・離陸前の格子）。倍率 k を自分で掛ける
 //   dsys.air   … 隊列の中のもの（経路・間隔・囲い）。dshow.pts の子にすると隊列と一緒に伸縮する
 const dsys = { world: null, air: null, cur: null, t: 0, mats: null, built: false, tmp: [] };
-const DSYS_C = 0x7fd4ff;   // しくみの色。演出の色（暖色・寒色いろいろ）と喧嘩しない一色に固定する
+const DSYS_C = 0xc8d6e4;   // しくみの色。演出の光点は彩度が高いので、こちらは彩度を落として層を分ける
+                           // （以前の #7fd4ff は図形「輪」の1色目と完全に同じで、背後の光点に溶けていた）
 
 function dsysBuild() {
   if (dsys.built) return;
@@ -7176,9 +7213,9 @@ function dsysBuild() {
   dsys.air = new THREE.Group(); dsys.air.visible = false; dshow.pts.add(dsys.air);
   for (const g of [dsys.world, dsys.air]) { g.userData.noPart = g.userData.noPick = g.userData.noShadow = g.userData.noAO = true; g.renderOrder = 5; }
   dsys.mats = {
-    line: new THREE.LineBasicMaterial({ color: DSYS_C, transparent: true, opacity: 0.55, depthWrite: false, toneMapped: false }),
-    faint: new THREE.LineBasicMaterial({ color: DSYS_C, transparent: true, opacity: 0.30, depthWrite: false, toneMapped: false }),
-    thin: new THREE.MeshBasicMaterial({ color: DSYS_C, transparent: true, opacity: 0.50, depthWrite: false, toneMapped: false }),
+    line: new THREE.LineBasicMaterial({ color: DSYS_C, transparent: true, opacity: 0.70, depthWrite: false, toneMapped: false }),
+    faint: new THREE.LineBasicMaterial({ color: DSYS_C, transparent: true, opacity: 0.42, depthWrite: false, toneMapped: false }),
+    thin: new THREE.MeshBasicMaterial({ color: DSYS_C, transparent: true, opacity: 0.62, depthWrite: false, toneMapped: false }),
     lit: new THREE.MeshBasicMaterial({ color: 0xdff2ff, toneMapped: false }),
     solid: new THREE.MeshBasicMaterial({ color: DSYS_C, transparent: true, opacity: 0.9, toneMapped: false }),
     body: new THREE.MeshStandardMaterial({ color: 0xd7dde6, roughness: 0.6, metalness: 0.1 }),
@@ -7193,6 +7230,26 @@ function dsysClear() {
   dsys.tmp.length = 0;
 }
 const dsysMark = (o) => { o.userData.noPart = o.userData.noPick = o.userData.noShadow = o.userData.noAO = true; o.renderOrder = 5; return o; };
+// 文字の札。夜空に重ねるので、地は敷かず白抜きの文字＋薄い縁取りだけにする
+const _dsLab = {};
+function dsysLabel(text, w) {
+  let e = _dsLab[text];
+  if (!e) {
+    const sc = 2, fs = 30, pad = 14;
+    const probe = document.createElement('canvas').getContext('2d');
+    probe.font = `700 ${fs}px -apple-system, "Hiragino Sans", sans-serif`;
+    const tw = Math.ceil(probe.measureText(text).width) + pad * 2, th = fs + pad * 2;   /* 文字の幅を測ってから canvas を作る */
+    const cv = document.createElement('canvas'); cv.width = tw * sc; cv.height = th * sc;
+    const c = cv.getContext('2d'); c.scale(sc, sc);
+    c.font = probe.font; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.lineWidth = 5; c.strokeStyle = 'rgba(6,10,18,0.85)'; c.strokeText(text, tw / 2, th / 2);
+    c.fillStyle = '#eaf2ff'; c.fillText(text, tw / 2, th / 2);
+    const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+    e = _dsLab[text] = { tex, ar: th / tw };
+  }
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: e.tex, transparent: true, depthWrite: false, depthTest: false, toneMapped: false }));
+  sp.scale.set(w, w * e.ar, 1); sp.renderOrder = 7; dsysMark(sp); return sp;
+}
 // 折れ線を1本つくる（three.js の線は太さが効かないので、太く見せたいものだけ筒にする）
 function dsysLine(pts, mat) {
   const g = new THREE.BufferGeometry().setFromPoints(pts.map(p => new THREE.Vector3(p[0], p[1], p[2])));
@@ -7232,27 +7289,45 @@ function dsysPath() {   // ①経路: つぎの図形へ向かう経路。太い
     }
   }
 }
-function dsysPair() {   // ③間隔: 隣り合う2機の経路と、その間の距離
-  const n = dshow.n, p = [0, 0, 0], q = [0, 0, 0];
-  // 行き先がいちばん近い2機を探す（＝いちばん詰まるところ）
-  let a = 0, b = 1, best = 1e9;
-  for (let i = 0; i < n; i += Math.max(1, (n / 400) | 0)) for (let j = i + 1; j < Math.min(n, i + 24); j++) {
-    const d = Math.hypot(dshow.to[i * 3] - dshow.to[j * 3], dshow.to[i * 3 + 1] - dshow.to[j * 3 + 1], dshow.to[i * 3 + 2] - dshow.to[j * 3 + 2]);
-    if (d > 1e-4 && d < best) { best = d; a = i; b = j; }
-  }
-  for (const i of [a, b]) { const pts = []; for (let s = 0; s <= 20; s++) pts.push(dsysAt(i, s / 20, p).slice()); dsys.air.add(dsysTube(pts, 0.008)); }
-  dsysAt(a, 0, p); dsysAt(b, 0, q);
-  dsys.air.add(dsysTube([p.slice(), q.slice()], 0.006, dsys.mats.solid));
-  { const r = best / 2, g = new THREE.SphereGeometry(r, 16, 10);
-    for (const c of [p, q]) { const m = dsysMark(new THREE.Mesh(g, dsys.mats.glass)); m.position.set(c[0], c[1], c[2]); dsys.air.add(m); } }
+function dsysPair() {   // ③間隔: 隣り合う機体の「間」を見せる
+  // 輪郭の図形（星・ハート・輪）は等間隔に並べるので、機数を増やすほど間隔は 0.5〜1.1px まで縮む。
+  // 2機を球で示す方式では物理的に見えないので、「一区画だけ明るく残す」方式にする
+  const n = dshow.n, to = dshow.to;
+  // 画面のいちばん手前に近い機体を1つ選び、その近傍だけ残す
+  let a = 0, bz = -1e9;
+  for (let i = 0; i < n; i++) if (to[i * 3 + 2] > bz) { bz = to[i * 3 + 2]; a = i; }
+  const near = [], ax = to[a * 3], ay = to[a * 3 + 1], az = to[a * 3 + 2];
+  for (let i = 0; i < n; i++) { const d2 = (to[i*3]-ax)**2 + (to[i*3+1]-ay)**2 + (to[i*3+2]-az)**2; near.push([d2, i]); }
+  near.sort((x, y) => x[0] - y[0]);
+  const keep = new Set(); for (let i = 0; i < Math.min(36, near.length); i++) keep.add(near[i][1]);
+  if (!dsys.brightSave) dsys.brightSave = dshow.bright.slice();
+  for (let i = 0; i < n; i++) dshow.bright[i] = keep.has(i) ? 2.10 : 0.11;
+  dshow.geo.attributes.bright.needsUpdate = true;
+  // いちばん近い相手までの距離を、実寸の線で出す
+  const b = near[1] ? near[1][1] : a;
+  const p = [to[a*3], to[a*3+1], to[a*3+2]], q = [to[b*3], to[b*3+1], to[b*3+2]];
+  dsys.air.add(dsysTube([p, q], 0.010, dsys.mats.solid));
+  { const mid = [(p[0]+q[0])/2, (p[1]+q[1])/2, (p[2]+q[2])/2];
+    const tip = [mid[0] - DSHOW_R * 0.52, mid[1] + DSHOW_R * 0.30, mid[2]];
+    dsys.air.add(dsysTube([mid, tip], 0.005));
+    // 箱庭の縮尺で実寸に直す。この教材の隊列は実際のショーを縮めたものなので、
+    // 「機体の飛行間隔1.5mを、この隊列の広がりに当てはめるとどれくらいか」を出す
+    const d = Math.hypot(p[0]-q[0], p[1]-q[1], p[2]-q[2]);
+    const lab = dsysLabel(`となりまで ${d.toFixed(2)} m`, DSHOW_R * 0.80);
+    lab.position.set(tip[0] - DSHOW_R * 0.28, tip[1] + DSHOW_R * 0.07, tip[2]); dsys.air.add(lab); }
+  for (const c of [p, q]) { const m = dsysMark(new THREE.Mesh(new THREE.SphereGeometry(0.030, 12, 8), dsys.mats.solid)); m.position.set(c[0], c[1], c[2]); dsys.air.add(m); }
 }
+function dsysPairOff() { if (dsys.brightSave) { dshow.bright.set(dsys.brightSave); dshow.geo.attributes.bright.needsUpdate = true; dsys.brightSave = null; } }
 function dsysFence() {   // ⑥囲い: 内側（越えたら帰る）と外側（越えたら止める）
   // dsys.air は dshow.pts の子。面を張るとカメラと隊列の間に色の膜ができて主役が消えるので、線だけで描く
   const k = dshow.k || 1, gz = dshow.gz || 0;
   const y0 = -DSHOW_H * (1 - k) * (1 - gz) / k, y1 = DSHOW_H + DSHOW_R * 1.16;
-  for (const [r, lm, nv] of [[DSHOW_R * 1.14, dsys.mats.line, 14], [DSHOW_R * 1.40, dsys.mats.warnLine, 14]]) {
-    for (const y of [y0, (y0 + y1) / 2, y1]) { const pts = []; for (let s2 = 0; s2 <= 64; s2++) { const a = s2 / 64 * Math.PI * 2; pts.push([Math.cos(a) * r, y, Math.sin(a) * r]); } dsys.air.add(dsysLine(pts, lm)); }
+  for (const [r, lm, nv] of [[DSHOW_R * 1.10, dsys.mats.line, 8], [DSHOW_R * 1.55, dsys.mats.warnLine, 16]]) {
+    for (const y of [y0, y1]) { const pts = []; for (let s2 = 0; s2 <= 64; s2++) { const a = s2 / 64 * Math.PI * 2; pts.push([Math.cos(a) * r, y, Math.sin(a) * r]); } dsys.air.add(dsysLine(pts, lm)); }
     for (let s2 = 0; s2 < nv; s2++) { const a = s2 / nv * Math.PI * 2; dsys.air.add(dsysLine([[Math.cos(a) * r, y0, Math.sin(a) * r], [Math.cos(a) * r, y1, Math.sin(a) * r]], lm)); }
+    const inner = lm === dsys.mats.line;
+    const lab = dsysLabel(inner ? '内側: 越えたら帰る・降りる' : '外側: 越えたらモーターを切る', DSHOW_R * 1.30);
+    lab.position.set(0, y1 - DSHOW_R * (inner ? 0.26 : 0.62), r * 0.62); dsys.air.add(lab);   /* 手前側に寄せる。上に出すと画面の外へ出る */
   }
 }
 function dsysGrid(withBoxes) {   // ⑦離陸前の格子（②⑤の足場にもなる）
@@ -7284,14 +7359,14 @@ function dsysStation(kind) {   // ②基準局 / ⑤地上局。夜なので自�
   const head = dsysMark(new THREE.Mesh(new THREE.CylinderGeometry(0.082, 0.060, 0.055, 20), dsys.mats.body)); head.position.y = 0.37; grp.add(head);
   if (kind === 'rtk') {
     const dome = dsysMark(new THREE.Mesh(new THREE.SphereGeometry(0.062, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), dsys.mats.lit)); dome.position.y = 0.395; grp.add(dome);
-    const core = new THREE.Sprite(M.glowCore('#7fd4ff')); core.scale.setScalar(0.22); core.position.y = 0.40; core.renderOrder = 6; grp.add(core);
+    const core = new THREE.Sprite(M.glowCore('#c8d6e4')); core.scale.setScalar(0.22); core.position.y = 0.40; core.renderOrder = 6; grp.add(core);
     for (let i = 0; i < 3; i++) {   /* 補正を配っている様子。広がる輪 */
       const r = 0.42 + i * 0.34, pts = []; for (let s2 = 0; s2 <= 48; s2++) { const a = s2 / 48 * Math.PI * 2; pts.push([Math.cos(a) * r, 0.40 + i * 0.02, Math.sin(a) * r]); }
       grp.add(dsysLine(pts, dsys.mats.faint)); }
   } else {
     const scr = dsysMark(new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.17, 0.014), dsys.mats.dark)); scr.position.set(0, 0.47, 0); scr.rotation.x = -0.32; grp.add(scr);
     const lit = dsysMark(new THREE.Mesh(new THREE.PlaneGeometry(0.23, 0.14), dsys.mats.lit)); lit.position.set(0, 0.472, 0.010); lit.rotation.x = -0.32; grp.add(lit);
-    const core = new THREE.Sprite(M.glowCore('#7fd4ff')); core.scale.setScalar(0.34); core.position.set(0, 0.47, 0.02); core.renderOrder = 6; grp.add(core);
+    const core = new THREE.Sprite(M.glowCore('#c8d6e4')); core.scale.setScalar(0.34); core.position.set(0, 0.47, 0.02); core.renderOrder = 6; grp.add(core);
   }
   dsys.world.add(grp);
   dsys.world.scale.setScalar(k);
@@ -7314,6 +7389,23 @@ function dsysLinks() {   // ⑤電波: 地上局から機体へ。多いと線�
 
 // ---------- 出し入れ ----------
 const DSYS_GROUND = ['rtk', 'link', 'grid', 'fence'];   // 地面のものが主役のレイヤー。ショー全体を縮めて地面から入れる
+// 描き進みの対象にする（InstancedMesh と Sprite は除く）
+function dsysArm(g) {
+  for (const o of g.children) {
+    if (o.isInstancedMesh || o.isSprite) continue;
+    if (o.children.length) { dsysArm(o); continue; }
+    const geo = o.geometry; if (!geo) continue;
+    o.userData.full = geo.index ? geo.index.count : (geo.attributes.position ? geo.attributes.position.count : 0);
+    if (o.userData.full) geo.setDrawRange(0, reduceMotion ? o.userData.full : 0);
+  }
+}
+function dsysDrawOn(g, e) {
+  for (const o of g.children) {
+    if (o.children.length && !o.userData.full) { dsysDrawOn(o, e); continue; }
+    if (!o.userData.full) continue;
+    o.geometry.setDrawRange(0, Math.max(2, (o.userData.full * e) | 0));
+  }
+}
 function dshowLayer(id) {
   if (!dshow.pts) return;
   dsysBuild();
@@ -7323,16 +7415,18 @@ function dshowLayer(id) {
   dsys.cur = id || null; dsys.t = 0;
   { const want = DSYS_GROUND.includes(dsys.cur) ? 1 : 0;
     if (want !== dshow.gzWant) { dshow.gzWant = want; dshowFrame(700); } }
-  if (dshow.mat) dshow.mat.uniforms.uSkew.value = 0;
+  if (dshow.mat) { dshow.mat.uniforms.uSkew.value = 0; dshow.mat.uniforms.uSkewFrac.value = 0.03; }
+  dsysPairOff();
   if (!dsys.cur) { dsys.world.visible = dsys.air.visible = false; return; }
   dsys.world.scale.setScalar(dshow.k || 1);
   if (id === 'path') { dsysPath(); dsysGrid(true); }
   else if (id === 'rtk') { dsysStation('rtk'); dsysGrid(false); }
   else if (id === 'pair') { dsysPair(); }
-  else if (id === 'sync') { if (dshow.mat) dshow.mat.uniforms.uSkew.value = 0.30; }   /* わざと時計をずらす。形が崩れるのを見せる */
+  else if (id === 'sync') { if (dshow.mat) { dshow.mat.uniforms.uSkew.value = 0.34; dshow.mat.uniforms.uSkewFrac.value = 0.03; } }   /* はじめは3%だけ遅らせる。だんだん増やして崩れるまでを見せる */
   else if (id === 'link') { dsysStation('gcs'); dsysLinks(); }
   else if (id === 'fence') { dsysFence(); }
   else if (id === 'grid') { dsysGrid(true); }
+  dsysArm(dsys.air); dsysArm(dsys.world);
   dsys.world.visible = dsys.world.children.length > 0;
   dsys.air.visible = dsys.air.children.length > 0;
   S.shadowDirty = S.csDirty = S.aoDirty = true;
@@ -7342,11 +7436,15 @@ function dsysLayout() { if (dsys.world) dsys.world.scale.setScalar(dshow.k || 1)
 function dsysRefresh() { if (dsys.cur && ['path', 'pair', 'link', 'fence'].includes(dsys.cur)) dshowLayer(dsys.cur); }
 function stepDsys(dtReal) {
   if (!dsys.cur || !dsys.built) return;
-  dsys.t += dtReal;
+  const was = dsys.t; dsys.t += dtReal;
+  if (was < 0.62) { const t = clamp(dsys.t / 0.55, 0, 1), e = t * t * (3 - 2 * t);   /* 端から描き進む */
+    dsysDrawOn(dsys.air, e); dsysDrawOn(dsys.world, e); }
   // 電波と補正は「流れているもの」なので、明るさを脈打たせる（動きを減らす設定では止める）
   const w = reduceMotion ? 0.5 : 0.5 + 0.5 * Math.sin(dsys.t * 3.2);
-  if (dsys.cur === 'link' || dsys.cur === 'rtk') dsys.mats.faint.opacity = 0.12 + 0.22 * w;
-  else dsys.mats.faint.opacity = 0.22;
+  if (dsys.cur === 'link' || dsys.cur === 'rtk') dsys.mats.faint.opacity = 0.20 + 0.30 * w;
+  else dsys.mats.faint.opacity = 0.42;
+  // ④は「1機だけ遅れる」から「形が崩れる」までを、8秒かけて見せる
+  if (dsys.cur === 'sync' && dshow.mat) dshow.mat.uniforms.uSkewFrac.value = reduceMotion ? 0.25 : clamp(0.03 + dsys.t / 9, 0.03, 0.55);
 }
 
 window.__dsys = { dsys, dshowLayer, dsysLayout, dsysRefresh };
