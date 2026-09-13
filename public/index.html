@@ -7497,7 +7497,7 @@ function dsysPairOff() { if (dsys.brightSave) { dshow.bright.set(dsys.brightSave
 function dsysFence() {   // ⑥囲い: 内側（越えたら帰る）と外側（越えたら止める）
   // dsys.air は dshow.pts の子。面を張るとカメラと隊列の間に色の膜ができて主役が消えるので、線だけで描く
   const k = dshow.k || 1, gz = dshow.gz || 0;
-  const y0 = -DSHOW_H * (1 - k) * (1 - gz) / k, y1 = DSHOW_H + DSHOW_R * 1.16;
+  const y0 = -DSHOW_H * (1 - k) * (1 - gz) / k, y1 = DSHOW_H + DSHOW_R * 0.94;
   for (const [r, lm, nv] of [[DSHOW_R * 1.10, dsys.mats.line, 8], [DSHOW_R * 1.55, dsys.mats.warnLine, 16]]) {
     for (const y of [y0, y1]) { const pts = []; for (let s2 = 0; s2 <= 64; s2++) { const a = s2 / 64 * Math.PI * 2; pts.push([Math.cos(a) * r, y, Math.sin(a) * r]); } dsys.air.add(dsysLine(pts, lm)); }
     for (let s2 = 0; s2 < nv; s2++) { const a = s2 / nv * Math.PI * 2; dsys.air.add(dsysLine([[Math.cos(a) * r, y0, Math.sin(a) * r], [Math.cos(a) * r, y1, Math.sin(a) * r]], lm)); }
@@ -7507,20 +7507,20 @@ function dsysFence() {   // ⑥囲い: 内側（越えたら帰る）と外側�
       dsys.air.add(sp); dsys.esc = { sp, r0: DSHOW_R * 0.55, r1: r, y: DSHOW_H };
     }
     const lab = dsysLabel(inner ? '内側: 越えたら帰る・降りる' : '外側: 越えたらモーターを切る', DSHOW_R * 1.30);
-    lab.position.set(0, y1 - DSHOW_R * (inner ? 0.26 : 0.62), r * 0.62); dsys.air.add(lab);   /* 手前側に寄せる。上に出すと画面の外へ出る */
+    lab.position.set(0, y1 - DSHOW_R * (inner ? 0.18 : 0.50), r * 0.62); dsys.air.add(lab);   /* 手前側に寄せる。上に出すと画面の外へ出る */
   }
   // 外側のさらに外。落ちた機体が届く範囲で、人を入れない区画。
   // 本文の締めがここなのに地面に何も無いと、いちばん効く一文だけ絵で確かめられない
   // dsys.world は倍率 k がかかるので、隊列の座標をそのまま使える
-  { const r2 = DSHOW_R * 1.55, r3 = r2 + DSHOW_H * 0.52;   /* 外側の枠の外へ、高さに応じて広がる */
+  { const r2 = DSHOW_R * 1.55, r3 = r2 + DSHOW_H * 0.30;   /* 外側の枠の外へ、高さに応じて広がる */
     const ring = (rr, mat) => { const pts = []; for (let s2 = 0; s2 <= 72; s2++) { const a = s2 / 72 * Math.PI * 2; pts.push([Math.cos(a) * rr, 0.010, Math.sin(a) * rr]); } return dsysLine(pts, mat); };
     dsys.world.add(ring(r3, dsys.mats.warnLine));
     for (let i = 0; i < 24; i++) {   /* 斜めの筋で「帯」に見せる。面を張ると画面に色の膜ができる */
       const a = (i + 0.5) / 24 * Math.PI * 2;
       dsys.world.add(dsysLine([[Math.cos(a) * r2, 0.010, Math.sin(a) * r2], [Math.cos(a) * r3, 0.010, Math.sin(a) * r3]], dsys.mats.warnLine));
     }
-    const lab = dsysLabel('落ちた機体が届く範囲 ＝ 人を入れない区画', DSHOW_R * 1.55);
-    lab.position.set(0, 0.48, (r2 + r3) / 2 * 1.02); dsys.world.add(lab);
+    const lab = dsysLabel('落ちた機体が届く範囲 ＝ 人を入れない区画', DSHOW_R * 1.36);
+    lab.position.set(0, 0.42, r2 * 0.74); lab.material.depthTest = false; dsys.world.add(lab);
   }
 }
 // 離陸前に機体を並べる格子。①経路と⑦離着陸で同じ場所を使う
