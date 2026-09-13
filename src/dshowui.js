@@ -13,7 +13,7 @@ function dshowChipsBuild() {
     const b = document.createElement('button');
     b.dataset.ds = h.id; b.setAttribute('aria-pressed', 'false');
     b.setAttribute('aria-label', h.head);
-    b.innerHTML = `<span aria-hidden="true">${h.no}</span>${h.chip}${h.layer ? '<span class="l" aria-hidden="true">◉</span>' : ''}`;
+    b.innerHTML = `<span aria-hidden="true">${h.no}</span>${h.chip}`;   /* 7項目すべてが3Dを持つので、印は情報を持たない */
     b.addEventListener('click', () => dshowPick(dsUI.pick === h.id ? null : h.id));
     box.appendChild(b);
   }
@@ -22,6 +22,11 @@ function dshowChipsBuild() {
 // 選んでいる間は自動送りを止める（下で図形が入れ替わると、いま何の話か分からなくなる）
 function dshowPick(id) {
   dsUI.pick = id || null;
+  // カードを畳んだまま項目を選ぶと、3Dだけが変わって説明がどこにも出ない。開き直す
+  if (dsUI.pick && !dsUI.open && typeof setNoteMini === 'function') {
+    const card = $('#noteCard');
+    if (card && (card.hidden || card.classList.contains('mini'))) { card.hidden = false; setNoteMini(false); }
+  }
   for (const b of $$('#dsHowChips button')) {
     const on = b.dataset.ds === dsUI.pick;
     b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
@@ -31,7 +36,7 @@ function dshowPick(id) {
   if (typeof dshowLayer === 'function') dshowLayer(h ? h.layer : null);
   // ④時計だけは例外。図形が移り変わらないと時計のずれは現れないので、自動送りを続ける
   dshowAuto(h && h.layer === 'sync' ? true : (!dsUI.pick && !dsUI.open ? null : false));
-  if (dsUI.open) { dsUI.tab = 'how'; dsRenderPanel(); if (h) { const el = $('#ds-' + h.id); if (el) el.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' }); } }
+  if (dsUI.open) { dsUI.tab = 'how'; dsRenderPanel(); if (h) { const el = $('#ds-' + h.id); if (el) el.scrollIntoView({ block: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });   /* start だと押したボタンが画面外へ飛び、取り消し方が分からなくなる */ } }
   updateDshowVals();
 }
 // 自動送り: null=もとに戻す / true=入 / false=切
@@ -56,6 +61,7 @@ function dshowPanelOpen(on, tab) {
   } else {
     setSheetState(el, -1);
     setTimeout(() => { if (!dsUI.open) el.hidden = true; }, 420);
+    dshowAuto(dsUI.pick ? false : null);   /* 閉じたら送りを戻す。戻さないと、読んで閉じた人の画面で図形が止まったままになる */
     const b = $('#dsRead'); if (b) b.focus({ preventScroll: true });
   }
   if (typeof dshowFrame === 'function' && dshow.on) dshowFrame(380);
@@ -63,11 +69,11 @@ function dshowPanelOpen(on, tab) {
 function dsRenderPanel() {
   const body = $('#dsPanelBody'); if (!body) return;
   for (const b of $$('#dsSeg button')) { const on = b.dataset.ds === dsUI.tab; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }
-  $('#dsSeg [data-ds=reg]').hidden = !regOn();   /* 制度の注記を出さない設定のときは、きまりの札ごと消す */
-  if (dsUI.tab === 'reg' && !regOn()) dsUI.tab = 'how';
+  $('#dsSeg [data-ds=reg]').hidden = false;   /* 札ごと消すと、制度の注記があること自体に気づけない */
   if (dsUI.tab === 'how') {
     body.innerHTML = DSHOW_HOW.map(h => `<section class="ds-item" id="ds-${h.id}">
         <div class="ds-head"><span class="ds-no" aria-hidden="true">${h.no}</span><h3>${h.head}</h3></div>
+        <p class="ds-lead">${h.lead}</p>
         ${h.body}
         ${h.layer ? `<button class="ds-see${dsUI.pick === h.id ? ' on' : ''}" data-see="${h.id}">${dsUI.pick === h.id ? '空から消す' : '空で見る'}</button>` : ''}
         <small class="ds-src">${h.ky}</small>
@@ -77,8 +83,11 @@ function dsRenderPanel() {
       if (b.dataset.act === 'text') { dshowPanelOpen(false); dshowToggleText(true); return; }   /* 入力欄はカードに出る。読み面が空を覆っていると押した結果が見えない */
       dshowPick(dsUI.pick === b.dataset.see ? null : b.dataset.see);
     };
+  } else if (dsUI.tab === 'reg' && !regOn()) {
+    body.innerHTML = `<p class="hint">いまは制度の注記を出さない設定です。画面右上の「⚙」から<b>くわしく</b>に切り替えると、ここに催し・夜間・台数の要件が出ます。</p>`;
+    body.onclick = null;
   } else if (dsUI.tab === 'reg') {
-    body.innerHTML = `<p class="caveat">${DSHOW_REG.lead}</p>
+    body.innerHTML = `<p class="hint">${DSHOW_REG.lead}</p>
       <ul class="check">${DSHOW_REG.items.map(x => `<li>${x}</li>`).join('')}</ul>
       <p class="hint">${DSHOW_REG.outside}</p>
       <small class="ds-src">${DSHOW_REG.src}</small>`;

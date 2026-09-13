@@ -654,6 +654,8 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
 #dsPanelBody .ds-item:first-child { border-top: 0; padding-top: 4px; }
 #dsPanelBody .ds-no { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-text); font: 700 12px/1 var(--mono); margin-right: 8px; vertical-align: 2px; flex: none; }
 #dsPanelBody .ds-head { display: flex; align-items: flex-start; gap: 0; margin-bottom: 6px; }
+/* 一言要約。長い本文に入る前の踊り場になる */
+#dsPanelBody .ds-lead { margin: -2px 0 8px; font-size: calc(13px * var(--fs, 1)); font-weight: 600; line-height: 1.55; color: var(--accent-text); }
 #dsPanelBody p + p { margin-top: 7px; }
 #dsPanelBody .ds-see { margin-top: 8px; padding: 6px 13px; border-radius: 999px; font-size: calc(12.5px * var(--fs, 1)); font-weight: 600; background: var(--seg-bg); color: var(--ink); min-height: var(--tap); }
 #dsPanelBody .ds-see.on { background: var(--accent-soft); color: var(--accent-text); box-shadow: inset 0 0 0 1.5px var(--accent); }
@@ -2004,7 +2006,7 @@ const DSHOW_HOW = [
     id: 'plan', no: '①', chip: '経路', layer: 'path',
     head: '1機ずつ操縦していない ― 経路は飛ばす前に作る',
     lead: '何百人もで操縦しているのではありません。経路は飛ばす前に作ってあります。',
-    body: `<p>ドローンショーは<b>自動操縦</b>です。教則は自動操縦を「プログラムにより自動的に操縦を行うこと」と定義しています（3.1.1）。</p>
+    body: `<p>ドローンショーは、教則がいう<b>自動操縦</b>（「プログラムにより自動的に操縦を行うこと」3.1.1）の形で飛びます。自動操縦でも、飛ばす者がいなくなるわけではありません。</p>
       <p>教則は自動操縦のやり方をこう説明しています（5.2.2(1)3)）。<b>「飛行を制御するアプリケーションソフトに搭載されている地図情報に、予め複数の飛行時のウエイポイント（経過点）を設定し飛行経路を作成する。ウェイポイントは地図上の位置情報の設定だけでなく、機体の向きや高度、速度など詳細な設定が可能である」</b>。そして「手動操縦に比較して、再現性の高い飛行を行うことができる」としています。</p>
       <p>教則は、プログラムで飛ぶ機体の弱点にも触れています（5.1.4(2)）。<b>「無人航空機にはプログラムに基づき自動又は自律で飛行するものも多くあり、そのようなものは、プログラムを不正に書き換えられる等により、当該無人航空機が奪取されたり操縦者の意図に反して悪用されたりする可能性がある」</b>。飛ばす前にデータを入れる作りは、そのデータを守ることとひと組です。</p>
       <p class="hint">ここから先は教則の外です。ショーの振り付けは 3D ソフト（Blender など）の上で作ります。1機ずつの目標位置を並べて図形を作り、それを時間順に並べた台本にして、<b>1個のショーファイル</b>に書き出します。中には全機の飛行経路、LEDの色の変化、花火の発火時刻、推奨されるジオフェンス、音楽までが入ります（Skybrush の公開資料）。当日飛ぶのはこの書き出したデータで、操縦者は送信機で機体を動かすのではなく、開始・中断・帰還といった<b>群全体への指令</b>を出します。</p>
@@ -2014,7 +2016,7 @@ const DSHOW_HOW = [
   },
   {
     id: 'rtk', no: '②', chip: '位置', layer: 'rtk',
-    head: '位置は数十mからcmへ ― 地上に基準局を置く（RTK）',
+    head: '位置は数十mからcmへ ― 誤差を測る受信機を別に置く（RTK）',
     lead: '機体の飛行間隔は1m前後。単独測位のままでは、そもそも並べません。',
     body: `<p>教則は測位の精度をこう書いています（4.5.3(2) GNSSとRTKの精度）。<b>「GPS測位での受信機1台の単独測位の精度は数十mの精度である。測位方式として固定局と移動局の2つの受信機を使用するRTK(Real Time Kinematic)やDGPS(Differential Global Positioning System)などの技術が確立され、これらの測位方式は数cm〜数mレベルの精度の高い測位が可能である」</b>。</p>
       <p>つまり RTK は、<b>動かない受信機（固定局）を地上に置いて</b>、そこで分かった誤差を飛んでいる受信機（移動局）に伝える方式です。1台だけで測るより桁違いに細かく位置が分かります。</p>
@@ -2024,8 +2026,19 @@ const DSHOW_HOW = [
     ky: '教則 4.5.3（GNSS）(2)GNSSとRTKの精度・(3)飛行における注意事項',
   },
   {
-    id: 'clear', no: '③', chip: '間隔', layer: 'pair',
-    head: 'ぶつからないのは、飛ぶ前に間隔を確かめてあるから',
+    id: 'clock', no: '③', chip: '時計', layer: 'sync',
+    head: '全機の時計を合わせる ― ずれると図形が崩れる',
+    lead: '同じ時刻に、決めた場所にいること。それだけで図形になります。',
+    body: `<p class="caveat">この項目は教則には書かれていません。機体側のしくみの話です。</p>
+      <p>各機は「いま何秒の位置にいるべきか」を<b>自分の時計</b>で決めています。互いに通信し合って歩調を合わせているのではありません。だから全機の時計が合っていることが、図形が図形として見える条件になります。</p>
+      <p>時計合わせには<b>測位衛星の時刻</b>を使います。衛星測位は「電波が届くまでの時間」で位置を出す仕組みなので、信号にはもともと極めて正確な時刻が乗っています。教則も、測位の精度に影響するものとして「GNSS衛星の時計の精度」を挙げています（4.5.3(3)）。</p>
+      <p class="hint">ここから先は教則の外です。ショーの開始時刻は「<b>未来のある時刻</b>」として全機に配られ、各機はその時刻が来たら自分の台本を再生し始めます。あるソフトでは、この時刻をGPSの週内秒（0〜604799秒）で指定します。地上のパソコンの時計がずれていると、表示どおりの時刻に始まらず、音楽や花火とずれます。</p>
+      <p>ずれると、その機体だけ図形から外れて見えます。少しのずれなら「何機かが前の持ち場に取り残されている」ように、ずれる機体が増えると形そのものが崩れます。</p>`,
+    ky: '教則の外（4.5.3(3) が「GNSS衛星の時計の精度」に触れているのみ）',
+  },
+  {
+    id: 'clear', no: '④', chip: '間隔', layer: 'pair',
+    head: 'ぶつからないように、飛ぶ前に間隔を確かめてある',
     lead: '飛びながらよけているのではありません。交差しない経路を先に作っています。',
     body: `<p>教則は、他の無人航空機との衝突防止を<b>飛行の方法の義務</b>として挙げています（3.1.2(3)1)c.）。<b>「飛行中の他の無人航空機を確認した場合には、当該無人航空機との間に安全な間隔を確保して飛行させ、接近又は衝突のおそれがあると認められる場合には地上に降下させるなど適切な措置を取るとともに、飛行日時、飛行経路、飛行高度等について、他の無人航空機を飛行させる者と調整を行うこと」</b>。これをしなかったときは50万円以下の罰金です（3.1.2(3)4)）。</p>
       <p>教則は、自動操縦で起きやすい間違いもこう書いています（5.2.2(2)）。<b>「ウェイポイント設定時、飛行経路上の障害物等の確認不足によって衝突や墜落が発生することが想定できる。設定した飛行経路上の障害物等は事前に現地確認を行うこと」</b>。〔一等〕では「可能な限り第三者の立入りが少ない飛行経路及び送電線や構造物が障害とならない飛行範囲を事前に確認し設定すること」「飛行経路付近に地上の第三者の立入りが少ないこと等の条件を考慮した緊急着陸地点や不時着エリアを予め設定すること」も挙げています（5.2.2(5)）。</p>
@@ -2035,19 +2048,8 @@ const DSHOW_HOW = [
     ky: '教則 3.1.2(3)1)c.（他の無人航空機との衝突防止）・5.2.2(2)・5.2.2(5)〔一等〕',
   },
   {
-    id: 'clock', no: '④', chip: '時計', layer: 'sync',
-    head: '全機の時計を合わせる ― ずれると図形が崩れる',
-    lead: '同じ時刻に、決めた場所にいること。それだけで図形になります。',
-    body: `<p class="caveat">この項目は教則には書かれていません。機体側のしくみの話です。</p>
-      <p>各機は「いま何秒の位置にいるべきか」を<b>自分の時計</b>で決めています。互いに通信し合って歩調を合わせているのではありません。だから全機の時計が合っていることが、図形が図形として見える条件になります。</p>
-      <p>時計合わせには<b>測位衛星の時刻</b>を使います。衛星測位は「電波が届くまでの時間」で位置を出す仕組みなので、信号にはもともと極めて正確な時刻が乗っています。教則も、測位の精度に影響するものとして「GNSS衛星の時計の精度」を挙げています（4.5.3(3)）。</p>
-      <p class="hint">ここから先は教則の外です。ショーの開始時刻は「<b>未来のある時刻</b>」として全機に配られ、各機はその時刻が来たら自分の台本を再生し始めます。あるソフトでは、この時刻をGPSの週内秒（0〜604799秒）で指定します。地上のパソコンの時計がずれていると、表示どおりの時刻に始まらず、音楽や花火とずれます。</p>
-      <p>ずれると、その機体だけ図形から外れて見えます。少しのずれなら「1機だけ遅れている」ように、大きくずれると形そのものが崩れます。</p>`,
-    ky: '教則の外（4.5.3(3) が「GNSS衛星の時計の精度」に触れているのみ）',
-  },
-  {
     id: 'gcs', no: '⑤', chip: '地上局', layer: 'link',
-    head: '地上局は見張りと非常停止 ― 操縦桿を握ってはいない',
+    head: '地上局は見張りと非常停止 ― ふだんは操縦桿を握らない',
     lead: '地上局から届いているのは、経路ではなく「止まれ」です。',
     body: `<p class="hint">この段落は教則の外（ショーの作り）です。飛んでいる間、地上局と機体の間には電波が通っています。ただしそれは経路を送るためではなく、<b>各機の状態を受け取り、必要なときに止めるため</b>のものです。あるメーカーの安全規範は、演目のデータは飛ばす前に各機の内蔵メモリへ入れてあり、<b>演目の進行そのものは通信に依存しない</b>としています（同社は2.4GHz・5.8GHz・850MHz の三重の無線を持たせています）。地上局が失うのは「見えること」と「止められること」です。</p>
       <p>教則は、自動操縦中に手動操縦へ切り替える場合として「作業指示による手動操作」「何らかの原因で不安定な飛行と判断した場合」を挙げ、切り替えた後は急な飛行速度の低下や失速に備えた操作準備、障害物への接近を避けるための機体方向の確認、ホバリングしての安定性と周囲の安全の確認が必要だとしています（5.2.2(4)）。</p>
@@ -2059,19 +2061,21 @@ const DSHOW_HOW = [
   },
   {
     id: 'fail', no: '⑥', chip: '異常時', layer: 'fence',
-    head: '通信が切れたら・位置を見失ったら・電池が減ったら',
+    head: '通信が切れたら・電池が減ったら ― 止まるための決めごと',
     lead: '止まるための決めごとが、飛ばす前に機体へ入っています。',
     body: `<p>教則は、機体のフェールセーフ機能をこう説明しています（5.2.3(1)）。<b>「送信電波や電源容量の減少などにより飛行が継続できない場合、又は継続できないことが予想される場合は、予め飛行制御アプリケーションのフェールセーフ機能により、自動帰還モードへ切り替わり、離陸地点へ飛行する。さらにバッテリー残量が極端に少ない場合などはその場で自動着陸を試みる」</b>。ホバリング・その地点での着陸・自動帰還のどれにするかを設定できる機体もあるとしています。</p>
       <p>そして緊急時の原則として、<b>「緊急時には、離陸地点などに戻すことを前提とせず、速やかに近くの安全な無人地帯へ不時着させる」</b>と書いています（5.2.3）。</p>
       <p>飛行の逸脱を防ぐ手立てとして、教則は<b>ジオフェンス</b>を挙げています（6.1.1(1)2)）。<b>「ジオフェンス機能を使用することにより、飛行禁止空域を設定する」</b>。〔一等〕では、ジオフェンスの設定に「当日の他の航空機との空域調整結果が反映されていることを確認する」ことも挙げています（6.1.3(2)）。</p>
-      <p class="hint">ここから先は教則の外です。ショーでは、この枠を<b>内側と外側の二段</b>に分ける作りが使われています。内側を越えたら帰還や着陸に切り替わり、外側を越えたら<b>モーターを切ります</b>（＝落ちます）。だから外側のさらに外に、落ちた機体が届く範囲を計算して、人を入れない区画を取ります。</p>
-      <p class="caveat">枠は<b>設定</b>であって保証ではありません。枠の値を間違えれば、枠は間違えた場所にできます（③の事例）。</p>
+      <p class="hint">ここから先は教則の外です。ショーでは、この枠を<b>内側と外側の二段</b>に分ける作りが使われています。米国FAAが交付しているドローンショーの免除（例 107W-2025-01425）は、区域を4つに分けることを条件にしています。飛行区域／<b>内側の枠</b>（越えたら「帰還」または「即時着陸」。飛行区域の外縁から最低5フィート、ショー高度が100フィート増えるごとに5フィート広げる）／<b>外側の枠</b>（越えたら「kill」指令で<b>モーターを切る</b>）／その外の<b>立入禁止区画</b>です。ショー用ソフトの公開文書（Skybrush）も soft／hard の二段として同じ動作を書いています。</p>
+      <p class="hint">立入禁止区画の広さは、外側の枠で動力を失った機体が水平にどこまで飛ぶかで決めます。FAAは式に<b>最大高度・初速・追い風・安全率</b>を含めることを条件にし、ショー高度が100フィート増えるごとに幅を最低33フィート（約10m）広げるとしていますが、<b>式そのものは公表していません</b>。日本の教則は、飛行させる区域に<b>危険半径</b>（飛行高度と同じ数値、又は30mのいずれか長い方）を加えた範囲を、立入管理措置を講じて無人地帯とする、としています（6.1.1）。</p>
+      <p class="hint">なお「モーターを切る」は自動操縦ソフトの<b>標準機能ではありません</b>。ArduPilot のマルチコプター用フェンス動作（FENCE_ACTION）に停止の選択肢は無く、0〜5はいずれも通報・帰還・着陸・制動です（同じ項目でも Rover には Terminate があります）。ショー用ソフトはこれを独自の設定項目で足しています（Skybrush の SHOW_HFENCE_*）。PX4 には GF_ACTION=4（Terminate）がありますが、これは「全出力をあらかじめ決めた値に固定する」動作で、モーター即停止（Disarm）とは別に定義されています。</p>
+      <p class="caveat">枠は<b>設定</b>であって保証ではありません。枠の値を間違えれば、枠は間違えた場所にできます（④の事例）。</p>
       <p class="hint">機体そのものの基準も教則の外にあります。国土交通省の検査要領（型式認証等の安全基準 No.8-001）は、<b>第一種</b>について「単一の起こり得る故障によって機体の制御不能又は想定飛行範囲からの逸脱を生じないように設計されなければならない」とし、試験での実証を求めています。<b>第二種</b>では対象が「目視外飛行を行う25kg未満の機体及び25kg以上の機体」に絞られ、文言も「想定飛行範囲からの逸脱」だけになります。試験は「最も厳しい操縦者と無人航空機数の比率」で行うこととされ、試験条件の一つに「操縦者に対する機体の数（1対1, 1対複数等）」が挙げられています。なお「操縦者による安全な飛行中断能力」は必須ですが、「すべての運用条件において機体を指定されたエリア内に留めるジオ・フェンス機能」は<b>その認証を得ようとする場合に実証する</b>任意の項目です。ショー機で型式認証を受けたものは、公表資料の範囲では確認できていません。</p>`,
-    ky: '教則 5.2.3（緊急時の対応）(1)・6.1.1(1)2)（飛行の逸脱防止）・6.1.3(2)〔一等〕',
+    ky: '教則 5.2.3（緊急時の対応）(1)・6.1.1（危険半径）・6.1.1(1)2)（飛行の逸脱防止）・6.1.3(2)〔一等〕／教則の外: 米国FAA交付済ウェーバー 107W-2025-01425 ほかの4区域条件・Skybrush 公開文書（soft/hard geofence・SHOW_HFENCE_*）・ArduPilot FENCE_ACTION・PX4 GF_ACTION',
   },
   {
     id: 'launch', no: '⑦', chip: '離着陸', layer: 'grid',
-    head: '箱から出て、箱に戻る ― 並べ方・着陸・充電',
+    head: '地面に並べて上げ、同じ場所へ降ろす ― 並べ方と離着陸エリア',
     lead: '地面に格子で並べ、真上に上がり、同じ場所へ戻ります。',
     body: `<p>離着陸場所の選び方は教則が扱っています。<b>「飛行経路を考慮し、周辺及び上方に障害物がない水平な場所を離着陸場所と設定する」「緊急時などに一時的な着陸が可能なスペースを、前もって確認・確保しておく」</b>（6.1.1(1)1)）。〔一等〕では「離陸地点は操縦者及び補助者との距離を3m以上保つか、機体の取扱説明書に推奨距離が記載されている場合はその指示に従う」「離陸地点は周囲の物件から30m以上離すことができる場所を選定する。距離が確保できない場合は、補助者を配置するなどの安全対策を講じる」としています（6.3.3(3)1)）。</p>
       <p class="hint">ここから先は教則の外です。ショー機は地面に<b>格子状に並べて</b>離陸します。ある事業者の公開資料（深圳大漠大智控技術『無人機集群飛行表演安全規範』2025年11月）は、離着陸エリアの面積を<b>「0.5m × 0.5m × 機数」</b>で見積もるとしており、1,000機なら約250平方メートル（およそ16m四方）です。同じ資料は、離陸場所と演技場所の水平距離を300m以内に収めること、観客区域を離陸区域と飛行経路の真下から50m以内に設けないこと、飛行経路の真下から15m以内に人も車も置かないこと、離陸高度を周囲の建物や樹木より10m以上高くとることも挙げています。国内では、ドローンショー・ジャパンが DSJ MODEL-X の地上配置間隔を0.8×0.5mと公表しています。箱に入れたまま出し入れする方式では、さらに詰められます（ある社は箱方式で0.4m）。</p>
@@ -7467,7 +7471,7 @@ function dsysPair() {   // ③間隔: 隣り合う機体の「間」を見せる
     // 「機体の飛行間隔1.5mを、この隊列の広がりに当てはめるとどれくらいか」を出す
     // この画は実際のショーを縮めたもの。箱庭の寸法をそのまま m で出すと実物と食い違うので、
     // 本文で出典を示した実機の間隔（0.8〜1.5m）を添える
-    const lab = dsysLabel('となりとの間隔（実機で0.8〜1.5m）', DSHOW_R * 1.06);
+    const lab = dsysLabel('となりとの間隔（実機で0.8〜1.5m）※ほかの機体は暗くしています', DSHOW_R * 1.62);
     lab.position.set(tip[0] - DSHOW_R * 0.42, tip[1] + DSHOW_R * 0.07, tip[2]); dsys.air.add(lab); }
   for (const c of [p, q]) { const m = dsysMark(new THREE.Mesh(new THREE.SphereGeometry(0.030, 12, 8), dsys.mats.solid)); m.position.set(c[0], c[1], c[2]); dsys.air.add(m); }
 }
@@ -7486,6 +7490,19 @@ function dsysFence() {   // ⑥囲い: 内側（越えたら帰る）と外側�
     }
     const lab = dsysLabel(inner ? '内側: 越えたら帰る・降りる' : '外側: 越えたらモーターを切る', DSHOW_R * 1.30);
     lab.position.set(0, y1 - DSHOW_R * (inner ? 0.26 : 0.62), r * 0.62); dsys.air.add(lab);   /* 手前側に寄せる。上に出すと画面の外へ出る */
+  }
+  // 外側のさらに外。落ちた機体が届く範囲で、人を入れない区画。
+  // 本文の締めがここなのに地面に何も無いと、いちばん効く一文だけ絵で確かめられない
+  // dsys.world は倍率 k がかかるので、隊列の座標をそのまま使える
+  { const r2 = DSHOW_R * 1.55, r3 = r2 + DSHOW_H * 0.52;   /* 外側の枠の外へ、高さに応じて広がる */
+    const ring = (rr, mat) => { const pts = []; for (let s2 = 0; s2 <= 72; s2++) { const a = s2 / 72 * Math.PI * 2; pts.push([Math.cos(a) * rr, 0.010, Math.sin(a) * rr]); } return dsysLine(pts, mat); };
+    dsys.world.add(ring(r3, dsys.mats.warnLine));
+    for (let i = 0; i < 24; i++) {   /* 斜めの筋で「帯」に見せる。面を張ると画面に色の膜ができる */
+      const a = (i + 0.5) / 24 * Math.PI * 2;
+      dsys.world.add(dsysLine([[Math.cos(a) * r2, 0.010, Math.sin(a) * r2], [Math.cos(a) * r3, 0.010, Math.sin(a) * r3]], dsys.mats.warnLine));
+    }
+    const lab = dsysLabel('落ちた機体が届く範囲 ＝ 人を入れない区画', DSHOW_R * 1.55);
+    lab.position.set(0, 0.48, (r2 + r3) / 2 * 1.02); dsys.world.add(lab);
   }
 }
 // 離陸前に機体を並べる格子。①経路と⑦離着陸で同じ場所を使う
@@ -7542,6 +7559,8 @@ function dsysStation(kind) {   // ②基準局 / ⑤地上局。夜なので自�
     { const pts = []; for (let s2 = 0; s2 <= 64; s2++) { const a = s2 / 64 * Math.PI * 2; pts.push([Math.cos(a), Math.sin(a), 0]); }
       dsys.rtkRing = [0, 1, 2].map(() => { const r = dsysLine(pts, dsys.mats.line.clone()); r.renderOrder = 6; dsys.world.add(r); return r; });
       dsys.rtkAt = [px, 0.40, pz]; }
+    { const lab = dsysLabel('基準局', DSHOW_R * 0.34);   /* grp は 1.7倍されているので world 側に置く。発着場の格子に重ならない幅に */
+      lab.position.set(px - 0.30, 0.035, pz + 0.62); lab.material.depthTest = false; dsys.world.add(lab); }
     dsys.rtkLab = ['補正なし: 位置が数十m ずれる', '補正あり: 位置が数cm に収まる'].map((t, i) => {
       const lab = dsysLabel(t, DSHOW_R * 1.06); lab.position.set(px * 0.20, 1.34, pz); lab.visible = i === 0;
       dsys.world.add(lab); return lab; });
@@ -7567,14 +7586,23 @@ function dsysLinks() {   // ⑤電波: 地上局から機体へ。多いと線�
   let j = 0; for (const t of dsys.tmp) if (t.link) { arr[j++] = t.a.x; arr[j++] = t.a.y; arr[j++] = t.a.z; arr[j++] = t.b.x; arr[j++] = t.b.y; arr[j++] = t.b.z; }
   geo.setAttribute('position', new THREE.BufferAttribute(arr, 3));
   const ls = dsysMark(new THREE.LineSegments(geo, dsys.mats.faint)); scene.add(ls); dsys.tmp.push({ owned: ls });
-  // 線の上を小さな玉が上がる。地上局から機体へ「状態を見に行っている」ことが動きで分かる
+  // 線の上を小さな玉が流れる。主役は下り（機体→地上局の「いまの状態」）で、
+  // 上り（地上局→機体の「止まれ」）はときどき。本文の「受け取り、必要なときに止める」と向きを揃える
   const beads = [];
   for (const t of dsys.tmp) if (t.link) {
-    const b = new THREE.Sprite(M.glowCore('#c8d6e4')); b.scale.setScalar(0.085); b.renderOrder = 7; dsysMark(b);
-    scene.add(b); beads.push({ sp: b, a: t.a, b: t.b, ph: Math.random() });
-    dsys.tmp.push({ owned: b });
+    for (const down of [true, false]) {
+      const b = new THREE.Sprite(M.glowCore(down ? '#c8d6e4' : '#ffd2a8'));
+      b.scale.setScalar(down ? 0.085 : 0.105); b.renderOrder = 7; dsysMark(b);
+      scene.add(b); beads.push({ sp: b, a: down ? t.b : t.a, b: down ? t.a : t.b, ph: Math.random(), up: !down });
+      dsys.tmp.push({ owned: b });
+    }
   }
   dsys.beads = beads;
+  // 札は dsys.world（倍率 k）に置くので、st（すでに k 倍済み）の座標をそのまま使わない
+  { const lab = dsysLabel('下り: いまの状態　／　上り: 止まれ', DSHOW_R * 1.24);
+    lab.position.set(0.10, 1.70, 1.05); dsys.world.add(lab); }
+  { const lab = dsysLabel('地上局', DSHOW_R * 0.44);
+    lab.position.set(1.30, 0.035, 1.72); lab.material.depthTest = false; dsys.world.add(lab); }
 }
 
 // ---------- 出し入れ ----------
@@ -7643,8 +7671,10 @@ function stepDsys(dtReal) {
   // ④は「1機だけ遅れる」から「形が崩れる」までを、8秒かけて見せる
   // ⑤の玉は線の上を上がり、⑥の1機は枠へ出て帰る
   if (dsys.beads) { const T = reduceMotion ? 0.5 : dsys.t;
-    for (const b of dsys.beads) { const u = ((T * 0.42 + b.ph) % 1);
-      b.sp.position.lerpVectors(b.a, b.b, u); b.sp.material.opacity = 0.95 * Math.sin(Math.PI * u); } }
+    const up = reduceMotion ? 1 : (T % 7) < 1.6 ? 1 : 0;   /* 「止まれ」は要るときだけ。ずっと流れていると主従が読めない */
+    for (const b of dsys.beads) { const u = ((T * (b.up ? 0.62 : 0.42) + b.ph) % 1);
+      b.sp.position.lerpVectors(b.a, b.b, u);
+      b.sp.material.opacity = (b.up ? up : 1) * 0.95 * Math.sin(Math.PI * u); } }
   if (dsys.esc) { const T = reduceMotion ? 0.5 : (dsys.t % 6) / 6;
     const u = T < 0.45 ? T / 0.45 : T < 0.6 ? 1 : 1 - (T - 0.6) / 0.4;   /* 出る → 枠に触れて止まる → 帰る */
     const e = u * u * (3 - 2 * u), r = dsys.esc.r0 + (dsys.esc.r1 - dsys.esc.r0) * e, a = 0.9;
@@ -7708,7 +7738,7 @@ function dshowChipsBuild() {
     const b = document.createElement('button');
     b.dataset.ds = h.id; b.setAttribute('aria-pressed', 'false');
     b.setAttribute('aria-label', h.head);
-    b.innerHTML = `<span aria-hidden="true">${h.no}</span>${h.chip}${h.layer ? '<span class="l" aria-hidden="true">◉</span>' : ''}`;
+    b.innerHTML = `<span aria-hidden="true">${h.no}</span>${h.chip}`;   /* 7項目すべてが3Dを持つので、印は情報を持たない */
     b.addEventListener('click', () => dshowPick(dsUI.pick === h.id ? null : h.id));
     box.appendChild(b);
   }
@@ -7717,6 +7747,11 @@ function dshowChipsBuild() {
 // 選んでいる間は自動送りを止める（下で図形が入れ替わると、いま何の話か分からなくなる）
 function dshowPick(id) {
   dsUI.pick = id || null;
+  // カードを畳んだまま項目を選ぶと、3Dだけが変わって説明がどこにも出ない。開き直す
+  if (dsUI.pick && !dsUI.open && typeof setNoteMini === 'function') {
+    const card = $('#noteCard');
+    if (card && (card.hidden || card.classList.contains('mini'))) { card.hidden = false; setNoteMini(false); }
+  }
   for (const b of $$('#dsHowChips button')) {
     const on = b.dataset.ds === dsUI.pick;
     b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
@@ -7726,7 +7761,7 @@ function dshowPick(id) {
   if (typeof dshowLayer === 'function') dshowLayer(h ? h.layer : null);
   // ④時計だけは例外。図形が移り変わらないと時計のずれは現れないので、自動送りを続ける
   dshowAuto(h && h.layer === 'sync' ? true : (!dsUI.pick && !dsUI.open ? null : false));
-  if (dsUI.open) { dsUI.tab = 'how'; dsRenderPanel(); if (h) { const el = $('#ds-' + h.id); if (el) el.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' }); } }
+  if (dsUI.open) { dsUI.tab = 'how'; dsRenderPanel(); if (h) { const el = $('#ds-' + h.id); if (el) el.scrollIntoView({ block: 'nearest', behavior: reduceMotion ? 'auto' : 'smooth' });   /* start だと押したボタンが画面外へ飛び、取り消し方が分からなくなる */ } }
   updateDshowVals();
 }
 // 自動送り: null=もとに戻す / true=入 / false=切
@@ -7751,6 +7786,7 @@ function dshowPanelOpen(on, tab) {
   } else {
     setSheetState(el, -1);
     setTimeout(() => { if (!dsUI.open) el.hidden = true; }, 420);
+    dshowAuto(dsUI.pick ? false : null);   /* 閉じたら送りを戻す。戻さないと、読んで閉じた人の画面で図形が止まったままになる */
     const b = $('#dsRead'); if (b) b.focus({ preventScroll: true });
   }
   if (typeof dshowFrame === 'function' && dshow.on) dshowFrame(380);
@@ -7758,11 +7794,11 @@ function dshowPanelOpen(on, tab) {
 function dsRenderPanel() {
   const body = $('#dsPanelBody'); if (!body) return;
   for (const b of $$('#dsSeg button')) { const on = b.dataset.ds === dsUI.tab; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }
-  $('#dsSeg [data-ds=reg]').hidden = !regOn();   /* 制度の注記を出さない設定のときは、きまりの札ごと消す */
-  if (dsUI.tab === 'reg' && !regOn()) dsUI.tab = 'how';
+  $('#dsSeg [data-ds=reg]').hidden = false;   /* 札ごと消すと、制度の注記があること自体に気づけない */
   if (dsUI.tab === 'how') {
     body.innerHTML = DSHOW_HOW.map(h => `<section class="ds-item" id="ds-${h.id}">
         <div class="ds-head"><span class="ds-no" aria-hidden="true">${h.no}</span><h3>${h.head}</h3></div>
+        <p class="ds-lead">${h.lead}</p>
         ${h.body}
         ${h.layer ? `<button class="ds-see${dsUI.pick === h.id ? ' on' : ''}" data-see="${h.id}">${dsUI.pick === h.id ? '空から消す' : '空で見る'}</button>` : ''}
         <small class="ds-src">${h.ky}</small>
@@ -7772,8 +7808,11 @@ function dsRenderPanel() {
       if (b.dataset.act === 'text') { dshowPanelOpen(false); dshowToggleText(true); return; }   /* 入力欄はカードに出る。読み面が空を覆っていると押した結果が見えない */
       dshowPick(dsUI.pick === b.dataset.see ? null : b.dataset.see);
     };
+  } else if (dsUI.tab === 'reg' && !regOn()) {
+    body.innerHTML = `<p class="hint">いまは制度の注記を出さない設定です。画面右上の「⚙」から<b>くわしく</b>に切り替えると、ここに催し・夜間・台数の要件が出ます。</p>`;
+    body.onclick = null;
   } else if (dsUI.tab === 'reg') {
-    body.innerHTML = `<p class="caveat">${DSHOW_REG.lead}</p>
+    body.innerHTML = `<p class="hint">${DSHOW_REG.lead}</p>
       <ul class="check">${DSHOW_REG.items.map(x => `<li>${x}</li>`).join('')}</ul>
       <p class="hint">${DSHOW_REG.outside}</p>
       <small class="ds-src">${DSHOW_REG.src}</small>`;

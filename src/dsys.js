@@ -126,7 +126,7 @@ function dsysPair() {   // ③間隔: 隣り合う機体の「間」を見せる
     // 「機体の飛行間隔1.5mを、この隊列の広がりに当てはめるとどれくらいか」を出す
     // この画は実際のショーを縮めたもの。箱庭の寸法をそのまま m で出すと実物と食い違うので、
     // 本文で出典を示した実機の間隔（0.8〜1.5m）を添える
-    const lab = dsysLabel('となりとの間隔（実機で0.8〜1.5m）', DSHOW_R * 1.06);
+    const lab = dsysLabel('となりとの間隔（実機で0.8〜1.5m）※ほかの機体は暗くしています', DSHOW_R * 1.62);
     lab.position.set(tip[0] - DSHOW_R * 0.42, tip[1] + DSHOW_R * 0.07, tip[2]); dsys.air.add(lab); }
   for (const c of [p, q]) { const m = dsysMark(new THREE.Mesh(new THREE.SphereGeometry(0.030, 12, 8), dsys.mats.solid)); m.position.set(c[0], c[1], c[2]); dsys.air.add(m); }
 }
@@ -145,6 +145,19 @@ function dsysFence() {   // ⑥囲い: 内側（越えたら帰る）と外側�
     }
     const lab = dsysLabel(inner ? '内側: 越えたら帰る・降りる' : '外側: 越えたらモーターを切る', DSHOW_R * 1.30);
     lab.position.set(0, y1 - DSHOW_R * (inner ? 0.26 : 0.62), r * 0.62); dsys.air.add(lab);   /* 手前側に寄せる。上に出すと画面の外へ出る */
+  }
+  // 外側のさらに外。落ちた機体が届く範囲で、人を入れない区画。
+  // 本文の締めがここなのに地面に何も無いと、いちばん効く一文だけ絵で確かめられない
+  // dsys.world は倍率 k がかかるので、隊列の座標をそのまま使える
+  { const r2 = DSHOW_R * 1.55, r3 = r2 + DSHOW_H * 0.52;   /* 外側の枠の外へ、高さに応じて広がる */
+    const ring = (rr, mat) => { const pts = []; for (let s2 = 0; s2 <= 72; s2++) { const a = s2 / 72 * Math.PI * 2; pts.push([Math.cos(a) * rr, 0.010, Math.sin(a) * rr]); } return dsysLine(pts, mat); };
+    dsys.world.add(ring(r3, dsys.mats.warnLine));
+    for (let i = 0; i < 24; i++) {   /* 斜めの筋で「帯」に見せる。面を張ると画面に色の膜ができる */
+      const a = (i + 0.5) / 24 * Math.PI * 2;
+      dsys.world.add(dsysLine([[Math.cos(a) * r2, 0.010, Math.sin(a) * r2], [Math.cos(a) * r3, 0.010, Math.sin(a) * r3]], dsys.mats.warnLine));
+    }
+    const lab = dsysLabel('落ちた機体が届く範囲 ＝ 人を入れない区画', DSHOW_R * 1.55);
+    lab.position.set(0, 0.48, (r2 + r3) / 2 * 1.02); dsys.world.add(lab);
   }
 }
 // 離陸前に機体を並べる格子。①経路と⑦離着陸で同じ場所を使う
@@ -201,6 +214,8 @@ function dsysStation(kind) {   // ②基準局 / ⑤地上局。夜なので自�
     { const pts = []; for (let s2 = 0; s2 <= 64; s2++) { const a = s2 / 64 * Math.PI * 2; pts.push([Math.cos(a), Math.sin(a), 0]); }
       dsys.rtkRing = [0, 1, 2].map(() => { const r = dsysLine(pts, dsys.mats.line.clone()); r.renderOrder = 6; dsys.world.add(r); return r; });
       dsys.rtkAt = [px, 0.40, pz]; }
+    { const lab = dsysLabel('基準局', DSHOW_R * 0.34);   /* grp は 1.7倍されているので world 側に置く。発着場の格子に重ならない幅に */
+      lab.position.set(px - 0.30, 0.035, pz + 0.62); lab.material.depthTest = false; dsys.world.add(lab); }
     dsys.rtkLab = ['補正なし: 位置が数十m ずれる', '補正あり: 位置が数cm に収まる'].map((t, i) => {
       const lab = dsysLabel(t, DSHOW_R * 1.06); lab.position.set(px * 0.20, 1.34, pz); lab.visible = i === 0;
       dsys.world.add(lab); return lab; });
@@ -226,14 +241,23 @@ function dsysLinks() {   // ⑤電波: 地上局から機体へ。多いと線�
   let j = 0; for (const t of dsys.tmp) if (t.link) { arr[j++] = t.a.x; arr[j++] = t.a.y; arr[j++] = t.a.z; arr[j++] = t.b.x; arr[j++] = t.b.y; arr[j++] = t.b.z; }
   geo.setAttribute('position', new THREE.BufferAttribute(arr, 3));
   const ls = dsysMark(new THREE.LineSegments(geo, dsys.mats.faint)); scene.add(ls); dsys.tmp.push({ owned: ls });
-  // 線の上を小さな玉が上がる。地上局から機体へ「状態を見に行っている」ことが動きで分かる
+  // 線の上を小さな玉が流れる。主役は下り（機体→地上局の「いまの状態」）で、
+  // 上り（地上局→機体の「止まれ」）はときどき。本文の「受け取り、必要なときに止める」と向きを揃える
   const beads = [];
   for (const t of dsys.tmp) if (t.link) {
-    const b = new THREE.Sprite(M.glowCore('#c8d6e4')); b.scale.setScalar(0.085); b.renderOrder = 7; dsysMark(b);
-    scene.add(b); beads.push({ sp: b, a: t.a, b: t.b, ph: Math.random() });
-    dsys.tmp.push({ owned: b });
+    for (const down of [true, false]) {
+      const b = new THREE.Sprite(M.glowCore(down ? '#c8d6e4' : '#ffd2a8'));
+      b.scale.setScalar(down ? 0.085 : 0.105); b.renderOrder = 7; dsysMark(b);
+      scene.add(b); beads.push({ sp: b, a: down ? t.b : t.a, b: down ? t.a : t.b, ph: Math.random(), up: !down });
+      dsys.tmp.push({ owned: b });
+    }
   }
   dsys.beads = beads;
+  // 札は dsys.world（倍率 k）に置くので、st（すでに k 倍済み）の座標をそのまま使わない
+  { const lab = dsysLabel('下り: いまの状態　／　上り: 止まれ', DSHOW_R * 1.24);
+    lab.position.set(0.10, 1.70, 1.05); dsys.world.add(lab); }
+  { const lab = dsysLabel('地上局', DSHOW_R * 0.44);
+    lab.position.set(1.30, 0.035, 1.72); lab.material.depthTest = false; dsys.world.add(lab); }
 }
 
 // ---------- 出し入れ ----------
@@ -302,8 +326,10 @@ function stepDsys(dtReal) {
   // ④は「1機だけ遅れる」から「形が崩れる」までを、8秒かけて見せる
   // ⑤の玉は線の上を上がり、⑥の1機は枠へ出て帰る
   if (dsys.beads) { const T = reduceMotion ? 0.5 : dsys.t;
-    for (const b of dsys.beads) { const u = ((T * 0.42 + b.ph) % 1);
-      b.sp.position.lerpVectors(b.a, b.b, u); b.sp.material.opacity = 0.95 * Math.sin(Math.PI * u); } }
+    const up = reduceMotion ? 1 : (T % 7) < 1.6 ? 1 : 0;   /* 「止まれ」は要るときだけ。ずっと流れていると主従が読めない */
+    for (const b of dsys.beads) { const u = ((T * (b.up ? 0.62 : 0.42) + b.ph) % 1);
+      b.sp.position.lerpVectors(b.a, b.b, u);
+      b.sp.material.opacity = (b.up ? up : 1) * 0.95 * Math.sin(Math.PI * u); } }
   if (dsys.esc) { const T = reduceMotion ? 0.5 : (dsys.t % 6) / 6;
     const u = T < 0.45 ? T / 0.45 : T < 0.6 ? 1 : 1 - (T - 0.6) / 0.4;   /* 出る → 枠に触れて止まる → 帰る */
     const e = u * u * (3 - 2 * u), r = dsys.esc.r0 + (dsys.esc.r1 - dsys.esc.r0) * e, a = 0.9;

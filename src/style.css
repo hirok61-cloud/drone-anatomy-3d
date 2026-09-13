@@ -648,6 +648,8 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
 #dsPanelBody .ds-item:first-child { border-top: 0; padding-top: 4px; }
 #dsPanelBody .ds-no { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-text); font: 700 12px/1 var(--mono); margin-right: 8px; vertical-align: 2px; flex: none; }
 #dsPanelBody .ds-head { display: flex; align-items: flex-start; gap: 0; margin-bottom: 6px; }
+/* 一言要約。長い本文に入る前の踊り場になる */
+#dsPanelBody .ds-lead { margin: -2px 0 8px; font-size: calc(13px * var(--fs, 1)); font-weight: 600; line-height: 1.55; color: var(--accent-text); }
 #dsPanelBody p + p { margin-top: 7px; }
 #dsPanelBody .ds-see { margin-top: 8px; padding: 6px 13px; border-radius: 999px; font-size: calc(12.5px * var(--fs, 1)); font-weight: 600; background: var(--seg-bg); color: var(--ink); min-height: var(--tap); }
 #dsPanelBody .ds-see.on { background: var(--accent-soft); color: var(--accent-text); box-shadow: inset 0 0 0 1.5px var(--accent); }
