@@ -377,7 +377,7 @@ function onCamInterrupt() { if (S.camSpring) { S.camSpring = null; S.camInertia 
 // 画面下でシートやドックが覆っている高さ(CSSピクセル)
 function bottomCover() {
   const H2 = window.innerHeight; let cov = 0;
-  for (const sel of ['#dock', '#inspector.open', '#lesson.open', '#expert.open', '#noteCard', '#massBar', '#bigBand']) {
+  for (const sel of ['#dock', '#inspector.open', '#lesson.open', '#expert.open', '#dshowPanel.open', '#noteCard', '#massBar', '#bigBand']) {
     if (sel === '#bigBand' && H2 <= 520) continue;   /* 横向きは高さが足りない。名前の帯は3Dに重ねて浮かせ、機体は小さくしない */
     const el = document.querySelector(sel); if (!el || el.hidden) continue;
     const r = el.getBoundingClientRect(); if (r.height < 4 || r.top > H2 - 8 || r.bottom < H2 * 0.6) continue;

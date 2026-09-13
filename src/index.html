@@ -25,6 +25,8 @@
       <div class="seg small" id="powerSeg" data-full><button data-p="0.2">低速</button><button data-p="0.5" class="on">ホバー</button><button data-p="1">全開</button></div>
       <div class="dock-group"><span class="dg-label">空もよう</span><div class="chips" id="skyChips" role="group" aria-label="空もよう"></div></div>
       <div class="dock-group dshow-keep"><span class="dg-label">夜</span><div class="chips"><button id="showBtn" aria-pressed="false" aria-label="夜のドローンショー"><span aria-hidden="true">🎆</span> ドローンショー</button></div></div>
+      <div class="dock-group dshow-only"><div class="chips"><button id="dsQuit" aria-label="ショーをやめる"><span aria-hidden="true">✕</span> やめる</button><button id="dsNext">つぎ ›</button><button id="dsAuto" class="tgl" aria-pressed="true" aria-label="自動送り"><i></i>自動</button><button id="dsRead">しくみ ›</button></div></div>
+      <div class="dock-group dshow-only"><span class="dg-label">しくみ</span><div class="chips" id="dsHowChips" role="group" aria-label="ショーのしくみ"></div></div>
       <div class="chips">
         <button class="tgl" data-t="slow" aria-pressed="false"><i></i>ゆっくり</button>
         <button class="tgl" data-t="air" aria-pressed="false"><i></i>風をみる</button>
@@ -140,6 +142,12 @@
   <div class="mb-foot"><b id="massTotal">—</b><span id="massSub" class="mb-sub"></span><div id="massPrice" class="mb-price" hidden></div><div id="massReg" class="mb-reg" hidden></div><p id="massNote" class="mb-note" hidden></p></div>
 </aside>
 
+<aside id="dshowPanel" class="glass" hidden aria-label="ショーのしくみ">
+  <div class="grabber" aria-hidden="true"></div>
+  <div class="insp-head"><h2 id="dsPanelTitle">ショーのしくみ</h2><button id="dsPanelClose" class="icon-btn sm" aria-label="閉じる">✕</button></div>
+  <div class="seg small xsegm" id="dsSeg" role="radiogroup" aria-label="なにを読む？"><button data-ds="how" class="on" role="radio" aria-checked="true">しくみ</button><button data-ds="reg" role="radio" aria-checked="false">きまり</button><button data-ds="craft" role="radio" aria-checked="false">この1機</button></div>
+  <div id="dsPanelBody"></div>
+</aside>
 <aside id="expert" class="glass" hidden aria-label="専門パネル">
   <div class="grabber" aria-hidden="true"></div>
   <div class="insp-head"><h2 id="expertTitle">専門</h2><button id="expertClose" class="icon-btn sm" aria-label="閉じる">✕</button></div>

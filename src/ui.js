@@ -63,6 +63,8 @@ function stopOthers(keep, arg) {
 function setTab(tab) {
   $('#coach').hidden = true;
   fpvExit();   /* 操作列を畳んだまま電源だけ切れると、映像の中から戻れなくなる */
+  if (typeof dsUI === 'object' && dsUI.open) { dshowPanelOpen(false); return; }   /* 読んでいる最中の Esc でショーごと終わらせない */
+  if (typeof dshow === 'object' && dshow.on && dshow.askText) { dshowToggleText(false); return; }
   if (typeof dshow === 'object' && dshow.on) dshowOn(false);   /* ショーも同じ。操作列を畳んでいる */
   if ((theater.active || theater.done) && tab !== 'theater') { stopTheaterUI(); }
   if (whatif.active && tab !== 'theater') { stopWhatifUI(); }
@@ -585,9 +587,9 @@ function onThemeChanged(dark) { airflowTheme(dark); fpvStageTheme();
 function onQualityChanged(level) { if (air.mesh && air.N !== Q.particles) rebuildAirflow(); $('#perfInfo').textContent = `品質 ${level}`;
   if (typeof dshow === 'object' && dshow.on) dshowSky(); else if (typeof weather === 'object' && weather.on) weatherSky(); }   /* 空のfbmのオクターブは選択時に決まるので、ここで入れ直す */
 { // シートの開閉・カードの出入りで、3Dの見える帯が変わるたびに視錐台を合わせ直す
-  const watch = ['#inspector', '#lesson', '#expert', '#noteCard', '#massBar'].map(s => $(s)).filter(Boolean);
+  const watch = ['#inspector', '#lesson', '#expert', '#dshowPanel', '#noteCard', '#massBar'].map(s => $(s)).filter(Boolean);
   let t = 0; const kick = () => { clearTimeout(t); t = setTimeout(() => { if (narrow()) resize(); }, 60); };   /* シートは .38s かけて動くので、動き終わりにも測り直す */
-  const sheets = ['#inspector', '#lesson', '#expert'].map(s => $(s));
+  const sheets = ['#inspector', '#lesson', '#expert', '#dshowPanel'].map(s => $(s));
   const fold = () => {   /* シートが open/tall のときは視点バー(tall ではタイトルバーも)を畳む。peek は機体を見る段なので戻す */
     const st = sheets.map(el => (el.hidden || !el.classList.contains('open')) ? -1 : sheetState(el)); const mx = Math.max(...st);
     document.body.classList.toggle('sheet-open', mx >= 1); document.body.classList.toggle('sheet-tall', mx >= 2);

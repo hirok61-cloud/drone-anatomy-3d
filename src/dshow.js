@@ -12,7 +12,7 @@ const dshow = {
   from: null, to: null, raw: null, colFrom: null, colTo: null, lag: null, rnd: null, bright: null,
   perm: null, keyA: null, keyB: null, ordA: null, ordB: null,
   nextTo: null, nextCol: null, nextLag: null, nextFig: -1,
-  fig: 0, figT: 0, phase: 'hold', saved: null, star: 0, lastVals: 0, lastBand: 0, sig: '', fitX: 2.4, fitY: 2.4, mini: false, text: '', forceFig: -1, askText: false, bodyPos: null, dist: 11, k: 1, bodyYaw: 0,
+  fig: 0, figT: 0, phase: 'hold', saved: null, star: 0, lastVals: 0, lastBand: 0, sig: '', auto: true, kWant: 1, gz: 0, gzWant: 0, fitX: 2.4, fitY: 2.4, mini: false, text: '', forceFig: -1, askText: false, bodyPos: null, dist: 11, k: 1, bodyYaw: 0,
 };
 const DSHOW_N = () => (S.qLevel <= 1 ? 1200 : S.qLevel === 2 ? 2200 : 3200);   // 実際のショーは数百〜数千機
 const DSHOW_H = 3.60;      // 隊列の中心の高さ(m)。低いほうの機体が地平線あたりに来る高さ
@@ -222,16 +222,16 @@ function dshowBuild() {
   const mat = new THREE.ShaderMaterial({
     uniforms: {
       uSize: { value: DSHOW_GLOW }, uPxPerM: { value: 900 }, uGain: { value: 1 },
-      uProg: { value: 1 }, uTime: { value: 0 }, uWave: { value: 1 },
+      uProg: { value: 1 }, uTime: { value: 0 }, uWave: { value: 1 }, uSkew: { value: 0 },
     },
     // 位置と色は頂点シェーダで作る。CPU は図形が変わる瞬間しか働かない
     vertexShader: `
       attribute vec3 aTo, aColA, aColB;
       attribute float aLag, aRnd, bright;
-      uniform float uSize, uPxPerM, uProg, uTime, uWave;
+      uniform float uSize, uPxPerM, uProg, uTime, uWave, uSkew;
       varying vec3 vCol; varying float vB;
       void main() {
-        float u = clamp((uProg - aLag) / max(0.10, 1.0 - aLag), 0.0, 1.0);
+        float u = clamp((uProg + aRnd * uSkew - aLag) / max(0.10, 1.0 - aLag), 0.0, 1.0);   // uSkew: わざと時計をずらして、形が崩れるのを見せる
         float e = u * u * (3.0 - 2.0 * u);          // なめらかに出て、なめらかに止まる
         vec3 p = mix(position, aTo, e);
         vec3 d = aTo - position; float L = length(d);
@@ -301,8 +301,9 @@ function dshowRect() {
   if (tb && !tb.hidden) { const q = tb.getBoundingClientRect(); if (q.height > 4 && q.bottom < ih * 0.3) y0 = q.bottom + 6; }
   const dock = $('#dock');
   if (dock && !dock.hidden) { const q = dock.getBoundingClientRect(); if (q.height > 4) y1 = Math.min(y1, q.top - 6); }
-  const card = $('#noteCard');
-  if (card && !card.hidden) {
+  for (const sel of ['#dshowPanel', '#noteCard']) {
+    const card = $(sel); if (!card || card.hidden) continue;
+    if (sel === '#dshowPanel' && !card.classList.contains('open')) continue;
     const q = card.getBoundingClientRect();
     if (q.height > 40) {
       if (q.width > iw * 0.66) y1 = Math.min(y1, q.top - 6);                 // 全幅のシート: 上へ逃げる
@@ -321,18 +322,32 @@ function dshowFrame(ms) {
   if (R) { camera.setViewOffset(innerWidth, innerHeight, innerWidth / 2 - R.cx, innerHeight / 2 - R.cy, innerWidth, innerHeight); camera.updateProjectionMatrix(); }
   // カメラを引くと天球（半径16m）の外に出て空が黒いドームになる。距離は固定して隊列のほうを伸縮させる
   const fit = DSHOW_CAM * tanV * Math.min(hF, asp * wF) / 1.06;
-  const k = clamp(fit / DSHOW_R, 0.34, 1.00);   /* 大きくしすぎると低い機体が地平線より下へ落ちる */
-  dshow.k = k; dshow.dist = DSHOW_CAM; dshow.sig = R ? `${Math.round(R.x0)},${Math.round(R.x1)},${Math.round(R.y0)},${Math.round(R.y1)}` : 'wide';
+  let k = clamp(fit / DSHOW_R, 0.34, 1.00);   /* 大きくしすぎると低い機体が地平線より下へ落ちる */
+  // 地上のものを見せるレイヤーでは、地面から隊列の上端までを1枚に入れる。
+  // カメラは引けない（天球の外に出る）ので、ショー全体を地面を基点に縮める
+  const gz = dshow.gzWant ? 1 : 0;
+  if (gz) k = Math.min(k, (DSHOW_CAM * tanV * hF * 2 * 0.92) / (DSHOW_H + DSHOW_R));
+  dshow.kWant = k; dshow.dist = DSHOW_CAM; dshow.sig = R ? `${Math.round(R.x0)},${Math.round(R.x1)},${Math.round(R.y0)},${Math.round(R.y1)}` : 'wide';
+  if (dshow.k == null || reduceMotion) dshow.k = k;   /* 初回と「動きを減らす」設定は、その場で合わせる */
   // 円の図形は縦横どちらかで頭打ちになるが、横長の図形（文字や整列）は余った側を使える。
   // 隊列の座標系で「いま画面に入る半分の幅・高さ」を控えておく
   dshow.fitX = DSHOW_CAM * tanV * (asp * wF) / k; dshow.fitY = DSHOW_CAM * tanV * hF / k;
-  if (dshow.pts) { dshow.pts.scale.setScalar(k); dshow.pts.position.y = DSHOW_H * (1 - k); }
-  if (dshow.mat) dshow.mat.uniforms.uSize.value = DSHOW_GLOW * k;   /* 光の玉も一緒に縮める。画面上の見え方を揃えるため */
-  const dy = DSHOW_H - DSHOW_EYE, hz = Math.sqrt(Math.max(0.5, DSHOW_CAM * DSHOW_CAM - dy * dy));
-  const eye = new THREE.Vector3(0.2874 * hz, DSHOW_EYE, 0.9578 * hz), aim = new THREE.Vector3(0, DSHOW_H, 0);   /* 正面から少し右に寄って見上げる */
+  dshowApplyK();
+  // 見上げる高さ。地上を含めるときは、地面から隊列の上端までの真ん中を見る
+  const aimY = gz ? k * (DSHOW_H + DSHOW_R) / 2 : DSHOW_H;
+  const eyeY = gz ? Math.max(0.75, aimY * 0.55) : DSHOW_EYE;
+  const dy = aimY - eyeY, hz = Math.sqrt(Math.max(0.5, DSHOW_CAM * DSHOW_CAM - dy * dy));
+  const eye = new THREE.Vector3(0.2874 * hz, eyeY, 0.9578 * hz), aim = new THREE.Vector3(0, aimY, 0);   /* 正面から少し右に寄って見上げる */
   dshowPlaceBody(eye, aim, tanV, asp * wF, hF);
   controls.maxDistance = Math.max(controls.maxDistance, DSHOW_CAM * 1.06);
   flyTo(eye, aim, ms, false);
+}
+// 隊列の倍率と高さの当てはめ。gz=1 のときは地面を基点に縮める（地上のものが画面に入る）
+function dshowApplyK() {
+  const k = dshow.k;
+  if (dshow.pts) { dshow.pts.scale.setScalar(k); dshow.pts.position.y = DSHOW_H * (1 - k) * (1 - dshow.gz); }
+  if (dshow.mat) dshow.mat.uniforms.uSize.value = DSHOW_GLOW * k;   /* 光の玉も一緒に縮める。画面上の見え方を揃えるため */
+  if (typeof dsysLayout === 'function') dsysLayout();
 }
 // 手前の1機は「観客のすぐ前を飛んでいる1機」。カメラからの距離で置くので、
 // 画面が変わっても同じ大きさに写る。隊列と重なっても手前なので前後は正しく出る
@@ -355,7 +370,7 @@ function dshowOn(on) {
     stopOthers('dshow');
     dshowBuild();
     dshow.on = true; dshow.t = 0; dshow.fig = 0; dshow.figT = 0; dshow.phase = 'hold'; dshow.star = 0; dshow.lastVals = 0;
-    dshow.forceFig = -1; dshow.askText = false;
+    dshow.forceFig = -1; dshow.askText = false; dshowUIOn(true);
     dshow.text = (store.get('dshowText') || '').slice(0, 12);
     dshow.mini = narrow();   /* スマホは説明カードが画面の半分を占める。畳んだ状態で始めて、読みたい人が開く */
     dshow.mat.uniforms.uProg.value = 1;
@@ -375,10 +390,10 @@ function dshowOn(on) {
     body.px = bp[0]; body.py = bp[1]; body.pz = bp[2]; body.tx = body.tz = body.wx = body.wz = 0; body.yaw = dshow.bodyYaw; body.mult = [1, 1, 1, 1];
     dshowSky();
     renderDshow();
-    { const b = $('#noteCard .note-actions button'); if (b) b.focus({ preventScroll: true }); }   /* 押したボタンは畳まれて消えるので、行き先を渡す */
+    { const b = (narrow() ? $('#dsRead') : null) || $('#noteCard .note-actions button'); if (b) b.focus({ preventScroll: true }); }   /* 押したボタンは畳まれて消えるので、行き先を渡す */
     if (!store.get('dshowSeen')) { store.set('dshowSeen', '1'); showToast('図形は自動で切り替わります。1機ずつ操縦しているのではありません', 4600); }
   } else {
-    dshow.on = false;
+    dshow.on = false; dshowUIOn(false);
     document.body.classList.remove('dshow'); syncDockH();
     if (dshow.pts) dshow.pts.visible = false;
     showDroneOn(false);
@@ -437,6 +452,7 @@ function dshowAdvance() {
   dshow.nextFig = -1; dshow.forceFig = -1;
   dshowUpload();
   dshow.phase = 'move'; dshow.figT = 0; dshow.mat.uniforms.uProg.value = 0;
+  if (typeof dsysRefresh === 'function') dsysRefresh();
   showDroneColor(DSHOW_FIGS[dshow.fig].col[0]);
   renderDshow();
 }
@@ -479,10 +495,15 @@ function stepDshow(dtReal) {
     const p = dshow.figT / DSHOW_MOVE;
     if (p >= 1) { dshow.phase = 'hold'; dshow.figT = 0; u.uProg.value = 1; }
     else u.uProg.value = p;
-  } else if (dshow.figT > DSHOW_HOLD && !reduceMotion) { dshowAdvance(); }
+  } else if (dshow.figT > DSHOW_HOLD && dshow.auto && !reduceMotion) { dshowAdvance(); }
   else if (dshow.phase === 'hold' && dshow.figT > 0.5 && dshow.nextFig < 0) { dshowPrepare(); }   /* 静止に入ってひと呼吸おいてから、次の図形を用意する */
   u.uTime.value = dshow.t;
   u.uWave.value = reduceMotion ? 0 : 1;
+  { const a = reduceMotion ? 1 : 1 - Math.exp(-dtReal / 0.22);
+    const dk = dshow.kWant - dshow.k, dg = dshow.gzWant - dshow.gz;
+    if (Math.abs(dk) > 1e-4 || Math.abs(dg) > 1e-4) { dshow.k += dk * a; dshow.gz += dg * a; dshowApplyK(); }
+    else if (dshow.k !== dshow.kWant) { dshow.k = dshow.kWant; dshow.gz = dshow.gzWant; dshowApplyK(); } }
+  stepDsys(dtReal);
   // 手前の1機もホバリングらしく、わずかに上下する
   if (body.mode !== 'theater') setBodyMode('theater');   /* 何かの拍子に free へ戻っても、隊列の画は崩さない */
   const bp = dshow.bodyPos || [1.6, 1.9, 5.4];
@@ -509,7 +530,7 @@ function dshowNext() {
 function updateDshowVals() {
   const el = $('#dshowVals'); if (!el || $('#noteCard').hidden) return;
   const f = DSHOW_FIGS[dshow.fig];
-  el.innerHTML = `<i class="dot" aria-hidden="true"></i><span>いま <b>${f.name}</b></span><span>${dshow.n} 機</span><span>高さ ${DSHOW_H.toFixed(1)} m</span><span>${dshow.phase === 'move' ? '移動中' : '静止中'}</span>`;
+  el.innerHTML = `<i class="dot" aria-hidden="true"></i><span>いま <b>${f.name}</b></span><span>${dshow.n} 機</span><span>高さ ${DSHOW_H.toFixed(1)} m</span><span>${dshow.phase === 'move' ? '移動中' : '静止中'}</span>${dshow.auto ? '' : '<span>自動送り 止</span>'}${dsUI.pick ? `<span>しくみ${(DSHOW_HOW.find(h => h.id === dsUI.pick) || {}).no || ''}</span>` : ''}`;
 }
 function renderDshow(rebuild) {
   if (!dshow.on) return;
@@ -546,22 +567,23 @@ function bindDshowText() {
   f.addEventListener('submit', e => { e.preventDefault(); inp.blur(); dshowSetText(inp.value); });
   inp.focus({ preventScroll: true });
 }
-function dshowToggleText() {
-  dshow.askText = !dshow.askText;
+function dshowToggleText(force) {
+  dshow.askText = force == null ? !dshow.askText : !!force;
   if (dshow.askText && dshow.mini) setNoteMini(false);   /* 畳んだままだと入力欄が隠れる */
   renderDshow(true);
 }
 // 手前の1機について。主役機と何が違うのかを、見えているものと結びつける
 function dshowCraftHtml() {
-  return `<details><summary>手前の1機（ショー専用の機体）</summary>
-    <ul class="check">
+  return `<details><summary>手前の1機（ショー専用の機体）</summary>${dshowCraftBody()}</details>`;
+}
+function dshowCraftBody() {
+  return `<ul class="check">
       <li><b>カメラもジンバルもありません。</b>代わりに、機体と同じくらい大きな灯りを下に抱えています。運ぶ荷物が「映像」から「光」に変わると、形はここまで変わります。</li>
       <li><b>脚がありません。</b>着地するのはプロペラを囲む輪の下縁です。決まった間隔の格子に並べて真上に上げ、同じ場所へ戻すので、脚をつける理由がありません。</li>
       <li><b>輪は安全のためでもあります。</b>教則は催し場所上空の飛行について、機体が第三者及び物件に接触した場合の<b>危害を軽減する構造</b>を用意していることが必要としています。何が該当するかまでは教則に書かれていません（国土交通省の審査要領は、危害を軽減する機能の例としてプロペラガードを挙げています）。</li>
       <li><b>小さく見えても100gは超えています。</b>屋外のショーで使われている機体は、最も軽いものでも249g、多くは500g台です。100グラム以上は1機ずつ登録して登録記号を表示するので、500機飛ばすなら500機分が対象になります。</li>
     </ul>
-    <p class="hint">主役機（外形85cm・約2200g）に対して、この機体は外形31cm・約530g。横幅で約1/3、質量で約1/4です。寸法は国内で実際に使われている機体（外形31cm前後・全高11〜14cm・モーター間23〜26cm・5インチ級のプロペラ）に合わせています。</p>
-  </details>`;
+    <p class="hint">主役機（外形85cm・約2200g）に対して、この機体は外形31cm・約530g。横幅で約1/3、質量で約1/4です。寸法は国内で実際に使われている機体（外形31cm前後・全高11〜14cm・モーター間23〜26cm・5インチ級のプロペラ）に合わせています。</p>`;
 }
 // 制度。ショーは教則が「多数の者の集合する催し」の例に挙げている場面そのもの
 function dshowRegHtml() {
@@ -575,6 +597,7 @@ function onResizedDshow() { if (dshow.on) { dshowPixels(); dshowFrame(420); } }
 function initDshow() {
   const b = $('#showBtn');
   if (b) b.addEventListener('click', () => dshowOn(!dshow.on));
+  initDshowUI();
   window.__dshow = { dshow, dshowOn, dshowNext, dshowSetText, dshowToggleText, setNoteMini, DSHOW_FIGS, dshowShape, SD, DSHOW_H, DSHOW_R,
     // シェーダが作る位置を CPU 側でも同じ式で求める（検証用）
     sample: (i) => { const e0 = clamp((dshow.mat.uniforms.uProg.value - dshow.lag[i]) / Math.max(0.10, 1 - dshow.lag[i]), 0, 1), e = e0 * e0 * (3 - 2 * e0);

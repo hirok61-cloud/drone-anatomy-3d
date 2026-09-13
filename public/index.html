@@ -141,7 +141,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 .keys i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
 
 /* ---- inspector ---- */
-#inspector, #lesson, #expert { position: fixed; top: 14px; right: 14px; bottom: 14px; width: var(--insp-w); z-index: 10; display: flex; flex-direction: column; overflow: hidden; }
+#inspector, #lesson, #expert, #dshowPanel { position: fixed; top: 14px; right: 14px; bottom: 14px; width: var(--insp-w); z-index: 10; display: flex; flex-direction: column; overflow: hidden; }
 .grabber { display: none; }
 .insp-head { display: flex; align-items: center; gap: 8px; padding: 12px 10px 10px 16px; border-bottom: 1px solid var(--hair); flex: none; }
 .insp-head h2 { font-size: calc(15px * var(--fs, 1)); font-weight: 700; letter-spacing: -0.005em; flex: 1; }
@@ -250,13 +250,13 @@ button, .tabs, .seg, .chips { touch-action: manipulation; -webkit-user-select: n
 @media (max-width: 1100px) {
   :root { --insp-w: 0px; }
   #bigBand { bottom: calc(var(--sheet-h, var(--dock-h)) + 8px); z-index: 15; }   /* タブレット幅でもシートの上に */
-  #inspector, #lesson, #expert { top: auto; right: 0; left: 0; bottom: 0; width: auto; height: min(56vh, 520px);   /* 3段デテント: peek(名前だけ) / open(既定) / tall(読む)。既定は3Dが4割見える高さ */ border-radius: 20px 20px 0 0; transform: translateY(102%); transition: transform .38s cubic-bezier(.32,.72,0,1), height .3s cubic-bezier(.32,.72,0,1); will-change: transform; z-index: 14; }
-  #inspector.open, #lesson.open, #expert.open { transform: translateY(0); } #inspector.dragging, #lesson.dragging, #expert.dragging { transition: none; }
+  #inspector, #lesson, #expert, #dshowPanel { top: auto; right: 0; left: 0; bottom: 0; width: auto; height: min(56vh, 520px);   /* 3段デテント: peek(名前だけ) / open(既定) / tall(読む)。既定は3Dが4割見える高さ */ border-radius: 20px 20px 0 0; transform: translateY(102%); transition: transform .38s cubic-bezier(.32,.72,0,1), height .3s cubic-bezier(.32,.72,0,1); will-change: transform; z-index: 14; }
+  #inspector.open, #lesson.open, #expert.open, #dshowPanel.open { transform: translateY(0); } #inspector.dragging, #lesson.dragging, #expert.dragging, #dshowPanel.dragging { transition: none; }
   .grabber { display: block; width: 40px; height: 5px; border-radius: 3px; background: var(--hair2); margin: 8px auto 0; position: relative; }
   .grabber::before { content: ''; position: absolute; inset: -22px -60px; }
   #inspClose { display: grid; }
   .compact-only { display: inline-flex; }
-  #expert { height: min(46vh, 420px); } #expert.tall, #inspector.tall, #lesson.tall { height: min(80vh, 660px); } #inspector.peek, #lesson.peek, #expert.peek { height: max(150px, 21vh); } .xsegm { margin: 0 14px 6px; align-self: flex-start; } #expertClose { display: grid; }   /* 専門シートは機体が見える高さに留め、モード切替をシート内にも置く(ドックがシートの下に隠れるため) */
+  #expert, #dshowPanel { height: min(46vh, 420px); } #expert.tall, #inspector.tall, #lesson.tall, #dshowPanel.tall { height: min(80vh, 660px); } #inspector.peek, #lesson.peek, #expert.peek, #dshowPanel.peek { height: max(150px, 21vh); } .xsegm { margin: 0 14px 6px; align-self: flex-start; } #expertClose { display: grid; }   /* 専門シートは機体が見える高さに留め、モード切替をシート内にも置く(ドックがシートの下に隠れるため) */
   #dock { right: 14px; margin: 0; } #viewCol { right: 14px; } #noteCard { width: min(420px, calc(100vw - 90px)); }
   /* シートを開いている間は上の操作を畳んで、機体の帯を広くとる(peek では戻す)。tall はタイトルバーまで畳む */
   #viewCol, #topbar { transition: opacity .25s, transform .25s, visibility .25s; }
@@ -470,7 +470,7 @@ body.fpv #noteCard, body.fpv #bigBand { display: none; }
 body.fpv #ctx { display: none; }   /* 操作はHUDに移す。ドックを畳むと映像が広がり、--dock-h も自動で縮む */
 /* ショーの間だけ、説明カードを夜の側に寄せる。明るいテーマのままだと、暗い空の上で白い板が光って見どころを食う。
    変数をカードに置き直すだけで、中の文字・区切り・強調がまとめて夜の配色になる */
-body.dshow #noteCard {
+body.dshow #noteCard, body.dshow #dshowPanel {
   --glass: rgba(15,19,27,0.80); --glass-strong: rgba(17,21,29,0.94); --glass-border: rgba(255,255,255,0.10);
   --glass-shadow: 0 14px 44px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.4);
   --ink: #e9edf4; --ink2: #aeb6c4; --ink3: #828a9a;
@@ -661,6 +661,46 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; }
   .spinner { animation: spin 1.8s linear infinite !important; }   /* 読み込み中だけは回す(止まると固まったように見える) */ }
 
+/* ---------- ショーの読み面 ---------- */
+#dshowPanel { display: flex; flex-direction: column; overflow: hidden; }
+#dshowPanel .insp-head { padding: 12px 10px 8px 16px; }
+#dsSeg { margin: 0 14px 8px; align-self: flex-start; flex: none; }
+#dsPanelBody { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 0 16px 20px; font-size: calc(13.5px * var(--fs, 1)); line-height: 1.65; }
+#dsPanelBody h3 { font-size: calc(14.5px * var(--fs, 1)); font-weight: 700; line-height: 1.4; margin: 0 0 2px; text-wrap: balance; }
+#dsPanelBody .ds-item { padding: 12px 0; border-top: 1px solid var(--hair); }
+#dsPanelBody .ds-item:first-child { border-top: 0; padding-top: 4px; }
+#dsPanelBody .ds-no { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-text); font: 700 12px/1 var(--mono); margin-right: 8px; vertical-align: 2px; flex: none; }
+#dsPanelBody .ds-head { display: flex; align-items: flex-start; gap: 0; margin-bottom: 6px; }
+#dsPanelBody p + p { margin-top: 7px; }
+#dsPanelBody .ds-see { margin-top: 8px; padding: 6px 13px; border-radius: 999px; font-size: calc(12.5px * var(--fs, 1)); font-weight: 600; background: var(--seg-bg); color: var(--ink); min-height: var(--tap); }
+#dsPanelBody .ds-see.on { background: var(--accent-soft); color: var(--accent-text); box-shadow: inset 0 0 0 1.5px var(--accent); }
+#dsPanelBody .ds-src { display: block; margin-top: 7px; font-size: calc(11px * var(--fs, 1)); line-height: 1.5; color: var(--ink3); }
+#dsPanelBody ul.check { margin: 6px 0 0; padding-left: 1.15em; font-size: calc(12.5px * var(--fs, 1)); line-height: 1.6; }
+#dsPanelBody ul.check li { margin: 6px 0; }
+#dsPanelBody .hint { margin-top: 7px; font-size: calc(12.5px * var(--fs, 1)); color: var(--ink2); }
+#dsPanelBody .caveat { font-size: calc(12px * var(--fs, 1)); }
+body.dshow #dshowPanel .grabber { background: rgba(255,255,255,0.22); }
+/* 読み面を開いている間は説明カードを隠す（二重に空を食わないように） */
+body.ds-read #noteCard { display: none; }
+@media (min-width: 1101px) { body.ds-read #noteCard { display: flex; } }
+/* ショー中だけ出る操作列 */
+.dock-group.dshow-only { display: none; }
+body.dshow #ctx .ctx-row > .dshow-only { display: flex; }
+body.dshow #ctx .ctx-row > .dshow-only > .dg-label { display: block; }
+#dsHowChips button .l { font-size: calc(11px * var(--fs, 1)); opacity: .75; margin-left: 3px; }
+
+/* 畳んだショーのカードは「いま何が起きているか」の帯にする。
+   題とボタンはドックの操作列に同じものがあるので、狭い画面では外して夜空へ回す */
+@media (max-width: 1100px) {
+  body.dshow #noteCard.mini .note-head h3, body.dshow #noteCard.mini #noteBadge, body.dshow #noteCard.mini .note-actions { display: none; }
+  body.dshow #noteCard.mini { padding-top: 8px; }
+  body.dshow #noteCard.mini .note-head { position: absolute; top: 4px; right: 6px; margin: 0; z-index: 2; gap: 2px; }
+  body.dshow #noteCard.mini #noteBody { padding-right: 58px; }
+  body.dshow #noteCard.mini #dshowVals { padding-right: 58px; }
+}
+body.dshow #noteCard.mini .icon-btn.sm { width: 26px; height: 26px; min-width: 26px; min-height: 26px; position: relative; }
+body.dshow #noteCard.mini .icon-btn.sm::before { content: ''; position: absolute; inset: -9px -4px; }   /* 見た目26pxでも当たりは44pt */
+
 </style>
 
 <div id="stage">
@@ -682,6 +722,8 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
       <div class="seg small" id="powerSeg" data-full><button data-p="0.2">低速</button><button data-p="0.5" class="on">ホバー</button><button data-p="1">全開</button></div>
       <div class="dock-group"><span class="dg-label">空もよう</span><div class="chips" id="skyChips" role="group" aria-label="空もよう"></div></div>
       <div class="dock-group dshow-keep"><span class="dg-label">夜</span><div class="chips"><button id="showBtn" aria-pressed="false" aria-label="夜のドローンショー"><span aria-hidden="true">🎆</span> ドローンショー</button></div></div>
+      <div class="dock-group dshow-only"><div class="chips"><button id="dsQuit" aria-label="ショーをやめる"><span aria-hidden="true">✕</span> やめる</button><button id="dsNext">つぎ ›</button><button id="dsAuto" class="tgl" aria-pressed="true" aria-label="自動送り"><i></i>自動</button><button id="dsRead">しくみ ›</button></div></div>
+      <div class="dock-group dshow-only"><span class="dg-label">しくみ</span><div class="chips" id="dsHowChips" role="group" aria-label="ショーのしくみ"></div></div>
       <div class="chips">
         <button class="tgl" data-t="slow" aria-pressed="false"><i></i>ゆっくり</button>
         <button class="tgl" data-t="air" aria-pressed="false"><i></i>風をみる</button>
@@ -797,6 +839,12 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
   <div class="mb-foot"><b id="massTotal">—</b><span id="massSub" class="mb-sub"></span><div id="massPrice" class="mb-price" hidden></div><div id="massReg" class="mb-reg" hidden></div><p id="massNote" class="mb-note" hidden></p></div>
 </aside>
 
+<aside id="dshowPanel" class="glass" hidden aria-label="ショーのしくみ">
+  <div class="grabber" aria-hidden="true"></div>
+  <div class="insp-head"><h2 id="dsPanelTitle">ショーのしくみ</h2><button id="dsPanelClose" class="icon-btn sm" aria-label="閉じる">✕</button></div>
+  <div class="seg small xsegm" id="dsSeg" role="radiogroup" aria-label="なにを読む？"><button data-ds="how" class="on" role="radio" aria-checked="true">しくみ</button><button data-ds="reg" role="radio" aria-checked="false">きまり</button><button data-ds="craft" role="radio" aria-checked="false">この1機</button></div>
+  <div id="dsPanelBody"></div>
+</aside>
 <aside id="expert" class="glass" hidden aria-label="専門パネル">
   <div class="grabber" aria-hidden="true"></div>
   <div class="insp-head"><h2 id="expertTitle">専門</h2><button id="expertClose" class="icon-btn sm" aria-label="閉じる">✕</button></div>
@@ -1964,6 +2012,90 @@ const beaufort = (v) => { let n = 0; while (n < BEAUFORT.length && v >= BEAUFORT
 // ===== 夜のドローンショーに関わる制度（教則第5版の原文に基づく） =====
 // 教則は条文番号をほとんど書いていない（催し・夜間の条番号は審査要領が出典）。ここでは条文を引かず、
 // 「教則にこう書かれている」の形で止める。該当の有無は総合的に判断されるので、判定は書かない。
+// ===== ショーのしくみ（7項目） =====
+// 「大量の機体をどうやって一斉に飛ばしているのか」。制度（DSHOW_REG）とは性質が違うので分けて持つ。
+// しくみ側は「そういう作りになっている」で止め、要件は制度側に置く。
+// 教則に書いてあることと、教則の外のことは、本文の中で必ず分ける。
+const DSHOW_HOW = [
+  {
+    id: 'plan', no: '①', chip: '経路', layer: 'path',
+    head: '1機ずつ操縦していない ― 経路は飛ばす前に作る',
+    lead: '何百人もで操縦しているのではありません。経路は飛ばす前に作ってあります。',
+    body: `<p>ドローンショーは<b>自動操縦</b>です。教則は自動操縦を「プログラムにより自動的に操縦を行うこと」と定義しています（3.1.1）。</p>
+      <p>教則は自動操縦のやり方をこう説明しています（5.2.2）。<b>「飛行を制御するアプリケーションソフトに搭載されている地図情報に、予め複数の飛行時のウエイポイント（経過点）を設定し飛行経路を作成する。ウェイポイントは地図上の位置情報の設定だけでなく、機体の向きや高度、速度など詳細な設定が可能である」</b>。そして「手動操縦に比較して、再現性の高い飛行を行うことができる」としています。</p>
+      <p class="hint">ここから先は教則の外です。ショーでは、この「経過点の列」を<b>全機ぶん</b>作ります。1機ぶんのデータは、時刻ごとの位置と灯りの色が並んだ表です。作ったデータは、飛ばす前にそれぞれの機体へ読み込ませます。飛んでいる間に地上から経路を送っているのではありません。</p>
+      <p class="hint">この教材の「文字を描く」も同じことをしています。あなたが文字を決めると、その場で全機ぶんの配置を計算し、どの機体がどこへ行くかを決めてから動かしています。</p>
+      <button class="ds-see" data-act="text">文字を決めて描かせる ›</button>`,
+    ky: '教則 3.1.1（自動操縦の定義）・5.2.2（手動操縦及び自動操縦）',
+  },
+  {
+    id: 'rtk', no: '②', chip: '位置', layer: 'rtk',
+    head: '位置は数十mからcmへ ― 地上に基準局を置く（RTK）',
+    lead: '機体の間隔は1m前後。単独測位のままでは、そもそも並べません。',
+    body: `<p>教則は測位の精度をこう書いています（4.5.3）。<b>「GPS測位での受信機1台の単独測位の精度は数十mの精度である。測位方式として固定局と移動局の2つの受信機を使用するRTKやDGPSなどの技術が確立され、これらの測位方式は数cm〜数mレベルの精度の高い測位が可能である」</b>。</p>
+      <p>つまり RTK は、<b>動かない受信機（基準局）を地上に置いて</b>、そこで分かった誤差を飛んでいる受信機に伝える方式です。1台だけで測るより桁違いに細かく位置が分かります。</p>
+      <p>教則は、自動操縦では手動操作よりも高精度な測位が必要だとしたうえで、<b>「あらかじめ地図上で設定したWay PointはGNSSの測位精度の影響を受けるため、精度が悪化した場合は実際の飛行経路の誤差が大きくなる」</b>としています。精度に影響するものとして、衛星の時計の精度・捕捉している衛星の数・障害物によるマルチパス・受信環境のノイズを挙げ、<b>「一般的に位置精度は、水平方向に比べ高度方向の誤差が大きくなる」</b>とも書いています。</p>
+      <p class="hint">ここから先は教則の外です。国内で使われているショー機の飛行間隔は、公表されているもので0.8m〜1.5mです。数十mの誤差では隣とぶつかりますし、そもそも図形になりません。屋内では衛星が届かないので、電波や光を使った別の測位（UWBなど）に置き換わります。</p>`,
+    ky: '教則 4.5.3（GNSS）(2)測位の精度・(3)飛行における注意事項',
+  },
+  {
+    id: 'clear', no: '③', chip: '間隔', layer: 'pair',
+    head: 'ぶつからないのは、飛ぶ前に間隔を確かめてあるから',
+    lead: '飛びながらよけているのではありません。交差しない経路を先に作っています。',
+    body: `<p>教則は、自動操縦で起きやすい間違いをこう書いています（5.2.2）。<b>「ウェイポイント設定時、飛行経路上の障害物等の確認不足によって衝突や墜落が発生することが想定できる。設定した飛行経路上の障害物等は事前に現地確認を行うこと」</b>。</p>
+      <p>ショーでは、この「障害物」に<b>他の機体</b>が加わります。数百〜数千の経路が、どの瞬間にも決めた間隔より近づかないことを、飛ばす前に確かめます。機体にぶつからないためのセンサーが付いていて飛びながらよけている、という作りではありません。</p>
+      <p class="hint">ここから先は教則の外です。海外では、この「飛ばす前のデータ」を間違えた事故が起きています。米国の事例（2024年12月・500機）では、①最後の経路のデータが機体に送られていなかった ②ショーの座標が7度回っていた ③安全の枠を社内の基準と違う値にしていた、という3つが重なり、離陸直後に機体同士が衝突して落下し、観客1名が重傷を負いました。機体が壊れた事故ではなく、<b>飛ばす前に作るデータの事故</b>です（米国 NTSB の予備報告書。原因の認定はまだ出ていません）。</p>
+      <p class="hint">〔一等〕教則は、カテゴリーⅢ飛行で自動操縦を使うときの注意点として「可能な限り第三者の立入りが少ない飛行経路及び送電線や構造物が障害とならない飛行範囲を事前に確認し設定すること」「緊急着陸地点や不時着エリアを予め設定すること」を挙げています（5.2.2(5)）。</p>
+      <p class="hint">なお、飛んでいる機体が落ちたときにどこまで飛ぶかは、教則が式で示しています。〔一等〕高度 h を速度 v で飛ぶ機体が揚力を失ったときの水平到達距離は <b>x = v√(2h/g)</b>（空気抵抗を無視した水平投射）です（4.3）。高度50m・速度10m/s なら約32mになります。国土交通省の<b>審査要領</b>（教則の外）は、催しの上空について、飛行の高度に応じた立入禁止区画を表で定めています（20m未満は飛行範囲の外周から30m以内、20〜50mは40m、50〜100mは60m、100〜150mは70m、150m以上は製造者等が保証した落下距離（70m未満なら70m）以内）。</p>`,
+    ky: '教則 5.2.2(2)（自動操縦におけるヒューマンエラーの傾向）・5.2.2(5)〔一等〕',
+  },
+  {
+    id: 'clock', no: '④', chip: '時計', layer: 'sync',
+    head: '全機の時計を合わせる ― ずれると図形が崩れる',
+    lead: '同じ時刻に、決めた場所にいること。それだけで図形になります。',
+    body: `<p class="caveat">この項目は教則には書かれていません。機体側のしくみの話です。</p>
+      <p>各機は「いま何秒の位置にいるべきか」を自分の時計で決めています。地上から「そこへ行け」と1機ずつ言われているのではありません。だから<b>全機の時計が合っていること</b>が、図形が図形として見える条件になります。</p>
+      <p>時計合わせには衛星の時刻が使えます。GNSS の受信機は位置を出すために衛星の時刻を受け取っているので、位置と時刻を同時に得られます。教則も、測位の精度に影響するものとして「GNSS衛星の時計の精度」を挙げています（4.5.3）。</p>
+      <p>ずれると、その機体だけ図形から外れて見えます。少しのずれなら「1機だけ遅れている」ように、大きくずれると形そのものが崩れます。</p>`,
+    ky: '教則の外（4.5.3 が「衛星の時計の精度」に触れているのみ）',
+  },
+  {
+    id: 'gcs', no: '⑤', chip: '地上局', layer: 'link',
+    head: '地上局は見張りと非常停止 ― 操縦桿を握ってはいない',
+    lead: '地上局から届いているのは、経路ではなく「止まれ」です。',
+    body: `<p>飛んでいる間、地上局と機体の間には電波が通っています。ただしそれは経路を送るためではなく、<b>各機の状態を受け取り、必要なときに止めるため</b>のものです。</p>
+      <p>教則は、自動操縦中に手動操縦へ切り替える場合として「作業指示による手動操作」「何らかの原因で不安定な飛行と判断した場合」を挙げ、切り替えた後は急な飛行速度の低下や失速に備えた操作準備、障害物への接近を避けるための機体方向の確認、ホバリングしての安定性と周囲の安全の確認が必要だとしています（5.2.2(4)）。</p>
+      <p class="hint">ここから先は教則の外です。国土交通省の<b>審査要領</b>は、自動操縦の機体について「あらかじめ設定された飛行プログラムにかかわらず、<b>常時、不具合発生時等において、無人航空機を飛行させる者が機体を安全に着陸させられるよう、強制的に操作介入ができる設計であること</b>」を求めています。数千機であっても、止める手段は人の側に残っている、という作りです。</p>
+      <p class="hint">メーカーが公開している安全規範では、演目のデータは飛ばす前に各機の内蔵メモリへ入れてあり、<b>演目の進行そのものは通信に依存しない</b>としています。監視の通信が切れても、機体は自分の中の予定どおりに飛び続けます。地上局が失うのは「見えること」と「止められること」です。だから通信は二重・三重にしてあります（ある社は2.4GHz・5.8GHz・850MHz の三重）。</p>
+      <p class="hint">「1人で何機まで見てよいか」を定めた明文の規定は、航空法・施行規則・審査要領・標準マニュアルのいずれにもありません。国土交通省が使う用語は「一斉飛行」でも「群飛行」でもなく<b>「多数機同時運航」</b>で、そのガイドライン（令和8年6月・第二版）は、ドローンショーのような目視内（レベル1・2）の多数機同時運航を<b>対象外</b>としています。ガイドラインにある1:5・1:8・1:10 という数字は、レベル3・3.5 の実証に基づくもので、ショーの基準ではありません。</p>
+      <p class="hint">参考までに米国では、1人が同時に2機以上に関与することを規則で禁じたうえで（14 CFR 107.35）、ショーごとに個別の免除を出しています。その解説文書には「<b>自動化を使っても、1人が複数機を同時に運用してよいことにはならない</b>」と明記されており、実際に出ている免除では補助者を機数に比例して置くこと（250〜500機に1名）が条件になっています。</p>`,
+    ky: '教則 5.2.2(4)（切り替えの注意）／教則の外: 審査要領 4-1-1(5)・多数機同時運航ガイドライン',
+  },
+  {
+    id: 'fail', no: '⑥', chip: '異常時', layer: 'fence',
+    head: '通信が切れたら・位置を見失ったら・電池が減ったら',
+    lead: '止まるための決めごとが、飛ばす前に機体へ入っています。',
+    body: `<p>教則は、機体のフェールセーフ機能をこう説明しています（5.2.3(1)）。<b>「送信電波や電源容量の減少などにより飛行が継続できない場合、又は継続できないことが予想される場合は、予め飛行制御アプリケーションのフェールセーフ機能により、自動帰還モードへ切り替わり、離陸地点へ飛行する。さらにバッテリー残量が極端に少ない場合などはその場で自動着陸を試みる」</b>。ホバリング・その地点での着陸・自動帰還のどれにするかを設定できる機体もあるとしています。</p>
+      <p>そして緊急時の原則として、<b>「緊急時には、離陸地点などに戻すことを前提とせず、速やかに近くの安全な無人地帯へ不時着させる」</b>と書いています（5.2.3）。</p>
+      <p class="hint">ここから先は教則の外です。ショーでは、飛んでよい範囲を立体の枠（ジオフェンス）として機体に入れておきます。内側の枠を越えたら帰還や着陸に切り替わり、外側の枠を越えたら停止する、という二段の作りが使われています。</p>
+      <p class="caveat">枠は<b>設定</b>であって保証ではありません。枠の値を間違えれば、枠は間違えた場所にできます（③の事例）。</p>
+      <p class="hint">機体そのものに求められる基準も、教則の外にあります。国土交通省の機体認証の検査要領は、<b>「単一の起こり得る故障によって機体の制御不能又は想定飛行範囲からの逸脱を生じないように設計されなければならない」</b>とし、これを試験で実証することを求めています。その試験は「最も厳しい操縦者と無人航空機数の比率」で行うこととされ、確認すべき能力として「操縦者による安全な飛行中断能力」「すべての運用条件において機体を指定されたエリア内に留めるジオ・フェンス機能」が挙げられています。</p>
+      <p class="caveat">ただし「<b>1機の故障が他の機体に波及しない</b>」ことを保証する記述は、広く使われている自動操縦ソフトの公式文書には見当たりません。地上局と通信が全機で共通であること自体が、1つの弱点になり得ます。</p>`,
+    ky: '教則 5.2.3（緊急時の対応）(1) 機体のフェールセーフ機能',
+  },
+  {
+    id: 'launch', no: '⑦', chip: '離着陸', layer: 'grid',
+    head: '箱から出て、箱に戻る ― 並べ方・着陸・充電',
+    lead: '地面に格子で並べ、真上に上がり、同じ場所へ戻ります。',
+    body: `<p class="caveat">この項目は教則には書かれていません。機体と運用の話です。</p>
+      <p>ショー機は、地面に<b>格子状に並べて</b>離陸します。公表されている地上の配置間隔は0.8m〜1.5m程度です。真上に上がって隊列に入り、終わったら同じ場所へ降りてきます。箱に収めたまま出し入れする方式もあり、着陸後にそのまま充電する機体もあります。</p>
+      <p>この運用だから、ショー機には<b>脚がありません</b>。着地するのはプロペラを囲む輪の下縁です。手前の1機を見てください。脚も、カメラも、ジンバルもありません。</p>
+      <p>必要な地面の広さは機数で決まります。メーカーが公開している算定式は<b>「離着陸エリアの総面積 ＝ 0.5m × 0.5m × 機数」</b>で、1,000機なら約250平方メートル（およそ16m四方）です。同じ資料は、離陸場所と演技場所の水平距離を300m以内に収めること、観客席を離陸区域と飛行経路の真下から50m以内に置かないこと、飛行経路の真下から15m以内に人も車も置かないこと、離陸高度を周囲の建物や樹木より10m以上高くとることも挙げています。</p>
+      <p class="hint">箱に入れたまま出し入れする方式では、この間隔をさらに詰められます（ある社は箱方式で0.4m）。ショーそのものより、地面と、そこへ人を入れない仕組みのほうが手間だと言われます。</p>`,
+    ky: '教則の外（機体と運用）',
+  },
+];
+const DSHOW_HOW_SRC = 'この教材の隊列・ジオフェンス・基準局は、箱庭の広さに合わせて縮めています（実際のショーは数百〜数千機で、高さも広さも桁が違います）／出典は各項目に記載';
 const DSHOW_REG = {
   lead: '教則は「多数の者の集合する催し」に<b>該当する例</b>として、祭礼や花火大会と並べて<b>ドローンショー</b>を挙げています。ただし「自社敷地内、無人の競技場内等、第三者の立入管理措置が行われていることが明白である場所での事前練習や企業向けの配信用撮影等を除く」という括弧書きが付きます。該当するかどうかは、催し場所上空で機体が落下することにより地上等の人に危害を及ぼすことを防止するという趣旨に照らし、人数や規模だけでなく、特定の場所や日時に開催されるかどうかによって総合的に判断されるとされています。',
   items: [
@@ -3236,7 +3368,7 @@ function onCamInterrupt() { if (S.camSpring) { S.camSpring = null; S.camInertia 
 // 画面下でシートやドックが覆っている高さ(CSSピクセル)
 function bottomCover() {
   const H2 = window.innerHeight; let cov = 0;
-  for (const sel of ['#dock', '#inspector.open', '#lesson.open', '#expert.open', '#noteCard', '#massBar', '#bigBand']) {
+  for (const sel of ['#dock', '#inspector.open', '#lesson.open', '#expert.open', '#dshowPanel.open', '#noteCard', '#massBar', '#bigBand']) {
     if (sel === '#bigBand' && H2 <= 520) continue;   /* 横向きは高さが足りない。名前の帯は3Dに重ねて浮かせ、機体は小さくしない */
     const el = document.querySelector(sel); if (!el || el.hidden) continue;
     const r = el.getBoundingClientRect(); if (r.height < 4 || r.top > H2 - 8 || r.bottom < H2 * 0.6) continue;
@@ -6436,7 +6568,7 @@ const dshow = {
   from: null, to: null, raw: null, colFrom: null, colTo: null, lag: null, rnd: null, bright: null,
   perm: null, keyA: null, keyB: null, ordA: null, ordB: null,
   nextTo: null, nextCol: null, nextLag: null, nextFig: -1,
-  fig: 0, figT: 0, phase: 'hold', saved: null, star: 0, lastVals: 0, lastBand: 0, sig: '', fitX: 2.4, fitY: 2.4, mini: false, text: '', forceFig: -1, askText: false, bodyPos: null, dist: 11, k: 1, bodyYaw: 0,
+  fig: 0, figT: 0, phase: 'hold', saved: null, star: 0, lastVals: 0, lastBand: 0, sig: '', auto: true, kWant: 1, gz: 0, gzWant: 0, fitX: 2.4, fitY: 2.4, mini: false, text: '', forceFig: -1, askText: false, bodyPos: null, dist: 11, k: 1, bodyYaw: 0,
 };
 const DSHOW_N = () => (S.qLevel <= 1 ? 1200 : S.qLevel === 2 ? 2200 : 3200);   // 実際のショーは数百〜数千機
 const DSHOW_H = 3.60;      // 隊列の中心の高さ(m)。低いほうの機体が地平線あたりに来る高さ
@@ -6646,16 +6778,16 @@ function dshowBuild() {
   const mat = new THREE.ShaderMaterial({
     uniforms: {
       uSize: { value: DSHOW_GLOW }, uPxPerM: { value: 900 }, uGain: { value: 1 },
-      uProg: { value: 1 }, uTime: { value: 0 }, uWave: { value: 1 },
+      uProg: { value: 1 }, uTime: { value: 0 }, uWave: { value: 1 }, uSkew: { value: 0 },
     },
     // 位置と色は頂点シェーダで作る。CPU は図形が変わる瞬間しか働かない
     vertexShader: `
       attribute vec3 aTo, aColA, aColB;
       attribute float aLag, aRnd, bright;
-      uniform float uSize, uPxPerM, uProg, uTime, uWave;
+      uniform float uSize, uPxPerM, uProg, uTime, uWave, uSkew;
       varying vec3 vCol; varying float vB;
       void main() {
-        float u = clamp((uProg - aLag) / max(0.10, 1.0 - aLag), 0.0, 1.0);
+        float u = clamp((uProg + aRnd * uSkew - aLag) / max(0.10, 1.0 - aLag), 0.0, 1.0);   // uSkew: わざと時計をずらして、形が崩れるのを見せる
         float e = u * u * (3.0 - 2.0 * u);          // なめらかに出て、なめらかに止まる
         vec3 p = mix(position, aTo, e);
         vec3 d = aTo - position; float L = length(d);
@@ -6725,8 +6857,9 @@ function dshowRect() {
   if (tb && !tb.hidden) { const q = tb.getBoundingClientRect(); if (q.height > 4 && q.bottom < ih * 0.3) y0 = q.bottom + 6; }
   const dock = $('#dock');
   if (dock && !dock.hidden) { const q = dock.getBoundingClientRect(); if (q.height > 4) y1 = Math.min(y1, q.top - 6); }
-  const card = $('#noteCard');
-  if (card && !card.hidden) {
+  for (const sel of ['#dshowPanel', '#noteCard']) {
+    const card = $(sel); if (!card || card.hidden) continue;
+    if (sel === '#dshowPanel' && !card.classList.contains('open')) continue;
     const q = card.getBoundingClientRect();
     if (q.height > 40) {
       if (q.width > iw * 0.66) y1 = Math.min(y1, q.top - 6);                 // 全幅のシート: 上へ逃げる
@@ -6745,18 +6878,32 @@ function dshowFrame(ms) {
   if (R) { camera.setViewOffset(innerWidth, innerHeight, innerWidth / 2 - R.cx, innerHeight / 2 - R.cy, innerWidth, innerHeight); camera.updateProjectionMatrix(); }
   // カメラを引くと天球（半径16m）の外に出て空が黒いドームになる。距離は固定して隊列のほうを伸縮させる
   const fit = DSHOW_CAM * tanV * Math.min(hF, asp * wF) / 1.06;
-  const k = clamp(fit / DSHOW_R, 0.34, 1.00);   /* 大きくしすぎると低い機体が地平線より下へ落ちる */
-  dshow.k = k; dshow.dist = DSHOW_CAM; dshow.sig = R ? `${Math.round(R.x0)},${Math.round(R.x1)},${Math.round(R.y0)},${Math.round(R.y1)}` : 'wide';
+  let k = clamp(fit / DSHOW_R, 0.34, 1.00);   /* 大きくしすぎると低い機体が地平線より下へ落ちる */
+  // 地上のものを見せるレイヤーでは、地面から隊列の上端までを1枚に入れる。
+  // カメラは引けない（天球の外に出る）ので、ショー全体を地面を基点に縮める
+  const gz = dshow.gzWant ? 1 : 0;
+  if (gz) k = Math.min(k, (DSHOW_CAM * tanV * hF * 2 * 0.92) / (DSHOW_H + DSHOW_R));
+  dshow.kWant = k; dshow.dist = DSHOW_CAM; dshow.sig = R ? `${Math.round(R.x0)},${Math.round(R.x1)},${Math.round(R.y0)},${Math.round(R.y1)}` : 'wide';
+  if (dshow.k == null || reduceMotion) dshow.k = k;   /* 初回と「動きを減らす」設定は、その場で合わせる */
   // 円の図形は縦横どちらかで頭打ちになるが、横長の図形（文字や整列）は余った側を使える。
   // 隊列の座標系で「いま画面に入る半分の幅・高さ」を控えておく
   dshow.fitX = DSHOW_CAM * tanV * (asp * wF) / k; dshow.fitY = DSHOW_CAM * tanV * hF / k;
-  if (dshow.pts) { dshow.pts.scale.setScalar(k); dshow.pts.position.y = DSHOW_H * (1 - k); }
-  if (dshow.mat) dshow.mat.uniforms.uSize.value = DSHOW_GLOW * k;   /* 光の玉も一緒に縮める。画面上の見え方を揃えるため */
-  const dy = DSHOW_H - DSHOW_EYE, hz = Math.sqrt(Math.max(0.5, DSHOW_CAM * DSHOW_CAM - dy * dy));
-  const eye = new THREE.Vector3(0.2874 * hz, DSHOW_EYE, 0.9578 * hz), aim = new THREE.Vector3(0, DSHOW_H, 0);   /* 正面から少し右に寄って見上げる */
+  dshowApplyK();
+  // 見上げる高さ。地上を含めるときは、地面から隊列の上端までの真ん中を見る
+  const aimY = gz ? k * (DSHOW_H + DSHOW_R) / 2 : DSHOW_H;
+  const eyeY = gz ? Math.max(0.75, aimY * 0.55) : DSHOW_EYE;
+  const dy = aimY - eyeY, hz = Math.sqrt(Math.max(0.5, DSHOW_CAM * DSHOW_CAM - dy * dy));
+  const eye = new THREE.Vector3(0.2874 * hz, eyeY, 0.9578 * hz), aim = new THREE.Vector3(0, aimY, 0);   /* 正面から少し右に寄って見上げる */
   dshowPlaceBody(eye, aim, tanV, asp * wF, hF);
   controls.maxDistance = Math.max(controls.maxDistance, DSHOW_CAM * 1.06);
   flyTo(eye, aim, ms, false);
+}
+// 隊列の倍率と高さの当てはめ。gz=1 のときは地面を基点に縮める（地上のものが画面に入る）
+function dshowApplyK() {
+  const k = dshow.k;
+  if (dshow.pts) { dshow.pts.scale.setScalar(k); dshow.pts.position.y = DSHOW_H * (1 - k) * (1 - dshow.gz); }
+  if (dshow.mat) dshow.mat.uniforms.uSize.value = DSHOW_GLOW * k;   /* 光の玉も一緒に縮める。画面上の見え方を揃えるため */
+  if (typeof dsysLayout === 'function') dsysLayout();
 }
 // 手前の1機は「観客のすぐ前を飛んでいる1機」。カメラからの距離で置くので、
 // 画面が変わっても同じ大きさに写る。隊列と重なっても手前なので前後は正しく出る
@@ -6779,7 +6926,7 @@ function dshowOn(on) {
     stopOthers('dshow');
     dshowBuild();
     dshow.on = true; dshow.t = 0; dshow.fig = 0; dshow.figT = 0; dshow.phase = 'hold'; dshow.star = 0; dshow.lastVals = 0;
-    dshow.forceFig = -1; dshow.askText = false;
+    dshow.forceFig = -1; dshow.askText = false; dshowUIOn(true);
     dshow.text = (store.get('dshowText') || '').slice(0, 12);
     dshow.mini = narrow();   /* スマホは説明カードが画面の半分を占める。畳んだ状態で始めて、読みたい人が開く */
     dshow.mat.uniforms.uProg.value = 1;
@@ -6799,10 +6946,10 @@ function dshowOn(on) {
     body.px = bp[0]; body.py = bp[1]; body.pz = bp[2]; body.tx = body.tz = body.wx = body.wz = 0; body.yaw = dshow.bodyYaw; body.mult = [1, 1, 1, 1];
     dshowSky();
     renderDshow();
-    { const b = $('#noteCard .note-actions button'); if (b) b.focus({ preventScroll: true }); }   /* 押したボタンは畳まれて消えるので、行き先を渡す */
+    { const b = (narrow() ? $('#dsRead') : null) || $('#noteCard .note-actions button'); if (b) b.focus({ preventScroll: true }); }   /* 押したボタンは畳まれて消えるので、行き先を渡す */
     if (!store.get('dshowSeen')) { store.set('dshowSeen', '1'); showToast('図形は自動で切り替わります。1機ずつ操縦しているのではありません', 4600); }
   } else {
-    dshow.on = false;
+    dshow.on = false; dshowUIOn(false);
     document.body.classList.remove('dshow'); syncDockH();
     if (dshow.pts) dshow.pts.visible = false;
     showDroneOn(false);
@@ -6861,6 +7008,7 @@ function dshowAdvance() {
   dshow.nextFig = -1; dshow.forceFig = -1;
   dshowUpload();
   dshow.phase = 'move'; dshow.figT = 0; dshow.mat.uniforms.uProg.value = 0;
+  if (typeof dsysRefresh === 'function') dsysRefresh();
   showDroneColor(DSHOW_FIGS[dshow.fig].col[0]);
   renderDshow();
 }
@@ -6903,10 +7051,15 @@ function stepDshow(dtReal) {
     const p = dshow.figT / DSHOW_MOVE;
     if (p >= 1) { dshow.phase = 'hold'; dshow.figT = 0; u.uProg.value = 1; }
     else u.uProg.value = p;
-  } else if (dshow.figT > DSHOW_HOLD && !reduceMotion) { dshowAdvance(); }
+  } else if (dshow.figT > DSHOW_HOLD && dshow.auto && !reduceMotion) { dshowAdvance(); }
   else if (dshow.phase === 'hold' && dshow.figT > 0.5 && dshow.nextFig < 0) { dshowPrepare(); }   /* 静止に入ってひと呼吸おいてから、次の図形を用意する */
   u.uTime.value = dshow.t;
   u.uWave.value = reduceMotion ? 0 : 1;
+  { const a = reduceMotion ? 1 : 1 - Math.exp(-dtReal / 0.22);
+    const dk = dshow.kWant - dshow.k, dg = dshow.gzWant - dshow.gz;
+    if (Math.abs(dk) > 1e-4 || Math.abs(dg) > 1e-4) { dshow.k += dk * a; dshow.gz += dg * a; dshowApplyK(); }
+    else if (dshow.k !== dshow.kWant) { dshow.k = dshow.kWant; dshow.gz = dshow.gzWant; dshowApplyK(); } }
+  stepDsys(dtReal);
   // 手前の1機もホバリングらしく、わずかに上下する
   if (body.mode !== 'theater') setBodyMode('theater');   /* 何かの拍子に free へ戻っても、隊列の画は崩さない */
   const bp = dshow.bodyPos || [1.6, 1.9, 5.4];
@@ -6933,7 +7086,7 @@ function dshowNext() {
 function updateDshowVals() {
   const el = $('#dshowVals'); if (!el || $('#noteCard').hidden) return;
   const f = DSHOW_FIGS[dshow.fig];
-  el.innerHTML = `<i class="dot" aria-hidden="true"></i><span>いま <b>${f.name}</b></span><span>${dshow.n} 機</span><span>高さ ${DSHOW_H.toFixed(1)} m</span><span>${dshow.phase === 'move' ? '移動中' : '静止中'}</span>`;
+  el.innerHTML = `<i class="dot" aria-hidden="true"></i><span>いま <b>${f.name}</b></span><span>${dshow.n} 機</span><span>高さ ${DSHOW_H.toFixed(1)} m</span><span>${dshow.phase === 'move' ? '移動中' : '静止中'}</span>${dshow.auto ? '' : '<span>自動送り 止</span>'}${dsUI.pick ? `<span>しくみ${(DSHOW_HOW.find(h => h.id === dsUI.pick) || {}).no || ''}</span>` : ''}`;
 }
 function renderDshow(rebuild) {
   if (!dshow.on) return;
@@ -6970,22 +7123,23 @@ function bindDshowText() {
   f.addEventListener('submit', e => { e.preventDefault(); inp.blur(); dshowSetText(inp.value); });
   inp.focus({ preventScroll: true });
 }
-function dshowToggleText() {
-  dshow.askText = !dshow.askText;
+function dshowToggleText(force) {
+  dshow.askText = force == null ? !dshow.askText : !!force;
   if (dshow.askText && dshow.mini) setNoteMini(false);   /* 畳んだままだと入力欄が隠れる */
   renderDshow(true);
 }
 // 手前の1機について。主役機と何が違うのかを、見えているものと結びつける
 function dshowCraftHtml() {
-  return `<details><summary>手前の1機（ショー専用の機体）</summary>
-    <ul class="check">
+  return `<details><summary>手前の1機（ショー専用の機体）</summary>${dshowCraftBody()}</details>`;
+}
+function dshowCraftBody() {
+  return `<ul class="check">
       <li><b>カメラもジンバルもありません。</b>代わりに、機体と同じくらい大きな灯りを下に抱えています。運ぶ荷物が「映像」から「光」に変わると、形はここまで変わります。</li>
       <li><b>脚がありません。</b>着地するのはプロペラを囲む輪の下縁です。決まった間隔の格子に並べて真上に上げ、同じ場所へ戻すので、脚をつける理由がありません。</li>
       <li><b>輪は安全のためでもあります。</b>教則は催し場所上空の飛行について、機体が第三者及び物件に接触した場合の<b>危害を軽減する構造</b>を用意していることが必要としています。何が該当するかまでは教則に書かれていません（国土交通省の審査要領は、危害を軽減する機能の例としてプロペラガードを挙げています）。</li>
       <li><b>小さく見えても100gは超えています。</b>屋外のショーで使われている機体は、最も軽いものでも249g、多くは500g台です。100グラム以上は1機ずつ登録して登録記号を表示するので、500機飛ばすなら500機分が対象になります。</li>
     </ul>
-    <p class="hint">主役機（外形85cm・約2200g）に対して、この機体は外形31cm・約530g。横幅で約1/3、質量で約1/4です。寸法は国内で実際に使われている機体（外形31cm前後・全高11〜14cm・モーター間23〜26cm・5インチ級のプロペラ）に合わせています。</p>
-  </details>`;
+    <p class="hint">主役機（外形85cm・約2200g）に対して、この機体は外形31cm・約530g。横幅で約1/3、質量で約1/4です。寸法は国内で実際に使われている機体（外形31cm前後・全高11〜14cm・モーター間23〜26cm・5インチ級のプロペラ）に合わせています。</p>`;
 }
 // 制度。ショーは教則が「多数の者の集合する催し」の例に挙げている場面そのもの
 function dshowRegHtml() {
@@ -6999,11 +7153,310 @@ function onResizedDshow() { if (dshow.on) { dshowPixels(); dshowFrame(420); } }
 function initDshow() {
   const b = $('#showBtn');
   if (b) b.addEventListener('click', () => dshowOn(!dshow.on));
+  initDshowUI();
   window.__dshow = { dshow, dshowOn, dshowNext, dshowSetText, dshowToggleText, setNoteMini, DSHOW_FIGS, dshowShape, SD, DSHOW_H, DSHOW_R,
     // シェーダが作る位置を CPU 側でも同じ式で求める（検証用）
     sample: (i) => { const e0 = clamp((dshow.mat.uniforms.uProg.value - dshow.lag[i]) / Math.max(0.10, 1 - dshow.lag[i]), 0, 1), e = e0 * e0 * (3 - 2 * e0);
       return [0, 1, 2].map(k => dshow.from[i * 3 + k] + (dshow.to[i * 3 + k] - dshow.from[i * 3 + k]) * e); },
     skyUniforms: () => { const u = backdropMat.uniforms; return { star: u.uStar.value, cloud: u.uCloud.value, wall: u.uWall.value, haze: u.uHaze.value }; } };
+}
+
+// ===== ショーのしくみを3Dで見せる =====
+// 夜空の見世物を壊さずに重ねる。線は細く、色は1つだけ、出すのは常に1つだけ。
+// 置き場所は2つに分ける:
+//   dsys.world … 地面のもの（基準局・地上局・離陸前の格子）。倍率 k を自分で掛ける
+//   dsys.air   … 隊列の中のもの（経路・間隔・囲い）。dshow.pts の子にすると隊列と一緒に伸縮する
+const dsys = { world: null, air: null, cur: null, t: 0, mats: null, built: false, tmp: [] };
+const DSYS_C = 0x7fd4ff;   // しくみの色。演出の色（暖色・寒色いろいろ）と喧嘩しない一色に固定する
+
+function dsysBuild() {
+  if (dsys.built) return;
+  dsys.built = true;
+  dsys.world = new THREE.Group(); dsys.world.visible = false; scene.add(dsys.world);
+  dsys.air = new THREE.Group(); dsys.air.visible = false; dshow.pts.add(dsys.air);
+  for (const g of [dsys.world, dsys.air]) { g.userData.noPart = g.userData.noPick = g.userData.noShadow = g.userData.noAO = true; g.renderOrder = 5; }
+  dsys.mats = {
+    line: new THREE.LineBasicMaterial({ color: DSYS_C, transparent: true, opacity: 0.55, depthWrite: false, toneMapped: false }),
+    faint: new THREE.LineBasicMaterial({ color: DSYS_C, transparent: true, opacity: 0.30, depthWrite: false, toneMapped: false }),
+    thin: new THREE.MeshBasicMaterial({ color: DSYS_C, transparent: true, opacity: 0.50, depthWrite: false, toneMapped: false }),
+    lit: new THREE.MeshBasicMaterial({ color: 0xdff2ff, toneMapped: false }),
+    solid: new THREE.MeshBasicMaterial({ color: DSYS_C, transparent: true, opacity: 0.9, toneMapped: false }),
+    body: new THREE.MeshStandardMaterial({ color: 0xd7dde6, roughness: 0.6, metalness: 0.1 }),
+    dark: new THREE.MeshStandardMaterial({ color: 0x2b2f37, roughness: 0.5, metalness: 0.4 }),
+    glass: new THREE.MeshBasicMaterial({ color: DSYS_C, transparent: true, opacity: 0.055, side: THREE.DoubleSide, depthWrite: false, toneMapped: false }),
+    warn: new THREE.MeshBasicMaterial({ color: 0xff7a3d, transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false, toneMapped: false }),
+    warnLine: new THREE.LineBasicMaterial({ color: 0xff7a3d, transparent: true, opacity: 0.5, depthWrite: false, toneMapped: false }),
+  };
+}
+function dsysClear() {
+  for (const g of [dsys.world, dsys.air]) { if (!g) continue; for (let i = g.children.length - 1; i >= 0; i--) { const o = g.children[i]; g.remove(o); if (o.geometry) o.geometry.dispose(); } }
+  dsys.tmp.length = 0;
+}
+const dsysMark = (o) => { o.userData.noPart = o.userData.noPick = o.userData.noShadow = o.userData.noAO = true; o.renderOrder = 5; return o; };
+// 折れ線を1本つくる（three.js の線は太さが効かないので、太く見せたいものだけ筒にする）
+function dsysLine(pts, mat) {
+  const g = new THREE.BufferGeometry().setFromPoints(pts.map(p => new THREE.Vector3(p[0], p[1], p[2])));
+  return dsysMark(new THREE.Line(g, mat || dsys.mats.line));
+}
+function dsysTube(pts, r, mat) {
+  const c = new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(p[0], p[1], p[2])));
+  return dsysMark(new THREE.Mesh(new THREE.TubeGeometry(c, Math.min(64, pts.length * 2), r, 6, false), mat || dsys.mats.solid));
+}
+// シェーダと同じ式で、i番の機体が u の時点にいる場所を出す（経路を描くために使う）
+function dsysAt(i, u, out) {
+  const from = dshow.to, to = (dshow.nextFig >= 0 ? dshow.nextTo : dshow.from);   /* 静止中は「つぎに行く先」を見せる */
+  const lag = dshow.nextFig >= 0 ? dshow.nextLag[i] : dshow.lag[i];
+  const t = clamp((u - lag) / Math.max(0.10, 1 - lag), 0, 1), e = t * t * (3 - 2 * t);
+  const dx = to[i * 3] - from[i * 3], dy = to[i * 3 + 1] - from[i * 3 + 1], dz = to[i * 3 + 2] - from[i * 3 + 2];
+  const L = Math.hypot(dx, dy, dz);
+  let ax = 0, ay = 0;
+  if (L > 1e-4) { ax = -dy / L; ay = dx / L; const n = Math.hypot(ax, ay) || 1; ax /= n; ay /= n; }   /* 進行方向と z 軸の外積 */
+  const bow = Math.sin(Math.PI * e) * 0.15 * L * dshow.rnd[i];
+  out[0] = from[i * 3] + dx * e + ax * bow;
+  out[1] = from[i * 3 + 1] + dy * e + ay * bow;
+  out[2] = from[i * 3 + 2] + dz * e;
+  return out;
+}
+
+// ---------- それぞれのレイヤー ----------
+function dsysPath() {   // ①経路: つぎの図形へ向かう経路。太い1本＝1機ぶんの予定
+  const n = dshow.n, N = 15, S = 24, p = [0, 0, 0];
+  for (let m = 0; m < N; m++) {
+    const i = Math.floor((m + 0.5) * n / N);
+    const pts = []; for (let s2 = 0; s2 <= S; s2++) pts.push(dsysAt(i, s2 / S, p).slice());
+    dsys.air.add(dsysTube(pts, m === 0 ? 0.026 : 0.014, m === 0 ? dsys.mats.solid : dsys.mats.thin));
+    // 出発点は小さく、行き先は大きく。どちらへ向かう線なのかが一目で分かる
+    for (const [u, r] of [[0, 0.018], [1, 0.034]]) {
+      const c = dsysAt(i, u, p), sp = dsysMark(new THREE.Mesh(new THREE.SphereGeometry(r * (m === 0 ? 1.5 : 1), 10, 6), dsys.mats.solid));
+      sp.position.set(c[0], c[1], c[2]); dsys.air.add(sp);
+    }
+  }
+}
+function dsysPair() {   // ③間隔: 隣り合う2機の経路と、その間の距離
+  const n = dshow.n, p = [0, 0, 0], q = [0, 0, 0];
+  // 行き先がいちばん近い2機を探す（＝いちばん詰まるところ）
+  let a = 0, b = 1, best = 1e9;
+  for (let i = 0; i < n; i += Math.max(1, (n / 400) | 0)) for (let j = i + 1; j < Math.min(n, i + 24); j++) {
+    const d = Math.hypot(dshow.to[i * 3] - dshow.to[j * 3], dshow.to[i * 3 + 1] - dshow.to[j * 3 + 1], dshow.to[i * 3 + 2] - dshow.to[j * 3 + 2]);
+    if (d > 1e-4 && d < best) { best = d; a = i; b = j; }
+  }
+  for (const i of [a, b]) { const pts = []; for (let s = 0; s <= 20; s++) pts.push(dsysAt(i, s / 20, p).slice()); dsys.air.add(dsysTube(pts, 0.008)); }
+  dsysAt(a, 0, p); dsysAt(b, 0, q);
+  dsys.air.add(dsysTube([p.slice(), q.slice()], 0.006, dsys.mats.solid));
+  { const r = best / 2, g = new THREE.SphereGeometry(r, 16, 10);
+    for (const c of [p, q]) { const m = dsysMark(new THREE.Mesh(g, dsys.mats.glass)); m.position.set(c[0], c[1], c[2]); dsys.air.add(m); } }
+}
+function dsysFence() {   // ⑥囲い: 内側（越えたら帰る）と外側（越えたら止める）
+  // dsys.air は dshow.pts の子。面を張るとカメラと隊列の間に色の膜ができて主役が消えるので、線だけで描く
+  const k = dshow.k || 1, gz = dshow.gz || 0;
+  const y0 = -DSHOW_H * (1 - k) * (1 - gz) / k, y1 = DSHOW_H + DSHOW_R * 1.16;
+  for (const [r, lm, nv] of [[DSHOW_R * 1.14, dsys.mats.line, 14], [DSHOW_R * 1.40, dsys.mats.warnLine, 14]]) {
+    for (const y of [y0, (y0 + y1) / 2, y1]) { const pts = []; for (let s2 = 0; s2 <= 64; s2++) { const a = s2 / 64 * Math.PI * 2; pts.push([Math.cos(a) * r, y, Math.sin(a) * r]); } dsys.air.add(dsysLine(pts, lm)); }
+    for (let s2 = 0; s2 < nv; s2++) { const a = s2 / nv * Math.PI * 2; dsys.air.add(dsysLine([[Math.cos(a) * r, y0, Math.sin(a) * r], [Math.cos(a) * r, y1, Math.sin(a) * r]], lm)); }
+  }
+}
+function dsysGrid(withBoxes) {   // ⑦離陸前の格子（②⑤の足場にもなる）
+  const k = dshow.k || 1, n = Math.min(dshow.n, 216);
+  const cols = Math.ceil(Math.sqrt(n * 1.6)), rows = Math.ceil(n / cols), sp = 0.075;   /* 0.5m格子を箱庭の縮尺に合わせる */
+  const g = new THREE.SphereGeometry(sp * 0.19, 8, 6);
+  const im = new THREE.InstancedMesh(g, dsys.mats.lit, n); im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  const m = new THREE.Matrix4();
+  for (let i = 0; i < n; i++) { const c = i % cols, r = (i / cols) | 0;
+    m.makeTranslation((c - (cols - 1) / 2) * sp, 0.014, (r - (rows - 1) / 2) * sp + 0.30); im.setMatrixAt(i, m); }
+  im.instanceMatrix.needsUpdate = true; dsysMark(im); dsys.world.add(im);
+  { const w = cols * sp * 0.62, h = rows * sp * 0.72;   /* 離陸場所を示す淡い床 */
+    const pad = dsysMark(new THREE.Mesh(new THREE.PlaneGeometry(w * 2, h * 2), dsys.mats.glass));
+    pad.rotation.x = -Math.PI / 2; pad.position.set(0, 0.004, 0.30); dsys.world.add(pad);
+    const pts = []; for (const [x, z] of [[-w, -h], [w, -h], [w, h], [-w, h], [-w, -h]]) pts.push([x, 0.006, z + 0.30]);
+    dsys.world.add(dsysLine(pts, dsys.mats.line)); }
+  if (withBoxes) { const bg = new THREE.BoxGeometry(sp * 2.0, 0.055, sp * rows * 0.8);
+    for (const x of [-1, 1]) { const b = dsysMark(new THREE.Mesh(bg, dsys.mats.body)); b.position.set(x * cols * sp * 0.42, 0.028, 0.30); dsys.world.add(b); } }
+  dsys.world.scale.setScalar(k);
+}
+function dsysStation(kind) {   // ②基準局 / ⑤地上局。夜なので自分で光っていないと見えない
+  const k = dshow.k || 1, sc = 1.7;
+  const grp = new THREE.Group(); dsysMark(grp);
+  const px = kind === 'rtk' ? -1.30 : 1.30, pz = 1.00;
+  grp.position.set(px, 0, pz); grp.scale.setScalar(sc);
+  for (let i = 0; i < 3; i++) { const a = i / 3 * Math.PI * 2 + 0.4;   /* 三脚 */
+    const leg = dsysMark(new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.36, 6), dsys.mats.body));
+    leg.position.set(Math.cos(a) * 0.075, 0.17, Math.sin(a) * 0.075); leg.rotation.set(Math.cos(a) * 0.36, 0, -Math.sin(a) * 0.36); grp.add(leg); }
+  const head = dsysMark(new THREE.Mesh(new THREE.CylinderGeometry(0.082, 0.060, 0.055, 20), dsys.mats.body)); head.position.y = 0.37; grp.add(head);
+  if (kind === 'rtk') {
+    const dome = dsysMark(new THREE.Mesh(new THREE.SphereGeometry(0.062, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), dsys.mats.lit)); dome.position.y = 0.395; grp.add(dome);
+    const core = new THREE.Sprite(M.glowCore('#7fd4ff')); core.scale.setScalar(0.22); core.position.y = 0.40; core.renderOrder = 6; grp.add(core);
+    for (let i = 0; i < 3; i++) {   /* 補正を配っている様子。広がる輪 */
+      const r = 0.42 + i * 0.34, pts = []; for (let s2 = 0; s2 <= 48; s2++) { const a = s2 / 48 * Math.PI * 2; pts.push([Math.cos(a) * r, 0.40 + i * 0.02, Math.sin(a) * r]); }
+      grp.add(dsysLine(pts, dsys.mats.faint)); }
+  } else {
+    const scr = dsysMark(new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.17, 0.014), dsys.mats.dark)); scr.position.set(0, 0.47, 0); scr.rotation.x = -0.32; grp.add(scr);
+    const lit = dsysMark(new THREE.Mesh(new THREE.PlaneGeometry(0.23, 0.14), dsys.mats.lit)); lit.position.set(0, 0.472, 0.010); lit.rotation.x = -0.32; grp.add(lit);
+    const core = new THREE.Sprite(M.glowCore('#7fd4ff')); core.scale.setScalar(0.34); core.position.set(0, 0.47, 0.02); core.renderOrder = 6; grp.add(core);
+  }
+  dsys.world.add(grp);
+  dsys.world.scale.setScalar(k);
+  dsys.tmp.push({ kind, grp, px, pz });
+}
+function dsysLinks() {   // ⑤電波: 地上局から機体へ。多いと線だらけになるので少しだけ
+  const n = dshow.n, N = 16, st = new THREE.Vector3(1.35 * (dshow.k || 1), 0.44 * (dshow.k || 1), 1.05 * (dshow.k || 1));
+  const k = dshow.k || 1;
+  for (let m = 0; m < N; m++) {
+    const i = Math.floor((m + 0.5) * n / N);
+    const p = new THREE.Vector3(dshow.to[i * 3] * k, dshow.to[i * 3 + 1] * k + DSHOW_H * (1 - k) * (1 - (dshow.gz || 0)), dshow.to[i * 3 + 2] * k);
+    dsys.tmp.push({ link: true, a: st.clone(), b: p });
+  }
+  const geo = new THREE.BufferGeometry();
+  const arr = new Float32Array(N * 6);
+  let j = 0; for (const t of dsys.tmp) if (t.link) { arr[j++] = t.a.x; arr[j++] = t.a.y; arr[j++] = t.a.z; arr[j++] = t.b.x; arr[j++] = t.b.y; arr[j++] = t.b.z; }
+  geo.setAttribute('position', new THREE.BufferAttribute(arr, 3));
+  const ls = dsysMark(new THREE.LineSegments(geo, dsys.mats.faint)); scene.add(ls); dsys.tmp.push({ owned: ls });
+}
+
+// ---------- 出し入れ ----------
+const DSYS_GROUND = ['rtk', 'link', 'grid', 'fence'];   // 地面のものが主役のレイヤー。ショー全体を縮めて地面から入れる
+function dshowLayer(id) {
+  if (!dshow.pts) return;
+  dsysBuild();
+  // 前のレイヤーの後始末（scene に直接足したものも消す）
+  for (const t of dsys.tmp) if (t.owned) { scene.remove(t.owned); t.owned.geometry.dispose(); }
+  dsysClear();
+  dsys.cur = id || null; dsys.t = 0;
+  { const want = DSYS_GROUND.includes(dsys.cur) ? 1 : 0;
+    if (want !== dshow.gzWant) { dshow.gzWant = want; dshowFrame(700); } }
+  if (dshow.mat) dshow.mat.uniforms.uSkew.value = 0;
+  if (!dsys.cur) { dsys.world.visible = dsys.air.visible = false; return; }
+  dsys.world.scale.setScalar(dshow.k || 1);
+  if (id === 'path') { dsysPath(); dsysGrid(true); }
+  else if (id === 'rtk') { dsysStation('rtk'); dsysGrid(false); }
+  else if (id === 'pair') { dsysPair(); }
+  else if (id === 'sync') { if (dshow.mat) dshow.mat.uniforms.uSkew.value = 0.30; }   /* わざと時計をずらす。形が崩れるのを見せる */
+  else if (id === 'link') { dsysStation('gcs'); dsysLinks(); }
+  else if (id === 'fence') { dsysFence(); }
+  else if (id === 'grid') { dsysGrid(true); }
+  dsys.world.visible = dsys.world.children.length > 0;
+  dsys.air.visible = dsys.air.children.length > 0;
+  S.shadowDirty = S.csDirty = S.aoDirty = true;
+}
+// 画の大きさが変わったら地面のものも合わせる。図形が変わったら経路は引き直す
+function dsysLayout() { if (dsys.world) dsys.world.scale.setScalar(dshow.k || 1); }
+function dsysRefresh() { if (dsys.cur && ['path', 'pair', 'link', 'fence'].includes(dsys.cur)) dshowLayer(dsys.cur); }
+function stepDsys(dtReal) {
+  if (!dsys.cur || !dsys.built) return;
+  dsys.t += dtReal;
+  // 電波と補正は「流れているもの」なので、明るさを脈打たせる（動きを減らす設定では止める）
+  const w = reduceMotion ? 0.5 : 0.5 + 0.5 * Math.sin(dsys.t * 3.2);
+  if (dsys.cur === 'link' || dsys.cur === 'rtk') dsys.mats.faint.opacity = 0.12 + 0.22 * w;
+  else dsys.mats.faint.opacity = 0.22;
+}
+
+window.__dsys = { dsys, dshowLayer, dsysLayout, dsysRefresh };
+
+// ===== ショーの読み面と操作列 =====
+// 説明が増えるほど、いちばん狭い窓（説明カード）に足したくなる。それをやると夜空が消える。
+// 増えた文字は「いま空いている面」へ回す:
+//   ・ライブ帯（#noteCard.mini）… いま何が起きているか。1〜2行
+//   ・操作列（ドックの空き）    … 項目の選択と3Dの出し入れ。夜空を1pxも削らない
+//   ・読み面（#dshowPanel）      … しくみ7・きまり8・この1機の全文。開いたときだけ出る
+const dsUI = { open: false, tab: 'how', pick: null };
+
+// ---------- 操作列 ----------
+function dshowChipsBuild() {
+  const box = $('#dsHowChips'); if (!box || box.childElementCount) return;
+  for (const h of DSHOW_HOW) {
+    const b = document.createElement('button');
+    b.dataset.ds = h.id; b.setAttribute('aria-pressed', 'false');
+    b.setAttribute('aria-label', h.head);
+    b.innerHTML = `<span aria-hidden="true">${h.no}</span>${h.chip}${h.layer ? '<span class="l" aria-hidden="true">◉</span>' : ''}`;
+    b.addEventListener('click', () => dshowPick(dsUI.pick === h.id ? null : h.id));
+    box.appendChild(b);
+  }
+}
+// 項目を選ぶ = 3Dの見え方が1つ変わる＋読み面がその項目へ飛ぶ。
+// 選んでいる間は自動送りを止める（下で図形が入れ替わると、いま何の話か分からなくなる）
+function dshowPick(id) {
+  dsUI.pick = id || null;
+  for (const b of $$('#dsHowChips button')) {
+    const on = b.dataset.ds === dsUI.pick;
+    b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
+    if (on) b.scrollIntoView({ inline: 'nearest', block: 'nearest' });   /* 横スクロールの端で隠れないように */
+  }
+  const h = DSHOW_HOW.find(x => x.id === dsUI.pick);
+  if (typeof dshowLayer === 'function') dshowLayer(h ? h.layer : null);
+  dshowAuto(!dsUI.pick && !dsUI.open ? null : false);
+  if (dsUI.open) { dsUI.tab = 'how'; dsRenderPanel(); if (h) { const el = $('#ds-' + h.id); if (el) el.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' }); } }
+  updateDshowVals();
+}
+// 自動送り: null=もとに戻す / true=入 / false=切
+function dshowAuto(on) {
+  dshow.auto = on == null ? !reduceMotion : !!on;
+  const b = $('#dsAuto'); if (b) { b.classList.toggle('on', dshow.auto); b.setAttribute('aria-pressed', String(dshow.auto)); }
+  updateDshowVals();
+}
+
+// ---------- 読み面 ----------
+function dshowPanelOpen(on, tab) {
+  const el = $('#dshowPanel'); if (!el) return;
+  dsUI.open = !!on;
+  if (tab) dsUI.tab = tab;
+  document.body.classList.toggle('ds-read', dsUI.open);
+  if (dsUI.open) {
+    el.hidden = false; dsRenderPanel();
+    setTimeout(() => { if (dsUI.open) setSheetState(el, 1); }, 0);   /* hidden を外した後で開く。rAF はタブが裏だと回らない */
+    dshowAuto(false);   /* 読むと宣言した以上、下で図形が変わらないほうがよい */
+    $('#dsPanelTitle').focus({ preventScroll: true });
+  } else {
+    setSheetState(el, -1);
+    setTimeout(() => { if (!dsUI.open) el.hidden = true; }, 420);
+    const b = $('#dsRead'); if (b) b.focus({ preventScroll: true });
+  }
+  if (typeof dshowFrame === 'function' && dshow.on) dshowFrame(380);
+}
+function dsRenderPanel() {
+  const body = $('#dsPanelBody'); if (!body) return;
+  for (const b of $$('#dsSeg button')) { const on = b.dataset.ds === dsUI.tab; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }
+  $('#dsSeg [data-ds=reg]').hidden = !regOn();   /* 制度の注記を出さない設定のときは、きまりの札ごと消す */
+  if (dsUI.tab === 'reg' && !regOn()) dsUI.tab = 'how';
+  if (dsUI.tab === 'how') {
+    body.innerHTML = DSHOW_HOW.map(h => `<section class="ds-item" id="ds-${h.id}">
+        <div class="ds-head"><span class="ds-no" aria-hidden="true">${h.no}</span><h3>${h.head}</h3></div>
+        ${h.body}
+        ${h.layer ? `<button class="ds-see${dsUI.pick === h.id ? ' on' : ''}" data-see="${h.id}">${dsUI.pick === h.id ? '空から消す' : '空で見る'}</button>` : ''}
+        <small class="ds-src">${h.ky}</small>
+      </section>`).join('') + `<p class="ds-src" style="margin-top:14px">${DSHOW_HOW_SRC}</p>`;
+    body.onclick = e => {
+      const b = e.target.closest('.ds-see'); if (!b) return;
+      if (b.dataset.act === 'text') { dshowPanelOpen(false); dshowToggleText(true); return; }   /* 入力欄はカードに出る。読み面が空を覆っていると押した結果が見えない */
+      dshowPick(dsUI.pick === b.dataset.see ? null : b.dataset.see);
+    };
+  } else if (dsUI.tab === 'reg') {
+    body.innerHTML = `<p class="caveat">${DSHOW_REG.lead}</p>
+      <ul class="check">${DSHOW_REG.items.map(x => `<li>${x}</li>`).join('')}</ul>
+      <p class="hint">${DSHOW_REG.outside}</p>
+      <small class="ds-src">${DSHOW_REG.src}</small>`;
+    body.onclick = null;
+  } else {
+    body.innerHTML = dshowCraftBody();
+    body.onclick = null;
+  }
+  body.scrollTop = 0;
+}
+
+// ---------- 入口・出口 ----------
+function dshowUIOn(on) {
+  dshowChipsBuild();
+  if (!on) { dshowPick(null); dshowPanelOpen(false); dshowAuto(null); }
+  else { dsUI.pick = null; dsUI.tab = 'how'; dshowAuto(null); for (const b of $$('#dsHowChips button')) { b.classList.remove('on'); b.setAttribute('aria-pressed', 'false'); } }
+}
+function initDshowUI() {
+  const q = $('#dsQuit'), n = $('#dsNext'), a = $('#dsAuto'), r = $('#dsRead');
+  if (q) q.addEventListener('click', () => dshowOn(false));
+  if (n) n.addEventListener('click', () => { dshowNext(); dshowAuto(false); });
+  if (a) a.addEventListener('click', () => dshowAuto(!dshow.auto));
+  if (r) r.addEventListener('click', () => dshowPanelOpen(!dsUI.open, 'how'));
+  const cl = $('#dsPanelClose'); if (cl) cl.addEventListener('click', () => dshowPanelOpen(false));
+  for (const b of $$('#dsSeg button')) b.addEventListener('click', () => { dsUI.tab = b.dataset.ds; dsRenderPanel(); });
+  bindSheet($('#dshowPanel'));
+  window.__dsui = { dsUI, dshowPanelOpen, dshowPick, dshowAuto, dsRenderPanel };
 }
 
 // ===== 共有リンク（いま見えている画面をURLにする） =====
@@ -7208,6 +7661,8 @@ function stopOthers(keep, arg) {
 function setTab(tab) {
   $('#coach').hidden = true;
   fpvExit();   /* 操作列を畳んだまま電源だけ切れると、映像の中から戻れなくなる */
+  if (typeof dsUI === 'object' && dsUI.open) { dshowPanelOpen(false); return; }   /* 読んでいる最中の Esc でショーごと終わらせない */
+  if (typeof dshow === 'object' && dshow.on && dshow.askText) { dshowToggleText(false); return; }
   if (typeof dshow === 'object' && dshow.on) dshowOn(false);   /* ショーも同じ。操作列を畳んでいる */
   if ((theater.active || theater.done) && tab !== 'theater') { stopTheaterUI(); }
   if (whatif.active && tab !== 'theater') { stopWhatifUI(); }
@@ -7730,9 +8185,9 @@ function onThemeChanged(dark) { airflowTheme(dark); fpvStageTheme();
 function onQualityChanged(level) { if (air.mesh && air.N !== Q.particles) rebuildAirflow(); $('#perfInfo').textContent = `品質 ${level}`;
   if (typeof dshow === 'object' && dshow.on) dshowSky(); else if (typeof weather === 'object' && weather.on) weatherSky(); }   /* 空のfbmのオクターブは選択時に決まるので、ここで入れ直す */
 { // シートの開閉・カードの出入りで、3Dの見える帯が変わるたびに視錐台を合わせ直す
-  const watch = ['#inspector', '#lesson', '#expert', '#noteCard', '#massBar'].map(s => $(s)).filter(Boolean);
+  const watch = ['#inspector', '#lesson', '#expert', '#dshowPanel', '#noteCard', '#massBar'].map(s => $(s)).filter(Boolean);
   let t = 0; const kick = () => { clearTimeout(t); t = setTimeout(() => { if (narrow()) resize(); }, 60); };   /* シートは .38s かけて動くので、動き終わりにも測り直す */
-  const sheets = ['#inspector', '#lesson', '#expert'].map(s => $(s));
+  const sheets = ['#inspector', '#lesson', '#expert', '#dshowPanel'].map(s => $(s));
   const fold = () => {   /* シートが open/tall のときは視点バー(tall ではタイトルバーも)を畳む。peek は機体を見る段なので戻す */
     const st = sheets.map(el => (el.hidden || !el.classList.contains('open')) ? -1 : sheetState(el)); const mx = Math.max(...st);
     document.body.classList.toggle('sheet-open', mx >= 1); document.body.classList.toggle('sheet-tall', mx >= 2);

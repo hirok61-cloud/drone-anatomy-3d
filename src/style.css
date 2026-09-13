@@ -118,7 +118,7 @@ hr { border: 0; border-top: 1px solid var(--hair); margin: 4px 0; }
 .keys i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
 
 /* ---- inspector ---- */
-#inspector, #lesson, #expert { position: fixed; top: 14px; right: 14px; bottom: 14px; width: var(--insp-w); z-index: 10; display: flex; flex-direction: column; overflow: hidden; }
+#inspector, #lesson, #expert, #dshowPanel { position: fixed; top: 14px; right: 14px; bottom: 14px; width: var(--insp-w); z-index: 10; display: flex; flex-direction: column; overflow: hidden; }
 .grabber { display: none; }
 .insp-head { display: flex; align-items: center; gap: 8px; padding: 12px 10px 10px 16px; border-bottom: 1px solid var(--hair); flex: none; }
 .insp-head h2 { font-size: calc(15px * var(--fs, 1)); font-weight: 700; letter-spacing: -0.005em; flex: 1; }
@@ -227,13 +227,13 @@ button, .tabs, .seg, .chips { touch-action: manipulation; -webkit-user-select: n
 @media (max-width: 1100px) {
   :root { --insp-w: 0px; }
   #bigBand { bottom: calc(var(--sheet-h, var(--dock-h)) + 8px); z-index: 15; }   /* タブレット幅でもシートの上に */
-  #inspector, #lesson, #expert { top: auto; right: 0; left: 0; bottom: 0; width: auto; height: min(56vh, 520px);   /* 3段デテント: peek(名前だけ) / open(既定) / tall(読む)。既定は3Dが4割見える高さ */ border-radius: 20px 20px 0 0; transform: translateY(102%); transition: transform .38s cubic-bezier(.32,.72,0,1), height .3s cubic-bezier(.32,.72,0,1); will-change: transform; z-index: 14; }
-  #inspector.open, #lesson.open, #expert.open { transform: translateY(0); } #inspector.dragging, #lesson.dragging, #expert.dragging { transition: none; }
+  #inspector, #lesson, #expert, #dshowPanel { top: auto; right: 0; left: 0; bottom: 0; width: auto; height: min(56vh, 520px);   /* 3段デテント: peek(名前だけ) / open(既定) / tall(読む)。既定は3Dが4割見える高さ */ border-radius: 20px 20px 0 0; transform: translateY(102%); transition: transform .38s cubic-bezier(.32,.72,0,1), height .3s cubic-bezier(.32,.72,0,1); will-change: transform; z-index: 14; }
+  #inspector.open, #lesson.open, #expert.open, #dshowPanel.open { transform: translateY(0); } #inspector.dragging, #lesson.dragging, #expert.dragging, #dshowPanel.dragging { transition: none; }
   .grabber { display: block; width: 40px; height: 5px; border-radius: 3px; background: var(--hair2); margin: 8px auto 0; position: relative; }
   .grabber::before { content: ''; position: absolute; inset: -22px -60px; }
   #inspClose { display: grid; }
   .compact-only { display: inline-flex; }
-  #expert { height: min(46vh, 420px); } #expert.tall, #inspector.tall, #lesson.tall { height: min(80vh, 660px); } #inspector.peek, #lesson.peek, #expert.peek { height: max(150px, 21vh); } .xsegm { margin: 0 14px 6px; align-self: flex-start; } #expertClose { display: grid; }   /* 専門シートは機体が見える高さに留め、モード切替をシート内にも置く(ドックがシートの下に隠れるため) */
+  #expert, #dshowPanel { height: min(46vh, 420px); } #expert.tall, #inspector.tall, #lesson.tall, #dshowPanel.tall { height: min(80vh, 660px); } #inspector.peek, #lesson.peek, #expert.peek, #dshowPanel.peek { height: max(150px, 21vh); } .xsegm { margin: 0 14px 6px; align-self: flex-start; } #expertClose { display: grid; }   /* 専門シートは機体が見える高さに留め、モード切替をシート内にも置く(ドックがシートの下に隠れるため) */
   #dock { right: 14px; margin: 0; } #viewCol { right: 14px; } #noteCard { width: min(420px, calc(100vw - 90px)); }
   /* シートを開いている間は上の操作を畳んで、機体の帯を広くとる(peek では戻す)。tall はタイトルバーまで畳む */
   #viewCol, #topbar { transition: opacity .25s, transform .25s, visibility .25s; }
@@ -447,7 +447,7 @@ body.fpv #noteCard, body.fpv #bigBand { display: none; }
 body.fpv #ctx { display: none; }   /* 操作はHUDに移す。ドックを畳むと映像が広がり、--dock-h も自動で縮む */
 /* ショーの間だけ、説明カードを夜の側に寄せる。明るいテーマのままだと、暗い空の上で白い板が光って見どころを食う。
    変数をカードに置き直すだけで、中の文字・区切り・強調がまとめて夜の配色になる */
-body.dshow #noteCard {
+body.dshow #noteCard, body.dshow #dshowPanel {
   --glass: rgba(15,19,27,0.80); --glass-strong: rgba(17,21,29,0.94); --glass-border: rgba(255,255,255,0.10);
   --glass-shadow: 0 14px 44px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.4);
   --ink: #e9edf4; --ink2: #aeb6c4; --ink3: #828a9a;
@@ -637,3 +637,43 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; }
   .spinner { animation: spin 1.8s linear infinite !important; }   /* 読み込み中だけは回す(止まると固まったように見える) */ }
+
+/* ---------- ショーの読み面 ---------- */
+#dshowPanel { display: flex; flex-direction: column; overflow: hidden; }
+#dshowPanel .insp-head { padding: 12px 10px 8px 16px; }
+#dsSeg { margin: 0 14px 8px; align-self: flex-start; flex: none; }
+#dsPanelBody { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 0 16px 20px; font-size: calc(13.5px * var(--fs, 1)); line-height: 1.65; }
+#dsPanelBody h3 { font-size: calc(14.5px * var(--fs, 1)); font-weight: 700; line-height: 1.4; margin: 0 0 2px; text-wrap: balance; }
+#dsPanelBody .ds-item { padding: 12px 0; border-top: 1px solid var(--hair); }
+#dsPanelBody .ds-item:first-child { border-top: 0; padding-top: 4px; }
+#dsPanelBody .ds-no { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-text); font: 700 12px/1 var(--mono); margin-right: 8px; vertical-align: 2px; flex: none; }
+#dsPanelBody .ds-head { display: flex; align-items: flex-start; gap: 0; margin-bottom: 6px; }
+#dsPanelBody p + p { margin-top: 7px; }
+#dsPanelBody .ds-see { margin-top: 8px; padding: 6px 13px; border-radius: 999px; font-size: calc(12.5px * var(--fs, 1)); font-weight: 600; background: var(--seg-bg); color: var(--ink); min-height: var(--tap); }
+#dsPanelBody .ds-see.on { background: var(--accent-soft); color: var(--accent-text); box-shadow: inset 0 0 0 1.5px var(--accent); }
+#dsPanelBody .ds-src { display: block; margin-top: 7px; font-size: calc(11px * var(--fs, 1)); line-height: 1.5; color: var(--ink3); }
+#dsPanelBody ul.check { margin: 6px 0 0; padding-left: 1.15em; font-size: calc(12.5px * var(--fs, 1)); line-height: 1.6; }
+#dsPanelBody ul.check li { margin: 6px 0; }
+#dsPanelBody .hint { margin-top: 7px; font-size: calc(12.5px * var(--fs, 1)); color: var(--ink2); }
+#dsPanelBody .caveat { font-size: calc(12px * var(--fs, 1)); }
+body.dshow #dshowPanel .grabber { background: rgba(255,255,255,0.22); }
+/* 読み面を開いている間は説明カードを隠す（二重に空を食わないように） */
+body.ds-read #noteCard { display: none; }
+@media (min-width: 1101px) { body.ds-read #noteCard { display: flex; } }
+/* ショー中だけ出る操作列 */
+.dock-group.dshow-only { display: none; }
+body.dshow #ctx .ctx-row > .dshow-only { display: flex; }
+body.dshow #ctx .ctx-row > .dshow-only > .dg-label { display: block; }
+#dsHowChips button .l { font-size: calc(11px * var(--fs, 1)); opacity: .75; margin-left: 3px; }
+
+/* 畳んだショーのカードは「いま何が起きているか」の帯にする。
+   題とボタンはドックの操作列に同じものがあるので、狭い画面では外して夜空へ回す */
+@media (max-width: 1100px) {
+  body.dshow #noteCard.mini .note-head h3, body.dshow #noteCard.mini #noteBadge, body.dshow #noteCard.mini .note-actions { display: none; }
+  body.dshow #noteCard.mini { padding-top: 8px; }
+  body.dshow #noteCard.mini .note-head { position: absolute; top: 4px; right: 6px; margin: 0; z-index: 2; gap: 2px; }
+  body.dshow #noteCard.mini #noteBody { padding-right: 58px; }
+  body.dshow #noteCard.mini #dshowVals { padding-right: 58px; }
+}
+body.dshow #noteCard.mini .icon-btn.sm { width: 26px; height: 26px; min-width: 26px; min-height: 26px; position: relative; }
+body.dshow #noteCard.mini .icon-btn.sm::before { content: ''; position: absolute; inset: -9px -4px; }   /* 見た目26pxでも当たりは44pt */
