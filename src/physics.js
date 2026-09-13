@@ -126,6 +126,7 @@ function applyBody(dtReal) {
   D.root.rotation.set(body.tz + a.rx, body.yaw + a.yaw, -body.tx + a.rz, 'YXZ');
   D.root.position.set(body.px, body.py + a.py, body.pz);
   if (typeof body.extraRot === 'function') body.extraRot();
+  if (typeof showDroneFollow === 'function') showDroneFollow();   /* ショー専用機は主役機と同じ姿勢で飛ぶ。ここで写せば1フレームもずれない */
 }
 
 // ---------- モーター / プロペラ ----------

@@ -91,7 +91,7 @@ function setPower(p, silent) { S.power = p; segSet($('#powerSeg'), 'p', p); cons
 $('#powerBtn').addEventListener('click', () => setPower(S.power > 0 ? 0 : (S.depth === 'full' ? (parseFloat($('#powerSeg .on')?.dataset.p) || 0.5) : 0.5)));
 $('#powerSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setPower(parseFloat(b.dataset.p)); });
 function syncBodyMode() {
-  if (theater.active || descent.active) return setBodyMode('theater');
+  if (theater.active || descent.active || dshow.on) return setBodyMode('theater');   /* ショー中に free に戻ると、カメラが手前の1機を追いかけて隊列から外れる */
   if (S.flight) return setBodyMode('demo');
   if (S.power > 0 && (S.tab === 'fly' || S.scale || alive.on || fpv.on || (S.lesson && lesson.hover) || S.expert === 'sensors')) return setBodyMode('free');
   setBodyMode('idle');

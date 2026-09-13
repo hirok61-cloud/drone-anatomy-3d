@@ -8,6 +8,11 @@ const easeInOut = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Mac/.test(navigator.platform));
 const narrow = () => matchMedia('(max-width: 1100px)').matches;
+// 台本がカメラを持っている場面。ここで自動回転を割り込ませると、決めた画が回って崩れる
+// （body.mode だけで見分けると、生きている感じ（alive）が入っているときに素通りする）
+const camScripted = () => (typeof whatif === 'object' && whatif.active) || (typeof theater === 'object' && theater.active)
+  || (typeof descent === 'object' && descent.active) || (typeof dshow === 'object' && dshow.on)
+  || (typeof weather === 'object' && weather.on) || (typeof fpv === 'object' && fpv.on);
 const compact = () => matchMedia('(max-width: 760px)').matches;
 const T0 = performance.now(); const TL = {}; const mark = k => { TL[k] = Math.round(performance.now() - T0); };
 
@@ -376,6 +381,8 @@ function bottomCover() {
     if (sel === '#bigBand' && H2 <= 520) continue;   /* 横向きは高さが足りない。名前の帯は3Dに重ねて浮かせ、機体は小さくしない */
     const el = document.querySelector(sel); if (!el || el.hidden) continue;
     const r = el.getBoundingClientRect(); if (r.height < 4 || r.top > H2 - 8 || r.bottom < H2 * 0.6) continue;
+    // 画面の一部しか覆っていないもの（幅の広い画面で左に寄ったカードなど）は、真ん中に載っていなければ帯を狭めない
+    if (r.width < innerWidth * 0.66 && (r.right < innerWidth * 0.42 || r.left > innerWidth * 0.58)) continue;
     cov = Math.max(cov, H2 - r.top);
   }
   return Math.min(cov, H2 * 0.62);

@@ -11,7 +11,7 @@ function tick(now) {
   stepCamera(dt);
   if (!S.camSpring && S.springWas) S.rotFrom = now; S.springWas = !!S.camSpring;
   const rotFor = (now - Math.max(S.lastInteract, S.rotFrom || 0, S.lastSelect + 7000)) / 1000;
-  const wantRot = S.autoRotate && !S.camSpring && !S.camInertia && rotFor > 5 && (body.mode === 'idle' || alive.on) && !reduceMotion && $('#inspector').classList.contains('open') === false && !S.question;
+  const wantRot = S.autoRotate && !S.camSpring && !S.camInertia && rotFor > 5 && (body.mode === 'idle' || alive.on) && !camScripted() && !reduceMotion && $('#inspector').classList.contains('open') === false && !S.question;
   controls.autoRotate = wantRot; controls.autoRotateSpeed = 0.45 * smoothstep(5, 7, rotFor);
   if (body.mode === 'free' && !S.camSpring) { const r = Math.hypot(body.px, body.pz); const w = smoothstep(0.08, 0.20, r); if (w > 0) controls.target.lerp(new THREE.Vector3(body.px, controls.target.y, body.pz), w * (1 - Math.exp(-dt / 0.6))); }
   controls.update();
