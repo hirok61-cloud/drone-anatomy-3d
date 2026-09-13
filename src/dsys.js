@@ -260,7 +260,7 @@ function dshowLayer(id) {
   dsysBuild();
   // 前のレイヤーの後始末（scene に直接足したものも消す）
   for (const t of dsys.tmp) if (t.owned) { scene.remove(t.owned); if (t.owned.geometry) t.owned.geometry.dispose(); }
-  dsys.beads = null; dsys.esc = null; dsys.rtkRing = null; dsys.rtkLab = null;
+  dsys.beads = null; dsys.esc = null; dsys.rtkRing = null; dsys.rtkLab = null; dsys.syncLab = null; dsys.syncFig = -1; dsys.syncBad = false;
   dsysClear();
   dsys.cur = id || null; dsys.t = 0;
   { const want = DSYS_GROUND.includes(dsys.cur) ? 1 : 0, la = dshow.landAim;
@@ -273,7 +273,12 @@ function dshowLayer(id) {
   if (id === 'path') { dsysGrid(true); dsysPath(); }
   else if (id === 'rtk') { dsysStation('rtk'); dsysGrid(false); }
   else if (id === 'pair') { dsysPair(); }
-  else if (id === 'sync') { if (dshow.mat) { dshow.mat.uniforms.uSkew.value = 0.34; dshow.mat.uniforms.uSkewFrac.value = 0.03; } }   /* はじめは3%だけ遅らせる。だんだん増やして崩れるまでを見せる */
+  else if (id === 'sync') {   /* はじめは3%だけ遅らせる。だんだん増やして崩れるまでを見せ、また揃える */
+    if (dshow.mat) { dshow.mat.uniforms.uSkew.value = 0.34; dshow.mat.uniforms.uSkewFrac.value = 0.03; }
+    dsys.syncLab = ['時計が合っていれば、みんな同じ拍で動く', '時計がずれた機体は、前の持ち場に取り残される'].map((t, i) => {
+      const lab = dsysLabel(t, DSHOW_R * 1.30); lab.position.set(0, DSHOW_H - DSHOW_R * 1.05, 0); lab.visible = i === 0;
+      dsys.air.add(lab); return lab; });
+  }
   else if (id === 'link') { dsysStation('gcs'); dsysLinks(); }
   else if (id === 'fence') { dsysFence(); }
   else if (id === 'grid') { dsysGrid(true, true); }
@@ -333,7 +338,16 @@ function stepDsys(dtReal) {
       dshow.landAim = la; dshowFrame(600);
     }
   }
-  if (dsys.cur === 'sync' && dshow.mat) dshow.mat.uniforms.uSkewFrac.value = reduceMotion ? 0.25 : clamp(0.03 + dsys.t / 9, 0.03, 0.55);
+  // ④ 時計のずれは「移り変わりの最中」にしか現れない（静止中は全機が行き先に着いている）。
+  // このレイヤーの間だけ図形を送り続け、1回おきに時計をずらして、揃う回と崩れる回を見比べさせる
+  if (dsys.cur === 'sync' && dshow.mat) {
+    if (dsys.syncFig !== dshow.fig) { dsys.syncFig = dshow.fig; dsys.syncBad = !dsys.syncBad; }
+    dshow.mat.uniforms.uSkewFrac.value = dsys.syncBad ? 0.55 : 0.03;
+    dshow.mat.uniforms.uSkew.value = dsys.syncBad ? 0.72 : 0.0;
+    if (dsys.syncLab) { dsys.syncLab[0].visible = !dsys.syncBad; dsys.syncLab[1].visible = !!dsys.syncBad;
+      const y = DSHOW_H - (dshow.fitY || 2.4) * 0.84;   /* 画の高さは端末で変わる。毎回いまの枠から置き直す */
+      for (const l of dsys.syncLab) l.position.y = y; }
+  }
 }
 
 window.__dsys = { dsys, dshowLayer, dsysLayout, dsysRefresh };

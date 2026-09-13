@@ -28,11 +28,11 @@ const DSHOW_GLOW = 0.060;  // 光の玉の直径(m)。機体そのものより�
 // どれも「輪郭の上に等間隔で並べる」。点の数が変わっても形が保てる
 const DSHOW_FIGS = [
   { id: 'grid', name: '整列', glow: 0.46, col: ['#cfe0ff', '#8fb6ff'], note: '離陸して定位置に並びます。1機ずつ手で操縦しているのではなく、あらかじめ決めた経路を自動で飛ばします。教則は自動操縦を「プログラムにより自動的に操縦を行うこと」としています。' },
-  { id: 'ring', name: '輪', col: ['#7fd4ff', '#d6f4ff'], note: '教則は、飛行中の他の無人航空機を確認した場合は安全な間隔を確保し、接近や衝突のおそれがあれば降下させるなどの措置をとるとともに、相手方と飛行日時・経路・高度を調整するとしています。' },
+  { id: 'ring', name: '輪', col: ['#4fc9ff', '#ffd27a'], note: '教則は、飛行中の他の無人航空機を確認した場合は安全な間隔を確保し、接近や衝突のおそれがあれば降下させるなどの措置をとるとともに、相手方と飛行日時・経路・高度を調整するとしています。' },
   { id: 'star', name: '星', col: ['#ffcf5e', '#fff6d6'], note: 'ショーの色は演出です。夜間飛行の必須装備は「機体の姿勢及び方向が正確に視認できる灯火」で、こちらは安全のための要件です。全周に同じ色で光る玉を見て、機首がどちらか分かるでしょうか。' },
   { id: 'heart', name: 'ハート', col: ['#ff7ba6', '#ffd8e3'], note: 'カテゴリーⅡ飛行は、飛行経路下に操縦者と補助者以外の第三者が立ち入らないよう管理する措置を講じたうえで行うものとされています。看板やコーンによる表示、補助者による監視と口頭警告が例です。' },
   { id: 'drone', name: '機体のかたち', glow: 0.80, col: ['#7dffc4', '#ddfff2'], note: '手前の1機を大きく描いています。ショーの機体はカメラを積まず、機体と同じくらい大きな灯りを下に抱えた形です。100グラム以上の機体は1機ずつ登録し、一部の例外を除きリモートID機能を備えることが求められます。台数分すべてが対象です。' },
-  { id: 'sphere', name: '球', glow: 0.78, col: ['#a992ff', '#e8e0ff'], note: '風が強まれば隊列は保てません。催しの上空では、風速5m/s以上の場合は飛行を中止することが必要とされています。' },
+  { id: 'sphere', name: '球', glow: 0.78, col: ['#a992ff', '#7dffd6'], note: '風が強まれば隊列は保てません。催しの上空では、風速5m/s以上の場合は飛行を中止することが必要とされています。' },
   // 最後に置く。文字が指定されていないときは順番から外れる（dshowFigN）
   { id: 'custom', name: 'あなたの文字', col: ['#ffc7e8', '#bfe4ff'], note: 'いま出ている文字は、あなたがこの場で指定したものです。実際のショーでも、飛ばす前にこの配置を作って全機に読み込ませます。教則は自動操縦を「プログラムにより自動的に操縦を行うこと」としています。機数は決まっているので、文字が多いほど1文字あたりに使える機体は減ります。' },
 ];
@@ -44,11 +44,17 @@ function dshowShape(id, n, out) {
     for (let i = 0; i < n; i++) { const c = i % cols, r = (i / cols) | 0;
       put(i, (c / (cols - 1) - 0.5) * DSHOW_R * 2.0, (r / Math.max(1, rows - 1) - 0.5) * DSHOW_R * 1.1, 0); }
   } else if (id === 'ring') {
-    // 内と外をそれぞれ等分する。角度を (i/n)*4π にすると i と i+n/2 が重なって、半数が同じ場所に立つ
+    // 細い円1本に1600機を並べると、となりまで画面1.3px で1本の光の帯に溶ける（3200機が1機も数えられない）。
+    // 内と外の2つの「環」にして、半径方向にも列を作る。同じ機数でも1機ずつが読める
+    const RN = 5;   // 1つの環あたりの列数
     for (let i = 0; i < n; i++) {
       const k = i % 2, m = k ? Math.floor(n / 2) : Math.ceil(n / 2), j = (i - k) / 2;
-      const a = (j / m) * Math.PI * 2 + (k ? Math.PI / m : 0), r = DSHOW_R * (k ? 0.62 : 1.0);
-      put(i, Math.cos(a) * r, Math.sin(a) * r, 0); }
+      const lane = j % RN, col = (j - lane) / RN, cols = Math.ceil(m / RN);
+      // 列ごとに半周ぶんずらす。同じ角度に5機が重ならない
+      const a = ((col + lane / RN) / cols) * Math.PI * 2 + (k ? Math.PI / cols : 0);
+      const r0 = DSHOW_R * (k ? 0.58 : 0.98), w = DSHOW_R * 0.085;
+      const rr = r0 + (lane - (RN - 1) / 2) * w / RN * 2 + dshow.rnd[i] * w * 0.16;   /* 列がきっちり並ぶと人工的に見える */
+      put(i, Math.cos(a) * rr, Math.sin(a) * rr, 0); }
   } else if (id === 'star') {
     const pts = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = DSHOW_R * (i % 2 ? 0.46 : 1.0); pts.push([Math.cos(a) * r, Math.sin(a) * r]); }
     dshowAlong(pts, n, put, true);
@@ -119,15 +125,29 @@ function dshowFromCanvas(draw, n, out, opts) {
   return true;
 }
 // 折れ線の上に等間隔で並べる（頂点の数に関わらず密度が揃う）
+// 輪郭に沿って並べる。1本の細い線に3200機を並べると となりまで画面0.5px になり、
+// 光が溶けて「ネオン管で描いた線」になってしまう（3200機が1機も数えられない）。
+// 法線の向きに何列か散らして、同じ形のまま1機ずつが読めるようにする
 function dshowAlong(pts, n, put, close) {
   const P = close ? pts.concat([pts[0]]) : pts;
   const seg = [], L = [];
   let total = 0;
   for (let i = 0; i < P.length - 1; i++) { const d = Math.hypot(P[i + 1][0] - P[i][0], P[i + 1][1] - P[i][1]); seg.push(d); total += d; L.push(total); }
+  // 1機あたり (0.025)² の面積がないと、隣と光が溶ける。必要な線の太さを周長から逆算する
+  const GAP = 0.025;
+  const wide = clamp(n * GAP * GAP / Math.max(0.5, total), DSHOW_R * 0.042, DSHOW_R * 0.105);
+  const lanes = clamp(Math.round(wide / GAP), 2, 9);
+  const per = Math.ceil(n / lanes);
   for (let i = 0; i < n; i++) {
-    const s = (i / n) * total; let k = 0; while (k < L.length - 1 && L[k] < s) k++;
+    const lane = i % lanes, j = (i - lane) / lanes;
+    // 列ごとに1/lanes だけ進みをずらす。同じ場所に列の数だけ重ならない
+    const s = ((j + lane / lanes) / per) * total;
+    let k = 0; while (k < L.length - 1 && L[k] < s) k++;
     const s0 = k ? L[k - 1] : 0, t = seg[k] > 1e-6 ? (s - s0) / seg[k] : 0;
-    put(i, P[k][0] + (P[k + 1][0] - P[k][0]) * t, P[k][1] + (P[k + 1][1] - P[k][1]) * t, 0);
+    const x = P[k][0] + (P[k + 1][0] - P[k][0]) * t, y = P[k][1] + (P[k + 1][1] - P[k][1]) * t;
+    const dx = P[k + 1][0] - P[k][0], dy = P[k + 1][1] - P[k][1], dl = Math.hypot(dx, dy) || 1;
+    const off = ((lane - (lanes - 1) / 2) / Math.max(1, lanes - 1) + dshow.rnd[i] * 0.10) * wide;   /* 列がきっちり並ぶと人工的に見える */
+    put(i, x - dy / dl * off, y + dx / dl * off, 0);
   }
 }
 
@@ -619,7 +639,12 @@ function dshowCrowdTex() {
     g.closePath(); g.fill();
     // 空からの光が頭と肩の縁に乗る。これが無いと、ただの黒い帯になる
     g.save(); g.beginPath(); g.rect(0, 0, W, sy + hr * 0.55); g.clip();   /* 縁の光は上だけ。横まで光ると切り抜きのシールに見える */
-    g.strokeStyle = `rgba(158,188,222,${0.50 - p.d * 0.20})`; g.lineWidth = 3.4 * s2;
+    { const gr = g.createLinearGradient(0, hy - hr * 1.2, 0, sy + hr * 0.55);   /* 光は空から来るので、頭のてっぺんがいちばん明るい */
+      gr.addColorStop(0, `rgba(178,206,236,${0.66 - p.d * 0.24})`);
+      gr.addColorStop(0.45, `rgba(150,180,214,${0.34 - p.d * 0.14})`);
+      gr.addColorStop(1, 'rgba(150,180,214,0)');
+      g.strokeStyle = gr; }
+    g.lineWidth = 3.4 * s2;
     g.beginPath();
     g.moveTo(p.x - sh, sy);
     g.quadraticCurveTo(p.x - sh * 0.99, sy - hr * 0.72, p.x - sh * 0.50, ny + hr * 0.16);
@@ -637,7 +662,10 @@ function dshowCrowdTex() {
       g.fillStyle = `rgba(0,0,0,${0.99 - p.d * 0.10})`;
       g.beginPath(); g.moveTo(ax - 13 * s2, ay); g.lineTo(hx - 11 * s2, hyy); g.lineTo(hx + 11 * s2, hyy); g.lineTo(ax + 13 * s2, ay); g.closePath(); g.fill();
       g.fillStyle = 'rgba(0,0,0,0.99)'; g.fillRect(hx - 15 * s2, hyy - 26 * s2, 30 * s2, 30 * s2);
-      g.fillStyle = 'rgba(206,222,244,0.38)'; g.fillRect(hx - 11 * s2, hyy - 22 * s2, 22 * s2, 22 * s2);
+      { const gl = g.createRadialGradient(hx, hyy - 11 * s2, 2, hx, hyy - 11 * s2, 46 * s2);   /* 画面のこぼれ光。これが無いと、ただの灰色の四角 */
+        gl.addColorStop(0, 'rgba(226,238,255,0.55)'); gl.addColorStop(0.35, 'rgba(190,214,248,0.20)'); gl.addColorStop(1, 'rgba(190,214,248,0)');
+        g.fillStyle = gl; g.beginPath(); g.arc(hx, hyy - 11 * s2, 46 * s2, 0, Math.PI * 2); g.fill(); }
+      g.fillStyle = 'rgba(228,240,255,0.86)'; g.fillRect(hx - 11 * s2, hyy - 22 * s2, 22 * s2, 22 * s2);
     }
   }
   const t = new THREE.CanvasTexture(c);
@@ -665,8 +693,9 @@ function dshowPlaceCrowd() {
   _dv1.copy(aim).sub(eye).normalize();
   _dv2.crossVectors(_dv1, UP).normalize();
   _dv3.crossVectors(_dv2, _dv1).normalize();
-  // 頭のてっぺんが画面の下から 19% のところに来るように下げる
-  const down = halfH * 0.62 + DSHOW_CROWD_H / 2;
+  // 頭のてっぺんが画面の下から 13% のところに来るように下げる。
+  // ここより上げると、隊列の下端が観客にくっついて夜空の帯が無くなる
+  const down = halfH * 0.74 + DSHOW_CROWD_H / 2;
   const p = eye.clone().addScaledVector(_dv1, near).addScaledVector(_dv3, -down);
   const w = Math.max(DSHOW_CROWD_W, halfW * 2.6);
   o.material.map.repeat.x = w / DSHOW_CROWD_W;
