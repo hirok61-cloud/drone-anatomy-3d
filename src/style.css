@@ -429,6 +429,19 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
   #noteCard .note-head { margin-bottom: 2px; }
 }
 @media (max-width: 760px) and (min-height: 481px) { #noteCard[data-kind=descent], #noteCard[data-kind=weather], #noteCard[data-kind=dshow] { max-height: min(44vh, calc(100vh - var(--dock-h) - 96px - var(--sat) - var(--sab))); } }
+/* ショーは夜空が主役。開いていてもカードは画面の3割までにして、隊列の帯を必ず残す */
+@media (max-width: 760px) and (min-height: 481px) { #noteCard[data-kind=dshow] { max-height: min(32vh, calc(100vh - var(--dock-h) - 96px - var(--sat) - var(--sab))); } }
+/* 畳んだ状態: いまの図形と数値、本文の2行、ボタンだけ残す */
+#noteCard.mini #noteBody details, #noteCard.mini #noteBody .ds-hint { display: none; }
+#noteCard.mini #dshowBody { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+#noteCard.mini { max-height: none; }
+#noteMini { font-size: 15px; line-height: 1; }
+/* 好きな文字を描く */
+.ds-text { display: flex; gap: 6px; margin: 8px 0 2px; }
+.ds-text input { flex: 1; min-width: 0; padding: 7px 11px; border-radius: 9px; border: 1px solid var(--hair2); background: var(--seg-bg); color: var(--ink); font: max(16px, calc(13px * var(--fs, 1)))/1.4 var(--font); min-height: var(--tap); }   /* iOS は 16px 未満の入力欄でページごと拡大する */
+.ds-text input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.ds-text button { flex: none; padding: 0 14px; border-radius: 999px; font-size: calc(12.5px * var(--fs, 1)); font-weight: 700; min-height: var(--tap); background: var(--accent); color: #fff; }
+.ds-hint { margin: 4px 0 0; font-size: calc(11.5px * var(--fs, 1)); line-height: 1.5; color: var(--ink3); }
 body.fpv #viewCol { display: none; }   /* 映像に重ねない。戻り道は「外から見る」と Esc */
 body.fpv #noteCard, body.fpv #bigBand { display: none; }
 body.fpv #ctx { display: none; }   /* 操作はHUDに移す。ドックを畳むと映像が広がり、--dock-h も自動で縮む */
@@ -447,6 +460,8 @@ body.dshow #noteCard {
 body.dshow #viewCol { display: none; }   /* 視点の切り替えは夜空には要らない。右に立つ縦長の列は、隊列を写せる幅も高さも削る */
 body.dshow #ctx .ctx-row > * { display: none; }
 body.dshow #ctx .ctx-row > .dshow-keep { display: flex; }   /* ショーの間もこのボタンだけ残す（カードを閉じても戻れるように） */
+body.dshow #ctx { padding-top: 6px; padding-bottom: 4px; }
+body.dshow #ctx .ctx-row > .dshow-keep > label, body.dshow #ctx .ctx-row > .dshow-keep > .dg-label { display: none; }   /* ボタン1つに見出しは要らない。夜空に回す高さのほうが大事 */
 body.fpv #inspector, body.fpv #lesson, body.fpv #expert, body.fpv #massBar, body.fpv #badges, body.fpv #leaders, body.fpv #labels { display: none; }   /* 映像は画面いっぱいに見せる */
 body.dshow #badges, body.dshow #leaders, body.dshow #labels { display: none; }   /* 夜空に数字を重ねない */
 /* スティックは送信機と同じく左右のすみへ。広い画面はその間に、狭い画面はその上に注記を置く */

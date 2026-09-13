@@ -73,6 +73,39 @@ A(document.getElementById('showBtn').getAttribute('aria-pressed') === 'true', '�
   const px = ds.mat.uniforms.uPxPerM.value, want = cv.height / (2 * Math.tan(d.camera.fov * Math.PI / 360));   /* gl_PointSize は描画バッファの画素で効く（画質設定で CSS 画素とは倍率が違う） */
   A(Math.abs(px / want - 1) < 0.25, '1mあたりの画素数が画角から出ている', px.toFixed(0), want.toFixed(0)); }
 
+// 好きな文字を描く
+{ const before = ds.fig;
+  const ok = DS.dshowSetText('安全'); d.step(0.4, 30);
+  A(ok === true, '文字: 受け付ける');
+  A(ds.text === '安全', '文字: 覚えている', ds.text);
+  A(DS.DSHOW_FIGS[ds.fig].id === 'custom', '文字: すぐその図形へ飛ぶ', DS.DSHOW_FIGS[ds.fig].id, before);
+  // 点が中央に潰れていない＝ちゃんと絵になっている
+  let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+  for (let i = 0; i < ds.n; i++) { const x = ds.to[i*3], y = ds.to[i*3+1];
+    if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  A(x1 - x0 > 1.0 && y1 - y0 > 0.4, '文字: 広がりがある', (x1-x0).toFixed(2), (y1-y0).toFixed(2));
+  A(x1 - x0 > (y1 - y0), '文字: 横に長い', (x1-x0).toFixed(2), (y1-y0).toFixed(2));
+  // 描けない文字は元に戻す
+  const keep = ds.text; DS.dshowSetText('   '); d.step(0.2, 30);
+  A(ds.text === '', '文字: 空にすると元の図形だけに戻る', ds.text);
+  A(DS.DSHOW_FIGS[ds.fig].id !== 'custom', '文字: 空にしたら「あなたの文字」から離れる');
+  void keep; }
+// 文字が無いときは「あなたの文字」を順番から外す
+{ ds.text = '';
+  const seen = new Set();
+  for (let i = 0; i < 240 && seen.size < 6; i++) { d.step(0.25, 30); seen.add(DS.DSHOW_FIGS[ds.fig].id); }
+  A(!seen.has('custom'), '文字が無ければ「あなたの文字」は出てこない', [...seen].join('/')); }
+
+// 説明カードを畳める（スマホは畳んだ状態で始まる）
+{ const card = document.getElementById('noteCard');
+  A(!document.getElementById('noteMini').hidden, '畳むボタンが出る');
+  DS.setNoteMini(true); d.step(0.3, 30);
+  A(card.classList.contains('mini'), '畳める');
+  const h1 = card.getBoundingClientRect().height;
+  DS.setNoteMini(false); d.step(0.3, 30);
+  A(!card.classList.contains('mini'), '開ける');
+  A(card.getBoundingClientRect().height > h1, '畳むと低くなる', h1, card.getBoundingClientRect().height); }
+
 // 他の機能を始めると止まる
 document.querySelector('#skyChips [data-sky=cold]').click(); d.step(1.0, 30);
 A(!ds.on && !document.body.classList.contains('dshow'), '空もようを始めるとショーは止まる');

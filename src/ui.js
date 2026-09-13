@@ -21,16 +21,25 @@ function renderNoteActions(list) {
   for (const a of (list || [])) { const btn = document.createElement('button'); btn.textContent = a.label; if (a.primary) btn.classList.add('primary'); btn.onclick = a.fn; acts.appendChild(btn); }
   acts.hidden = !(list && list.length);
 }
+// 説明を畳む（いまはショーだけ）。スマホでは説明カードが画面の半分を占めて、夜空がほとんど残らない
+function setNoteMini(on) {
+  const card = $('#noteCard'), b = $('#noteMini');
+  card.classList.toggle('mini', !!on);
+  if (b) { b.textContent = on ? '⌄' : '⌃'; b.setAttribute('aria-expanded', String(!on)); b.setAttribute('aria-label', on ? '説明をひらく' : '説明を畳む'); }
+  if (typeof dshow === 'object' && dshow.on) { dshow.mini = !!on; if (typeof dshowFrame === 'function') dshowFrame(360); }
+}
 function renderNote(o) {
   const card = $('#noteCard'); $('#noteBody').onclick = null;   /* 前のカードが張った委譲を残さない */
-  if (!o) { card.hidden = true; card.dataset.kind = ''; return; }   /* kind を残すと、次に同じ種類を開くとき「閉じられたまま」と誤判定される */
+  if (!o) { card.hidden = true; card.dataset.kind = ''; card.classList.remove('mini'); $('#noteMini').hidden = true; return; }   /* kind を残すと、次に同じ種類を開くとき「閉じられたまま」と誤判定される */
   $('#noteTitle').textContent = o.title || ''; const b = $('#noteBadge'); if (o.badge) { b.textContent = o.badge; b.hidden = false; } else b.hidden = true;
   $('#noteBody').innerHTML = o.html || ''; renderNoteActions(o.actions);
   card.hidden = false; if (card.dataset.kind !== (o.kind || '')) card.scrollTop = 0;   /* 同じ種類のカードを描き直すときは読んでいた位置を保つ */
   card.dataset.kind = o.kind || '';
+  { const mb = $('#noteMini'); mb.hidden = !o.mini; if (o.mini) setNoteMini(o.miniOn); else card.classList.remove('mini'); }
   if (o.onClose) card._onClose = o.onClose; else card._onClose = null;
 }
 $('#noteClose').addEventListener('click', () => { const c = $('#noteCard'); if (c._onClose) c._onClose(); c.hidden = true; });
+$('#noteMini').addEventListener('click', () => setNoteMini(!$('#noteCard').classList.contains('mini')));
 
 // ---------- タブ ----------
 // 「同時に1つ」の対象（質問・飛行デモ・用途・重さ・シアター・もしも・クイズ）を、keep 以外すべて止める

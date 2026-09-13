@@ -12,7 +12,7 @@ const dshow = {
   from: null, to: null, raw: null, colFrom: null, colTo: null, lag: null, rnd: null, bright: null,
   perm: null, keyA: null, keyB: null, ordA: null, ordB: null,
   nextTo: null, nextCol: null, nextLag: null, nextFig: -1,
-  fig: 0, figT: 0, phase: 'hold', saved: null, star: 0, lastVals: 0, lastBand: 0, sig: '', bodyPos: null, dist: 11, k: 1, bodyYaw: 0,
+  fig: 0, figT: 0, phase: 'hold', saved: null, star: 0, lastVals: 0, lastBand: 0, sig: '', fitX: 2.4, fitY: 2.4, mini: false, text: '', forceFig: -1, askText: false, bodyPos: null, dist: 11, k: 1, bodyYaw: 0,
 };
 const DSHOW_N = () => (S.qLevel <= 1 ? 1200 : S.qLevel === 2 ? 2200 : 3200);   // 実際のショーは数百〜数千機
 const DSHOW_H = 3.60;      // 隊列の中心の高さ(m)。低いほうの機体が地平線あたりに来る高さ
@@ -21,6 +21,7 @@ const DSHOW_EYE = 1.55;    // 見る人の目の高さ(m)。ここを上げる�
 const DSHOW_CAM = 11.0;    // 見る位置までの距離(m)。天球は半径16mなので、これより外へ出すと空が黒いドームになる
 const DSHOW_MOVE = 3.2, DSHOW_HOLD = 3.6;   // 移り変わりと静止の秒数
 const DSHOW_LAG = 0.46;    // 出発の遅れの最大（ワイプの深さ）
+const DSHOW_FONT = (px) => `900 ${px}px "Noto Sans JP", "Hiragino Sans", "Yu Gothic UI", sans-serif`;
 const DSHOW_GLOW = 0.060;  // 光の玉の直径(m)。機体そのものより少し大きい
 
 // ---------- 図形 ----------
@@ -32,7 +33,10 @@ const DSHOW_FIGS = [
   { id: 'heart', name: 'ハート', col: ['#ff7ba6', '#ffd8e3'], note: 'カテゴリーⅡ飛行は、飛行経路下に操縦者と補助者以外の第三者が立ち入らないよう管理する措置を講じたうえで行うものとされています。看板やコーンによる表示、補助者による監視と口頭警告が例です。' },
   { id: 'drone', name: '機体のかたち', col: ['#7dffc4', '#ddfff2'], note: '手前の1機を大きく描いています。ショーの機体はカメラを積まず、機体と同じくらい大きな灯りを下に抱えた形です。100グラム以上の機体は1機ずつ登録し、一部の例外を除きリモートID機能を備えることが求められます。台数分すべてが対象です。' },
   { id: 'sphere', name: '球', col: ['#a992ff', '#e8e0ff'], note: '風が強まれば隊列は保てません。催しの上空では、風速5m/s以上の場合は飛行を中止することが必要とされています。' },
+  // 最後に置く。文字が指定されていないときは順番から外れる（dshowFigN）
+  { id: 'custom', name: 'あなたの文字', col: ['#ffc7e8', '#bfe4ff'], note: 'いま出ている文字は、あなたがこの場で指定したものです。実際のショーでも、飛ばす前にこの配置を作って全機に読み込ませます。教則は自動操縦を「プログラムにより自動的に操縦を行うこと」としています。機数は決まっているので、文字が多いほど1文字あたりに使える機体は減ります。' },
 ];
+const dshowFigN = () => DSHOW_FIGS.length - (dshow.text ? 0 : 1);   /* 文字が無ければ「あなたの文字」を飛ばす */
 function dshowShape(id, n, out) {
   const put = (i, x, y, z) => { out[i * 3] = x; out[i * 3 + 1] = y + DSHOW_H; out[i * 3 + 2] = z; };
   if (id === 'grid') {
@@ -62,10 +66,14 @@ function dshowShape(id, n, out) {
       for (let j = 0; j < arm; j++) { const t = 0.20 + (j / Math.max(1, arm - 1)) * 0.70; put(i++, cx * t, cy * t, 0); }
     }
     for (let j = 0; j < rest; j++) { const a = j * 2.399963, r = DSHOW_R * 0.21 * Math.sqrt((j + 0.5) / rest); put(i++, Math.cos(a) * r, Math.sin(a) * r, 0); }   /* 黄金角で並べると渦の筋が出ずに一様な円板になる */
-  } else if (id.slice(0, 5) === 'text:') {
-    const t = id.slice(5);
-    dshowFromCanvas((c, W2, H2) => { c.font = `900 ${Math.round(H2 * 0.78)}px "Noto Sans JP", ${'sans-serif'}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(t, W2 / 2, H2 * 0.54); },
-      n, out, { w: 300, h: 150, scale: DSHOW_R * 2.0 / 300 });
+  } else if (id === 'custom' || id.slice(0, 5) === 'text:') {
+    const t = (id === 'custom' ? dshow.text : id.slice(5)) || '　';
+    dshowFromCanvas((c, W2, H2) => {
+      c.textAlign = 'center'; c.textBaseline = 'middle';
+      let fs = Math.round(H2 * 0.80);   /* 幅に収まるまで小さくする。文字数で自動的に決まる */
+      for (; fs > 10; fs -= 2) { c.font = DSHOW_FONT(fs); if (c.measureText(t).width <= W2 - 24) break; }
+      c.fillText(t, W2 / 2, H2 * 0.52);
+    }, n, out, { w: 560, h: 190, fit: true });
   } else {   // sphere: フィボナッチ球
     const g = Math.PI * (3 - Math.sqrt(5));
     for (let i = 0; i < n; i++) { const y = 1 - (i / (n - 1)) * 2, r = Math.sqrt(Math.max(0, 1 - y * y)), a = g * i;
@@ -82,16 +90,33 @@ function dshowFromCanvas(draw, n, out, opts) {
   c.fillStyle = '#000'; c.fillRect(0, 0, W2, H2); c.fillStyle = '#fff';
   draw(c, W2, H2);
   const px = c.getImageData(0, 0, W2, H2).data, cand = [];
-  for (let y = 0; y < H2; y++) for (let x = 0; x < W2; x++) if (px[(y * W2 + x) * 4] > 120) cand.push(x + y * W2);
-  if (!cand.length) { for (let i = 0; i < n; i++) { out[i * 3] = 0; out[i * 3 + 1] = DSHOW_H; out[i * 3 + 2] = 0; } return; }
-  for (let i = cand.length - 1; i > 0; i--) { const j = (Math.sin(i * 12.9898) * 43758.5453 % 1 + 1) % 1 * (i + 1) | 0; const t = cand[i]; cand[i] = cand[j]; cand[j] = t; }
+  let x0 = W2, x1 = -1, y0 = H2, y1 = -1;
+  for (let y = 0; y < H2; y++) for (let x = 0; x < W2; x++) if (px[(y * W2 + x) * 4] > 120) {
+    cand.push(x + y * W2); if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  if (cand.length < 24) { for (let i = 0; i < n; i++) { out[i * 3] = 0; out[i * 3 + 1] = DSHOW_H; out[i * 3 + 2] = 0; } return false; }
+  // 描いた絵の外接矩形を、いま画面に入る広さに合わせる。文字数が変わっても画面上の大きさが揃う
+  let sc = S1, cx = W2 / 2, cy = H2 / 2;
+  if (o.fit) { const bw = x1 - x0 + 1, bh = y1 - y0 + 1;
+    sc = Math.min(2 * dshow.fitX * 0.94 / bw, 2 * dshow.fitY * 0.84 / bh); cx = (x0 + x1) / 2; cy = (y0 + y1) / 2; }
+  // 無作為に選ぶと縁がぼろぼろになり濃淡の斑も出る。格子のます目ごとに1点ずつ選んで均す
+  const g = Math.max(1, Math.sqrt(cand.length / n)), gw = Math.max(1, Math.ceil((x1 - x0 + 1) / g));
+  const cell = new Map();
+  for (const kk of cand) {
+    const x = kk % W2, y = (kk / W2) | 0;
+    const ci = ((y - y0) / g | 0) * gw + ((x - x0) / g | 0);
+    const e = cell.get(ci); if (e === undefined) cell.set(ci, kk); else if (((kk * 2654435761) % 97) < 24) cell.set(ci, kk);
+  }
+  const pick = [...cell.values()];
+  for (let i = pick.length; i < n; i++) pick.push(cand[(i * 7919) % cand.length]);   /* 足りないぶんは元の候補から足す */
+  for (let i = pick.length - 1; i > 0; i--) { const j = (Math.sin(i * 12.9898) * 43758.5453 % 1 + 1) % 1 * (i + 1) | 0; const t = pick[i]; pick[i] = pick[j]; pick[j] = t; }
   for (let i = 0; i < n; i++) {
-    const k = cand[i % cand.length], x = k % W2, y = (k / W2) | 0;
-    const jx = i >= cand.length ? (Math.sin(i * 7.13) * 0.5) : 0, jy = i >= cand.length ? (Math.cos(i * 5.71) * 0.5) : 0;
-    out[i * 3] = (x + 0.5 + jx - W2 / 2) * S1;
-    out[i * 3 + 1] = DSHOW_H - (y + 0.5 + jy - H2 / 2) * S1;
+    const k = pick[i % pick.length], x = k % W2, y = (k / W2) | 0;
+    const jx = (Math.sin(i * 7.13) * 0.35) * g, jy = (Math.cos(i * 5.71) * 0.35) * g;   /* ます目の中で少しだけ散らす */
+    out[i * 3] = (x + 0.5 + jx - cx) * sc;
+    out[i * 3 + 1] = DSHOW_H - (y + 0.5 + jy - cy) * sc;
     out[i * 3 + 2] = 0;
   }
+  return true;
 }
 // 折れ線の上に等間隔で並べる（頂点の数に関わらず密度が揃う）
 function dshowAlong(pts, n, put, close) {
@@ -298,6 +323,9 @@ function dshowFrame(ms) {
   const fit = DSHOW_CAM * tanV * Math.min(hF, asp * wF) / 1.06;
   const k = clamp(fit / DSHOW_R, 0.34, 1.00);   /* 大きくしすぎると低い機体が地平線より下へ落ちる */
   dshow.k = k; dshow.dist = DSHOW_CAM; dshow.sig = R ? `${Math.round(R.x0)},${Math.round(R.x1)},${Math.round(R.y0)},${Math.round(R.y1)}` : 'wide';
+  // 円の図形は縦横どちらかで頭打ちになるが、横長の図形（文字や整列）は余った側を使える。
+  // 隊列の座標系で「いま画面に入る半分の幅・高さ」を控えておく
+  dshow.fitX = DSHOW_CAM * tanV * (asp * wF) / k; dshow.fitY = DSHOW_CAM * tanV * hF / k;
   if (dshow.pts) { dshow.pts.scale.setScalar(k); dshow.pts.position.y = DSHOW_H * (1 - k); }
   if (dshow.mat) dshow.mat.uniforms.uSize.value = DSHOW_GLOW * k;   /* 光の玉も一緒に縮める。画面上の見え方を揃えるため */
   const dy = DSHOW_H - DSHOW_EYE, hz = Math.sqrt(Math.max(0.5, DSHOW_CAM * DSHOW_CAM - dy * dy));
@@ -310,11 +338,11 @@ function dshowFrame(ms) {
 // 画面が変わっても同じ大きさに写る。隊列と重なっても手前なので前後は正しく出る
 function dshowPlaceBody(eye, aim, tanV, wF, hF) {
   // 見える帯が狭いほど遠くに置く。そうしないと縦長の画面で手前の1機が隊列を覆ってしまう
-  const near = clamp(2.22 / Math.max(0.2, Math.min(hF, wF)), 2.6, 7.0), hh = near * tanV;
+  const near = clamp(2.85 / Math.max(0.2, Math.min(hF, wF)), 2.6, 7.5), hh = near * tanV;
   _dv1.copy(aim).sub(eye).normalize();
   _dv2.crossVectors(_dv1, UP).normalize();
   _dv3.crossVectors(_dv2, _dv1).normalize();
-  const p = eye.clone().addScaledVector(_dv1, near).addScaledVector(_dv2, hh * wF * 0.45).addScaledVector(_dv3, -hh * hF * 0.50);
+  const p = eye.clone().addScaledVector(_dv1, near).addScaledVector(_dv2, hh * wF * 0.60).addScaledVector(_dv3, -hh * hF * 0.76);   /* 隅に寄せる。文字は横いっぱいに広がるので、真ん中寄りだと隊列の上に乗る */
   dshow.bodyPos = [p.x, Math.max(0.5, p.y), p.z];
   dshow.bodyYaw = Math.atan2(eye.x - p.x, eye.z - p.z) + 0.6;
 }
@@ -327,6 +355,9 @@ function dshowOn(on) {
     stopOthers('dshow');
     dshowBuild();
     dshow.on = true; dshow.t = 0; dshow.fig = 0; dshow.figT = 0; dshow.phase = 'hold'; dshow.star = 0; dshow.lastVals = 0;
+    dshow.forceFig = -1; dshow.askText = false;
+    dshow.text = (store.get('dshowText') || '').slice(0, 12);
+    dshow.mini = narrow();   /* スマホは説明カードが画面の半分を占める。畳んだ状態で始めて、読みたい人が開く */
     dshow.mat.uniforms.uProg.value = 1;
     document.body.classList.add('dshow'); syncDockH();   /* 操作列を畳んで夜空を広くとる */
     $('#coach').hidden = true;   /* 見ている最中に問いかけを割り込ませない */
@@ -388,7 +419,7 @@ function dshowSky() {
 // 次の図形の下ごしらえ。対応づけは機数に比例して重い（3200機で15ms前後）ので、
 // 静止している間に済ませておく。動き出す瞬間にやると、そこだけ画が飛ぶ
 function dshowPrepare() {
-  const n = dshow.n, fi = (dshow.fig + 1) % DSHOW_FIGS.length;
+  const n = dshow.n, fi = dshow.forceFig >= 0 ? dshow.forceFig : (dshow.fig + 1) % dshowFigN();
   if (dshow.nextFig === fi) return;
   dshowShape(DSHOW_FIGS[fi].id, n, dshow.raw);
   dshowAssign(dshow.to, dshow.raw, dshow.nextTo, n);   /* 静止中の位置＝いまの行き先 */
@@ -403,11 +434,37 @@ function dshowAdvance() {
   dshow.from.set(dshow.to); dshow.colFrom.set(dshow.colTo);
   dshow.fig = dshow.nextFig;
   dshow.to.set(dshow.nextTo); dshow.colTo.set(dshow.nextCol); dshow.lag.set(dshow.nextLag);
-  dshow.nextFig = -1;
+  dshow.nextFig = -1; dshow.forceFig = -1;
   dshowUpload();
   dshow.phase = 'move'; dshow.figT = 0; dshow.mat.uniforms.uProg.value = 0;
   showDroneColor(DSHOW_FIGS[dshow.fig].col[0]);
   renderDshow();
+}
+
+// 指定した図形へ飛ぶ（文字を描いたときに使う）
+function dshowGoto(fi) {
+  if (!dshow.on) return;
+  dshow.nextFig = -1; dshow.forceFig = fi;
+  if (dshow.phase === 'hold') dshowAdvance(); else dshow.figT = DSHOW_MOVE;   /* 移動中なら着いてすぐ次へ */
+}
+// 好きな文字を描く。描けるかどうかは実際に点を作ってみないと分からない（絵文字などは拾えないことがある）
+function dshowSetText(t) {
+  t = (t || '').replace(/\s+/g, ' ').trim().slice(0, 12);
+  if (!t) { dshow.text = ''; store.set('dshowText', ''); dshow.askText = false; if (dshow.fig === DSHOW_FIGS.length - 1) dshow.fig = 0; renderDshow(true); return false; }
+  const probe = new Float32Array(48 * 3);
+  const prev = dshow.text; dshow.text = t;
+  const ok = dshowFromCanvas((c, W2, H2) => {
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    let fs = Math.round(H2 * 0.80);
+    for (; fs > 10; fs -= 2) { c.font = DSHOW_FONT(fs); if (c.measureText(t).width <= W2 - 24) break; }
+    c.fillText(t, W2 / 2, H2 * 0.52);
+  }, 48, probe, { w: 560, h: 190, fit: true });
+  if (!ok) { dshow.text = prev; showToast('その文字は光の点にできませんでした。ひらがな・漢字・英数字でお試しください', 4200); return false; }
+  store.set('dshowText', t);
+  dshow.askText = false;
+  renderDshow(true);
+  dshowGoto(DSHOW_FIGS.length - 1);
+  return true;
 }
 
 // ---------- 毎フレーム ----------
@@ -454,24 +511,45 @@ function updateDshowVals() {
   const f = DSHOW_FIGS[dshow.fig];
   el.innerHTML = `<i class="dot" aria-hidden="true"></i><span>いま <b>${f.name}</b></span><span>${dshow.n} 機</span><span>高さ ${DSHOW_H.toFixed(1)} m</span><span>${dshow.phase === 'move' ? '移動中' : '静止中'}</span>`;
 }
-function renderDshow() {
+function renderDshow(rebuild) {
   if (!dshow.on) return;
   const card = $('#noteCard');
   if (card.hidden && card.dataset.kind === 'dshow') return;   /* 一度閉じたら、図形が変わっても開き直さない */
   const f = DSHOW_FIGS[dshow.fig];
   // 図形が変わるたびに作り直すと、制度の折りたたみが閉じてしまう。変わるところだけ差し替える
-  if (card.dataset.kind === 'dshow' && $('#dshowBody')) {
+  if (!rebuild && card.dataset.kind === 'dshow' && $('#dshowBody')) {
     $('#dshowBody').innerHTML = f.note; $('#noteBadge').textContent = f.name; updateDshowVals(); return;
   }
   renderNote({
-    kind: 'dshow', title: '夜のドローンショー', badge: f.name,
+    kind: 'dshow', title: '夜のドローンショー', badge: f.name, mini: true, miniOn: dshow.mini,
     html: `<div id="dshowVals" class="vals live" aria-live="off"><i class="dot" aria-hidden="true"></i></div>
+      ${dshowTextHtml()}
       <p id="dshowBody" aria-live="off">${f.note}</p>
       ${dshowCraftHtml()}
       ${dshowRegHtml()}`,
-    actions: [{ label: 'つぎの図形 ›', fn: () => dshowNext() }, { label: 'やめる', fn: () => dshowOn(false) }],
+    actions: [{ label: '文字を描く', fn: () => dshowToggleText() }, { label: 'つぎの図形 ›', fn: () => dshowNext() }, { label: 'やめる', fn: () => dshowOn(false) }],
   });
+  bindDshowText();
   updateDshowVals();
+}
+// 好きな文字の入力欄。畳んでいる間は隠れるので、押したら開く
+function dshowTextHtml() {
+  if (!dshow.askText) return '';
+  const v = (dshow.text || '').replace(/"/g, '&quot;');
+  return `<form id="dshowText" class="ds-text"><input type="text" maxlength="12" inputmode="text" enterkeyhint="go"
+      aria-label="描く文字" placeholder="例: そつぎょう" value="${v}"><button type="submit">描く</button></form>
+    <p class="ds-hint">最大12文字。<b>文字が多いほど1文字あたりに使える機体が減ります</b>（いまは${dshow.n}機）。空にして「描く」を押すと元の6図形に戻ります。</p>`;
+}
+function bindDshowText() {
+  const f = $('#dshowText'); if (!f) return;
+  const inp = f.querySelector('input');
+  f.addEventListener('submit', e => { e.preventDefault(); inp.blur(); dshowSetText(inp.value); });
+  inp.focus({ preventScroll: true });
+}
+function dshowToggleText() {
+  dshow.askText = !dshow.askText;
+  if (dshow.askText && dshow.mini) setNoteMini(false);   /* 畳んだままだと入力欄が隠れる */
+  renderDshow(true);
 }
 // 手前の1機について。主役機と何が違うのかを、見えているものと結びつける
 function dshowCraftHtml() {
@@ -497,7 +575,7 @@ function onResizedDshow() { if (dshow.on) { dshowPixels(); dshowFrame(420); } }
 function initDshow() {
   const b = $('#showBtn');
   if (b) b.addEventListener('click', () => dshowOn(!dshow.on));
-  window.__dshow = { dshow, dshowOn, dshowNext, DSHOW_FIGS, dshowShape, SD, DSHOW_H, DSHOW_R,
+  window.__dshow = { dshow, dshowOn, dshowNext, dshowSetText, dshowToggleText, setNoteMini, DSHOW_FIGS, dshowShape, SD, DSHOW_H, DSHOW_R,
     // シェーダが作る位置を CPU 側でも同じ式で求める（検証用）
     sample: (i) => { const e0 = clamp((dshow.mat.uniforms.uProg.value - dshow.lag[i]) / Math.max(0.10, 1 - dshow.lag[i]), 0, 1), e = e0 * e0 * (3 - 2 * e0);
       return [0, 1, 2].map(k => dshow.from[i * 3 + k] + (dshow.to[i * 3 + k] - dshow.from[i * 3 + k]) * e); },
