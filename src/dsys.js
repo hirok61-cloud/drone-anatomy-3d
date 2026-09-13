@@ -3,7 +3,7 @@
 // 置き場所は2つに分ける:
 //   dsys.world … 地面のもの（基準局・地上局・離陸前の格子）。倍率 k を自分で掛ける
 //   dsys.air   … 隊列の中のもの（経路・間隔・囲い）。dshow.pts の子にすると隊列と一緒に伸縮する
-const dsys = { world: null, air: null, cur: null, t: 0, mats: null, built: false, tmp: [] };
+const dsys = { world: null, air: null, cur: null, t: 0, mats: null, built: false, tmp: [], beads: null, esc: null, brightSave: null };
 const DSYS_C = 0xc8d6e4;   // しくみの色。演出の光点は彩度が高いので、こちらは彩度を落として層を分ける
                            // （以前の #7fd4ff は図形「輪」の1色目と完全に同じで、背後の光点に溶けていた）
 
@@ -127,6 +127,10 @@ function dsysFence() {   // ⑥囲い: 内側（越えたら帰る）と外側�
     for (const y of [y0, y1]) { const pts = []; for (let s2 = 0; s2 <= 64; s2++) { const a = s2 / 64 * Math.PI * 2; pts.push([Math.cos(a) * r, y, Math.sin(a) * r]); } dsys.air.add(dsysLine(pts, lm)); }
     for (let s2 = 0; s2 < nv; s2++) { const a = s2 / nv * Math.PI * 2; dsys.air.add(dsysLine([[Math.cos(a) * r, y0, Math.sin(a) * r], [Math.cos(a) * r, y1, Math.sin(a) * r]], lm)); }
     const inner = lm === dsys.mats.line;
+    if (inner) {   // 枠に向かって出ていく1機。触れたら帰ってくる
+      const sp = new THREE.Sprite(M.glowCore('#ffd2a8')); sp.scale.setScalar(0.16); sp.renderOrder = 7; dsysMark(sp);
+      dsys.air.add(sp); dsys.esc = { sp, r0: DSHOW_R * 0.55, r1: r, y: DSHOW_H };
+    }
     const lab = dsysLabel(inner ? '内側: 越えたら帰る・降りる' : '外側: 越えたらモーターを切る', DSHOW_R * 1.30);
     lab.position.set(0, y1 - DSHOW_R * (inner ? 0.26 : 0.62), r * 0.62); dsys.air.add(lab);   /* 手前側に寄せる。上に出すと画面の外へ出る */
   }
@@ -186,6 +190,14 @@ function dsysLinks() {   // ⑤電波: 地上局から機体へ。多いと線�
   let j = 0; for (const t of dsys.tmp) if (t.link) { arr[j++] = t.a.x; arr[j++] = t.a.y; arr[j++] = t.a.z; arr[j++] = t.b.x; arr[j++] = t.b.y; arr[j++] = t.b.z; }
   geo.setAttribute('position', new THREE.BufferAttribute(arr, 3));
   const ls = dsysMark(new THREE.LineSegments(geo, dsys.mats.faint)); scene.add(ls); dsys.tmp.push({ owned: ls });
+  // 線の上を小さな玉が上がる。地上局から機体へ「状態を見に行っている」ことが動きで分かる
+  const beads = [];
+  for (const t of dsys.tmp) if (t.link) {
+    const b = new THREE.Sprite(M.glowCore('#c8d6e4')); b.scale.setScalar(0.085); b.renderOrder = 7; dsysMark(b);
+    scene.add(b); beads.push({ sp: b, a: t.a, b: t.b, ph: Math.random() });
+    dsys.tmp.push({ owned: b });
+  }
+  dsys.beads = beads;
 }
 
 // ---------- 出し入れ ----------
@@ -211,7 +223,8 @@ function dshowLayer(id) {
   if (!dshow.pts) return;
   dsysBuild();
   // 前のレイヤーの後始末（scene に直接足したものも消す）
-  for (const t of dsys.tmp) if (t.owned) { scene.remove(t.owned); t.owned.geometry.dispose(); }
+  for (const t of dsys.tmp) if (t.owned) { scene.remove(t.owned); if (t.owned.geometry) t.owned.geometry.dispose(); }
+  dsys.beads = null; dsys.esc = null;
   dsysClear();
   dsys.cur = id || null; dsys.t = 0;
   { const want = DSYS_GROUND.includes(dsys.cur) ? 1 : 0;
@@ -245,6 +258,15 @@ function stepDsys(dtReal) {
   if (dsys.cur === 'link' || dsys.cur === 'rtk') dsys.mats.faint.opacity = 0.20 + 0.30 * w;
   else dsys.mats.faint.opacity = 0.42;
   // ④は「1機だけ遅れる」から「形が崩れる」までを、8秒かけて見せる
+  // ⑤の玉は線の上を上がり、⑥の1機は枠へ出て帰る
+  if (dsys.beads) { const T = reduceMotion ? 0.5 : dsys.t;
+    for (const b of dsys.beads) { const u = ((T * 0.42 + b.ph) % 1);
+      b.sp.position.lerpVectors(b.a, b.b, u); b.sp.material.opacity = 0.95 * Math.sin(Math.PI * u); } }
+  if (dsys.esc) { const T = reduceMotion ? 0.5 : (dsys.t % 6) / 6;
+    const u = T < 0.45 ? T / 0.45 : T < 0.6 ? 1 : 1 - (T - 0.6) / 0.4;   /* 出る → 枠に触れて止まる → 帰る */
+    const e = u * u * (3 - 2 * u), r = dsys.esc.r0 + (dsys.esc.r1 - dsys.esc.r0) * e, a = 0.9;
+    dsys.esc.sp.position.set(Math.cos(a) * r, dsys.esc.y, Math.sin(a) * r);
+    dsys.esc.sp.material.opacity = 0.5 + 0.5 * (T > 0.45 && T < 0.6 ? 1 : 0.6); }
   if (dsys.cur === 'sync' && dshow.mat) dshow.mat.uniforms.uSkewFrac.value = reduceMotion ? 0.25 : clamp(0.03 + dsys.t / 9, 0.03, 0.55);
 }
 

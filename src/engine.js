@@ -99,9 +99,10 @@ const backdropMat = new THREE.ShaderMaterial({
     uSun: { value: new THREE.Vector3(0.45, 0.55, -0.7).normalize() },
     uT: { value: 0 }, uDrift: { value: new THREE.Vector2(0.02, 0.01) },
     uHaze: { value: 0 }, uHazeCol: { value: new THREE.Color('#cfdcea') }, uStar: { value: 0 },
+    uHazeDir: { value: new THREE.Vector3(0.6, 0, -0.8).normalize() },   /* 地平線の明かりを方位で変える向き（遠くの街の明かり） */
   },
   vertexShader: `varying vec3 vDir; void main(){ vDir = normalize((modelMatrix * vec4(position,1.0)).xyz); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
-  fragmentShader: `uniform vec3 top, mid, edge, bottom, spotDir, uLo, uHi, uSun, uHazeCol;
+  fragmentShader: `uniform vec3 top, mid, edge, bottom, spotDir, uLo, uHi, uSun, uHazeCol, uHazeDir;
     uniform float uCloud, uWall, uSharp, uScale, uT, uHaze, uStar; uniform int uOct; uniform vec2 uDrift;
     varying vec3 vDir;
     float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
@@ -132,7 +133,9 @@ const backdropMat = new THREE.ShaderMaterial({
         cc = mix(cc, uHi, pow(1.0 - thick, 3.0) * 0.55);
         c = mix(c, cc, clamp(m, 0.0, 1.0)); cloudM = clamp(m, 0.0, 1.0);
       }
-      c = mix(c, uHazeCol, uHaze * (1.0 - smoothstep(0.0, 0.30, abs(y))));
+      { float hz = uHaze * (1.0 - smoothstep(0.0, 0.30, abs(y)));
+        hz *= 0.55 + 0.45 * smoothstep(-0.35, 0.95, dot(d, uHazeDir));   // 地平線の明るさを方位で変える（遠くの街の明かり）
+        c = mix(c, uHazeCol, hz); }
       gl_FragColor = vec4(c, 1.0); }`,
   side: THREE.BackSide, depthWrite: false, fog: false,
 });
