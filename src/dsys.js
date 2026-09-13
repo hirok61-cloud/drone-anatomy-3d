@@ -77,15 +77,26 @@ function dsysAt(i, u, out) {
 }
 
 // ---------- それぞれのレイヤー ----------
-function dsysPath() {   // ①経路: つぎの図形へ向かう経路。太い1本＝1機ぶんの予定
-  const n = dshow.n, N = 15, S = 24, p = [0, 0, 0];
+function dsysPath() {   // ①経路: 並べた場所から上がり、つぎの図形へ向かうまでの1本
+  const n = dshow.n, N = 9, S = 18, p = [0, 0, 0];
+  const y0 = (0.016 - DSHOW_H * (1 - dshow.k) * (1 - dshow.gz)) / dshow.k;   // 地面(world y≒0)にあたる隊列座標の高さ
   for (let m = 0; m < N; m++) {
-    const i = Math.floor((m + 0.5) * n / N);
-    const pts = []; for (let s2 = 0; s2 <= S; s2++) pts.push(dsysAt(i, s2 / S, p).slice());
-    dsys.air.add(dsysTube(pts, m === 0 ? 0.026 : 0.014, m === 0 ? dsys.mats.solid : dsys.mats.thin));
+    const i = Math.floor((m + 0.5) * n / N), main = m === 0;
+    const hx = dshow.home[i * 3], hz = dshow.home[i * 3 + 2];
+    const c0 = dsysAt(i, 0, p).slice();
+    const pts = [];
+    // 離陸: まっすぐ上がってから横へ動く（実際の運用と同じ順）
+    for (let s2 = 0; s2 <= 12; s2++) {
+      const u = s2 / 12;
+      const uy = Math.min(1, u * 1.30), ey = uy * uy * (3 - 2 * uy);
+      const ux = Math.max(0, (u - 0.22) / 0.78), ex = ux * ux * (3 - 2 * ux);
+      pts.push([hx + (c0[0] - hx) * ex, y0 + (c0[1] - y0) * ey, hz + (c0[2] - hz) * ex]);
+    }
+    for (let s2 = 1; s2 <= S; s2++) pts.push(dsysAt(i, s2 / S, p).slice());   // つぎの図形へ
+    dsys.air.add(dsysTube(pts, main ? 0.040 : 0.018, main ? dsys.mats.solid : dsys.mats.thin));
     // 出発点は小さく、行き先は大きく。どちらへ向かう線なのかが一目で分かる
-    for (const [u, r] of [[0, 0.018], [1, 0.034]]) {
-      const c = dsysAt(i, u, p), sp = dsysMark(new THREE.Mesh(new THREE.SphereGeometry(r * (m === 0 ? 1.5 : 1), 10, 6), dsys.mats.solid));
+    for (const [c, r] of [[[hx, y0, hz], 0.024], [dsysAt(i, 1, p).slice(), 0.040]]) {
+      const sp = dsysMark(new THREE.Mesh(new THREE.SphereGeometry(r * (main ? 1.5 : 1), 10, 6), dsys.mats.solid));
       sp.position.set(c[0], c[1], c[2]); dsys.air.add(sp);
     }
   }
@@ -102,7 +113,7 @@ function dsysPair() {   // ③間隔: 隣り合う機体の「間」を見せる
   near.sort((x, y) => x[0] - y[0]);
   const keep = new Set(); for (let i = 0; i < Math.min(36, near.length); i++) keep.add(near[i][1]);
   if (!dsys.brightSave) dsys.brightSave = dshow.bright.slice();
-  for (let i = 0; i < n; i++) dshow.bright[i] = keep.has(i) ? 2.10 : 0.11;
+  for (let i = 0; i < n; i++) dshow.bright[i] = keep.has(i) ? 2.40 : 0.30;
   dshow.geo.attributes.bright.needsUpdate = true;
   // いちばん近い相手までの距離を、実寸の線で出す
   const b = near[1] ? near[1][1] : a;
@@ -113,9 +124,10 @@ function dsysPair() {   // ③間隔: 隣り合う機体の「間」を見せる
     dsys.air.add(dsysTube([mid, tip], 0.005));
     // 箱庭の縮尺で実寸に直す。この教材の隊列は実際のショーを縮めたものなので、
     // 「機体の飛行間隔1.5mを、この隊列の広がりに当てはめるとどれくらいか」を出す
-    const d = Math.hypot(p[0]-q[0], p[1]-q[1], p[2]-q[2]);
-    const lab = dsysLabel(`となりまで ${d.toFixed(2)} m`, DSHOW_R * 0.80);
-    lab.position.set(tip[0] - DSHOW_R * 0.28, tip[1] + DSHOW_R * 0.07, tip[2]); dsys.air.add(lab); }
+    // この画は実際のショーを縮めたもの。箱庭の寸法をそのまま m で出すと実物と食い違うので、
+    // 本文で出典を示した実機の間隔（0.8〜1.5m）を添える
+    const lab = dsysLabel('となりとの間隔（実機で0.8〜1.5m）', DSHOW_R * 1.06);
+    lab.position.set(tip[0] - DSHOW_R * 0.42, tip[1] + DSHOW_R * 0.07, tip[2]); dsys.air.add(lab); }
   for (const c of [p, q]) { const m = dsysMark(new THREE.Mesh(new THREE.SphereGeometry(0.030, 12, 8), dsys.mats.solid)); m.position.set(c[0], c[1], c[2]); dsys.air.add(m); }
 }
 function dsysPairOff() { if (dsys.brightSave) { dshow.bright.set(dsys.brightSave); dshow.geo.attributes.bright.needsUpdate = true; dsys.brightSave = null; } }
@@ -135,22 +147,39 @@ function dsysFence() {   // ⑥囲い: 内側（越えたら帰る）と外側�
     lab.position.set(0, y1 - DSHOW_R * (inner ? 0.26 : 0.62), r * 0.62); dsys.air.add(lab);   /* 手前側に寄せる。上に出すと画面の外へ出る */
   }
 }
-function dsysGrid(withBoxes) {   // ⑦離陸前の格子（②⑤の足場にもなる）
-  const k = dshow.k || 1, n = Math.min(dshow.n, 216);
-  const cols = Math.ceil(Math.sqrt(n * 1.6)), rows = Math.ceil(n / cols), sp = 0.075;   /* 0.5m格子を箱庭の縮尺に合わせる */
-  const g = new THREE.SphereGeometry(sp * 0.19, 8, 6);
-  const im = new THREE.InstancedMesh(g, dsys.mats.lit, n); im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-  const m = new THREE.Matrix4();
+// 離陸前に機体を並べる格子。①経路と⑦離着陸で同じ場所を使う
+function dsysHome() {
+  const n = dshow.n, W = DSHOW_R * 1.00, D = DSHOW_R * 0.72, cz = 0.30;
+  const cols = Math.max(2, Math.round(Math.sqrt(n * W / D))), rows = Math.ceil(n / cols);
+  const sx = W * 2 / cols, sz = D * 2 / rows;
   for (let i = 0; i < n; i++) { const c = i % cols, r = (i / cols) | 0;
-    m.makeTranslation((c - (cols - 1) / 2) * sp, 0.014, (r - (rows - 1) / 2) * sp + 0.30); im.setMatrixAt(i, m); }
-  im.instanceMatrix.needsUpdate = true; dsysMark(im); dsys.world.add(im);
-  { const w = cols * sp * 0.62, h = rows * sp * 0.72;   /* 離陸場所を示す淡い床 */
-    const pad = dsysMark(new THREE.Mesh(new THREE.PlaneGeometry(w * 2, h * 2), dsys.mats.glass));
-    pad.rotation.x = -Math.PI / 2; pad.position.set(0, 0.004, 0.30); dsys.world.add(pad);
-    const pts = []; for (const [x, z] of [[-w, -h], [w, -h], [w, h], [-w, h], [-w, -h]]) pts.push([x, 0.006, z + 0.30]);
+    dshow.home[i * 3] = (c - (cols - 1) / 2) * sx;
+    dshow.home[i * 3 + 1] = 0;
+    dshow.home[i * 3 + 2] = (r - (rows - 1) / 2) * sz + cz; }
+  dshow.geo.attributes.aHome.needsUpdate = true;
+}
+function dsysGrid(withBoxes, land) {   // ⑦離陸前の格子（②⑤の足場にもなる）
+  const k = dshow.k || 1;
+  // 離着陸エリアの広さ。実寸どおりだと隊列の1/6以下になって何も読めないので、
+  // 見える大きさに広げてある（縮尺の断りは読み面の末尾に出している）
+  const W = DSHOW_R * 1.00, D = DSHOW_R * 0.72, cz = 0.30;
+  const N = land ? dshow.n : Math.min(dshow.n, 216);
+  const cols = Math.max(2, Math.round(Math.sqrt(N * W / D))), rows = Math.ceil(N / cols);
+  const sx = W * 2 / cols, sz = D * 2 / rows;
+  dsysHome();   // 全機ぶんの並べる位置（高さは uHomeY で毎フレーム渡す。倍率が動くため）
+  if (!land) {  // 印の格子（実際の機体は空にいる）
+    const g = new THREE.SphereGeometry(Math.min(sx, sz) * 0.13, 8, 6);   /* 主役は経路。並べる場所は控えめな点で示す */
+    const im = new THREE.InstancedMesh(g, dsys.mats.solid, N); const m = new THREE.Matrix4();
+    for (let i = 0; i < N; i++) { const c = i % cols, r = (i / cols) | 0;
+      m.makeTranslation((c - (cols - 1) / 2) * sx, 0.014, (r - (rows - 1) / 2) * sz + cz); im.setMatrixAt(i, m); }
+    im.instanceMatrix.needsUpdate = true; dsysMark(im); dsys.world.add(im);
+  }
+  { const pad = dsysMark(new THREE.Mesh(new THREE.PlaneGeometry(W * 2.1, D * 2.3), dsys.mats.glass));
+    pad.rotation.x = -Math.PI / 2; pad.position.set(0, 0.004, cz); dsys.world.add(pad);
+    const pts = []; for (const [x, z] of [[-W, -D], [W, -D], [W, D], [-W, D], [-W, -D]]) pts.push([x * 1.05, 0.006, z * 1.15 + cz]);
     dsys.world.add(dsysLine(pts, dsys.mats.line)); }
-  if (withBoxes) { const bg = new THREE.BoxGeometry(sp * 2.0, 0.055, sp * rows * 0.8);
-    for (const x of [-1, 1]) { const b = dsysMark(new THREE.Mesh(bg, dsys.mats.body)); b.position.set(x * cols * sp * 0.42, 0.028, 0.30); dsys.world.add(b); } }
+  if (withBoxes) { const bg = new THREE.BoxGeometry(W * 0.22, 0.055, D * 1.7);
+    for (const x of [-1, 1]) { const b = dsysMark(new THREE.Mesh(bg, dsys.mats.body)); b.position.set(x * W * 1.28, 0.028, cz); dsys.world.add(b); } }
   dsys.world.scale.setScalar(k);
 }
 function dsysStation(kind) {   // ②基準局 / ⑤地上局。夜なので自分で光っていないと見えない
@@ -168,6 +197,13 @@ function dsysStation(kind) {   // ②基準局 / ⑤地上局。夜なので自�
     for (let i = 0; i < 3; i++) {   /* 補正を配っている様子。広がる輪 */
       const r = 0.42 + i * 0.34, pts = []; for (let s2 = 0; s2 <= 48; s2++) { const a = s2 / 48 * Math.PI * 2; pts.push([Math.cos(a) * r, 0.40 + i * 0.02, Math.sin(a) * r]); }
       grp.add(dsysLine(pts, dsys.mats.faint)); }
+    // 基準局から上がっていく輪。これが届くと、機体のふらつきが止まる
+    { const pts = []; for (let s2 = 0; s2 <= 64; s2++) { const a = s2 / 64 * Math.PI * 2; pts.push([Math.cos(a), Math.sin(a), 0]); }
+      dsys.rtkRing = [0, 1, 2].map(() => { const r = dsysLine(pts, dsys.mats.line.clone()); r.renderOrder = 6; dsys.world.add(r); return r; });
+      dsys.rtkAt = [px, 0.40, pz]; }
+    dsys.rtkLab = ['補正なし: 位置が数十m ずれる', '補正あり: 位置が数cm に収まる'].map((t, i) => {
+      const lab = dsysLabel(t, DSHOW_R * 1.06); lab.position.set(px * 0.20, 1.34, pz); lab.visible = i === 0;
+      dsys.world.add(lab); return lab; });
   } else {
     const scr = dsysMark(new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.17, 0.014), dsys.mats.dark)); scr.position.set(0, 0.47, 0); scr.rotation.x = -0.32; grp.add(scr);
     const lit = dsysMark(new THREE.Mesh(new THREE.PlaneGeometry(0.23, 0.14), dsys.mats.lit)); lit.position.set(0, 0.472, 0.010); lit.rotation.x = -0.32; grp.add(lit);
@@ -201,7 +237,7 @@ function dsysLinks() {   // ⑤電波: 地上局から機体へ。多いと線�
 }
 
 // ---------- 出し入れ ----------
-const DSYS_GROUND = ['rtk', 'link', 'grid', 'fence'];   // 地面のものが主役のレイヤー。ショー全体を縮めて地面から入れる
+const DSYS_GROUND = ['path', 'rtk', 'link', 'grid', 'fence'];   // 地面のものが主役のレイヤー。ショー全体を縮めて地面から入れる
 // 描き進みの対象にする（InstancedMesh と Sprite は除く）
 function dsysArm(g) {
   for (const o of g.children) {
@@ -224,22 +260,23 @@ function dshowLayer(id) {
   dsysBuild();
   // 前のレイヤーの後始末（scene に直接足したものも消す）
   for (const t of dsys.tmp) if (t.owned) { scene.remove(t.owned); if (t.owned.geometry) t.owned.geometry.dispose(); }
-  dsys.beads = null; dsys.esc = null;
+  dsys.beads = null; dsys.esc = null; dsys.rtkRing = null; dsys.rtkLab = null;
   dsysClear();
   dsys.cur = id || null; dsys.t = 0;
-  { const want = DSYS_GROUND.includes(dsys.cur) ? 1 : 0;
-    if (want !== dshow.gzWant) { dshow.gzWant = want; dshowFrame(700); } }
-  if (dshow.mat) { dshow.mat.uniforms.uSkew.value = 0; dshow.mat.uniforms.uSkewFrac.value = 0.03; }
+  { const want = DSYS_GROUND.includes(dsys.cur) ? 1 : 0, la = dshow.landAim;
+    dshow.landAim = 0;
+    if (want !== dshow.gzWant || la) { dshow.gzWant = want; dshowFrame(700); } }
+  if (dshow.mat) { dshow.mat.uniforms.uSkew.value = 0; dshow.mat.uniforms.uSkewFrac.value = 0.03; dshow.mat.uniforms.uLand.value = 0; }
   dsysPairOff();
   if (!dsys.cur) { dsys.world.visible = dsys.air.visible = false; return; }
   dsys.world.scale.setScalar(dshow.k || 1);
-  if (id === 'path') { dsysPath(); dsysGrid(true); }
+  if (id === 'path') { dsysGrid(true); dsysPath(); }
   else if (id === 'rtk') { dsysStation('rtk'); dsysGrid(false); }
   else if (id === 'pair') { dsysPair(); }
   else if (id === 'sync') { if (dshow.mat) { dshow.mat.uniforms.uSkew.value = 0.34; dshow.mat.uniforms.uSkewFrac.value = 0.03; } }   /* はじめは3%だけ遅らせる。だんだん増やして崩れるまでを見せる */
   else if (id === 'link') { dsysStation('gcs'); dsysLinks(); }
   else if (id === 'fence') { dsysFence(); }
-  else if (id === 'grid') { dsysGrid(true); }
+  else if (id === 'grid') { dsysGrid(true, true); }
   dsysArm(dsys.air); dsysArm(dsys.world);
   dsys.world.visible = dsys.world.children.length > 0;
   dsys.air.visible = dsys.air.children.length > 0;
@@ -267,6 +304,35 @@ function stepDsys(dtReal) {
     const e = u * u * (3 - 2 * u), r = dsys.esc.r0 + (dsys.esc.r1 - dsys.esc.r0) * e, a = 0.9;
     dsys.esc.sp.position.set(Math.cos(a) * r, dsys.esc.y, Math.sin(a) * r);
     dsys.esc.sp.material.opacity = 0.5 + 0.5 * (T > 0.45 && T < 0.6 ? 1 : 0.6); }
+  // ⑦は「降りて、しばらく待って、また上がる」を繰り返す
+  if (dsys.cur === 'rtk' && dshow.mat) {
+    // 補正が届く前はふらつき、届くと止まる。輪は基準局から上がっていく
+    const T = reduceMotion ? 0.80 : (dsys.t % 9) / 9;
+    const w = T < 0.40 ? 3.6 : T < 0.54 ? 3.6 * (1 - (T - 0.40) / 0.14) : 0;
+    dshow.mat.uniforms.uWave.value = reduceMotion ? 0 : w;
+    if (dsys.rtkLab) { dsys.rtkLab[0].visible = T < 0.47; dsys.rtkLab[1].visible = T >= 0.47; }
+    if (dsys.rtkRing) {
+      for (const [i, ring] of dsys.rtkRing.entries()) {
+        const e = clamp(T / 0.50 - i * 0.22, 0, 1);
+        ring.visible = e > 0 && e < 1 && T < 0.56;
+        if (!ring.visible) continue;
+        ring.position.set(dsys.rtkAt[0], dsys.rtkAt[1], dsys.rtkAt[2]);
+        ring.lookAt(camera.position);   /* 水平な輪は低い視点から線にしか見えない。カメラを向けて「広がり」を出す */
+        ring.scale.setScalar(0.20 + e * 2.6);
+        ring.material.opacity = 0.72 * (1 - e) * (1 - e);
+      }
+    }
+  }
+  if (dsys.cur === 'grid' && dshow.mat) {
+    const T = reduceMotion ? 0.45 : (dsys.t % 11) / 11;
+    const u = T < 0.30 ? T / 0.30 : T < 0.62 ? 1 : T < 0.88 ? 1 - (T - 0.62) / 0.26 : 0;
+    dshow.mat.uniforms.uLand.value = u * u * (3 - 2 * u);
+    // カメラは機体と一緒に下りる。0.035 ごとに追いかけ先を置き直して、あとは flyTo が滑らかにつなぐ
+    const la = dshow.mat.uniforms.uLand.value;
+    if (Math.abs(la - dshow.landAim) > 0.035 || (la === 0 && dshow.landAim) || (la === 1 && dshow.landAim !== 1)) {
+      dshow.landAim = la; dshowFrame(600);
+    }
+  }
   if (dsys.cur === 'sync' && dshow.mat) dshow.mat.uniforms.uSkewFrac.value = reduceMotion ? 0.25 : clamp(0.03 + dsys.t / 9, 0.03, 0.55);
 }
 

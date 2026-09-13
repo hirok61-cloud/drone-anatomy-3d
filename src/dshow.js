@@ -12,7 +12,7 @@ const dshow = {
   from: null, to: null, raw: null, colFrom: null, colTo: null, lag: null, rnd: null, bright: null,
   perm: null, keyA: null, keyB: null, ordA: null, ordB: null,
   nextTo: null, nextCol: null, nextLag: null, nextFig: -1,
-  fig: 0, figT: 0, phase: 'hold', saved: null, star: 0, lastVals: 0, lastBand: 0, sig: '', auto: true, kWant: 1, gz: 0, gzWant: 0, fitX: 2.4, fitY: 2.4, mini: false, text: '', forceFig: -1, askText: false, bodyPos: null, dist: 11, k: 1, bodyYaw: 0,
+  fig: 0, figT: 0, phase: 'hold', saved: null, star: 0, lastVals: 0, lastBand: 0, sig: '', auto: true, kWant: 1, gz: 0, gzWant: 0, fitX: 2.4, fitY: 2.4, landAim: 0, glowF: 1, mini: false, text: '', forceFig: -1, askText: false, bodyPos: null, dist: 11, k: 1, bodyYaw: 0,
 };
 const DSHOW_N = () => (S.qLevel <= 1 ? 1200 : S.qLevel === 2 ? 2200 : 3200);   // 実際のショーは数百〜数千機
 const DSHOW_H = 3.60;      // 隊列の中心の高さ(m)。低いほうの機体が地平線あたりに来る高さ
@@ -27,12 +27,12 @@ const DSHOW_GLOW = 0.060;  // 光の玉の直径(m)。機体そのものより�
 // ---------- 図形 ----------
 // どれも「輪郭の上に等間隔で並べる」。点の数が変わっても形が保てる
 const DSHOW_FIGS = [
-  { id: 'grid', name: '整列', col: ['#cfe0ff', '#8fb6ff'], note: '離陸して定位置に並びます。1機ずつ手で操縦しているのではなく、あらかじめ決めた経路を自動で飛ばします。教則は自動操縦を「プログラムにより自動的に操縦を行うこと」としています。' },
+  { id: 'grid', name: '整列', glow: 0.46, col: ['#cfe0ff', '#8fb6ff'], note: '離陸して定位置に並びます。1機ずつ手で操縦しているのではなく、あらかじめ決めた経路を自動で飛ばします。教則は自動操縦を「プログラムにより自動的に操縦を行うこと」としています。' },
   { id: 'ring', name: '輪', col: ['#7fd4ff', '#d6f4ff'], note: '教則は、飛行中の他の無人航空機を確認した場合は安全な間隔を確保し、接近や衝突のおそれがあれば降下させるなどの措置をとるとともに、相手方と飛行日時・経路・高度を調整するとしています。' },
   { id: 'star', name: '星', col: ['#ffcf5e', '#fff6d6'], note: 'ショーの色は演出です。夜間飛行の必須装備は「機体の姿勢及び方向が正確に視認できる灯火」で、こちらは安全のための要件です。全周に同じ色で光る玉を見て、機首がどちらか分かるでしょうか。' },
   { id: 'heart', name: 'ハート', col: ['#ff7ba6', '#ffd8e3'], note: 'カテゴリーⅡ飛行は、飛行経路下に操縦者と補助者以外の第三者が立ち入らないよう管理する措置を講じたうえで行うものとされています。看板やコーンによる表示、補助者による監視と口頭警告が例です。' },
-  { id: 'drone', name: '機体のかたち', col: ['#7dffc4', '#ddfff2'], note: '手前の1機を大きく描いています。ショーの機体はカメラを積まず、機体と同じくらい大きな灯りを下に抱えた形です。100グラム以上の機体は1機ずつ登録し、一部の例外を除きリモートID機能を備えることが求められます。台数分すべてが対象です。' },
-  { id: 'sphere', name: '球', col: ['#a992ff', '#e8e0ff'], note: '風が強まれば隊列は保てません。催しの上空では、風速5m/s以上の場合は飛行を中止することが必要とされています。' },
+  { id: 'drone', name: '機体のかたち', glow: 0.80, col: ['#7dffc4', '#ddfff2'], note: '手前の1機を大きく描いています。ショーの機体はカメラを積まず、機体と同じくらい大きな灯りを下に抱えた形です。100グラム以上の機体は1機ずつ登録し、一部の例外を除きリモートID機能を備えることが求められます。台数分すべてが対象です。' },
+  { id: 'sphere', name: '球', glow: 0.78, col: ['#a992ff', '#e8e0ff'], note: '風が強まれば隊列は保てません。催しの上空では、風速5m/s以上の場合は飛行を中止することが必要とされています。' },
   // 最後に置く。文字が指定されていないときは順番から外れる（dshowFigN）
   { id: 'custom', name: 'あなたの文字', col: ['#ffc7e8', '#bfe4ff'], note: 'いま出ている文字は、あなたがこの場で指定したものです。実際のショーでも、飛ばす前にこの配置を作って全機に読み込ませます。教則は自動操縦を「プログラムにより自動的に操縦を行うこと」としています。機数は決まっているので、文字が多いほど1文字あたりに使える機体は減ります。' },
 ];
@@ -206,6 +206,7 @@ function dshowBuild() {
   dshow.from = new Float32Array(n * 3); dshow.to = new Float32Array(n * 3); dshow.raw = new Float32Array(n * 3);
   dshow.colFrom = new Float32Array(n * 3); dshow.colTo = new Float32Array(n * 3);
   dshow.lag = new Float32Array(n); dshow.rnd = new Float32Array(n); dshow.bright = new Float32Array(n);
+  dshow.home = new Float32Array(n * 3);   /* ⑦で実際に降ろす先（離陸前の格子） */
   dshow.perm = new Uint32Array(n); dshow.ordA = new Uint32Array(n); dshow.ordB = new Uint32Array(n);
   dshow.nextTo = new Float32Array(n * 3); dshow.nextCol = new Float32Array(n * 3); dshow.nextLag = new Float32Array(n); dshow.nextFig = -1;
   dshow.keyA = new Float64Array(n); dshow.keyB = new Float64Array(n);
@@ -218,17 +219,18 @@ function dshowBuild() {
   geo.setAttribute('aLag', new THREE.BufferAttribute(dshow.lag, 1));
   geo.setAttribute('aRnd', new THREE.BufferAttribute(dshow.rnd, 1));
   geo.setAttribute('bright', new THREE.BufferAttribute(dshow.bright, 1));
+  geo.setAttribute('aHome', new THREE.BufferAttribute(dshow.home, 3));
   geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, DSHOW_H, 0), DSHOW_R * 2);
   const mat = new THREE.ShaderMaterial({
     uniforms: {
       uSize: { value: DSHOW_GLOW }, uPxPerM: { value: 900 }, uGain: { value: 1 },
-      uProg: { value: 1 }, uTime: { value: 0 }, uWave: { value: 1 }, uSkew: { value: 0 }, uSkewFrac: { value: 0.03 },
+      uProg: { value: 1 }, uTime: { value: 0 }, uWave: { value: 1 }, uSkew: { value: 0 }, uSkewFrac: { value: 0.03 }, uLand: { value: 0 }, uHomeY: { value: 0 },
     },
     // 位置と色は頂点シェーダで作る。CPU は図形が変わる瞬間しか働かない
     vertexShader: `
-      attribute vec3 aTo, aColA, aColB;
+      attribute vec3 aTo, aColA, aColB, aHome;
       attribute float aLag, aRnd, bright;
-      uniform float uSize, uPxPerM, uProg, uTime, uWave, uSkew, uSkewFrac;
+      uniform float uSize, uPxPerM, uProg, uTime, uWave, uSkew, uSkewFrac, uLand, uHomeY;
       varying vec3 vCol; varying float vB;
       void main() {
         float late = step(1.0 - uSkewFrac, abs(aRnd));   // 時計がずれているのは一部の機体だけ（全機だと砂嵐に見える）
@@ -241,14 +243,17 @@ function dshowBuild() {
           p += ax * (sin(3.14159265 * e) * 0.15 * L * aRnd);
         }
         float ph = aRnd * 31.4 + aLag * 12.0;       // 静止中も1機ずつわずかに位置を保ち直している
-        p += uWave * 0.010 * vec3(sin(uTime * 1.30 + ph), sin(uTime * 1.07 + ph * 1.7), sin(uTime * 0.83 + ph * 2.3));
+        p += uWave * (1.0 - uLand) * 0.010 * vec3(sin(uTime * 1.30 + ph), sin(uTime * 1.07 + ph * 1.7), sin(uTime * 0.83 + ph * 2.3));
+        // ⑦離着陸: 1機ずつ少しずらして、格子へ降りる／格子から上がる
+        float ld = clamp((uLand * 1.35) - abs(aRnd) * 0.35, 0.0, 1.0);
+        p = mix(p, vec3(aHome.x, uHomeY, aHome.z), ld * ld * (3.0 - 2.0 * ld));   // 着地の高さは倍率で変わるので uniform で渡す
         vCol = mix(aColA, aColB, e);
         vec4 mv = modelViewMatrix * vec4(p, 1.0);
         float dist = max(-mv.z, 0.05);
         // 明るさは「値」ではなく「半径」で表す。gl_PointSize は画角を見ないので、自分で1mあたりの画素数を渡す
         float ideal = uSize * pow(bright, 0.42) * uPxPerM / dist;
         float px = clamp(ideal, 2.3, 62.0);         // 2px を切ると点が明滅する。上限は一部の GPU の上限(64px)の手前
-        vB = min(bright * (ideal * ideal) / (px * px), 6.0);   // 広げたぶん暗く、詰めたぶん明るく。光の総量は変えない
+        vB = min(bright * (1.0 - uLand * 0.30) * (ideal * ideal) / (px * px), 6.0);   // 着地したら灯りを落とす   // 広げたぶん暗く、詰めたぶん明るく。光の総量は変えない
         gl_PointSize = px;
         gl_Position = projectionMatrix * mv;
       }`,
@@ -274,7 +279,7 @@ function dshowBuild() {
   // これが無いと数珠つなぎの玉に見える（実写のショーは光の線が発光して見える）。
   // uSize と uGain 以外の uniform は同じ入れ物を共有するので、毎フレームの写しが要らない
   const haloMat = mat.clone();
-  for (const key of ['uPxPerM', 'uProg', 'uTime', 'uWave', 'uSkew', 'uSkewFrac']) haloMat.uniforms[key] = mat.uniforms[key];
+  for (const key of ['uPxPerM', 'uProg', 'uTime', 'uWave', 'uSkew', 'uSkewFrac', 'uLand', 'uHomeY']) haloMat.uniforms[key] = mat.uniforms[key];
   const halo = new THREE.Points(geo, haloMat); halo.frustumCulled = false; halo.renderOrder = 5;
   halo.userData.noPart = halo.userData.noPick = halo.userData.noShadow = halo.userData.noAO = true;
   pts.add(halo);
@@ -291,12 +296,21 @@ function dshowUpload() {
 // 画面の広さと画素密度から、1m が何画素になるかを出す（点の大きさはこれで決まる）
 // にじみの2枚目を本体に合わせる。2.5倍を超えると1機ずつが読めなくなる（＝事実と違う見え方）ので上限にする
 const DSHOW_HALO = () => (S.qLevel <= 1 ? 2.1 : 2.5);
-function dshowGlowSync() {
+// 発着場の見かけの半幅（隊列の座標。斜めから見たぶんを含む）。隊列の半径 DSHOW_R より広い
+const DSHOW_PAD_W = 2.95;
+// 灯りの大きさ。画の倍率と、図形ごとの詰まり具合で決める。
+// 面で埋める図形（整列など）は隣までが 5cm ほどしかないので、
+// 光の輪が 15cm もあると 1枚の板に溶けてしまう。図形ごとに小さくする
+function dshowSetGlow() {
+  if (!dshow.mat) return;
+  const g = DSHOW_GLOW * dshow.k * dshow.glowF;
+  dshow.mat.uniforms.uSize.value = g;
   if (!dshow.haloMat) return;
   const h = DSHOW_HALO();
-  dshow.haloMat.uniforms.uSize.value = DSHOW_GLOW * dshow.k * h;
+  dshow.haloMat.uniforms.uSize.value = g * h;
   dshow.haloMat.uniforms.uGain.value = dshow.mat.uniforms.uGain.value * (0.60 / h);
 }
+function dshowGlowSync() { dshowSetGlow(); }
 function dshowPixels() {
   const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   dshow.mat.uniforms.uPxPerM.value = (H * DPR) / (2 * tanV);
@@ -339,12 +353,15 @@ function dshowFrame(ms) {
   const wF = R ? R.w : 1, hF = R ? R.h : 1;
   if (R) { camera.setViewOffset(innerWidth, innerHeight, innerWidth / 2 - R.cx, innerHeight / 2 - R.cy, innerWidth, innerHeight); camera.updateProjectionMatrix(); }
   // カメラを引くと天球（半径16m）の外に出て空が黒いドームになる。距離は固定して隊列のほうを伸縮させる
-  const fit = DSHOW_CAM * tanV * Math.min(hF, asp * wF) / 1.06;
+  const fit = DSHOW_CAM * tanV * Math.min(hF, asp * wF) / 1.12;
   let k = clamp(fit / DSHOW_R, 0.34, 1.00);   /* 大きくしすぎると低い機体が地平線より下へ落ちる */
   // 地上のものを見せるレイヤーでは、地面から隊列の上端までを1枚に入れる。
   // カメラは引けない（天球の外に出る）ので、ショー全体を地面を基点に縮める
   const gz = dshow.gzWant ? 1 : 0;
   if (gz) k = Math.min(k, (DSHOW_CAM * tanV * hF * 2 * 0.92) / (DSHOW_H + DSHOW_R));
+  // 着地のあいだは発着場が主役。隊列より2割ほど広いので、そのぶん縮めないと横がはみ出す
+  { const la0 = dshow.landAim || 0;
+    if (la0 > 0) k = k * (1 - la0) + Math.min(k, DSHOW_CAM * tanV * asp * wF / (DSHOW_PAD_W * 1.04)) * la0; }
   dshow.kWant = k; dshow.dist = DSHOW_CAM; dshow.sig = R ? `${Math.round(R.x0)},${Math.round(R.x1)},${Math.round(R.y0)},${Math.round(R.y1)}` : 'wide';
   if (dshow.k == null || reduceMotion) dshow.k = k;   /* 初回と「動きを減らす」設定は、その場で合わせる */
   // 円の図形は縦横どちらかで頭打ちになるが、横長の図形（文字や整列）は余った側を使える。
@@ -352,10 +369,16 @@ function dshowFrame(ms) {
   dshow.fitX = DSHOW_CAM * tanV * (asp * wF) / k; dshow.fitY = DSHOW_CAM * tanV * hF / k;
   dshowApplyK();
   // 見上げる高さ。地上を含めるときは、地面から隊列の上端までの真ん中を見る
-  const aimY = gz ? k * (DSHOW_H + DSHOW_R) / 2 : DSHOW_H;
-  const eyeY = gz ? Math.max(0.75, aimY * 0.55) : DSHOW_EYE;
+  // 着地のあいだは地面が主役。降りてくる機体を追って視線を下ろし、
+  // 最後は真上寄りから見下ろして「1機ずつ間隔をあけて並んでいる」のが分かる角度にする。
+  // 距離は変えない（寄っても見かけの大きさは変わらず、はみ出すだけ）
+  const la = dshow.landAim || 0;
+  const aimAir = gz ? k * (DSHOW_H + DSHOW_R) / 2 : DSHOW_H;
+  const aimY = aimAir * (1 - la) + 0.16 * la;
+  const eyeY = (gz ? Math.max(0.75, aimAir * 0.55) : DSHOW_EYE) * (1 - la) + (0.16 + DSHOW_CAM * 0.52) * la;
   const dy = aimY - eyeY, hz = Math.sqrt(Math.max(0.5, DSHOW_CAM * DSHOW_CAM - dy * dy));
   const eye = new THREE.Vector3(0.2874 * hz, eyeY, 0.9578 * hz), aim = new THREE.Vector3(0, aimY, 0);   /* 正面から少し右に寄って見上げる */
+  dshow.hF = hF;
   dshowPlaceBody(eye, aim, tanV, asp * wF, hF);
   controls.maxDistance = Math.max(controls.maxDistance, DSHOW_CAM * 1.06);
   flyTo(eye, aim, ms, false);
@@ -364,7 +387,8 @@ function dshowFrame(ms) {
 function dshowApplyK() {
   const k = dshow.k;
   if (dshow.pts) { dshow.pts.scale.setScalar(k); dshow.pts.position.y = DSHOW_H * (1 - k) * (1 - dshow.gz); }
-  if (dshow.mat) { dshow.mat.uniforms.uSize.value = DSHOW_GLOW * k; dshowGlowSync(); }   /* 光の玉も一緒に縮める。画面上の見え方を揃えるため */
+  if (dshow.mat) { dshowSetGlow();
+    dshow.mat.uniforms.uHomeY.value = (0.016 - DSHOW_H * (1 - k) * (1 - dshow.gz)) / k; }   /* world y≈0 に当たる隊列座標 */   /* 光の玉も一緒に縮める。画面上の見え方を揃えるため */
   if (typeof dsysLayout === 'function') dsysLayout();
 }
 // 手前の1機は「観客のすぐ前を飛んでいる1機」。カメラからの距離で置くので、
@@ -375,7 +399,13 @@ function dshowPlaceBody(eye, aim, tanV, wF, hF) {
   _dv1.copy(aim).sub(eye).normalize();
   _dv2.crossVectors(_dv1, UP).normalize();
   _dv3.crossVectors(_dv2, _dv1).normalize();
-  const p = eye.clone().addScaledVector(_dv1, near).addScaledVector(_dv2, hh * wF * 0.60).addScaledVector(_dv3, -hh * hF * 0.76);   /* 隅に寄せる。文字は横いっぱいに広がるので、真ん中寄りだと隊列の上に乗る */
+  // 隅に寄せる。文字は横いっぱいに広がるので、真ん中寄りだと隊列の上に乗る。
+  // 見下ろすときは下の隅が地面の下になるので、地面すれすれで止まるところまで寄せ幅を詰める（画面外に出さない）
+  // 下げすぎると観客のシルエットに重なり、「人の上を飛んでいる」ように見えてしまう
+  let f = 0.52;
+  const yAt = (ff) => eye.y + near * _dv1.y - hh * hF * ff * _dv3.y;
+  if (yAt(f) < 0.55 && _dv3.y > 1e-3) f = clamp((eye.y + near * _dv1.y - 0.55) / (hh * hF * _dv3.y), 0, 0.52);
+  const p = eye.clone().addScaledVector(_dv1, near).addScaledVector(_dv2, hh * wF * 0.60).addScaledVector(_dv3, -hh * hF * f);
   dshow.bodyPos = [p.x, Math.max(0.5, p.y), p.z];
   dshow.bodyYaw = Math.atan2(eye.x - p.x, eye.z - p.z) + 0.6;
 }
@@ -398,7 +428,7 @@ function dshowOn(on) {
     S.labelsSuppressed = true; buildLabels();
     S.air = false; for (const x of $$('.tgl[data-t=air]')) { x.classList.remove('on'); x.setAttribute('aria-pressed', 'false'); }
     if (S.explode > 0.02) setExplode(0); if (S.mode === 'cut') setMode('normal');
-    dshow.pts.visible = true; dshowPixels();
+    dshow.pts.visible = true; dshowPixels(); dshowCrowdBuild();
     farGroundOn(true);
     if (S.power === 0) setPower(0.5, true);
     // 手前の1機はショー専用機に差し替える。カメラも灯りも積まず、機体と同じくらいの光を抱えた別の機体
@@ -414,6 +444,7 @@ function dshowOn(on) {
     dshow.on = false; dshowUIOn(false);
     document.body.classList.remove('dshow'); syncDockH();
     if (dshow.pts) dshow.pts.visible = false;
+    if (dshow.crowd) dshow.crowd.visible = false;
     showDroneOn(false);
     const s = dshow.saved || {};
     S.labelsSuppressed = !!s.labels; buildLabels();
@@ -526,10 +557,17 @@ function stepDshow(dtReal) {
   else if (dshow.phase === 'hold' && dshow.figT > 0.5 && dshow.nextFig < 0) { dshowPrepare(); }   /* 静止に入ってひと呼吸おいてから、次の図形を用意する */
   u.uTime.value = dshow.t;
   u.uWave.value = reduceMotion ? 0 : 1;
+  { let want = (DSHOW_FIGS[dshow.fig] || {}).glow || 1;   // 図形が変われば灯りの大きさも変える（移り変わりに合わせてゆっくり）
+    const ld = u.uLand.value; if (ld > 0) want = want * (1 - ld) + 0.46 * ld;   // 地上に並べたときの間隔は「整列」と同じくらい
+    if (Math.abs(want - dshow.glowF) > 2e-3) {
+      dshow.glowF += (want - dshow.glowF) * (reduceMotion ? 1 : 1 - Math.exp(-dtReal / 0.55));
+      dshowSetGlow();
+    } }
   { const a = reduceMotion ? 1 : 1 - Math.exp(-dtReal / 0.22);
     const dk = dshow.kWant - dshow.k, dg = dshow.gzWant - dshow.gz;
     if (Math.abs(dk) > 1e-4 || Math.abs(dg) > 1e-4) { dshow.k += dk * a; dshow.gz += dg * a; dshowApplyK(); }
     else if (dshow.k !== dshow.kWant) { dshow.k = dshow.kWant; dshow.gz = dshow.gzWant; dshowApplyK(); } }
+  dshowPlaceCrowd();
   stepDsys(dtReal);
   // 手前の1機もホバリングらしく、わずかに上下する
   if (body.mode !== 'theater') setBodyMode('theater');   /* 何かの拍子に free へ戻っても、隊列の画は崩さない */
@@ -545,6 +583,95 @@ function stepDshow(dtReal) {
     if (sig !== dshow.sig) dshowFrame(420);
   }
   if (dshow.t - dshow.lastVals > 0.25) { dshow.lastVals = dshow.t; updateDshowVals(); }
+}
+
+// ---------- 観客のシルエット ----------
+// 夜空だけだと大きさの手がかりがない。画面の下の縁に人の頭と肩を置くと、
+// 「自分がその場に立って見上げている」ことが一目で伝わる。
+// 地上のしくみを見せるとき（gz）はカメラが下を向くので、じゃまになる前に消す
+// 実寸で描く。1m = 300px。頭のてっぺんから腰のあたりまでで 1.30m、横は 12m ぶん。
+// 観客は 12m 先に置く。近すぎると1人が画面の1割を占めてしまい、群衆に見えない
+const DSHOW_CROWD_W = 12.0, DSHOW_CROWD_H = 1.30, DSHOW_CROWD_PX = 300, DSHOW_CROWD_D = 12.0;
+function dshowCrowdTex() {
+  const W = DSHOW_CROWD_W * DSHOW_CROWD_PX, H = DSHOW_CROWD_H * DSHOW_CROWD_PX;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const g = c.getContext('2d');
+  const rnd = (() => { let s2 = 20260913; return () => (s2 = (s2 * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff; })();
+  const people = [];
+  for (let x = -140; x < W + 140; x += 74 + rnd() * 74) people.push({ x, s: 0.86 + rnd() * 0.30, d: rnd(), ph: rnd() < 0.13, hat: rnd() < 0.26 });
+  people.sort((a2, b2) => b2.d - a2.d);   // 後ろの人から描く
+  for (const p of people) {
+    const s2 = p.s * (1 - p.d * 0.26);
+    const hr = 32 * s2;                      // 頭の半径（実寸 0.105m）
+    const sh = 89 * s2;                      // 肩幅の半分（実寸 0.295m）
+    const hy = hr * 1.30 + 8 + p.d * 84;     // 頭の中心。奥の人ほど小さく、下がる
+    const ny = hy + hr * 0.94, sy = hy + hr * 2.10, y = H + 12;   // 首・肩・体の抜け
+    g.fillStyle = `rgba(0,0,0,${0.99 - p.d * 0.10})`;   /* 空のどこよりも暗く。そうしないと地面に溶ける */
+    g.beginPath();
+    g.moveTo(p.x - sh, y);
+    g.lineTo(p.x - sh, sy);
+    g.quadraticCurveTo(p.x - sh * 0.99, sy - hr * 0.72, p.x - sh * 0.50, ny + hr * 0.16);   // なで肩
+    g.quadraticCurveTo(p.x - hr * 1.02, ny, p.x - hr * 0.81, hy + hr * 0.59);               // 首すじ
+    g.arc(p.x, hy, hr, Math.PI * 0.80, Math.PI * 2.20);                                     // 頭
+    g.quadraticCurveTo(p.x + hr * 1.02, ny, p.x + sh * 0.50, ny + hr * 0.16);
+    g.quadraticCurveTo(p.x + sh * 0.99, sy - hr * 0.72, p.x + sh, sy);
+    g.lineTo(p.x + sh, y);
+    g.closePath(); g.fill();
+    // 空からの光が頭と肩の縁に乗る。これが無いと、ただの黒い帯になる
+    g.save(); g.beginPath(); g.rect(0, 0, W, sy + hr * 0.55); g.clip();   /* 縁の光は上だけ。横まで光ると切り抜きのシールに見える */
+    g.strokeStyle = `rgba(158,188,222,${0.50 - p.d * 0.20})`; g.lineWidth = 3.4 * s2;
+    g.beginPath();
+    g.moveTo(p.x - sh, sy);
+    g.quadraticCurveTo(p.x - sh * 0.99, sy - hr * 0.72, p.x - sh * 0.50, ny + hr * 0.16);
+    g.quadraticCurveTo(p.x - hr * 1.02, ny, p.x - hr * 0.81, hy + hr * 0.59);
+    g.arc(p.x, hy, hr, Math.PI * 0.80, Math.PI * 2.20);
+    g.quadraticCurveTo(p.x + hr * 1.02, ny, p.x + sh * 0.50, ny + hr * 0.16);
+    g.quadraticCurveTo(p.x + sh * 0.99, sy - hr * 0.72, p.x + sh, sy);
+    g.stroke(); g.restore();
+    if (p.hat) {   // 帽子やまとめ髪。頭がぜんぶ同じ丸だと並びが機械的に見える
+      g.fillStyle = `rgba(0,0,0,${0.99 - p.d * 0.10})`;
+      g.beginPath(); g.ellipse(p.x + hr * 0.18, hy - hr * 0.86, hr * 0.52, hr * 0.44, 0, 0, Math.PI * 2); g.fill(); }
+    if (p.ph) {   // 何人かは画面を上げている。腕もいっしょに描かないと四角が浮いて見える
+      const sgn = rnd() < 0.5 ? -1 : 1, ax = p.x + sgn * sh * 0.62, ay = sy + hr * 0.2;
+      const hx = p.x + sgn * sh * 0.86, hyy = hy - hr * 1.35;
+      g.fillStyle = `rgba(0,0,0,${0.99 - p.d * 0.10})`;
+      g.beginPath(); g.moveTo(ax - 13 * s2, ay); g.lineTo(hx - 11 * s2, hyy); g.lineTo(hx + 11 * s2, hyy); g.lineTo(ax + 13 * s2, ay); g.closePath(); g.fill();
+      g.fillStyle = 'rgba(0,0,0,0.99)'; g.fillRect(hx - 15 * s2, hyy - 26 * s2, 30 * s2, 30 * s2);
+      g.fillStyle = 'rgba(206,222,244,0.38)'; g.fillRect(hx - 11 * s2, hyy - 22 * s2, 22 * s2, 22 * s2);
+    }
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace; t.minFilter = THREE.LinearFilter; t.generateMipmaps = false;
+  t.wrapS = THREE.RepeatWrapping;
+  return t;
+}
+function dshowCrowdBuild() {
+  if (dshow.crowd) return dshow.crowd;
+  const m = new THREE.MeshBasicMaterial({ map: dshowCrowdTex(), transparent: true, depthWrite: false, toneMapped: false, fog: false });
+  const o = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), m);
+  o.renderOrder = 30; o.frustumCulled = false; o.visible = false; scene.add(o);
+  dshow.crowd = o; return o;
+}
+// 手前の1機と同じで、カメラからの距離で置く。画面のいちばん下に頭が並ぶ高さに合わせる。
+// カメラが動いている最中もついてくるよう、枠決めのときだけでなく毎フレーム置き直す
+function dshowPlaceCrowd() {
+  const o = dshow.crowd; if (!o) return;
+  const fade = clamp(1 - dshow.gz * 1.8, 0, 1);
+  o.visible = fade > 0.02; o.material.opacity = fade;
+  if (!o.visible) return;
+  const eye = camera.position, aim = controls.target;
+  const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  const near = DSHOW_CROWD_D, halfH = near * tanV, halfW = halfH * Math.max(0.40, camera.aspect);
+  _dv1.copy(aim).sub(eye).normalize();
+  _dv2.crossVectors(_dv1, UP).normalize();
+  _dv3.crossVectors(_dv2, _dv1).normalize();
+  // 頭のてっぺんが画面の下から 19% のところに来るように下げる
+  const down = halfH * 0.62 + DSHOW_CROWD_H / 2;
+  const p = eye.clone().addScaledVector(_dv1, near).addScaledVector(_dv3, -down);
+  const w = Math.max(DSHOW_CROWD_W, halfW * 2.6);
+  o.material.map.repeat.x = w / DSHOW_CROWD_W;
+  o.position.copy(p); o.scale.set(w, DSHOW_CROWD_H, 1);
+  o.lookAt(eye.x, p.y, eye.z);   /* 上下は起こしたまま、横だけカメラを向く */
 }
 
 // ---------- 説明カード ----------
