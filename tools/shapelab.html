@@ -23,7 +23,7 @@
   figcaption { color: #8fa3c8; font-size: 11.5px; margin-top: 2px; }
   canvas { display: block; background: #03060c; border: 1px solid #1a2438; border-radius: 6px; }
   pre { margin: 0; font: 11.5px/1.45 ui-monospace, Menlo, monospace; color: #b9c8e6; white-space: pre-wrap; }
-  .warn { color: #ffb86b; } .err { color: #ff7b7b; font-weight: 700; }
+  .warn { color: #ffb86b; } .err { color: #ff7b7b; font-weight: 700; } .note { color: #9fd0ff; }
   .cell { width: var(--s); } .cell figcaption { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 </style>
 </head>
@@ -103,9 +103,14 @@ window.addEventListener('load', () => {
   function gapReport(def, c, SZ) {
     const size = 384, parts = _dsExpand(def), tf = _dsTf(def, size), lab = _dsLabelsDef(parts, tf, size), T = Math.max(3, Math.round(2.0 * tf.a));
     const ins = (x, y) => x >= 0 && y >= 0 && x < size && y < size && lab[y * size + x] >= 0, cells = new Map();
+    const uni = new Int16Array(size * size); for (let i = 0; i < uni.length; i++) uni[i] = lab[i] >= 0 ? 0 : -1;
+    const where = new Map(); _dsContours(uni, size, size).forEach((ch, ci) => { const m = ch.ch.length / 2; for (let q = 0; q < m; q++) where.set(ch.ch[q * 2 + 1] * size + ch.ch[q * 2], [ci, q, m]); });
+    const find = (x, y) => { for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const w = where.get((y + dy) * size + x + dx); if (w) return w; } return null; };
     for (let y = 0; y < size; y += 2) for (let x = 0; x < size; x += 2) { if (ins(x, y)) continue;
       for (const [dx, dy] of [[1, 0], [0, 1], [1, 1], [1, -1]]) { let a = 0, b = 0; for (let k = 1; k <= T; k++) { if (!a && ins(x + dx * k, y + dy * k)) a = k; if (!b && ins(x - dx * k, y - dy * k)) b = k; }
-        if (a && b && a + b <= 2 * T) { const key = ((y / 28) | 0) * 100 + ((x / 28) | 0), e = cells.get(key) || { n: 0, sx: 0, sy: 0, w: 99 }; e.n++; e.sx += x; e.sy += y; e.w = Math.min(e.w, (a + b) * (dx && dy ? 1.414 : 1)); cells.set(key, e); break; } } }
+        if (a && b && a + b <= 2 * T) { const pa = find(x + dx * a, y + dy * a), pb = find(x - dx * b, y - dy * b);
+          if (pa && pb && pa[0] === pb[0]) { const dd = Math.abs(pa[1] - pb[1]), along = Math.min(dd, pa[2] - dd); if (along < 6 * (a + b)) break; }   /* 谷・かど: 直さなくてよい */
+          const key = ((y / 28) | 0) * 100 + ((x / 28) | 0), e = cells.get(key) || { n: 0, sx: 0, sy: 0, w: 99 }; e.n++; e.sx += x; e.sy += y; e.w = Math.min(e.w, (a + b) * (dx && dy ? 1.414 : 1)); cells.set(key, e); break; } } }
     const out = []; for (const e of cells.values()) if (e.n >= 7) out.push({ x: e.sx / e.n, y: e.sy / e.n, w: e.w / tf.a, n: e.n });
     out.sort((a, b) => b.n - a.n);
     if (c) { c.fillStyle = '#ff4fd8'; for (const g of out.slice(0, 12)) { c.beginPath(); c.arc(g.x * SZ / size, g.y * SZ / size, Math.max(3, SZ * 0.012), 0, 7); c.fill(); } }
@@ -180,7 +185,8 @@ window.addEventListener('load', () => {
     const plist = document.createElement('div'); plist.style.cssText = 'column-count:3;column-gap:18px;margin-top:4px';
     const plog = (s2, cls) => { const e = document.createElement('div'); if (cls) e.className = cls; e.textContent = s2; plist.appendChild(e); };
     parts.forEach((p, k) => { const nm = `#${k} ${p.tag || '-'} ${p.s ? '線 ' + p.s : p.c || ''}${p._mx != null ? '（写し）' : ''}${p.cut ? '（切り抜き）' : ''}`;
-      const bad = !p.cut && cB[k] < 3; plog(`${nm}: ${cA[k]} / ${cB[k]}${bad ? ' ←1200機で見えない' : ''}`, bad ? 'warn' : ''); if (bad) log(`部品 ${nm} は1200機ではほぼ見えません（${cB[k]}点）。大きくするか w を上げてください`, 'warn'); });
+      const bad = !p.cut && cB[k] < 3; if (!bad && !p.cut && cB[k] < 10) log(`参考: 部品 #${k} ${p.tag || '-'} は1200機で ${cB[k]} 点。10点を切ると遠目には読みにくくなります（大事な部品なら大きくするか w を上げる）`, 'note');
+      plog(`${nm}: ${cA[k]} / ${cB[k]}${bad ? ' ←1200機で見えない' : ''}`, bad ? 'warn' : ''); if (bad) log(`部品 ${nm} は1200機ではほぼ見えません（${cB[k]}点）。大きくするか w を上げてください`, 'warn'); });
     const tags = new Set(parts.map(p => p.tag).filter(Boolean));
     for (const a of src.def.anim || []) for (const t of a.tags || []) if (!tags.has(t)) log(`動き ${a.type} が指している tag「${t}」を持つ部品がありません`, 'err');
     const known = ['spine', 'flap', 'swim', 'wave', 'sway', 'swing', 'rock', 'spin', 'pulse', 'bob', 'hop', 'orbit', 'shift', 'twinkle', 'blink', 'chase'];

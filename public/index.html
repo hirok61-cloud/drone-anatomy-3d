@@ -6924,7 +6924,15 @@ function dshapeSample(lab, W, H, n, opt) {
       const gw = g / Math.sqrt(wOf(c.k)), step = gw * 0.80, rad = gw * 0.52, cnt = Math.max(3, Math.round(c.len / step)); let j = 0;
       for (let q = 0; q < cnt; q++) { const s = (q + 0.5) / cnt * c.len; while (j < c.m - 1 && c.acc[j + 1] < s) j++;
         if (!c.keep[j]) continue;
-        const j2 = (j + 1) % c.m, t = (s - c.acc[j]) / Math.max(1e-6, c.acc[j + 1] - c.acc[j]), x = c.xs[j] + (c.xs[j2] - c.xs[j]) * t, y = c.ys[j] + (c.ys[j2] - c.ys[j]) * t;
+        const j2 = (j + 1) % c.m, t = (s - c.acc[j]) / Math.max(1e-6, c.acc[j + 1] - c.acc[j]); let x = c.xs[j] + (c.xs[j2] - c.xs[j]) * t, y = c.ys[j] + (c.ys[j2] - c.ys[j]) * t;
+        // 細い線（ひげ・角・触角・細い脚）は、両側の縁に1列ずつ置くと管のように見える。
+        // 縁から内側へたどって、すぐ向こう側の縁に近づき始める（＝幅が点の間隔ほどしかない）なら、まん中の尾根に置く。両側の点はそこで重なって1列にまとまる
+        { const ja = (j + 2) % c.m, jb = (j - 2 + c.m) % c.m; let tx = c.xs[ja] - c.xs[jb], ty = c.ys[ja] - c.ys[jb]; const tl = Math.hypot(tx, ty) || 1; tx /= tl; ty /= tl;
+          const lim = 0.62 * gw;
+          for (const sg of [1, -1]) { const nx = -ty * sg, ny = tx * sg; let pd = -1, rx = x, ry = y, ridge = false;
+            for (let u = 0.75; u <= lim + 1.5; u += 0.75) { const qx = x + nx * u, qy = y + ny * u; if (qx < 0 || qy < 0 || qx >= W || qy >= H) break; const qi = (qy | 0) * W + (qx | 0); if (lab[qi] !== c.k) break;
+              const dv = dist[qi]; if (dv < pd - 0.01) { ridge = true; break; } if (dv > pd) { pd = dv; rx = qx; ry = qy; } }
+            if (ridge && pd > 0 && pd < lim) { x = rx; y = ry; break; } } }
         // 近すぎる点は置かない（細い線は輪郭が往復するので、同じ場所に2つ並ぶ）
         const gx = Math.floor(x / cell), gy = Math.floor(y / cell); let ok = true;
         for (let yy = gy - 1; yy <= gy + 1 && ok; yy++) for (let xx = gx - 1; xx <= gx + 1 && ok; xx++) { const l = grid.get(xx * 4096 + yy); if (l) for (let u = 0; u < l.length; u += 2) if ((l[u] - x) * (l[u] - x) + (l[u + 1] - y) * (l[u + 1] - y) < rad * rad) { ok = false; break; } }
@@ -7029,7 +7037,14 @@ function dshapeMake(src, n, env) {
     const K = tf ? tf.a / hm : 1, toN = (p) => (tf ? [((p[0] * tf.a + tf.ox) - cx) / hm, -((p[1] * tf.a + tf.oy) - cy) / hm] : p);
     const list = parts ? src.def.anim || [] : (Array.isArray(src.motion) ? src.motion : DSHAPE_MOTION[src.motion || 'float'] || []);
     const LEN = { swim: ['amp'], wave: ['amp'], bob: ['amp', 'ax'], hop: ['amp'], shift: ['ax', 'ay'], orbit: ['r', 'ry'], swing: ['r'], rock: ['r'], spine: ['amp'] };
-    for (const a of list) { const o = Object.assign({}, a);
+    // mirror つきの動きは、支点を左右に写した動きを足す（左右の耳・腕・ひれ）。回る向きも写すので、左右が同じように開いて閉じる
+    const full = [];
+    for (const a of list) { full.push(a); if (a.mirror != null && tf) { const mx = a.mirror, m = Object.assign({}, a, { mirror: null, tags: a.mtags || a.tags, phase: (a.phase || 0) + (a.mphase || 0) });
+        for (const key of ['pivot', 'hinge']) if (a[key]) m[key] = [2 * mx - a[key][0], a[key][1]];
+        if (a.type === 'swing' || a.type === 'rock' || a.type === 'sway') { m.amp = -(a.amp == null ? (a.type === 'sway' ? 0.06 : 0.2) : a.amp); if (a.bias) m.bias = -a.bias; }
+        if (a.ax) m.ax = -a.ax; if (a.type === 'spin') m.dir = -(a.dir || 1);
+        full.push(m); } }
+    for (const a of full) { const o = Object.assign({}, a);
       for (const key of ['pivot', 'hinge']) if (a[key]) o[key] = toN(a[key]);
       for (const key of LEN[a.type] || []) if (typeof a[key] === 'number') o[key] = a[key] * K;
       if ((a.type === 'swing' || a.type === 'rock') && typeof a.k === 'number') o.k = a.k / K;
@@ -7049,8 +7064,10 @@ function _dsSpineBind(a, sh, pts) {
   const M = 160, cv = _dsCurve(pts, M), tg = _dsTangents(cv), n = sh.n;
   a.cv = cv; a.M = M; a.bj = new Int16Array(n).fill(-1); a.bu = new Float32Array(n); a.bv = new Float32Array(n);
   a.fx = new Float32Array(M + 1); a.fy = new Float32Array(M + 1); a.ftx = new Float32Array(M + 1); a.fty = new Float32Array(M + 1);
+  // bind: { tag名: [s0, s1] } で、その部位を結びつける背骨の範囲を絞れる（曲がりの内側の脚が、向かいの胴に結びつくのを防ぐ）
   for (let i = 0; i < n; i++) { if (!a.m[sh.tag[i]]) continue; const x = sh.bx[i], y = sh.by[i]; let bj = 0, bd = 1e9;
-    for (let j = 0; j <= M; j++) { const d = (cv.x[j] - x) * (cv.x[j] - x) + (cv.y[j] - y) * (cv.y[j] - y); if (d < bd) { bd = d; bj = j; } }
+    const rg = a.bind && a.bind[sh.tags[sh.tag[i]]], j0 = rg ? Math.max(0, Math.round(rg[0] * M)) : 0, j1 = rg ? Math.min(M, Math.round(rg[1] * M)) : M;
+    for (let j = j0; j <= j1; j++) { const d = (cv.x[j] - x) * (cv.x[j] - x) + (cv.y[j] - y) * (cv.y[j] - y); if (d < bd) { bd = d; bj = j; } }
     const dx = x - cv.x[bj], dy = y - cv.y[bj]; a.bj[i] = bj; a.bu[i] = dx * tg.tx[bj] + dy * tg.ty[bj]; a.bv[i] = -dx * tg.ty[bj] + dy * tg.tx[bj]; }
   a.rtx = tg.tx; a.rty = tg.ty;
 }
