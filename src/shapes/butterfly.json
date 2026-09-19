@@ -1,0 +1,22 @@
+{
+  "id": "butterfly",
+  "name": "ちょう",
+  "keys": ["蝶", "ちょうちょ", "蝶々", "ちょうちょう", "バタフライ", "butterfly", "🦋"],
+  "vb": [0, 0, 100, 100],
+  "parts": [
+    { "tag": "wing", "mirror": 50, "d": "M50,46 C47,30 36,10 18,9 C6,9 2,22 6,34 C10,46 30,52 50,50 Z", "c": "#ff7a1a", "c2": "#ffd21f", "g": [50, 46, 8, 14] },
+    { "tag": "wing", "mirror": 50, "d": "M50,51 C36,52 18,56 15,70 C13,83 26,91 36,84 C45,77 49,64 50,56 Z", "c": "#ff3b7a", "c2": "#ff9a3c", "g": [50, 54, 18, 84] },
+    { "tag": "wing", "mirror": 50, "circle": [21, 27, 6.5], "c": "#2fd6ff", "w": 1.6 },
+    { "tag": "wing", "mirror": 50, "circle": [36, 36, 3.6], "c": "#ffffff", "w": 1.8 },
+    { "tag": "wing", "mirror": 50, "circle": [28, 71, 5], "c": "#6fe9ff", "w": 1.6 },
+    { "tag": "feeler", "mirror": 50, "d": "M49,29 Q45,17 38,12", "s": "#ffd98a", "sw": 1.7 },
+    { "tag": "feeler", "mirror": 50, "circle": [38, 12, 2.0], "c": "#ffd98a" },
+    { "ellipse": [50, 52, 3.2, 17], "c": "#fff1c9" },
+    { "circle": [50, 31.5, 3.9], "c": "#fff1c9" }
+  ],
+  "anim": [
+    { "type": "flap", "tags": ["wing"], "hinge": [50, 50], "amp": 0.62, "hz": 0.9, "lift": 0.10 },
+    { "type": "swing", "tags": ["feeler"], "pivot": [50, 29], "amp": 0.10, "hz": 0.9, "phase": 0.2 },
+    { "type": "bob", "amp": 1.6, "hz": 0.45, "ax": 1.0 }
+  ]
+}

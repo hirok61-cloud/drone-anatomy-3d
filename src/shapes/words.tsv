@@ -1,0 +1,396 @@
+# 言葉 → 絵文字の表。1行に1つ、タブ区切りで「絵文字 / 動き / 言葉,言葉,…」。# で始まる行は読み飛ばす。
+# 解決の順は (1)手作りの形 (2)この表 (3)絵文字そのもの (4)文字。だから手作りと同じ言葉が入っていてもよい（手作りが勝つ）。
+# 言葉はエンジンがひらがな・カタカナ・全角半角・大文字小文字・記号の違いを吸収するので、
+# 読みの違うもの・漢字・外来語・英語だけを並べる（「リンゴ」と「りんご」の両方は要らない）。
+# 同じ言葉は表全体で1回だけ（先に出た行が勝つ）。絵文字はすべて tools/shapelab.sh で点描を目で確かめてある。
+# 動き: swim swimR flap beat breathe float sway hop spin rock wave ripple fly drive launch twinkle flicker chase none
+
+# ---- けもの ----
+🐷	float	ぶた,豚,ぴっぐ,pig
+🐮	float	うし,牛,かう,cow
+🐑	float	ひつじ,羊,しーぷ,sheep
+🐐	float	やぎ,山羊,ごーと,goat
+🐿	hop	りす,栗鼠,しまりす,squirrel
+🦔	float	はりねずみ,針鼠,hedgehog
+🐨	breathe	こあら,koala
+🦛	float	かば,河馬,hippo
+🦏	float	さい,犀,rhino
+🐊	swimR	わに,鰐,くろこだいる,ありげーたー,crocodile
+🦌	float	しか,鹿,ばんび,でぃあ,deer
+🦓	float	しまうま,縞馬,ぜぶら,zebra
+🐪	float	らくだ,駱駝,きゃめる,camel
+🦙	float	あるぱか,らま,llama
+🦘	hop	かんがるー,kangaroo
+🐹	float	はむすたー,hamster
+🐭	float	ねずみ,鼠,まうす,mouse
+🐗	float	いのしし,猪,ぼあ,boar
+🦇	flap	こうもり,蝙蝠,ばっと,bat
+🦨	float	すかんく,skunk
+🐺	float	おおかみ,狼,うるふ,wolf
+🦝	float	あらいぐま,洗い熊,raccoon
+🦍	float	ごりら,gorilla
+
+# ---- とり ----
+🐔	float	にわとり,鶏,めんどり,雌鳥,chicken
+🐤	hop	ひよこ,雛,ひな,chick
+🦆	swimR	あひる,家鴨,かも,鴨,だっく,duck
+🦅	fly	わし,鷲,たか,鷹,いーぐる,eagle
+🦚	float	くじゃく,孔雀,ぴーこっく,peacock
+🦩	sway	ふらみんご,flamingo
+🦜	float	いんこ,おうむ,鸚鵡,parrot
+🦢	swim	はくちょう,白鳥,すわん,swan
+🕊	fly	はと,鳩,ぴじょん,dove
+
+# ---- むし・は虫類 ----
+🦎	float	とかげ,蜥蜴,やもり,lizard
+🐌	float	かたつむり,蝸牛,でんでんむし,snail
+🐞	float	てんとうむし,天道虫,ladybug
+🐜	float	あり,蟻,ant
+🕷	float	蜘蛛,すぱいだー,spider
+🕸	spin	くものす,蜘蛛の巣,すぱいだーうぇぶ,web
+🦂	float	さそり,蠍,scorpion
+🪰	fly	はえ,蝿,housefly
+🪱	ripple	みみず,蚯蚓,わーむ,worm
+🪲	float	かぶとむし,兜虫,甲虫,びーとる,beetle
+🐛	ripple	いもむし,芋虫,けむし,毛虫,caterpillar
+🦗	hop	こおろぎ,蟋蟀,ばった,飛蝗,きりぎりす,cricket
+
+# ---- 水のいきもの ----
+🦐	float	えび,海老,しゅりんぷ,shrimp
+🦞	float	ろぶすたー,ざりがに,lobster
+🦑	float	いか,烏賊,squid
+🐡	swim	ふぐ,河豚,pufferfish
+🦈	swim	さめ,鮫,しゃーく,shark
+🐠	swim	ねったいぎょ,熱帯魚,tropicalfish
+🐚	float	かいがら,貝殻,貝,ほらがい,shell
+🦭	swim	あざらし,海豹,おっとせい,seal
+🦠	breathe	ばいきん,ばい菌,細菌,さいきん,ういるす,microbe
+
+# ---- くだもの ----
+🍎	float	りんご,林檎,あっぷる,apple
+🍏	float	あおりんご,青りんご,greenapple
+🍊	float	みかん,蜜柑,おれんじ,たんじぇりん,orange
+🍋	float	れもん,檸檬,lemon
+🍌	float	ばなな,banana
+🍉	float	すいか,西瓜,watermelon
+🍇	float	ぶどう,葡萄,ぐれーぷ,ますかっと,grape
+🍓	float	いちご,苺,すとろべりー,strawberry
+🫐	float	ぶるーべりー,blueberry
+🍈	float	めろん,melon
+🍒	float	さくらんぼ,桜桃,ちぇりー,cherry
+🍑	float	もも,桃,ぴーち,peach
+🥭	float	まんごー,mango
+🍍	float	ぱいなっぷる,ぱいん,pineapple
+🥥	float	ここなっつ,椰子の実,coconut
+🥝	float	きうい,kiwi
+
+# ---- やさい・きのこ・木の実 ----
+🍅	float	とまと,tomato
+🍆	float	なす,茄子,なすび,eggplant
+🥑	float	あぼかど,avocado
+🥦	float	ぶろっこりー,broccoli
+🥬	float	はくさい,白菜,れたす,きゃべつ,lettuce
+🥒	float	きゅうり,胡瓜,cucumber
+🌶	float	とうがらし,唐辛子,ちり,chilipepper
+🫑	float	ぴーまん,ぱぷりか,bellpepper
+🌽	float	とうもろこし,玉蜀黍,こーん,corn
+🥕	float	にんじん,人参,きゃろっと,carrot
+🧄	float	にんにく,大蒜,がーりっく,garlic
+🧅	float	たまねぎ,玉葱,おにおん,onion
+🥔	float	じゃがいも,馬鈴薯,ぽてと,potato
+🍄	sway	きのこ,茸,まっしゅるーむ,mushroom
+🥜	float	ぴーなっつ,落花生,らっかせい,peanut
+🌰	float	くり,栗,まろん,chestnut
+
+# ---- はな・くさ木 ----
+🌹	sway	ばら,薔薇,ろーず,rose
+🌺	sway	はいびすかす,hibiscus
+🌼	sway	はな,花,おはな,でいじー,flower
+🌵	sway	さぼてん,仙人掌,cactus
+🌴	sway	やしのき,椰子の木,ぱーむ,なんごく,南国,palmtree
+🌲	sway	まつ,松,もみのき,樅の木,針葉樹,evergreen
+🍂	float	おちば,落ち葉,かれは,枯れ葉,fallenleaves
+🍃	float	はっぱ,葉っぱ,葉,りーふ,leaf
+🌱	sway	芽,ふたば,双葉,めばえ,芽生え,seedling
+🌿	sway	はーぶ,くさ,草,herb
+🌾	sway	いね,稲,いなほ,稲穂,すすき,riceplant
+🪴	sway	はちうえ,鉢植え,かんようしょくぶつ,観葉植物,pottedplant
+💐	sway	はなたば,花束,ぶーけ,bouquet
+
+# ---- てんき・そら・しぜん ----
+🌙	twinkle	みかづき,三日月,crescentmoon
+🌟	twinkle	きらきら,輝き,かがやき,glowingstar
+✨	twinkle	きらめき,すぱーくる,sparkles
+☁	float	くも,雲,くもり,曇り,cloud
+🌧	float	あめ,雨,れいん,あまぐも,雨雲,rain
+⚡	twinkle	かみなり,雷,いなずま,稲妻,らいとにんぐ,thunder
+💧	float	みず,水,しずく,雫,どろっぷ,water
+💦	float	あせ,汗,しぶき,飛沫,sweat
+🔥	flicker	ひ,火,ほのお,炎,ふぁいあ,fire
+🌪	spin	たつまき,竜巻,とるねーど,tornado
+☂	float	かさ,傘,あんぶれら,umbrella
+🌋	flicker	かざん,火山,ぼるけーの,volcano
+🏔	none	やま,山,ゆきやま,雪山,mountain
+🌀	spin	うずまき,渦巻き,たいふう,台風,cyclone
+☄	fly	すいせい,彗星,ほうきぼし,箒星,comet
+
+# ---- パン・ごはん・おかず ----
+🥐	float	くろわっさん,croissant
+🍞	float	ぱん,しょくぱん,食パン,bread
+🥖	float	ふらんすぱん,ばげっと,baguette
+🧀	float	ちーず,cheese
+🥚	float	たまご,卵,玉子,えっぐ,egg
+🍳	float	めだまやき,目玉焼き,ふらいぱん,friedegg
+🥞	float	ぱんけーき,ほっとけーき,pancake
+🧇	float	わっふる,waffle
+🥓	float	べーこん,bacon
+🍔	float	はんばーがー,ばーがー,hamburger
+🍟	float	ふらいどぽてと,ぽてとふらい,fries
+🍕	float	ぴざ,ぴっつぁ,pizza
+🌭	float	ほっとどっぐ,hotdog
+🥪	float	さんどいっち,さんど,sandwich
+🍖	float	にく,肉,ほねつきにく,骨付き肉,meat
+🍗	float	からあげ,唐揚げ,ちきん,とりにく,鶏肉,friedchicken
+🥩	float	すてーき,ぎゅうにく,牛肉,steak
+🍤	float	えびふらい,海老フライ,てんぷら,天ぷら,tempura
+🍣	float	すし,寿司,おすし,にぎり,sushi
+🍱	float	べんとう,弁当,おべんとう,bento
+🍙	float	おにぎり,御握り,おむすび,riceball
+🍚	float	ごはん,ご飯,はくまい,白米,こめ,米,rice
+🍛	float	かれー,かれーらいす,curry
+🍜	float	らーめん,中華そば,ぬーどる,ramen
+🍝	float	すぱげってぃ,ぱすた,pasta
+🍲	float	なべ,鍋,しちゅー,stew
+🍢	float	おでん,くしやき,串焼き,oden
+🍡	float	だんご,団子,おだんご,みたらし,dango
+🍘	float	せんべい,煎餅,おせんべい,ricecracker
+🥟	float	ぎょうざ,餃子,だんぷりんぐ,dumpling
+
+# ---- おかし ----
+🍦	float	そふとくりーむ,あいす,softserve
+🍧	float	かきごおり,かき氷,shavedice
+🍩	spin	どーなつ,donut
+🍪	float	くっきー,びすけっと,cookie
+🍰	float	しょーとけーき,いちごけーき,苺ケーキ,shortcake
+🧁	float	かっぷけーき,まふぃん,cupcake
+🍫	float	ちょこ,ちょこれーと,chocolate
+🍬	float	飴,きゃんでぃ,candy
+🍭	spin	ぺろぺろきゃんでぃ,ろりぽっぷ,lollipop
+🍮	float	ぷりん,ぷでぃんぐ,かすたーど,pudding
+🍯	float	はちみつ,蜂蜜,はにー,honey
+🍿	float	ぽっぷこーん,popcorn
+
+# ---- のみもの ----
+🥛	float	ぎゅうにゅう,牛乳,みるく,milk
+☕	float	こーひー,珈琲,coffee
+🍵	float	おちゃ,お茶,りょくちゃ,緑茶,まっちゃ,抹茶,tea
+🧃	float	じゅーす,かみぱっく,紙パック,juice
+🥤	float	こーら,そーだ,どりんく,soda
+🧋	float	たぴおか,ばぶるてぃー,tapioca
+🍶	float	さけ,酒,にほんしゅ,日本酒,とっくり,徳利,sake
+🍺	float	びーる,じょっき,beer
+🧊	float	こおり,氷,あいすきゅーぶ,ice
+
+# ---- スポーツ ----
+⚽	spin	さっかー,さっかーぼーる,ふっとぼーる,soccer
+🏀	spin	ばすけ,ばすけっとぼーる,basketball
+⚾	spin	やきゅう,野球,ぼーる,baseball
+🎾	spin	てにす,tennis
+🏐	spin	ばれーぼーる,volleyball
+🏈	float	あめふと,あめりかんふっとぼーる,football
+🏓	float	たっきゅう,卓球,ぴんぽん,pingpong
+🏸	float	ばどみんとん,しゃとる,badminton
+⛳	sway	ごるふ,golf
+🏹	float	ゆみ,弓,ゆみや,弓矢,あーちぇりー,archery
+🎣	float	つり,釣り,つりざお,釣竿,fishing
+🥊	float	ぼくしんぐ,boxing
+🥋	float	じゅうどう,柔道,からて,空手,どうぎ,道着,karate
+🛹	drive	すけぼー,すけーとぼーど,skateboard
+🛼	drive	ろーらーすけーと,rollerskate
+⛸	float	すけーと,あいすすけーと,skate
+🎿	float	すきー,ski
+🎯	spin	まと,的,だーつ,darts
+
+# ---- あそび ----
+🎮	float	げーむ,こんとろーらー,げーむき,ゲーム機,gamepad
+🧩	float	ぱずる,じぐそー,ぱずるのぴーす,puzzle
+🪀	spin	よーよー,yoyo
+🪁	fly	凧,かいと,たこあげ,凧揚げ,kite
+🎪	float	さーかす,circus
+🎠	spin	めりーごーらんど,かいてんもくば,回転木馬,carousel
+🎡	spin	かんらんしゃ,観覧車,ferriswheel
+🎢	ripple	じぇっとこーすたー,rollercoaster
+🎳	float	ぼうりんぐ,bowling
+🎨	float	え,絵,ぱれっと,えのぐ,絵の具,palette
+🖌	float	ふで,筆,えふで,絵筆,paintbrush
+
+# ---- がっき ----
+🎤	float	まいく,まいくろふぉん,microphone
+🎧	float	へっどほん,headphone
+🎸	float	ぎたー,guitar
+🎹	float	ぴあの,けんばん,鍵盤,piano
+🥁	beat	どらむ,たいこ,太鼓,drum
+🎺	float	とらんぺっと,trumpet
+🎻	float	ばいおりん,violin
+🎷	float	さっくす,さきそふぉん,saxophone
+🔔	rock	かね,鐘,べる,すず,鈴,bell
+
+# ---- のりもの ----
+🚌	drive	ばす,bus
+🚕	drive	たくしー,taxi
+🚚	drive	とらっく,truck
+🚜	drive	とらくたー,tractor
+🚓	drive	ぱとかー,ぱとろーるかー,policecar
+🚑	drive	きゅうきゅうしゃ,救急車,ambulance
+🚒	drive	しょうぼうしゃ,消防車,firetruck
+🏍	drive	ばいく,おーとばい,motorcycle
+🛵	drive	すくーたー,げんつき,原付,scooter
+🚲	drive	じてんしゃ,自転車,ちゃり,bicycle
+🛴	drive	きっくぼーど,きっくすけーたー,kickscooter
+🚂	drive	きかんしゃ,機関車,じょうききかんしゃ,蒸気機関車,locomotive
+🚅	drive	しんかんせん,新幹線,shinkansen
+🛶	float	かぬー,かやっく,canoe
+⛵	rock	よっと,はんせん,帆船,sailboat
+🚤	rock	もーたーぼーと,speedboat
+⚓	float	いかり,錨,あんかー,anchor
+🚧	float	こうじちゅう,工事中,ばりけーど,construction
+🚦	chase	しんごう,信号,しんごうき,信号機,trafficlight
+🪂	float	ぱらしゅーと,parachute
+
+# ---- たてもの・ばしょ ----
+🏠	none	いえ,家,はうす,おうち,house
+🏫	none	がっこう,学校,school
+🏥	none	びょういん,病院,hospital
+🏦	none	ぎんこう,銀行,bank
+🏰	none	しろ,城,きゃっする,おしろ,castle
+🏯	none	にほんじょう,日本城,てんしゅかく,天守閣,japanesecastle
+🗼	none	たわー,でんぱとう,電波塔,tower
+⛲	ripple	ふんすい,噴水,fountain
+⛺	float	てんと,きゃんぷ,tent
+⛪	none	きょうかい,教会,ちゃーち,church
+🗿	none	もあい,せきぞう,石像,moai
+🏮	rock	ちょうちん,提灯,あかちょうちん,赤提灯,lantern
+
+# ---- どうぐ・ぶんぼうぐ ----
+✏	float	えんぴつ,鉛筆,pencil
+🖍	float	くれよん,crayon
+✂	float	はさみ,鋏,しざー,scissors
+📎	float	くりっぷ,ぜむくりっぷ,paperclip
+📌	float	がびょう,画鋲,ぴん,pushpin
+🔑	float	かぎ,鍵,きー,key
+🔨	float	かなづち,金槌,はんまー,とんかち,hammer
+🪓	float	おの,斧,あっくす,axe
+🔧	float	すぱな,れんち,wrench
+⚙	spin	はぐるま,歯車,ぎあ,gear
+🧲	float	じしゃく,磁石,まぐねっと,magnet
+🔦	twinkle	かいちゅうでんとう,懐中電灯,らいと,flashlight
+💡	twinkle	でんきゅう,電球,ひらめき,あいであ,bulb
+🕯	flicker	ろうそく,蝋燭,きゃんどる,candle
+🧹	float	ほうき,箒,ぶるーむ,broom
+🪣	float	ばけつ,bucket
+🪥	float	はぶらし,歯ブラシ,toothbrush
+🚿	float	しゃわー,shower
+🛁	float	おふろ,お風呂,ふろ,風呂,ばすたぶ,bath
+🚽	float	といれ,べんき,便器,toilet
+🛏	float	べっど,bed
+🛋	float	そふぁ,かうち,sofa
+🪑	float	いす,椅子,ちぇあ,chair
+🔪	float	ほうちょう,包丁,ないふ,knife
+🥄	float	すぷーん,spoon
+🫖	float	きゅうす,急須,てぃーぽっと,teapot
+🧺	float	かご,籠,ばすけっと,basket
+🧳	float	すーつけーす,きゃりーばっぐ,りょこうかばん,旅行かばん,suitcase
+🪜	float	はしご,梯子,ladder
+🧯	float	しょうかき,消火器,fireextinguisher
+🛒	drive	かーと,しょっぴんぐかーと,かいものかご,買い物かご,shoppingcart
+🔍	float	むしめがね,虫眼鏡,るーぺ,かくだいきょう,拡大鏡,magnifier
+📢	float	めがほん,かくせいき,拡声器,loudspeaker
+💊	float	くすり,薬,かぷせる,pill
+💉	float	ちゅうしゃ,注射,ちゅうしゃき,注射器,syringe
+🧪	float	しけんかん,試験管,じっけん,実験,testtube
+🔬	float	けんびきょう,顕微鏡,microscope
+🔭	float	ぼうえんきょう,望遠鏡,telescope
+🧭	spin	こんぱす,ほういじしん,方位磁針,らしんばん,羅針盤,compass
+🔋	float	でんち,電池,ばってりー,battery
+🪄	twinkle	まほうのつえ,魔法の杖,すてっき,magicwand
+🔮	twinkle	すいしょうだま,水晶玉,うらない,占い,crystalball
+💣	launch	ばくだん,爆弾,ぼむ,bomb
+🧨	launch	ばくちく,爆竹,だいなまいと,firecracker
+
+# ---- かでん・もちもの・ふく ----
+📱	float	すまほ,すまーとふぉん,けいたい,携帯,smartphone
+💻	float	ぱそこん,のーとぱそこん,laptop
+📷	float	かめら,しゃしんき,写真機,camera
+📺	float	てれび,てれびじょん,television
+📻	float	らじお,radio
+⌚	float	うでどけい,腕時計,watch
+⏰	rock	めざまし,目覚まし,めざましどけい,目覚まし時計,alarmclock
+⏳	float	すなどけい,砂時計,hourglass
+☎	float	でんわ,電話,くろでんわ,黒電話,telephone
+📖	float	ほん,本,どくしょ,読書,ぶっく,book
+📦	float	はこ,箱,だんぼーる,段ボール,こづつみ,小包,box
+🎒	float	りゅっく,らんどせる,backpack
+👜	float	はんどばっぐ,かばん,鞄,bag
+👓	float	めがね,眼鏡,ぐらす,glasses
+🕶	float	さんぐらす,sunglasses
+👒	float	ぼうし,帽子,むぎわらぼうし,麦わら帽子,hat
+🎩	float	しるくはっと,とっぷはっと,やまたかぼうし,山高帽子,tophat
+🧢	float	きゃっぷ,やきゅうぼう,野球帽,cap
+👕	float	てぃーしゃつ,しゃつ,ふく,服,tshirt
+👖	float	じーんず,ずぼん,ぱんつ,jeans
+👗	float	どれす,わんぴーす,dress
+👘	float	きもの,着物,わふく,和服,ゆかた,浴衣,kimono
+👔	float	ねくたい,わいしゃつ,necktie
+🧥	float	こーと,じゃけっと,coat
+🧦	float	くつした,靴下,そっくす,socks
+👟	float	くつ,靴,すにーかー,shoes
+👢	float	ぶーつ,ながぐつ,長靴,boots
+🧤	float	てぶくろ,手袋,ぐろーぶ,gloves
+🧣	wave	まふらー,すかーふ,scarf
+💍	twinkle	ゆびわ,指輪,りんぐ,ring
+💎	twinkle	ほうせき,宝石,だいや,だいやもんど,じゅえる,diamond
+🏆	float	とろふぃー,ゆうしょう,優勝,trophy
+🥇	spin	きんめだる,金メダル,めだる,goldmedal
+💰	float	おかね,お金,かねぶくろ,金袋,money
+🧸	float	ぬいぐるみ,ていでぃべあ,teddybear
+🎀	float	りぼん,ちょうむすび,蝶結び,ribbon
+🎉	launch	くらっかー,ぱーてぃー,partypopper
+🍼	float	ほにゅうびん,哺乳瓶,べびーぼとる,babybottle
+
+# ---- きもち・しぐさ・からだ ----
+😀	float	わらう,笑う,わらい,笑い,にこにこ,grin
+😂	float	なきわらい,泣き笑い,ばくしょう,爆笑,joy
+😍	beat	だいすき,大好き,はーとめ,ハート目,love
+😎	float	かっこいい,くーる,cool
+😭	float	なく,泣く,ごうきゅう,号泣,なみだ,涙,cry
+😡	float	おこる,怒る,怒り,ぷんぷん,げきおこ,angry
+😴	breathe	ねる,寝る,ねむい,眠い,すやすや,sleep
+😱	float	びっくり,おどろき,驚き,しょっく,scream
+😷	float	ますく,かぜ,風邪,mask
+🥳	float	おいわい,お祝い,いわう,祝う,celebrate
+🤔	float	かんがえる,考える,なやむ,悩む,thinking
+💀	float	がいこつ,骸骨,どくろ,髑髏,skull
+👹	float	おに,鬼,あかおに,赤鬼,なまはげ,ogre
+👺	float	てんぐ,天狗,tengu
+🤡	float	ぴえろ,どうけし,道化師,clown
+💩	hop	うんち,うんこ,poop
+👍	float	いいね,ぐっど,おやゆび,親指,さむずあっぷ,good
+✌	float	ぴーす,ぶいさいん,Vサイン,peace
+👏	float	はくしゅ,拍手,ぱちぱち,clap
+🙏	float	おねがい,お願い,いのり,祈り,がっしょう,合掌,ありがとう,pray
+👋	rock	ばいばい,さようなら,てをふる,手を振る,byebye
+💪	float	ちから,力,きんにく,筋肉,ちからこぶ,力こぶ,muscle
+👀	float	め,目,めだま,目玉,みてる,eyes
+🧠	float	のう,脳,brain
+🦴	float	ほね,骨,bone
+👣	float	あしあと,足跡,footprints
+💔	beat	しつれん,失恋,はーとぶれいく,brokenheart
+💥	launch	ばくはつ,爆発,どかん,collision
+
+# ---- しるし・えんぎもの ----
+🚩	wave	はた,旗,ふらっぐ,flag
+🛡	float	たて,盾,しーるど,shield
+⚔	float	けん,剣,つるぎ,そーど,sword
+🎋	sway	たなばた,七夕,ささ,笹,tanabata
+🎐	rock	ふうりん,風鈴,windchime
+🧬	chase	でぃーえぬえー,いでんし,遺伝子,dna

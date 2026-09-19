@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>形のラボ</title>
+<!--
+  ドローンショーの「形」を、アプリと同じエンジン（src/dshapes.js）で点にして確かめるページ。
+  使い方（どれか1つ）:
+    ?shape=butterfly          src/shapes/butterfly.json（または gen-*.js が登録した形）
+    ?emoji=🐉&motion=swim     端末の絵文字から
+    ?word=ドラゴン            入力された言葉がどう解決されるか
+    ?img=docs/review/x.png    画像から（プロジェクト直下からの相対パス）
+    ?view=gallery             登録されている形をすべて並べる（&n=2200 &size=230 &t=0.6）
+  撮影: tools/shapelab.sh <出力.png> "<クエリ>"
+-->
+<style>
+  html, body { margin: 0; background: #05080f; color: #dfe8ff; font: 13px/1.5 "Hiragino Sans", system-ui, sans-serif; }
+  #wrap { padding: 12px 14px; }
+  h1 { font-size: 16px; margin: 0 0 8px; font-weight: 700; }
+  h1 small { font-weight: 400; color: #8fa3c8; margin-left: 10px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-start; margin-bottom: 10px; }
+  figure { margin: 0; }
+  figcaption { color: #8fa3c8; font-size: 11.5px; margin-top: 2px; }
+  canvas { display: block; background: #03060c; border: 1px solid #1a2438; border-radius: 6px; }
+  pre { margin: 0; font: 11.5px/1.45 ui-monospace, Menlo, monospace; color: #b9c8e6; white-space: pre-wrap; }
+  .warn { color: #ffb86b; } .err { color: #ff7b7b; font-weight: 700; }
+  .cell { width: var(--s); } .cell figcaption { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+</style>
+</head>
+<body>
+<div id="wrap"><h1 id="title">形のラボ</h1><div id="out"></div><pre id="report"></pre></div>
+<script src="../src/dshapes.js"></script>
+<script>
+// 読み込みはすべて同期で済ませる（画面なしの Chrome は load の直後に撮影するので、あとから届く fetch を待ってくれない）
+window.__lab = { files: [], errs: [] };
+(function () {
+  const get = (url) => { try { const x = new XMLHttpRequest(); x.open('GET', url + (url.indexOf('?') < 0 ? '?' : '&') + '_=' + Date.now(), false); x.send(); return x.status === 200 ? x.responseText : null; } catch (e) { return null; } };
+  window.__lab.get = get;
+  const html = get('../src/shapes/');
+  if (html == null) { window.__lab.errs.push('src/shapes/ の一覧が取れません（開発サーバーは動いていますか？）'); return; }
+  const files = window.__lab.files = [...html.matchAll(/href="([^"?]+)"/g)].map(m => decodeURIComponent(m[1])).filter(f => /\.(json|js|tsv)$/.test(f));
+  for (const f of files.filter(f => f.endsWith('.js'))) document.write('<script src="../src/shapes/' + f + '?_=' + Date.now() + '"><\/script>');
+  const img = new URLSearchParams(location.search).get('img');
+  if (img) document.write('<img id="srcimg" src="../' + img + '" style="position:absolute;left:-9999px;width:10px">');   /* load は画像を待つ */
+})();
+</script>
+<script>
+window.addEventListener('load', () => {
+  const Q = new URLSearchParams(location.search), out = document.getElementById('out'), rep = document.getElementById('report');
+  const log = (s, cls) => { const e = document.createElement('div'); if (cls) e.className = cls; e.textContent = s; rep.appendChild(e); };
+  window.addEventListener('error', e => log('エラー: ' + e.message + ' @' + (e.filename || '').split('/').pop() + ':' + e.lineno, 'err'));
+  for (const m of window.__lab.errs) log(m, 'err');
+  // ?shape= のときは、その形のファイルだけを読む（ほかの人が編集中の壊れた JSON に巻き込まれないように）
+  const onlyId = Q.get('shape');
+  for (const f of window.__lab.files.filter(f => f.endsWith('.json') && (!onlyId || f === onlyId + '.json'))) {
+    const txt = window.__lab.get('../src/shapes/' + f);
+    try { dshapeRegister(JSON.parse(txt)); } catch (e) { log(`JSON が壊れています: ${f} — ${e.message}`, 'err'); }
+  }
+  if (window.__lab.files.includes('words.tsv')) window.DSHAPE_WORDS = window.__lab.get('../src/shapes/words.tsv') || '';
+
+  // ---- 点を描く。アプリのシェーダと同じ光り方にする（白く飽和する芯＋ゆっくり落ちる裾＋2.5倍のにじみ、加算合成）----
+  // 灯りの直径は点の間隔の 0.44倍（アプリは「整列」の間隔 6.3cm に対して 0.46×6cm の灯りを基準にしている）
+  const _spr = new Map();
+  function sprite(R, G, B, D) {
+    const q = (v) => Math.max(0, Math.min(15, Math.round(v * 15))), key = q(R) + ',' + q(G) + ',' + q(B) + ',' + D;
+    let cv = _spr.get(key); if (cv) return cv;
+    const S = Math.max(4, Math.ceil(D * 2.5)) | 1; cv = document.createElement('canvas'); cv.width = cv.height = S;
+    const c = cv.getContext('2d'), im = c.createImageData(S, S), px = im.data, r0 = q(R) / 15, g0 = q(G) / 15, b0 = q(B) / 15, GAIN = 3.4;   /* 縮小して見るぶん、アプリ(1.15〜2.6)より強くする */
+    const lay = (d2) => { if (d2 > 0.25) return [0, 0]; const core = Math.exp(-d2 * 30), halo = 0.075 / (1 + 52 * d2), m = 1 - Math.min(1, Math.max(0, (d2 - 0.16) / 0.09)); return [core, (core + halo) * m]; };
+    for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+      const ux = (x + 0.5 - S / 2), uy = (y + 0.5 - S / 2), dA = (ux * ux + uy * uy) / (D * D), dB = (ux * ux + uy * uy) / (D * D * 6.25);
+      const [cA, iA] = lay(dA), [cB, iB] = lay(dB), wA = cA * 0.86, wB = cB * 0.86, k = (y * S + x) * 4;
+      const f = (c0) => ((c0 + (1 - c0) * wA) * iA + (c0 + (1 - c0) * wB) * iB * 0.24) * GAIN;
+      px[k] = Math.min(255, f(r0) * 255); px[k + 1] = Math.min(255, f(g0) * 255); px[k + 2] = Math.min(255, f(b0) * 255); px[k + 3] = 255;
+    }
+    c.putImageData(im, 0, 0); _spr.set(key, cv); return cv;
+  }
+  function drawDots(cv, sh, t, o) {
+    o = o || {};
+    const S = cv.width, c = cv.getContext('2d'), pos = new Float32Array(sh.n * 2), col = new Float32Array(sh.n * 3);
+    col.set(sh.col); dshapePose(sh, t, pos, col);   /* 手続きの形が色を書かなくても、元の色が残る */
+    if (!o.keep) { c.globalCompositeOperation = 'source-over'; c.fillStyle = '#03060c'; c.fillRect(0, 0, S, S); }
+    const bw = sh.box[0], bh = sh.box[1], sc = (S / 2) * 0.92 / Math.max(bw, bh), pitchPx = sh.pitch * sc;
+    const glowF = Math.max(0.36, Math.min(1, 0.46 * (sh.pitch * 2.0 / 0.063)));   /* アプリと同じ式。形の半分が約2mに写る想定 */
+    const D = Math.max(3.2, Math.round(0.060 * glowF * (sc / 2.0) * 2) / 2);
+    c.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < sh.n; i++) {
+      const x = S / 2 + pos[i * 2] * sc, y = S / 2 - pos[i * 2 + 1] * sc;
+      let R = col[i * 3], G = col[i * 3 + 1], B = col[i * 3 + 2]; if (o.tint) { R = o.tint[0] * 0.6; G = o.tint[1] * 0.6; B = o.tint[2] * 0.6; }
+      const sp = sprite(R, G, B, D); c.drawImage(sp, x - sp.width / 2, y - sp.height / 2);
+    }
+    c.globalCompositeOperation = 'source-over';
+    return { pitchPx, D };
+  }
+  const Z = Math.max(0.4, Math.min(1.5, +(Q.get('z') || 1)));   /* 全体の縮尺。確認用の画像を小さくして読む量を減らす（細部を見るときは z=1） */
+  function panel(row, size, caption) {
+    size = Math.round(size * Z);
+    const fig = document.createElement('figure'), cv = document.createElement('canvas'), cap = document.createElement('figcaption');
+    cv.width = cv.height = size * 2; cv.style.width = cv.style.height = size + 'px'; cap.textContent = caption; fig.style.width = size + 'px';   /* 説明が長くても段がずれないように */
+    fig.appendChild(cv); fig.appendChild(cap); row.appendChild(fig); return cv;
+  }
+  // 細いすき間を探す。背景の画素から向かい合う2方向へたどり、両側とも形に当たって、その幅が vb で4未満なら「すき間」
+  function gapReport(def, c, SZ) {
+    const size = 384, parts = _dsExpand(def), tf = _dsTf(def, size), lab = _dsLabelsDef(parts, tf, size), T = Math.max(3, Math.round(2.0 * tf.a));
+    const ins = (x, y) => x >= 0 && y >= 0 && x < size && y < size && lab[y * size + x] >= 0, cells = new Map();
+    for (let y = 0; y < size; y += 2) for (let x = 0; x < size; x += 2) { if (ins(x, y)) continue;
+      for (const [dx, dy] of [[1, 0], [0, 1], [1, 1], [1, -1]]) { let a = 0, b = 0; for (let k = 1; k <= T; k++) { if (!a && ins(x + dx * k, y + dy * k)) a = k; if (!b && ins(x - dx * k, y - dy * k)) b = k; }
+        if (a && b && a + b <= 2 * T) { const key = ((y / 28) | 0) * 100 + ((x / 28) | 0), e = cells.get(key) || { n: 0, sx: 0, sy: 0, w: 99 }; e.n++; e.sx += x; e.sy += y; e.w = Math.min(e.w, (a + b) * (dx && dy ? 1.414 : 1)); cells.set(key, e); break; } } }
+    const out = []; for (const e of cells.values()) if (e.n >= 7) out.push({ x: e.sx / e.n, y: e.sy / e.n, w: e.w / tf.a, n: e.n });
+    out.sort((a, b) => b.n - a.n);
+    if (c) { c.fillStyle = '#ff4fd8'; for (const g of out.slice(0, 12)) { c.beginPath(); c.arc(g.x * SZ / size, g.y * SZ / size, Math.max(3, SZ * 0.012), 0, 7); c.fill(); } }
+    return out.slice(0, 6).map(g => ({ vx: (g.x - tf.ox) / tf.a, vy: (g.y - tf.oy) / tf.a, w: g.w }));
+  }
+  const mkRow = () => { const r = document.createElement('div'); r.className = 'row'; out.appendChild(r); return r; };
+
+  // ---- 何を見るか ----
+  const view = Q.get('view');
+  if (view === 'gallery') {
+    const n = +(Q.get('n') || 2200), size = +(Q.get('size') || 230), t = +(Q.get('t') || 0.6), only = (Q.get('ids') || '').split(',').filter(Boolean);
+    const list = dshapeList().filter(d => !only.length || only.includes(d.id));
+    document.getElementById('title').innerHTML = `形の一覧 <small>${list.length}種・${n}機・t=${t}s</small>`;
+    const row = mkRow(); row.style.setProperty('--s', size + 'px');
+    for (const def of list) {
+      const t0 = performance.now(); let sh = null; try { sh = dshapeMake({ kind: 'lib', def }, n, {}); } catch (e) { log(`${def.id}: ${e.message}`, 'err'); }
+      const cv = panel(row, size, `${def.name}（${def.id}）${sh ? ' ' + Math.round(performance.now() - t0) + 'ms' : ' ✕'}`); cv.parentNode.className = 'cell';
+      if (sh) drawDots(cv, sh, t);
+    }
+    document.title = 'done'; return;
+  }
+  if (view === 'emoji') {   // 絵文字をまとめて確かめる: ?view=emoji&list=🐉,🦋,🐟
+    const n = +(Q.get('n') || 2200), size = +(Q.get('size') || 230), t = +(Q.get('t') || 0.6), list = (Q.get('list') || '🐉,🦋,🐟,🌸,🚀,⭐,❤️,🎄,🐱,😀,🐼,🌈').split(',');
+    document.getElementById('title').innerHTML = `絵文字から <small>${list.length}種・${n}機</small>`;
+    const row = mkRow(); row.style.setProperty('--s', size + 'px');
+    for (const ch of list) { const t0 = performance.now(); let sh = null; try { sh = dshapeMake({ kind: 'emoji', ch, motion: Q.get('motion') || 'float' }, n, {}); } catch (e) { log(`${ch}: ${e.message}`, 'err'); }
+      const cv = panel(row, size, `${ch} ${sh ? Math.round(performance.now() - t0) + 'ms 間隔' + (sh.pitch * size * 0.92).toFixed(1) + 'px' : '✕ 形にできません'}`); cv.parentNode.className = 'cell'; if (sh) drawDots(cv, sh, t); }
+    document.title = 'done'; return;
+  }
+
+  let src = null, label = '';
+  if (Q.get('shape')) { const def = dshapeGet(Q.get('shape')); if (!def) { log(`形「${Q.get('shape')}」が見つかりません（src/shapes/${Q.get('shape')}.json はありますか？）`, 'err'); document.title = 'done'; return; } src = { kind: 'lib', def }; label = `${def.name}（${def.id}）`; }
+  else if (Q.get('emoji')) { src = { kind: 'emoji', ch: Q.get('emoji'), motion: Q.get('motion') || 'float' }; label = '絵文字 ' + Q.get('emoji'); }
+  else if (Q.get('img')) { const im = document.getElementById('srcimg'); if (!im || !im.naturalWidth) { log('画像を読み込めません: ' + Q.get('img'), 'err'); document.title = 'done'; return; } src = { kind: 'image', img: im, motion: Q.get('motion') || 'none' }; label = '画像 ' + Q.get('img'); }
+  else if (Q.get('word')) { const r = dshapeResolve(Q.get('word')); if (!r) { log(`「${Q.get('word')}」→ 形は見つかりません（文字で描きます）`, 'warn'); document.title = 'done'; return; } src = r; label = `「${Q.get('word')}」→ ${r.kind === 'lib' ? r.def.name + '（' + r.def.id + '）' : '絵文字 ' + r.ch + '／動き ' + r.motion}`; }
+  else { log('?shape= / ?emoji= / ?word= / ?img= / ?view=gallery のどれかを指定してください', 'warn'); document.title = 'done'; return; }
+  document.getElementById('title').innerHTML = `${label} <small>アプリと同じエンジンで点にした結果</small>`;
+
+  const env = { aspect: +(Q.get('aspect') || 1.6), still: false };
+  const make = (n) => { const t0 = performance.now(); const sh = dshapeMake(src, n, env); return { sh, ms: performance.now() - t0 }; };
+  const A = make(3200), B = make(1200), C = make(2200);
+  if (!A.sh || !B.sh || !C.sh) { log('形を作れませんでした（下絵に描かれた面積が小さすぎる・絵文字がこの端末に無い、など）', 'err'); document.title = 'done'; return; }
+
+  // 1段目: 元の絵と、機数ごとの静止した形
+  const r1 = mkRow();
+  let gaps = [];
+  { const cv = panel(r1, 300, '元の絵（桃色の印＝細いすき間）'), c = cv.getContext('2d'), SZ = cv.width; c.fillStyle = '#0a1120'; c.fillRect(0, 0, SZ, SZ);
+    if (src.kind === 'lib' && !src.def.gen) { dshapeDrawDef(c, src.def, SZ); gaps = gapReport(src.def, c, SZ); }
+    else if (src.kind === 'emoji') dshapeDrawEmoji(c, src.ch, SZ);
+    else if (src.kind === 'image') dshapeDrawImage(c, src.img, SZ);
+    else { c.fillStyle = '#8fa3c8'; c.font = '20px sans-serif'; c.textAlign = 'center'; c.fillText('手続きで作る形（下絵なし）', SZ / 2, SZ / 2); } }
+  const iA = drawDots(panel(r1, 440, `3200機（パソコン・高画質）　点の間隔 ${(A.sh.pitch * 440 * Z * 0.92 / Math.max(A.sh.box[0], A.sh.box[1])).toFixed(1)}px`), A.sh, 0);
+  drawDots(panel(r1, 440, '1200機（スマホ・軽い設定）を大きく表示'), B.sh, 0);
+  drawDots(panel(r1, 200, '1200機をスマホの実寸ほどで'), B.sh, 0);
+
+  // 2段目: 動き。1周を5コマに分ける
+  const hzs = (C.sh.anims || []).map(a => a.hz == null ? 1 : a.hz).filter(h => h > 0), T = C.sh.period || (hzs.length ? Math.min(5, 1 / Math.min.apply(null, hzs)) : 2);
+  const r2 = mkRow();
+  for (let q = 0; q < 5; q++) drawDots(panel(r2, 228, `動き t=${(q * T / 5).toFixed(2)}s`), C.sh, q * T / 5);
+  { const cv = panel(r2, 228, '重ね（白0 水T/4 橙T/2）'); drawDots(cv, C.sh, 0, { tint: [0.8, 0.8, 0.8] }); drawDots(cv, C.sh, T / 4, { tint: [0.2, 0.8, 1], keep: true }); drawDots(cv, C.sh, T / 2, { tint: [1, 0.55, 0.15], keep: true }); }
+
+  // 報告
+  const L = [];
+  L.push(`作るのにかかった時間: 3200機 ${A.ms.toFixed(0)}ms ／ 1200機 ${B.ms.toFixed(0)}ms ／ 2200機 ${C.ms.toFixed(0)}ms`);
+  L.push(`外接の半分（動きなし）: ${A.sh.half.map(v => v.toFixed(2)).join(' × ')}　動きを含む: ${A.sh.box.map(v => v.toFixed(2)).join(' × ')}　縦横比 ${(A.sh.half[0] / A.sh.half[1]).toFixed(2)}`);
+  L.push(`輪郭に置いた点: 3200機で ${A.sh.edge ? A.sh.edge.reduce((a, b) => a + b, 0) : '—'} ／ 1200機で ${B.sh.edge ? B.sh.edge.reduce((a, b) => a + b, 0) : '—'}`);
+  L.push(`動き: ${(C.sh.anims || []).map(a => a.type + (a.tags ? '[' + a.tags.join(',') + ']' : '')).join(' / ') || (C.sh.pose ? '手続き（pose）' : 'なし')}　明るさの動き: ${(C.sh.colAnims || []).map(a => a.type).join(' / ') || 'なし'}　1周 ${T.toFixed(2)}s`);
+  rep.textContent = L.join('\n') + '\n';
+  if (src.kind === 'lib' && !src.def.gen) {
+    const parts = _dsExpand(src.def), cA = new Int32Array(parts.length), cB = new Int32Array(parts.length);
+    for (let i = 0; i < A.sh.n; i++) cA[A.sh.part[i]]++; for (let i = 0; i < B.sh.n; i++) cB[B.sh.part[i]]++;
+    const plist = document.createElement('div'); plist.style.cssText = 'column-count:3;column-gap:18px;margin-top:4px';
+    const plog = (s2, cls) => { const e = document.createElement('div'); if (cls) e.className = cls; e.textContent = s2; plist.appendChild(e); };
+    parts.forEach((p, k) => { const nm = `#${k} ${p.tag || '-'} ${p.s ? '線 ' + p.s : p.c || ''}${p._mx != null ? '（写し）' : ''}${p.cut ? '（切り抜き）' : ''}`;
+      const bad = !p.cut && cB[k] < 3; plog(`${nm}: ${cA[k]} / ${cB[k]}${bad ? ' ←1200機で見えない' : ''}`, bad ? 'warn' : ''); if (bad) log(`部品 ${nm} は1200機ではほぼ見えません（${cB[k]}点）。大きくするか w を上げてください`, 'warn'); });
+    const tags = new Set(parts.map(p => p.tag).filter(Boolean));
+    for (const a of src.def.anim || []) for (const t of a.tags || []) if (!tags.has(t)) log(`動き ${a.type} が指している tag「${t}」を持つ部品がありません`, 'err');
+    const known = ['spine', 'flap', 'swim', 'wave', 'sway', 'swing', 'rock', 'spin', 'pulse', 'bob', 'hop', 'orbit', 'shift', 'twinkle', 'blink', 'chase'];
+    for (const a of src.def.anim || []) if (!known.includes(a.type)) log(`知らない動き「${a.type}」です`, 'err');
+    for (const g of gaps) log(`すき間が細い: 下絵の (${g.vx.toFixed(0)}, ${g.vy.toFixed(0)}) 付近・幅 約${g.w.toFixed(1)}。4未満は点にするとくっついて光の塊や割れ目になります。思い切って空けるか、重ねて1つにしてください`, 'warn');
+    const ar = A.sh.half[0] / A.sh.half[1]; if (ar > 1.7 || ar < 0.58) log(`縦横比が ${ar.toFixed(2)} です。スマホの縦画面では小さく写ります（0.7〜1.5 が目安）`, 'warn');
+    if (A.sh.box[0] > A.sh.half[0] * 1.35 || A.sh.box[1] > A.sh.half[1] * 1.35) log('動きの幅が大きすぎます（動きを含む外接が、止まった形の1.35倍を超えています）。そのぶん形が小さく写ります', 'warn');
+    log('部品ごとの点の数（3200機 / 1200機）:'); rep.appendChild(plist);
+    if (iA.pitchPx < 3.2) log('面積が小さく、点が詰まりすぎています（線が細すぎる・形が小さすぎる）。塗りの面を増やしてください', 'warn');
+  }
+  document.title = 'done';
+});
+</script>
+</body>
+</html>

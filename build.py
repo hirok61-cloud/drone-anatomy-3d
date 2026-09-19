@@ -28,6 +28,42 @@ while True:
 SOURCES = ['data.js', 'materials.js', 'drone.js', 'engine.js', 'showdrone.js', 'physics.js', 'airflow.js', 'theater.js', 'whatif.js', 'scale.js', 'codex.js', 'live.js', 'lesson.js', 'expert.js', 'reg.js', 'preflight.js', 'descent.js', 'fpv.js', 'weather.js', 'dshow.js', 'dsys.js', 'dshowui.js', 'audio.js', 'share.js', 'ui.js', 'app.js']
 js = '\n'.join((SRC / f).read_text(encoding='utf-8') for f in SOURCES if (SRC / f).exists())
 
+# ---- ドローンショーの「形」を束ねる ----
+# src/shapes/*.json（形の定義）と words.tsv（言葉→絵文字の表）を定数にして、エンジン(dshapes.js)の前に置く。
+# エンジンは読み込まれた時点で DSHAPE_LIB を登録するので、順番を入れ替えないこと。
+import json, re, unicodedata
+def _norm(w):
+    w = unicodedata.normalize('NFKC', w or '').lower()
+    w = ''.join(chr(ord(ch) - 0x60) if 'ァ' <= ch <= 'ヶ' else ch for ch in w)
+    return re.sub(r'[\s　!?。、,.・~〜♪☆★\-‐―\'"「」『』()︎️]', '', w)
+SHAPES = SRC / 'shapes'
+lib, seen = [], {}
+for f in sorted(SHAPES.glob('*.json')):
+    try:
+        d = json.loads(f.read_text(encoding='utf-8'))
+    except Exception as e:
+        raise SystemExit(f'shapes/{f.name}: JSON として読めません — {e}')
+    if d.get('id') != f.stem:
+        raise SystemExit(f'shapes/{f.name}: id は "{f.stem}" にしてください（いまは {d.get("id")!r}）')
+    for k in [d['id'], d.get('name', '')] + list(d.get('keys', [])):
+        nk = _norm(k)
+        if not nk:
+            continue
+        if nk in seen and seen[nk] != d['id']:
+            raise SystemExit(f'shapes: 言葉「{k}」が {seen[nk]} と {d["id"]} の両方にあります')
+        seen[nk] = d['id']
+    lib.append(d)
+words = (SHAPES / 'words.tsv').read_text(encoding='utf-8') if (SHAPES / 'words.tsv').exists() else ''
+words = '\n'.join(r for r in words.split('\n') if r.strip() and not r.startswith('#'))
+gens = '\n'.join(f.read_text(encoding='utf-8') for f in sorted(SHAPES.glob('gen-*.js')))
+shape_js = ('const DSHAPE_LIB = ' + json.dumps(lib, ensure_ascii=False, separators=(',', ':')) + ';\n'
+            + 'const DSHAPE_WORDS = ' + json.dumps(words, ensure_ascii=False) + ';\n'
+            + (SRC / 'dshapes.js').read_text(encoding='utf-8') + '\n' + gens)
+assert '</script' not in shape_js.lower(), 'shapes: </script> を含む文字列は入れられません'
+_mark = (SRC / 'dshow.js').read_text(encoding='utf-8')
+assert _mark in js
+js = js.replace(_mark, shape_js + '\n' + _mark, 1)
+
 frag = tpl.replace('/*INLINE:style.css*/', css).replace('/*INLINE:scripts*/', js)
 # 出力は決定的にする（日付などを混ぜると CI の差分検査が誤検知する）
 frag = frag.replace('<title>ドローンの構造</title>',

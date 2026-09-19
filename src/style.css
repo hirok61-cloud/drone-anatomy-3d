@@ -441,6 +441,19 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
 .ds-text input { flex: 1; min-width: 0; padding: 7px 11px; border-radius: 9px; border: 1px solid var(--hair2); background: var(--seg-bg); color: var(--ink); font: max(16px, calc(13px * var(--fs, 1)))/1.4 var(--font); min-height: var(--tap); }   /* iOS は 16px 未満の入力欄でページごと拡大する */
 .ds-text input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 .ds-text button { flex: none; padding: 0 14px; border-radius: 999px; font-size: calc(12.5px * var(--fs, 1)); font-weight: 700; min-height: var(--tap); background: var(--accent); color: #fff; }
+.ds-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 6px 0 2px; }
+.ds-mode { display: inline-flex; padding: 2px; border-radius: 999px; background: var(--seg-bg); border: 1px solid var(--hair2); }
+.ds-mode button { padding: 0 12px; min-height: calc(var(--tap) - 8px); border-radius: 999px; font-size: calc(12px * var(--fs, 1)); font-weight: 600; color: var(--ink2); }
+.ds-mode button[aria-checked=true] { background: var(--accent); color: #fff; }
+.ds-img { padding: 0 12px; min-height: calc(var(--tap) - 4px); border-radius: 999px; border: 1px solid var(--hair2); font-size: calc(12px * var(--fs, 1)); font-weight: 600; color: var(--ink); background: var(--seg-bg); }
+.ds-sugs { display: flex; gap: 6px; overflow-x: auto; padding: 6px 0 4px; margin: 2px 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.ds-sugs::-webkit-scrollbar { display: none; }
+.ds-sugs button { flex: none; padding: 0 12px; min-height: calc(var(--tap) - 8px); border-radius: 999px; border: 1px solid var(--hair2); background: var(--seg-bg); color: var(--ink); font-size: calc(12px * var(--fs, 1)); white-space: nowrap; }
+.ds-sugs button:active, .ds-img:active { transform: scale(0.97); }
+.ds-mode button:focus-visible, .ds-img:focus-visible, .ds-sugs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+#noteCard.mini #noteBody .ds-row, #noteCard.mini #noteBody .ds-sugs { display: none; }
+#noteCard.ds-asking #dshowVals, #noteCard.ds-asking #dshowBody, #noteCard.ds-asking #noteBody details { display: none; }
+@media (max-width: 760px) { #noteCard.ds-asking { max-height: min(58vh, calc(100vh - var(--dock-h) - 96px - var(--sat) - var(--sab))); } }
 .ds-hint { margin: 4px 0 0; font-size: calc(11.5px * var(--fs, 1)); line-height: 1.5; color: var(--ink3); }
 body.fpv #viewCol { display: none; }   /* 映像に重ねない。戻り道は「外から見る」と Esc */
 body.fpv #noteCard, body.fpv #bigBand { display: none; }

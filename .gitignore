@@ -2,3 +2,8 @@
 node_modules/
 .wrangler/
 docs/review/*.jpg
+
+# 形のラボの撮影結果（PNG）は記録しない
+docs/review/*.png
+docs/review/shapes/
+docs/review/words/

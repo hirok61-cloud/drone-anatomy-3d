@@ -1,0 +1,26 @@
+{
+  "id": "rabbit",
+  "name": "うさぎ",
+  "keys": ["うさぎ", "兎", "ウサギ", "うさちゃん", "ラビット", "バニー", "rabbit", "bunny", "🐰", "🐇"],
+  "vb": [0, 0, 100, 100],
+  "parts": [
+    { "tag": "earL", "mtag": "earR", "mirror": 50, "ellipse": [35, 21, 8.6, 18.5, -15], "c": "#ffffff" },
+    { "tag": "earL", "mtag": "earR", "mirror": 50, "ellipse": [35.4, 22.4, 4.7, 14.2, -15], "c": "#ff5fa2" },
+    { "ellipse": [50, 78, 28, 20], "c": "#ffffff" },
+    { "mirror": 50, "ellipse": [27, 92, 13, 7, -8], "c": "#ffffff" },
+    { "mirror": 50, "ellipse": [23.5, 92.5, 5.4, 3.4, -8], "c": "#ff9ec4" },
+    { "mirror": 50, "ellipse": [38, 80, 7, 9.5, 8], "c": "#ffffff" },
+    { "ellipse": [50, 48, 23.5, 20], "c": "#ffffff" },
+    { "mirror": 50, "circle": [36, 55, 5.4], "c": "#ff9ec4", "edge": false },
+    { "mirror": 50, "ellipse": [39, 45, 4.8, 5.4], "c": "#16324a", "w": 2.4 },
+    { "mirror": 50, "circle": [37.4, 43.1, 2.1], "c": "#ffffff", "w": 2.4 },
+    { "d": "M46.2,51.4 L53.8,51.4 L50,55.6 Z", "c": "#ff5fa2", "w": 2.5 },
+    { "mirror": 50, "d": "M50,55.6 Q47.4,59.4 43.6,57.4", "s": "#ff5fa2", "sw": 1.7 }
+  ],
+  "anim": [
+    { "type": "swing", "tags": ["earL"], "pivot": [41, 38], "amp": 0.10, "hz": 0.5, "r": 12 },
+    { "type": "swing", "tags": ["earR"], "pivot": [59, 38], "amp": 0.10, "hz": 0.5, "phase": 0.5, "r": 12 },
+    { "type": "hop", "amp": 3.0, "hz": 0.55 },
+    { "type": "bob", "amp": 0.6, "hz": 0.28 }
+  ]
+}
