@@ -1,0 +1,39 @@
+{
+  "id": "astronaut",
+  "name": "うちゅうひこうし",
+  "keys": ["うちゅうひこうし", "宇宙飛行士", "アストロノート", "うちゅうふく", "宇宙服", "astronaut", "spaceman", "👨‍🚀", "👩‍🚀", "🧑‍🚀"],
+  "vb": [0, 0, 100, 100],
+  "paths": {
+    "armL": [[36, 44], [25, 50], [16, 60]],
+    "armR": [[64, 46], [76, 42], [85, 32]]
+  },
+  "parts": [
+    {"tag": "pack", "rect": [22, 36, 56, 30, 8], "c": "#6f7dff"},
+    {"tag": "leg", "rect": [34, 66, 13, 26, 5], "c": "#ffffff"},
+    {"tag": "leg", "rect": [53, 66, 13, 26, 5], "c": "#ffffff"},
+    {"tag": "leg", "rect": [34, 83, 13, 9.5, 3], "c": "#ff8a1f"},
+    {"tag": "leg", "rect": [53, 83, 13, 9.5, 3], "c": "#ff8a1f"},
+    {
+      "tag": "armL",
+      "band": {"path": "armL", "r": [6.6, 6.1, 5.6]},
+      "c": "#ffffff"
+    },
+    {"tag": "armL", "circle": [16, 60, 6.4], "c": "#ff8a1f"},
+    {
+      "tag": "armR",
+      "band": {"path": "armR", "r": [6.6, 6.1, 5.6]},
+      "c": "#ffffff"
+    },
+    {"tag": "armR", "circle": [85, 32, 6.4], "c": "#ff8a1f"},
+    {"tag": "body", "rect": [33, 39, 34, 32, 8], "c": "#ffffff"},
+    {"tag": "body", "rect": [41, 47, 18, 13, 3], "c": "#35e07a", "w": 1.3},
+    {"tag": "head", "circle": [50, 24, 19], "c": "#ffffff"},
+    {"tag": "head", "ellipse": [50, 25, 14.3, 12.4], "c": "#9fedff", "c2": "#2f6bff", "g": [50, 13, 50, 37.4]}
+  ],
+  "anim": [
+    {"type": "blink", "tags": ["body"], "depth": 0.3, "hz": 0.7},
+    {"type": "swing", "tags": ["armR"], "pivot": [64, 46], "amp": 0.26, "hz": 0.55},
+    {"type": "swing", "pivot": [50, 20], "amp": 0.05, "hz": 0.22},
+    {"type": "bob", "amp": 2.0, "ax": 1.2, "hz": 0.35}
+  ]
+}

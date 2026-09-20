@@ -90,11 +90,12 @@ const ext = () => { let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; for (let i = 0
   A(ok === true && !ds.shape && DS.DSHOW_FIGS[ds.fig].id === 'custom', '形の無い言葉: 文字で出る');
   const e = ext(); A(e.x1 - e.x0 > e.y1 - e.y0, '形の無い言葉: 横に長い'); }
 // 絵文字そのもの（端末に絵文字が無い環境では文字へ落ちる。どちらでも受け付けること）
-{ const ok = DS.dshowSetText('🐧'); settle();
+{ const ok = DS.dshowSetText('🍙'); settle();   /* 作り込んだ形を持たない絵文字で確かめる（🐧 などは形の側が受け持つ） */
   A(ok === true && DS.DSHOW_FIGS[ds.fig].id === 'custom', '絵文字: 受け付ける');
   if (ds.shape) { A(ds.shape.sh.kind === 'emoji', '絵文字: 絵文字から作った形'); A(/の形$/.test(DS.dshowFigName()), '絵文字: 名前', DS.dshowFigName()); } }
 // 言葉の表（あれば）
-{ const r = E.dshapeResolve('りんご'); if (r) A(r.kind === 'emoji' || r.kind === 'lib', '言葉の表: りんごが引ける'); }
+{ const r = E.dshapeResolve('りんご'); if (r) A(r.kind === 'emoji' || r.kind === 'lib', '言葉の表: りんごが引ける');
+  const p = E.dshapeResolve('🐧'); A(p && p.kind === 'lib' && p.def.id === 'penguin', '絵文字でも、作り込んだ形があればそちらが出る', p && p.kind); }
 // 図形が先へ進んだら、形の扱いは終わる
 { DS.dshowNext(); settle();
   A(DS.DSHOW_FIGS[ds.fig].id !== 'custom' && !ds.shape, '次の図形: 形の動きを持ち越さない', DS.DSHOW_FIGS[ds.fig].id); }

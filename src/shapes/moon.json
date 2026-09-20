@@ -1,0 +1,18 @@
+{
+  "id": "moon",
+  "name": "つき",
+  "keys": ["つき", "月", "みかづき", "三日月", "おつきさま", "お月様", "ムーン", "moon", "crescent", "🌙", "🌛", "🌜"],
+  "vb": [0, 0, 100, 100],
+  "parts": [
+    {"tag": "moon", "circle": [44, 48, 31], "c": "#ffd21f", "c2": "#ffab1f", "g": [16, 68, 50, 34]},
+    {"tag": "moon", "circle": [57, 40.5, 31], "cut": true},
+    {"tag": "star", "star": [77, 25, 7.5, 3.2, 5, 0], "c": "#ffffff", "w": 2},
+    {"tag": "star", "star": [88, 50, 5.6, 2.4, 5, 0], "c": "#ffffff", "w": 2.2},
+    {"tag": "star", "star": [72, 82, 6.2, 2.7, 5, 0], "c": "#ffffff", "w": 2.2}
+  ],
+  "anim": [
+    {"type": "twinkle", "tags": ["star"], "depth": 0.66, "hz": 0.75},
+    {"type": "swing", "tags": ["moon"], "pivot": [50, 12], "amp": 0.055, "hz": 0.22},
+    {"type": "bob", "amp": 1.2, "hz": 0.3}
+  ]
+}

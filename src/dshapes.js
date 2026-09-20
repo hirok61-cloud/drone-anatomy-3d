@@ -427,6 +427,8 @@ function dshapeMake(src, n, env) {
         else if (p.gr) t = Math.hypot(vx - p.gr[0], vy - p.gr[1]) / Math.max(1e-6, p.gr[2]);
         t = Math.max(0, Math.min(1, t)); }
       const a = pc[k], b2 = pc2[k] || a, br = p.b || 1; r = (a[0] + (b2[0] - a[0]) * t) * br; g = (a[1] + (b2[1] - a[1]) * t) * br; b = (a[2] + (b2[2] - a[2]) * t) * br;
+      // 明るさを上げて 1 を超えた成分をそのまま切ると色相が転ぶ（黄が黄緑に、橙がサーモンに）。色相を保ったまま収め、超えたぶんは白へ寄せて「より明るい」を表す
+      { const mx = Math.max(r, g, b); if (mx > 1) { const f = 1 / mx, w = Math.min(0.35, (mx - 1) * 0.5); r = r * f; g = g * f; b = b * f; r += (1 - r) * w; g += (1 - g) * w; b += (1 - b) * w; } }
       sh.tag[i] = tagIx.get(p.tag || '') || 0;
     } else {
       // 境目の点は、にじんだ色を拾わないよう、同じ部品のいちばん内側の画素から色をとる
