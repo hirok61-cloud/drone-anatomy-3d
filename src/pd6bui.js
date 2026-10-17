@@ -24,7 +24,7 @@ function initModelUI() {
 }
 
 // ---------- 状態の問い合わせ (ui.js / live.js から呼ばれる) ----------
-function pd6bBusy() { return IS_PD6B && (pd6b.foldTo > 0 || pd6b.fold > 0.001 || !!pd6b.act || pd6b.chuteTo > 0); }
+function pd6bBusy() { return IS_PD6B && (pd6b.foldTo > 0 || pd6b.fold > 0.001 || !!pd6b.act || pd6b.chuteTo > 0 || pd6b.sizeOn); }   /* 大きさは床に立つ人と並べるので着地させる */
 function pd6bShadowExtra() { return (pd6b.sizeOn ? 0.45 : 0) + (pd6b.act && pd6b.act.id === 'drop' ? 0.1 : 0); }
 function pd6bBlockPower() {
   if (!IS_PD6B) return false;
@@ -43,8 +43,11 @@ function pd6bAction(id) {
   if (!IS_PD6B) return;
   if (S.tab !== 'see') setTab('see');
   if (id === 'about') { renderPdAbout(); return; }
-  if (id === 'size') { setSize(!pd6b.sizeOn); return; }
-  if (id === 'chute') { setChute(!(pd6b.chuteTo > 0)); return; }
+  // 同時に1つ: 傘を開いたまま箱を置く・大きさを比べたまま付け替える、のような重ね方はさせない
+  if (id !== 'chute' && pd6b.chuteTo > 0) setChute(false, true);
+  if (id !== 'size' && pd6b.sizeOn) setSize(false, true);
+  if (id === 'size') { if (pd6b.act) pd6bStop(); setSize(!pd6b.sizeOn); return; }
+  if (id === 'chute') { if (!(pd6b.chuteTo > 0) && (pd6b.foldTo > 0 || pd6b.fold > 0.001)) { pd6b.foldTo = 0; showToast('アームを広げてから開きます'); } setChute(!(pd6b.chuteTo > 0)); return; }
   if (pd6b.act) pd6bStop();
   stopOthers('pd6b');
   if (S.explode > 0.02) setExplode(0);
@@ -59,13 +62,14 @@ function pd6bAction(id) {
   if (id === 'drop' && pd6b.variant !== 'cargo') { pd6bSetVariant('cargo'); }
   if (id === 'unit') { pd6b.act = { id, t: 0, from: pd6b.variant, to: pd6b.variant === 'cargo' ? 'survey' : 'cargo', swapped: false }; renderPdNote('unit'); syncPdChips(); return; }
   if (id === 'swap') { pd6b.act = { id, t: 0, p: D.parts.filter(p => p.key === 'battery')[1] }; renderPdNote('swap'); syncPdChips(); return; }
-  if (id === 'drop') { pd6b.act = { id, t: 0, body: true }; syncBodyMode(); renderPdNote('drop'); syncPdChips(); focusOn([D.root], { pull: false, margin: 1.7 }); return; }
+  if (id === 'drop') { for (const th of D.arrows.thrust) th.userData.forceHide = true; pd6b.act = { id, t: 0, body: true }; syncBodyMode(); renderPdNote('drop'); syncPdChips(); pdFrame([D.root], { pull: false, margin: 1.5 }); return; }
 }
 function pd6bStop() {
   if (!IS_PD6B || !pd6b.act) return;
   const a = pd6b.act; pd6b.act = null;
   if (a.id === 'swap' && a.p) { a.p.anim = null; a.p.animReset = true; setTint(a.p, PD_OLD, 0); }
   if (a.id === 'drop') {
+    for (const th of D.arrows.thrust) th.userData.forceHide = false;
     D.boxPart.anim = null; D.boxPart.animReset = true; for (const c of D.latchPart.claws) c.g.rotation.z = 0;
     for (const mo of D.motors) { mo.rpmTarget = null; mo.rpmRate = null; } body.py = 0; body.vyF = 0;
   }
@@ -124,7 +128,7 @@ function renderPdNote(id) {
 }
 
 // ---------- パラシュート / 大きさ ----------
-function setChute(on) {
+function setChute(on, quiet) {
   pd6b.chuteTo = on ? 1 : 0; syncPdChips();
   if (on) {
     if (pd6b.act) pd6bStop(); if (S.explode > 0.02) setExplode(0); if (S.power > 0) setPower(0, true);
@@ -133,16 +137,33 @@ function setChute(on) {
     flyTo(t.clone().addScaledVector(dir, 2.3 * viewScale() * bandK()), t, 1100);
   } else {
     if ($('#noteCard').dataset.kind === 'pd6b-chute') renderNote(null);
-    focusOn([D.root], { pull: true });
+    if (!quiet) focusOn([D.root], { pull: true });
   }
 }
-function setSize(on) {
+// 枠決め: PCでは説明カードが左側を覆うので、カードの右端から視点列までの空いた範囲の中央に被写体を寄せ、狭いぶん引く
+function pdFrame(objs, opts) {
+  focusOn(objs, opts);
+  const card = $('#noteCard'); if (narrow() || !S.camSpring || card.hidden) return;
+  const r = card.getBoundingClientRect(), cw = canvas.clientWidth - 384, vc = $('#viewCol').getBoundingClientRect();
+  const f0 = Math.min(r.right + 12, cw * 0.6), f1 = Math.max(f0 + 200, Math.min(cw, vc.left) - 12);
+  const sp = S.camSpring, back = sp.p1.clone().sub(sp.q1), k = clamp(0.8 * cw / (f1 - f0), 1, 1.7);
+  sp.p1.copy(sp.q1).addScaledVector(back, k);
+  const d = sp.p1.distanceTo(sp.q1), tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect;
+  const px = (f0 + f1) / 2 - cw / 2, right = new THREE.Vector3().crossVectors(back.normalize().negate(), camera.up).normalize();
+  const shift = right.multiplyScalar(-(px / cw) * 2 * d * tanH); sp.p1.add(shift); sp.q1.add(shift);
+  controls.maxDistance = Math.max(controls.maxDistance, d * 1.02);
+}
+function setSize(on, quiet) {
   pd6b.sizeOn = !!on; syncPdChips();
   if (pd6b.person) pd6b.person.visible = pd6b.sizeOn; if (pd6b.ghost) pd6b.ghost.visible = pd6b.sizeOn;
   S.shadowDirty = S.csDirty = S.aoDirty = true;
   if (on && pd6b.person && pd6b.person.userData.face) pd6b.person.userData.face(camera.position.x, camera.position.z);   /* 人は見ている人の方を向かせる */
-  if (on) { renderPdNote('size'); focusOn([D.root, pd6b.person, pd6b.ghost], { pull: true, margin: 1.12 }); }
-  else { if ($('#noteCard').dataset.kind === 'pd6b-size') renderNote(null); focusOn([D.root], { pull: true }); }
+  if (on) {
+    renderPdNote('size');
+    const dir = new THREE.Vector3(0.45, 0.32, -0.84).normalize();   /* 視点の向きを決めておく（前の場面の向きを引き継ぐと人が手前に大写しになる） */
+    pdFrame([D.root, pd6b.person, pd6b.ghost], { pull: true, margin: 1.15, dir });
+  }
+  else { if ($('#noteCard').dataset.kind === 'pd6b-size') renderNote(null); if (!quiet) focusOn([D.root], { pull: true }); }
 }
 // 550クラスの半透明の影絵（大きさの物差し。部品には数えない）
 function pd6bQuadGhost() {
@@ -158,7 +179,7 @@ function pd6bQuadGhost() {
   }
   for (const sx of [-1, 1]) { g.add(at(mesh(cylGeo(0.006, 0.006, 0.27, 16).rotateX(Math.PI / 2), mat), sx * 0.112, -0.150, 0)); for (const sz of [-1, 1]) g.add(tubeBetween(V3(sx * 0.055, -0.006, sz * 0.045), V3(sx * 0.112, -0.148, sz * 0.088), 0.005, mat, 12)); }
   g.traverse(o => { o.castShadow = false; o.userData.noPick = true; });
-  g.scale.setScalar(PD6B_K); g.position.set(0.66, -0.158 + 0.156 * PD6B_K, 0.10); g.visible = false;
+  g.scale.setScalar(PD6B_K); g.position.set(-0.45, -0.158 + 0.156 * PD6B_K, -0.50); g.visible = false;
   return g;
 }
 
@@ -170,6 +191,7 @@ function setLock(red) {
 }
 function stepPd6b(dt) {
   let dirty = false;
+  { const sup = pd6b.sizeOn || pd6b.chuteTo > 0 || !!(pd6b.act && pd6b.act.id === 'drop'); if (sup !== pd6b._sup) { pd6b._sup = sup; S.labelsSuppressed = sup; } }   /* 引いた画では部品名が重なって読めないので、その間だけ隠す（PD6Bでは他にこの旗を使う機能がない） */
   // --- たたむ / 広げる ---
   if (pd6b.foldTo > pd6b.fold) {
     const spinning = D.motors.some(mo => mo.rpm > 30) || body.py > 0.003;
@@ -217,7 +239,7 @@ function stepPd6b(dt) {
       bp.anim.pos.set(0, -0.035 * fall - py / PD6B_K, 0);   /* 箱は床に残す: 機体が上がったぶんだけ下げる */
       for (const mo of D.motors) { mo.rpmTarget = t > 1.0 && t < 7.4 ? HOVER_RPM * 0.9 : 0; mo.rpmRate = 2.5; }
       const st = $('#pdDropState'); if (st) st.textContent = t < 0.6 ? '爪を開いています…' : t < 1.2 ? '箱が床に降りました' : t < 2.0 ? 'プロペラを回します' : t < 5.6 ? '箱を置いて上昇・ホバリング' : t < 7.6 ? 'もどって着陸します' : '爪で箱をつかみ直しました';
-      if (t > 9.2) { bp.anim = null; bp.animReset = true; for (const mo of D.motors) { mo.rpmTarget = null; mo.rpmRate = null; } pd6b.act = null; syncBodyMode(); syncPdChips(); }
+      if (t > 9.2) { for (const th of D.arrows.thrust) th.userData.forceHide = false; bp.anim = null; bp.animReset = true; for (const mo of D.motors) { mo.rpmTarget = null; mo.rpmRate = null; } pd6b.act = null; syncBodyMode(); syncPdChips(); }
     }
     if (a.id === 'unit') {
       const outP = a.from === 'cargo' ? [D.boxPart, D.latchPart] : [D.svPart], inP = a.to === 'cargo' ? [D.boxPart, D.latchPart] : [D.svPart];
@@ -241,9 +263,9 @@ function stepPd6b(dt) {
 
 // ---------- 起動 ----------
 function initPd6b() {
-  camera.position.sub(controls.target).multiplyScalar(1.15).add(controls.target);   /* 550クラスより一回り大きく見えるので、最初の画を少し引く */
+  camera.position.sub(controls.target).multiplyScalar(narrow() ? 1.32 : 1.15).add(controls.target);   /* スマホは帯に合わせて寄るので、翼端が切れないよう多めに引く */   /* 550クラスより一回り大きく見えるので、最初の画を少し引く */
   for (const b of $$('#pdChips [data-pd]')) b.addEventListener('click', () => pd6bAction(b.dataset.pd));
-  pd6b.person = buildPerson(); pd6b.person.scale.setScalar(PD6B_K); pd6b.person.position.set(-0.66, -0.158, 0.06); pd6b.person.visible = false; scene.add(pd6b.person);
+  pd6b.person = buildPerson(); pd6b.person.scale.setScalar(PD6B_K); pd6b.person.position.set(0.05, -0.158, 0.68);   /* 機体の奥に立たせ、550の影絵は手前右に置く（横一列だと説明カードに機体が隠れる） */ pd6b.person.visible = false; scene.add(pd6b.person);
   pd6b.ghost = pd6bQuadGhost(); scene.add(pd6b.ghost);
   pd6bSetVariant('cargo'); syncPdChips();
   const q = new URLSearchParams(location.search);

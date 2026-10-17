@@ -130,7 +130,7 @@ document.addEventListener('click', e => {
   else if (t === 'slow') { setTimeScale(on ? 1 / 50 : 1); if (on) { if (S.power === 0) setPower(0.5); showLegend(); } }
   else if (t === 'air') { S.air = on; if (on) { if (S.power === 0) setPower(0.5); if (!store.get('airSeen')) { showToast('プロペラが空気を下に押しています。押した分だけ、機体は上に押し返されます。', 3600); store.set('airSeen', '1'); } } }
   else if (t === 'sticks') setSticks(on);
-  else if (t === 'sound') { sndOn(on); if (on && !store.get('soundSeen')) { showToast('モーターの音は回転数そのものです（羽根2枚 × 毎秒の回転数）。4基の回転差で、あのうなりが出ます。', 4200); store.set('soundSeen', '1'); } }
+  else if (t === 'sound') { sndOn(on); if (on && !store.get('soundSeen')) { showToast(`モーターの音は回転数そのものです（羽根2枚 × 毎秒の回転数）。${D.motors.length}基の回転差で、あのうなりが出ます。`, 4200); store.set('soundSeen', '1'); } }
   else if (t === 'tilt') setTilt(on);
   else if (t === 'shadows') { S.shadows = on; applyMode(); }
   else if (t === 'alive') setAlive(on);
@@ -293,7 +293,7 @@ function updateLabels() {
   }
   // モーターの%バッジ
   for (const B of badgeEls) {
-    const show = (live || S.scale) && B.mo.rpm > 100 && partVisible(B.mo.part) && !theater.active;
+    const show = (live || S.scale) && B.mo.rpm > 100 && partVisible(B.mo.part) && !theater.active && !(typeof pd6b === 'object' && pd6b.act);   /* PD6Bの荷物投下はモーターの差を見せる場面ではない */
     B.el.hidden = !show; if (!show) continue;
     const a = B.mo.group.localToWorld(tmpV.set(0, 0.10, 0)); const pr = tmpV2.copy(a).project(camera); if (pr.z > 1) { B.el.hidden = true; continue; }
     const x = clamp((pr.x + 1) / 2 * W, 60, W - 60), y = clamp((1 - pr.y) / 2 * H, 40, H - 40); B.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%,-50%)`;
@@ -439,7 +439,7 @@ function onTheaterChanged() {
 const STICK_MAP = { 1: { L: { v: 'pitch', h: 'yaw' }, R: { v: 'thr', h: 'roll' } }, 2: { L: { v: 'thr', h: 'yaw' }, R: { v: 'pitch', h: 'roll' } } };
 const AXIS_LBL = { pitch: ['前', '後'], yaw: ['←向き', '向き→'], thr: ['上', '下'], roll: ['←左', '右→'] };
 let stickMode = ['1', '2'].includes(store.get('stickMode')) ? store.get('stickMode') : '1';
-function setSticks(on) { S.sticks = on; for (const x of $$('.tgl[data-t=sticks]')) x.classList.toggle('on', on); $('#sticks').hidden = !on; document.body.classList.toggle('sticks-on', !!on); if (typeof updateFpvHud === 'function') updateFpvHud(); if (on) { if (S.power === 0) setPower(0.5, true); if (!store.get('stickSeen')) { showToast('スティックをたおすと、4つのモーターがそれぞれ違う速さになります。', 3600); store.set('stickSeen', '1'); } } else { body.stick.active = false; body.stick.x = body.stick.y = body.stick.yaw = body.stick.thr = 0; } labelSticks(); }
+function setSticks(on) { S.sticks = on; for (const x of $$('.tgl[data-t=sticks]')) x.classList.toggle('on', on); $('#sticks').hidden = !on; document.body.classList.toggle('sticks-on', !!on); if (typeof updateFpvHud === 'function') updateFpvHud(); if (on) { if (S.power === 0) setPower(0.5, true); if (!store.get('stickSeen')) { showToast(`スティックをたおすと、${D.motors.length}つのモーターがそれぞれ違う速さになります。`, 3600); store.set('stickSeen', '1'); } } else { body.stick.active = false; body.stick.x = body.stick.y = body.stick.yaw = body.stick.thr = 0; } labelSticks(); }
 function labelSticks() { for (const side of ['L', 'R']) { const map = STICK_MAP[stickMode][side]; const el = $(side === 'L' ? '#stickL' : '#stickR'); el.querySelector('.lbl.t').textContent = AXIS_LBL[map.v][0]; el.querySelector('.lbl.b').textContent = AXIS_LBL[map.v][1]; el.querySelector('.lbl.l').textContent = AXIS_LBL[map.h][0]; el.querySelector('.lbl.r').textContent = AXIS_LBL[map.h][1]; } }
 $('#modeSeg2').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; stickMode = b.dataset.m; store.set('stickMode', stickMode); segSet($('#modeSeg2'), 'm', stickMode); labelSticks(); });
 for (const side of ['L', 'R']) {
