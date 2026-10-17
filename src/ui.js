@@ -1,7 +1,7 @@
 // ===== UI: タブ・扉・解説・ラベル・スティック・入力 =====
-const LIST_ORDER = ['frameTop', 'frameBottom', 'regMark', 'arm', 'armClamp', 'motorMount', 'standoff', 'screws', 'motor', 'bell', 'stator', 'winding', 'magnet', 'shaft', 'motorBase', 'prop', 'propNut', 'propAdapter', 'esc', 'fc', 'pdb', 'capacitor', 'buzzer', 'battery', 'cells', 'batteryTray', 'xt60', 'balance', 'strap', 'wiring', 'gps', 'remoteId', 'rx', 'vtx', 'telemetry', 'led', 'gimbal', 'camera', 'damper', 'landingGear'];
-const SUB = { bell: 'motor', stator: 'motor', winding: 'motor', magnet: 'motor', shaft: 'motor', motorBase: 'motor', cells: 'battery', propNut: 'prop', propAdapter: 'prop' };
-const PER_MOTOR = new Set(['motor', 'prop', 'esc', 'arm', 'bell', 'stator', 'winding', 'magnet', 'shaft', 'motorBase', 'propNut', 'propAdapter', 'led', 'armClamp', 'motorMount']);
+const LIST_ORDER = IS_PD6B ? PD6B_LIST_ORDER.slice() : ['frameTop', 'frameBottom', 'regMark', 'arm', 'armClamp', 'motorMount', 'standoff', 'screws', 'motor', 'bell', 'stator', 'winding', 'magnet', 'shaft', 'motorBase', 'prop', 'propNut', 'propAdapter', 'esc', 'fc', 'pdb', 'capacitor', 'buzzer', 'battery', 'cells', 'batteryTray', 'xt60', 'balance', 'strap', 'wiring', 'gps', 'remoteId', 'rx', 'vtx', 'telemetry', 'led', 'gimbal', 'camera', 'damper', 'landingGear'];
+const SUB = IS_PD6B ? PD6B_SUB : { bell: 'motor', stator: 'motor', winding: 'motor', magnet: 'motor', shaft: 'motor', motorBase: 'motor', cells: 'battery', propNut: 'prop', propAdapter: 'prop' };
+const PER_MOTOR = IS_PD6B ? new Set(PD6B_PER_MOTOR) : new Set(['motor', 'prop', 'esc', 'arm', 'bell', 'stator', 'winding', 'magnet', 'shaft', 'motorBase', 'propNut', 'propAdapter', 'led', 'armClamp', 'motorMount']);
 const ICON = {
   eye: '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-5.5 8-5.5 8 5.5 8 5.5-3 5.5-8 5.5S2 10 2 10z"/><circle cx="10" cy="10" r="2.4"/></svg>',
   eyeOff: '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l14 14M8.6 8.7A2.4 2.4 0 0 0 11.3 11.4M6.2 6.3C3.6 7.9 2 10 2 10s3 5.5 8 5.5c1.5 0 2.8-.5 3.9-1.1M9 4.6C9.3 4.5 9.7 4.5 10 4.5c5 0 8 5.5 8 5.5s-.7 1.3-2 2.6"/></svg>',
@@ -58,7 +58,8 @@ function stopOthers(keep, arg) {
   if (keep !== 'descent' && descent.active) stopDescent(true);
   if (keep !== 'fpv' && typeof fpv === 'object' && fpv.on) fpvExit();
   if (keep !== 'dshow' && typeof dshow === 'object' && dshow.on) dshowOn(false);
-  if (keep !== 'weather' && keep !== 'fpv' && typeof weather === 'object' && weather.on) setWeather(null);   /* 場面は自前の空を使う。一人称は空もようのまま入れる */
+  if (keep !== 'weather' && keep !== 'fpv' && typeof weather === 'object' && weather.on) setWeather(null);
+  if (keep !== 'pd6b' && typeof pd6bStop === 'function') pd6bStop();   /* 場面は自前の空を使う。一人称は空もようのまま入れる */
 }
 function setTab(tab) {
   $('#coach').hidden = true;
@@ -68,6 +69,7 @@ function setTab(tab) {
   if (typeof dshow === 'object' && dshow.on) dshowOn(false);   /* ショーも同じ。操作列を畳んでいる */
   if ((theater.active || theater.done) && tab !== 'theater') { stopTheaterUI(); }
   if (whatif.active && tab !== 'theater') { stopWhatifUI(); }
+  if (typeof pd6bOnTab === 'function') pd6bOnTab(tab);
   S.tab = tab; segSet($('#tabs'), 'tab', tab);
   for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== tab;
   if (tab === 'fly') { if (S.explode > 0.02) { setExplode(0); showToast('分解をもどしました'); } if (S.mode === 'cut') setMode('normal'); }
@@ -86,23 +88,23 @@ function setDepth(d) {
   S.depth = d; store.set('depth', d); document.body.classList.toggle('full', d === 'full'); segSet($('#depthSeg'), 'd', d); $('#coach').hidden = true;
   buildList(); renderDetail(); buildLabels(); buildMishapCards(); buildAsk(); updateBigBand(); if (S.scale) renderMassBar(S.selected && S.selected.key);
   buildWhatifCards(); if (typeof syncRegToggle === 'function') { syncRegToggle(); if (S.scale && typeof regGhosts === 'function') regGhosts(true); }
-  if (d === 'full') showToast('くわしく: 部品40種の仕様例と点検ポイントも見られます'); 
+  if (d === 'full') showToast(`くわしく: 部品${listKeys().length}種の仕様例と点検ポイントも見られます`);
 }
 $('#depthSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setDepth(b.dataset.d); });
 
 // ---------- モード / 分解 / モーター ----------
-function setMode(m) { const was = S.mode; S.mode = m; segSet($('#modeSeg'), 'mode', m); applyMode(); applyBlueprint(); if (m !== was) { if (m === 'cut') { setView('inside'); showToast('断面: モーター1つとバッテリーを半分に切った断面を見ています'); } else showToast({ normal: 'ふつうの見え方', xray: 'すけて見る: 外側を透かして中の部品が見えます', wire: '線だけ: 形の輪郭だけを見ます', blueprint: '設計図: 40部品をすべて見た人だけの見え方です' }[m]); } }
+function setMode(m) { const was = S.mode; S.mode = m; segSet($('#modeSeg'), 'mode', m); applyMode(); applyBlueprint(); if (m !== was) { if (m === 'cut') { setView('inside'); showToast('断面: モーター1つとバッテリーを半分に切った断面を見ています'); } else showToast({ normal: 'ふつうの見え方', xray: 'すけて見る: 外側を透かして中の部品が見えます', wire: '線だけ: 形の輪郭だけを見ます', blueprint: `設計図: ${LIST_ORDER.length}部品をすべて見た人だけの見え方です` }[m]); } }
 $('#modeSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.mode); });
 const explodeEl = $('#explode');
 explodeEl.addEventListener('input', () => { S.explodeAt = performance.now(); S.explode = explodeEl.value / 100; S.explodeT = S.explode; $('#explodeVal').textContent = explodeEl.value + '%'; explodePullBack(); S.shadowDirty = S.csDirty = true; });
 function explodePullBack() { if (S.explode < 0.35 || S.explodedCam) return; S.explodedCam = true; S.explodeFrame = true; }
 function setExplode(v) { S.explode = v; S.explodeAt = performance.now(); explodeEl.value = Math.round(v * 100); $('#explodeVal').textContent = Math.round(v * 100) + '%'; explodePullBack(); }
-function setPower(p, silent) { S.power = p; segSet($('#powerSeg'), 'p', p); const b = $('#powerBtn'); b.textContent = p > 0 ? t('stop') : t('power'); b.classList.toggle('primary', p === 0); syncBodyMode();
+function setPower(p, silent) { if (p > 0 && typeof pd6bBlockPower === 'function' && pd6bBlockPower()) return; S.power = p; segSet($('#powerSeg'), 'p', p); const b = $('#powerBtn'); b.textContent = p > 0 ? t('stop') : t('power'); b.classList.toggle('primary', p === 0); syncBodyMode();
   if (p > 0 && !silent && !store.get('coachFlick') && S.tab === 'fly') setTimeout(() => { if (S.power > 0 && body.mode === 'free') showCoach('機体をはじいてみよう', '浮いている機体を指やマウスでさっとはじくと、傾いたぶんを頭脳（FC）がモーターの速さで直します。', null, () => store.set('coachFlick', '1')); }, 2500); }
 $('#powerBtn').addEventListener('click', () => setPower(S.power > 0 ? 0 : (S.depth === 'full' ? (parseFloat($('#powerSeg .on')?.dataset.p) || 0.5) : 0.5)));
 $('#powerSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setPower(parseFloat(b.dataset.p)); });
 function syncBodyMode() {
-  if (theater.active || descent.active || dshow.on) return setBodyMode('theater');   /* ショー中に free に戻ると、カメラが手前の1機を追いかけて隊列から外れる */
+  if (theater.active || descent.active || dshow.on || (typeof pd6b === 'object' && pd6b.act && pd6b.act.body)) return setBodyMode('theater');   /* ショー中に free に戻ると、カメラが手前の1機を追いかけて隊列から外れる */
   if (S.flight) return setBodyMode('demo');
   if (S.power > 0 && (S.tab === 'fly' || S.scale || alive.on || fpv.on || (S.lesson && lesson.hover) || S.expert === 'sensors')) return setBodyMode('free');
   setBodyMode('idle');
@@ -117,7 +119,7 @@ function setFlight(f) {
   else if ($('#noteCard').dataset.kind === 'flight') renderNote(null);
 }
 $('#flightChips').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; setFlight(S.flight === b.dataset.f ? null : b.dataset.f); });
-function updateFlightTab() { const tab = $('#fnTab'); if (!tab) return; const mean = Math.max(1, D.motors.reduce((a, m) => a + m.pct, 0) / 4); tab.innerHTML = D.motors.map((mo, i) => { const pct = Math.round(mo.pct); const cls = mo.pct > mean * 1.03 ? 'up' : mo.pct < mean * 0.97 ? 'down' : ''; return `<div class="${cls}"><b>${MOTOR_INFO[i].id} ${pct}%</b>${MOTOR_INFO[i].pos} · ${MOTOR_INFO[i].dir === 'CW' ? '↻' : '↺'}${MOTOR_INFO[i].dir}</div>`; }).join(''); }
+function updateFlightTab() { const tab = $('#fnTab'); if (!tab) return; const mean = Math.max(1, D.motors.reduce((a, m) => a + m.pct, 0) / D.motors.length); tab.innerHTML = D.motors.map((mo, i) => { const pct = Math.round(mo.pct); const cls = mo.pct > mean * 1.03 ? 'up' : mo.pct < mean * 0.97 ? 'down' : ''; return `<div class="${cls}"><b>${MOTOR_INFO[i].id} ${pct}%</b>${MOTOR_INFO[i].pos} · ${MOTOR_INFO[i].dir === 'CW' ? '↻' : '↺'}${MOTOR_INFO[i].dir}</div>`; }).join(''); }
 // トグル
 document.addEventListener('click', e => {
   const b = e.target.closest('.tgl'); if (!b) return;
@@ -160,7 +162,7 @@ function applyFind() {
   for (const g of $$('#partList .grp')) { let n = 0; for (let e = g.nextElementSibling; e && e.classList.contains('row'); e = e.nextElementSibling) if (!e.hidden) n++; g.hidden = !n; }
   const note = $('#findNote');
   if (note) { note.hidden = !q; note.textContent = !q ? '' : hit.size ? (deep ? `名前では見つかりません。説明文から ${hit.size} 件` : `${hit.size} 件`) : '見つかりません。ちがう言い方で試してください'; }
-  $('#partCount').textContent = q ? `${hit.size} / ${LIST_ORDER.length}` : `${LIST_ORDER.length} 部品`;
+  $('#partCount').textContent = q ? `${hit.size} / ${listKeys().length}` : `${listKeys().length} 部品`;
 }
 // Enter で開く1件。名前が前方一致するものを一覧の順より優先する（「モーター」でモーターマウントが先に来ないように）
 function findBest() {
@@ -174,14 +176,16 @@ function findBest() {
 function findClear() { const inp = $('#partFind'); if (inp) { inp.value = ''; applyFind(); } }
 
 // ---------- 部品一覧 / 解説 ----------
+// 付け替え式の部品(PD6Bの腰下ユニット)は、いま付いている方だけを一覧に出す
+const listKeys = () => LIST_ORDER.filter(k => PARTS[k] && (!PARTS[k].variant || typeof pd6b !== 'object' || PARTS[k].variant === pd6b.variant));
 function buildList() {
   const list = $('#partList'); const prevFind = $('#partFind') ? $('#partFind').value : ''; let html = '';
-  if (S.depth === 'simple') { for (const k of SIMPLE_KEYS) html += `<div class="row" data-key="${k}" tabindex="0" role="button"><span class="nm">${partName(k)}</span><span class="cnt"></span><span></span></div>`; $('#partCount').textContent = `${SIMPLE_KEYS.length} 部品`; }
+  if (S.depth === 'simple') { for (const k of SIMPLE_KEYS.filter(k => listKeys().includes(k))) html += `<div class="row" data-key="${k}" tabindex="0" role="button"><span class="nm">${partName(k)}</span><span class="cnt"></span><span></span></div>`; $('#partCount').textContent = `${SIMPLE_KEYS.filter(k => listKeys().includes(k)).length} 部品`; }
   else {
     html += `<div class="p-find"><input id="partFind" type="search" autocomplete="off" spellcheck="false" placeholder="${t('find.ph')}" aria-label="${t('find.ph')}" aria-controls="partList"><p id="findNote" class="find-note" hidden></p></div>`;
-    for (const g of GROUPS) { const keys = LIST_ORDER.filter(k => PARTS[k] && PARTS[k].group === g.id); html += `<div class="grp" style="--c:${g.color}"><i></i>${g.name}</div>`;
+    for (const g of GROUPS) { const keys = listKeys().filter(k => PARTS[k].group === g.id); if (!keys.length) continue; html += `<div class="grp" style="--c:${g.color}"><i></i>${g.name}</div>`;
       for (const k of keys) { const d = PARTS[k]; const hid = partsOf(k).some(p => p.hidden); html += `<div class="row${SUB[k] ? ' sub' : ''}${hid ? ' off' : ''}" data-key="${k}" tabindex="0" role="button"><span class="nm">${partName(k)}</span><span class="cnt">${d.count > 1 ? '×' + d.count : ''}</span><button class="eye" aria-label="${d.name}の表示切替">${hid ? ICON.eyeOff : ICON.eye}</button></div>`; } }
-    $('#partCount').textContent = `${LIST_ORDER.length} 部品`;
+    $('#partCount').textContent = `${listKeys().length} 部品`;
   }
   list.innerHTML = html;
   for (const row of $$('#partList .row')) row.classList.toggle('on', !!S.selected && row.dataset.key === S.selected.key);
@@ -193,7 +197,7 @@ $('#partList').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key
 $('#inspBack').addEventListener('click', () => select(null));
 function toggleHidden(key) { const ps = partsOf(key); const h = !ps.some(p => p.hidden); for (const p of ps) p.hidden = h; applyVisibility(); buildList(); renderDetail(); }
 function onVisibilityChanged() {
-  const hiddenKeys = [...new Set(D.parts.filter(p => p.hidden).map(p => p.key))];
+  const hiddenKeys = [...new Set(D.parts.filter(p => p.hidden && !(PARTS[p.key] && PARTS[p.key].variant)).map(p => p.key))];   /* 付け替えで外れている部品は「非表示」と言わない */
   if (S.isolated) showToast(`${PARTS[S.isolated].name} だけを表示中`); else if (hiddenKeys.length) showToast(`非表示: ${hiddenKeys.map(k => PARTS[k].name).join('・')}`);
 }
 function select(p, all = false, opts = {}) {
@@ -293,7 +297,7 @@ function updateLabels() {
     B.el.hidden = !show; if (!show) continue;
     const a = B.mo.group.localToWorld(tmpV.set(0, 0.10, 0)); const pr = tmpV2.copy(a).project(camera); if (pr.z > 1) { B.el.hidden = true; continue; }
     const x = clamp((pr.x + 1) / 2 * W, 60, W - 60), y = clamp((1 - pr.y) / 2 * H, 40, H - 40); B.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%,-50%)`;
-    const pct = Math.round(B.mo.pct), mean = Math.max(1, D.motors.reduce((a, m) => a + m.pct, 0) / 4), up = B.mo.pct > mean * 1.03, dn = B.mo.pct < mean * 0.97; B.el.classList.toggle('up', up); B.el.classList.toggle('down', dn); B.el.classList.toggle('over', !!(S.scale && scale.share[B.i] > SCALE_OVER));
+    const pct = Math.round(B.mo.pct), mean = Math.max(1, D.motors.reduce((a, m) => a + m.pct, 0) / D.motors.length), up = B.mo.pct > mean * 1.03, dn = B.mo.pct < mean * 0.97; B.el.classList.toggle('up', up); B.el.classList.toggle('down', dn); B.el.classList.toggle('over', !!(S.scale && scale.share[B.i] > SCALE_OVER));
     B.el.innerHTML = S.depth === 'simple' && !S.scale ? (up ? 'はやい ▲' : dn ? 'おそい ▼' : 'ふつう') : `${MOTOR_INFO[B.i].id} ${pct}% ${up ? '▲' : dn ? '▼' : ''}<small>${MOTOR_INFO[B.i].pos} ${MOTOR_INFO[B.i].dir === 'CW' ? '↻' : '↺'}</small>`;
   }
 }
@@ -610,5 +614,5 @@ function onResized() {
 function initUI() {
   buildUseChips(); buildAsk(); buildMishapCards(); buildWhatifCards(); labelSticks(); segSet($('#modeSeg2'), 'm', stickMode);
   const d = store.get('depth') === 'full' ? 'full' : 'simple'; setDepth(d);
-  if (d === 'simple' && !store.get('coach')) setTimeout(() => showCoach(FIRST_QUESTION.q, FIRST_QUESTION.hint, () => { store.set('coach', '1'); askQuestion(FIRST_QUESTION.qid); }, () => store.set('coach', '1')), 1200);
+  if (d === 'simple' && !store.get('coach') && !IS_PD6B) setTimeout(() => showCoach(FIRST_QUESTION.q, FIRST_QUESTION.hint, () => { store.set('coach', '1'); askQuestion(FIRST_QUESTION.qid); }, () => store.set('coach', '1')), 1200);
 }

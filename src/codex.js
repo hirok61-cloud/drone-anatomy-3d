@@ -2,12 +2,14 @@
 // 見た部品を静かに数え、今日の一部品をうっすら光らせ、記念写真を持ち帰れるようにする。
 // バッジ・称号・ランキング・音は作らない（数字ひとつと控えめな光だけ）。
 const codex = { seen: new Set(), today: null, pending: null, done: false, t: 0, litKey: null, total: 40 };
+// 見た部品は機種ごとに数える（PD6B の部品で 550クラスの記録を上書きしない）
+const CODEX_KEY = IS_PD6B ? 'codex.pd6b' : 'codex', CODEX_DONE = IS_PD6B ? 'codexDone.pd6b' : 'codexDone';
 
 function codexLoad() {
-  try { const a = JSON.parse(store.get('codex') || '[]'); if (Array.isArray(a)) codex.seen = new Set(a.filter(k => PARTS[k])); } catch (e) { codex.seen = new Set(); }
-  codex.done = store.get('codexDone') === '1';
+  try { const a = JSON.parse(store.get(CODEX_KEY) || '[]'); if (Array.isArray(a)) codex.seen = new Set(a.filter(k => PARTS[k])); } catch (e) { codex.seen = new Set(); }
+  codex.done = store.get(CODEX_DONE) === '1';
 }
-function codexSave() { try { store.set('codex', JSON.stringify([...codex.seen])); } catch (e) {} }
+function codexSave() { try { store.set(CODEX_KEY, JSON.stringify([...codex.seen])); } catch (e) {} }
 
 // 日付から今日の一部品を決める（端末内で完結。通信も乱数も使わない）
 function codexToday() {
@@ -32,7 +34,7 @@ function renderCodexCount(pulse) {
 }
 
 function codexUnlock() {
-  codex.done = true; store.set('codexDone', '1');
+  codex.done = true; store.set(CODEX_DONE, '1');
   const b = $('#modeSeg [data-mode=blueprint]'); if (b) b.hidden = false;
   showCoach('全部の部品を見ました', '設計図モードが使えるようになりました。見え方の「設計図」で開けます', () => setMode('blueprint'));
 }
@@ -63,6 +65,7 @@ function codexTriviaRow(key) { if (!TRIVIA[key]) return ''; const act = typeof T
 // 豆知識の内容を機体に演じさせる
 function triviaAct(key) {
   const a = TRIVIA_ACT && TRIVIA_ACT[key]; if (!a) return;
+  if (a.pd6b) { pd6bAction(a.pd6b); return; }
   if (a.explode != null) { setTab('see'); setExplode(a.explode); }
   else if (a.mode) { setTab('see'); setMode(a.mode); if (a.mode === 'cut' && key !== 'motor') select(partsOf(key)[0], true, { quiet: true }); }
   else if (a.question) askQuestion(a.question);
@@ -122,8 +125,8 @@ async function photoShare() {
 }
 
 function initCodex() {
-  codexLoad(); codex.today = codexToday(); renderCodexCount(false);
-  if (codex.seen.size >= codex.total && !codex.done) { codex.done = true; store.set('codexDone', '1'); }   // 既に全部見ている状態で開いた場合は静かに解放
+  codex.total = LIST_ORDER.length; codexLoad(); codex.today = codexToday(); renderCodexCount(false);
+  if (codex.seen.size >= codex.total && !codex.done) { codex.done = true; store.set(CODEX_DONE, '1'); }   // 既に全部見ている状態で開いた場合は静かに解放
   const b = $('#modeSeg [data-mode=blueprint]'); if (b) b.hidden = !codex.done;
   window.codexPoster = codexPoster;   // 検証用
   $('#photoBtn').addEventListener('click', photoShare);

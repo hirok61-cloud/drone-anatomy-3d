@@ -12,7 +12,7 @@ const narrow = () => matchMedia('(max-width: 1100px)').matches;
 // （body.mode だけで見分けると、生きている感じ（alive）が入っているときに素通りする）
 const camScripted = () => (typeof whatif === 'object' && whatif.active) || (typeof theater === 'object' && theater.active)
   || (typeof descent === 'object' && descent.active) || (typeof dshow === 'object' && dshow.on)
-  || (typeof weather === 'object' && weather.on) || (typeof fpv === 'object' && fpv.on);
+  || (typeof weather === 'object' && weather.on) || (typeof fpv === 'object' && fpv.on) || (typeof pd6b === 'object' && !!pd6b.act);
 const compact = () => matchMedia('(max-width: 760px)').matches;
 const T0 = performance.now(); const TL = {}; const mark = k => { TL[k] = Math.round(performance.now() - T0); };
 
@@ -47,7 +47,7 @@ controls.addEventListener('change', () => { S.aoDirty = true; });
 
 mark('gl');
 const M = makeMaterials(renderer.capabilities.getMaxAnisotropy()); mark('mat');
-const D = buildDrone(M); mark('geo');
+const D = IS_PD6B ? buildPD6B(M) : buildDrone(M); mark('geo');
 scene.add(D.root);
 if (D.personGroup) scene.add(D.personGroup);
 

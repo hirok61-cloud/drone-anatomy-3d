@@ -17,14 +17,14 @@ function tick(now) {
   controls.update();
   // 分解
   S.explodeT += (S.explode - S.explodeT) * (1 - Math.exp(-dt * 9)); if (Math.abs(S.explode - S.explodeT) < 0.0005) S.explodeT = S.explode; if (S.explode < 0.05 && S.explodedCam) { S.explodedCam = false; S.explodeFrame = true; }   // 戻したら組み上がった機体を再フレーミング
-  { const fs = 0.5 + 0.45 * S.explodeT + 0.3 * Math.max(0, body.py) + (S.scale && D.personGroup && D.personGroup.visible ? 0.8 : 0) + (S.scale && typeof regGhost === 'object' && regGhost.grp && regGhost.grp.visible ? 0.45 : 0);
+  { const fs = 0.5 + 0.45 * S.explodeT + 0.3 * Math.max(0, body.py) + (S.scale && D.personGroup && D.personGroup.visible ? 0.8 : 0) + (S.scale && typeof regGhost === 'object' && regGhost.grp && regGhost.grp.visible ? 0.45 : 0) + (IS_PD6B ? pd6bShadowExtra() : 0);
     const c = key.shadow.camera; if (Math.abs(c.right - fs) > 0.01) { c.left = c.bottom = -fs; c.right = c.top = fs; const kd = key.position.length(); c.near = Math.max(0.05, kd - fs * 1.8); c.far = kd + fs * 1.8; key.shadow.normalBias = 0.0006 * Math.max(1, fs / 0.5); c.updateProjectionMatrix(); S.shadowDirty = true; }   /* 枠を広げたら near/far とバイアスも合わせる(人型や区画が影から外れる・縞が出るのを防ぐ) */
     const si = 1 - 0.55 * S.explodeT; if (Math.abs((key.shadow.intensity ?? 1) - si) > 0.01) { key.shadow.intensity = si; S.shadowDirty = true; } }
   applyExplode();
   if (S.scale) stepScale();
   if (S.explodeFrame && Math.abs(S.explode - S.explodeT) < 0.01 && performance.now() - (S.explodeAt || 0) > 350) { S.explodeFrame = false; D.root.updateWorldMatrix(true, true); focusOn(D.parts.filter(p => partVisible(p) && effVisible(p.obj)).map(p => p.obj), { pull: true }); }   // 分解が落ち着いたら全体をフレーミング
   // 機体
-  stepAlive(dt); stepBody(dtSim, dt); if (theater.active) stepTheater(dtSim, dt); if (whatif.active) stepWhatif(dtSim, dt); if (descent.active) stepDescent(dtSim); if (weather.on) stepWeather(dtSim, dt); if (dshow.on) stepDshow(dt); applyBody(dt); stepSound(dt);   /* 音は状態が決まったあとに写す */
+  stepAlive(dt); stepBody(dtSim, dt); if (IS_PD6B) stepPd6b(dt); if (theater.active) stepTheater(dtSim, dt); if (whatif.active) stepWhatif(dtSim, dt); if (descent.active) stepDescent(dtSim); if (weather.on) stepWeather(dtSim, dt); if (dshow.on) stepDshow(dt); applyBody(dt); stepSound(dt);   /* 音は状態が決まったあとに写す */
   updateGimbal();   /* ジンバルは外から見ているときも傾きを打ち消す。本体の姿勢を当てた後に回す */
   if (fpv.on) stepFpv(dt);   /* カメラの姿勢は本体の姿勢が決まってから写す(1コマ遅れると水平が残る) */
   updateMotors(dtSim, dt); updateMoveArrow(); updateAirflow(dtSim, dt);
@@ -58,13 +58,13 @@ function tick(now) {
 }
 // 検証用に最小限だけグローバルへ出す(モジュールスコープのままだとコンソールから触れないため)
 window.LIST_ORDER = LIST_ORDER; window.PARTS = PARTS; window.WHATIF = WHATIF; window.WEAR = WEAR; window.MISHAPS = MISHAPS; window.USES = USES; window.FLIGHT = FLIGHT; window.EXPERT_MODES = EXPERT_MODES;
-window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: scale, __codex: codex, __whatif: whatif, __alive: alive, __lesson: lesson, __expert: expert, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
+window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: scale, __codex: codex, __whatif: whatif, __alive: alive, __lesson: lesson, __expert: expert, get pd6b() { return typeof pd6b === 'object' ? pd6b : null; }, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
 // ---------- 起動 ----------
 (async () => {
   $('#loadMsg').textContent = '照明と材質を準備しています…';
   buildList(); applyTheme(); resize();
   applyQuality(isMobile ? (HF ? 1 : 0) : 3);
-  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif(); initLive(); initLesson(); initExpert(); initReg(); initPreflight(); initDescent(); initFpv(); initWeather(); initDshow(); initSound(); initShare();
+  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif(); initLive(); initLesson(); initExpert(); initReg(); initPreflight(); initDescent(); initFpv(); initWeather(); initDshow(); initSound(); initShare(); initModelUI(); if (IS_PD6B) initPd6b();
   { const vs = viewScale(); if (vs > 1) camera.position.multiplyScalar(vs); }
   renderer.setClearColor(0x000000, 1);
   $('#loadMsg').textContent = 'シェーダーをコンパイルしています…'; mark('setup');

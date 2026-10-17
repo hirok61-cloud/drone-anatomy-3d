@@ -584,6 +584,37 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
   #noteCard, #massBar { bottom: calc(var(--dock-h) + 8px + var(--sab)); }
   .tabs button { min-height: var(--tap); }
 }
+/* ===== 機種の切り替え / PD6B-CAT3 ===== */
+body.pd6b .q550-only, body:not(.pd6b) .pd6b-only { display: none !important; }
+.model-btn { gap: 6px; padding: 5px 12px; min-height: 32px; font-weight: 500; }
+.model-btn .mb-k { color: var(--ink3); font-size: 12px; } .model-btn b { font-weight: 700; } .model-btn .mb-c { color: var(--ink3); font-size: 11px; }
+body.pd6b .model-btn { box-shadow: inset 0 0 0 1.5px var(--accent); }
+#modelPop { left: 14px; right: auto; width: 360px; }
+#modelPop h3 { font-size: calc(15px * var(--fs, 1)); margin-bottom: 8px; }
+.model-list { display: flex; flex-direction: column; gap: 6px; }
+.model-list button { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; padding: 10px 12px; border-radius: 12px; background: var(--seg-bg); color: var(--ink); min-height: var(--tap); transition: background .15s; }
+.model-list button:hover { background: var(--hair2); }
+.model-list button b { font-size: calc(14px * var(--fs, 1)); }
+.model-list button span { font-size: calc(12px * var(--fs, 1)); color: var(--ink2); line-height: 1.5; }
+.model-list button.on { background: var(--accent-soft); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.pd-spec { width: 100%; border-collapse: collapse; margin: 8px 0 4px; font-size: calc(12.5px * var(--fs, 1)); }
+.pd-spec th { text-align: left; font-weight: 500; color: var(--ink2); padding: 4px 8px 4px 0; white-space: nowrap; vertical-align: top; width: 7.5em; }
+.pd-spec td { padding: 4px 0; font-variant-numeric: tabular-nums; border-bottom: 1px solid var(--hair); }
+.pd-spec th { border-bottom: 1px solid var(--hair); }
+.pd-spec small { display: block; color: var(--ink3); font-size: calc(11px * var(--fs, 1)); }
+#noteBody h4 { font-size: calc(13px * var(--fs, 1)); margin: 10px 0 4px; }
+.pd-diff { padding-left: 1.1em; font-size: calc(12.5px * var(--fs, 1)); line-height: 1.6; }
+.pd-src summary { cursor: pointer; font-size: calc(12px * var(--fs, 1)); color: var(--ink2); margin-top: 6px; }
+.pd-src ul { padding-left: 1.1em; font-size: calc(11.5px * var(--fs, 1)); line-height: 1.6; }
+.pd-src a { color: var(--accent-text); }
+.pd-state { margin-top: 6px; padding: 6px 10px; border-radius: 8px; background: var(--hair); font-size: calc(12.5px * var(--fs, 1)); }
+@media (max-width: 760px) {
+  .model-btn { padding: 4px 8px; min-height: 30px; } .model-btn .mb-k { display: none; } .model-btn b { font-size: 11.5px; }
+  .brand h1 { display: none; }   /* 狭い画面は機体ボタンが見出しを兼ねる（タイトル・機体・くわしさ・操作が1行に入らない） */
+  .model-btn { flex: none; }
+  #modelPop { left: calc(10px + var(--sal)); right: calc(10px + var(--sar)); width: auto; }
+}
+
 @media (pointer: coarse) {
   .tbform input, .tbform select, .xctl select, .xflights input, #expertBody input[type=number] { font-size: max(16px, calc(12.5px * var(--fs, 1))); }   /* 16px未満だと iOS がページごと拡大する */
 }
@@ -713,13 +744,14 @@ body.dshow #noteCard.mini .icon-btn.sm::before { content: ''; position: absolute
     <div class="ctx-row" data-tab="see">
       <button id="inspToggle" class="pill-btn compact-only" data-i18n="ui.parts">部品一覧</button>
       <div class="dock-group grow"><label for="explode"><span data-i18n="ui.explode">分解</span> <span id="explodeVal" class="mono">0%</span></label><input type="range" id="explode" min="0" max="100" value="0"></div>
+      <div class="dock-group pd6b-only"><label>PD6B-CAT3</label><div class="chips" id="pdChips" role="group" aria-label="PD6B-CAT3の動き"><button data-pd="about">ⓘ この機体</button><button data-pd="fold" aria-pressed="false">たたむ</button><button data-pd="swap">電池交換</button><button data-pd="drop">荷物を置く</button><button data-pd="chute" aria-pressed="false">パラシュート</button><button data-pd="unit">測量用に付け替え</button><button data-pd="size" aria-pressed="false">大きさ</button></div></div>
       <div class="dock-group"><label data-i18n="ui.look">見え方</label><div class="seg small" id="modeSeg" role="radiogroup"><button data-mode="normal" class="on"><span data-simple data-i18n="ui.normal">ふつう</span><span data-fullname>通常</span></button><button data-mode="xray"><span data-simple data-i18n="ui.xray">すけて見る</span><span data-fullname>X線</span></button><button data-mode="wire"><span data-simple data-i18n="ui.wire">線だけ</span><span data-fullname>線画</span></button><button data-mode="cut"><span data-simple data-i18n="ui.cut">切って見る</span><span data-fullname>断面</span></button><button data-mode="blueprint" data-unlock hidden>設計図</button></div></div>
     </div>
     <div class="ctx-row" data-tab="fly" hidden>
       <button id="powerBtn" class="pill-btn primary">▶ プロペラを回す</button>
       <div class="seg small" id="powerSeg" data-full><button data-p="0.2">低速</button><button data-p="0.5" class="on">ホバー</button><button data-p="1">全開</button></div>
-      <div class="dock-group"><span class="dg-label">空もよう</span><div class="chips" id="skyChips" role="group" aria-label="空もよう"></div></div>
-      <div class="dock-group dshow-keep"><span class="dg-label">夜</span><div class="chips"><button id="showBtn" aria-pressed="false" aria-label="夜のドローンショー"><span aria-hidden="true">🎆</span> ドローンショー</button></div></div>
+      <div class="dock-group q550-only"><span class="dg-label">空もよう</span><div class="chips" id="skyChips" role="group" aria-label="空もよう"></div></div>
+      <div class="dock-group dshow-keep q550-only"><span class="dg-label">夜</span><div class="chips"><button id="showBtn" aria-pressed="false" aria-label="夜のドローンショー"><span aria-hidden="true">🎆</span> ドローンショー</button></div></div>
       <div class="dock-group dshow-only"><div class="chips"><button id="dsQuit" aria-label="ショーをやめる"><span aria-hidden="true">✕</span> やめる</button><button id="dsNext">つぎ ›</button><button id="dsAuto" class="tgl" aria-pressed="true" aria-label="自動送り"><i></i>自動</button><button id="dsRead">しくみ ›</button></div></div>
       <div class="dock-group dshow-only"><span class="dg-label">しくみ</span><div class="chips" id="dsHowChips" role="group" aria-label="ショーのしくみ"></div></div>
       <div class="chips">
@@ -730,7 +762,7 @@ body.dshow #noteCard.mini .icon-btn.sm::before { content: ''; position: absolute
         <button class="tgl" data-t="sound" aria-pressed="false" aria-label="音を出す"><i></i>音</button>
         <button class="tgl" data-t="tilt" id="tiltBtn" hidden aria-pressed="false"><i></i>かたむき</button>
       </div>
-      <div class="dock-group"><span class="dg-label">降ろし方</span><div class="chips" id="descChips" role="group" aria-label="降ろし方"><button data-dz="straight" aria-pressed="false">まっすぐ降ろす</button><button data-dz="slide" aria-pressed="false">横に流しながら</button></div></div>
+      <div class="dock-group q550-only"><span class="dg-label">降ろし方</span><div class="chips" id="descChips" role="group" aria-label="降ろし方"><button data-dz="straight" aria-pressed="false">まっすぐ降ろす</button><button data-dz="slide" aria-pressed="false">横に流しながら</button></div></div>
       <div class="dock-group"><label>飛行の原理</label><div class="chips" id="flightChips"><button data-f="hover">ホバリング</button><button data-f="climb" data-full>上昇</button><button data-f="pitch">前進</button><button data-f="roll" data-full>右へ移動</button><button data-f="yaw">右旋回</button></div></div>
     </div>
     <div class="ctx-row" data-tab="use" hidden>
@@ -758,27 +790,28 @@ body.dshow #noteCard.mini .icon-btn.sm::before { content: ''; position: absolute
   <nav class="tabs" id="tabs" role="tablist">
     <button data-tab="see" class="on" role="tab" aria-selected="true"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10" cy="10" r="3"/><path d="M2 10s3-5.5 8-5.5 8 5.5 8 5.5-3 5.5-8 5.5S2 10 2 10z"/></svg><span data-i18n="tabs.see">みる</span></button>
     <button data-tab="fly" role="tab" aria-selected="false"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M10 3v14M3 10h14M5 5l10 10M15 5L5 15"/></svg><span data-i18n="tabs.fly">とばす</span></button>
-    <button data-tab="use" role="tab" aria-selected="false"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h14v9H3zM7 7V4h6v3"/></svg><span data-i18n="tabs.use">つかう</span></button>
-    <button data-tab="mishap" role="tab" aria-selected="false" data-tabbtn="mishap"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3l8 14H2z"/><path d="M10 8v4M10 14.5v.5"/></svg><span data-i18n="tabs.mishap">もしも</span></button>
-    <button data-tab="expert" role="tab" aria-selected="false"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 14l4-6 3 4 3-7 3 5 3-2"/></svg><span data-i18n="tabs.expert">専門</span></button>
+    <button data-tab="use" class="q550-only" role="tab" aria-selected="false"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h14v9H3zM7 7V4h6v3"/></svg><span data-i18n="tabs.use">つかう</span></button>
+    <button data-tab="mishap" class="q550-only" role="tab" aria-selected="false" data-tabbtn="mishap"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3l8 14H2z"/><path d="M10 8v4M10 14.5v.5"/></svg><span data-i18n="tabs.mishap">もしも</span></button>
+    <button data-tab="expert" class="q550-only" role="tab" aria-selected="false"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 14l4-6 3 4 3-7 3 5 3-2"/></svg><span data-i18n="tabs.expert">専門</span></button>
   </nav>
 </div>
 
 <header id="topbar" class="glass">
   <div class="brand">
     <h1>ドローンの構造</h1>
+    <button id="modelBtn" class="pill-btn model-btn" aria-haspopup="dialog" aria-expanded="false" aria-controls="modelPop" title="機体をえらぶ"><span class="mb-k">機体</span><b id="modelName">550クラス</b><span aria-hidden="true" class="mb-c">▾</span></button>
     <div class="seg tiny" id="depthSeg" role="radiogroup" aria-label="くわしさ"><button data-d="simple" class="on" data-i18n="depth.simple">はじめて</button><button data-d="full" data-i18n="depth.full">くわしく</button></div>
   </div>
   <div class="top-actions">
-    <button id="lessonBtn" class="pill-btn" aria-haspopup="dialog" title="授業・説明会">授業</button>
-    <button id="askBtn" class="pill-btn" aria-haspopup="dialog"><span class="q">？</span><span data-i18n="ask">きく</span></button>
+    <button id="lessonBtn" class="pill-btn q550-only" aria-haspopup="dialog" title="授業・説明会">授業</button>
+    <button id="askBtn" class="pill-btn q550-only" aria-haspopup="dialog"><span class="q">？</span><span data-i18n="ask">きく</span></button>
     <button id="settingsBtn" class="icon-btn" aria-label="設定" title="設定" aria-expanded="false" aria-controls="settings">
       <svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.6"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/></svg>
     </button>
   </div>
 </header>
 <div id="settings" class="glass popover" hidden role="dialog" aria-label="設定">
-  <div class="pop-row lesson-row mobile-only"><button id="lessonBtnM" class="pill-btn primary">授業・説明会 ›</button></div>
+  <div class="pop-row lesson-row mobile-only q550-only"><button id="lessonBtnM" class="pill-btn primary">授業・説明会 ›</button></div>
   <div class="pop-row"><span>言語</span><div class="seg small" id="langSeg" role="radiogroup" aria-label="言語"><button data-lang="ja" class="on">日本語</button><button data-lang="easy">やさしい日本語</button><button data-lang="en">English</button></div></div>
   <div class="pop-row"><span>読みやすさ</span><button class="tgl" data-t="big" aria-pressed="false"><i></i>大きく読む（文字と部品名を大きく）</button></div>
   <div class="pop-row speakrow"><span>読み上げ</span><button class="tgl speak" data-t="speakAuto" aria-pressed="false"><i></i>部品を選ぶと読み上げる</button></div>
@@ -806,6 +839,15 @@ body.dshow #noteCard.mini .icon-btn.sm::before { content: ''; position: absolute
 
 <div id="lessonPop" class="glass popover" hidden role="dialog" aria-label="授業・説明会"></div>
 
+<div id="modelPop" class="glass popover" hidden role="dialog" aria-label="機体をえらぶ">
+  <h3>機体をえらぶ</h3>
+  <div class="model-list" role="radiogroup" aria-label="機体">
+    <button data-model="q550" role="radio" aria-checked="true"><b>550クラス クアッドコプター</b><span>空撮などに使う一般的な産業用（約2.4kg・プロペラ4枚）。とばす・つかう・もしも・専門まで全部の機能</span></button>
+    <button data-model="pd6b" role="radio" aria-checked="false"><b>PD6B-CAT3（プロドローン）</b><span>第一種型式認証をめざす物流用の大型機（最大離陸重量約45kg・プロペラ6枚）。みる・とばすと、たたむ・電池交換などの固有の動き</span></button>
+  </div>
+  <p class="pop-foot">切り替えると読み込み直します。</p>
+</div>
+
 <div id="photoPop" class="glass popover" hidden role="dialog" aria-label="記念写真">
 <h3>記念写真</h3>
 <img id="photoImg" alt="この画面の記念写真">
@@ -822,7 +864,7 @@ body.dshow #noteCard.mini .icon-btn.sm::before { content: ''; position: absolute
 </div>
 
 <div id="viewCol" class="glass" aria-label="視点">
-  <button data-v="iso" class="on" title="斜め" data-i18n="views.iso">斜</button><button data-v="front" title="前" data-i18n="views.front">前</button><button data-v="top" title="上" data-i18n="views.top">上</button><button data-v="side" title="横" data-full data-i18n="views.side">横</button><button data-v="inside" title="モーター内部" data-full data-i18n="views.inside">内</button><button data-v="fpv" title="機体のカメラから見る" aria-label="機体のカメラから見る">眼</button>
+  <button data-v="iso" class="on" title="斜め" data-i18n="views.iso">斜</button><button data-v="front" title="前" data-i18n="views.front">前</button><button data-v="top" title="上" data-i18n="views.top">上</button><button data-v="side" title="横" data-full data-i18n="views.side">横</button><button data-v="inside" title="モーター内部" data-full data-i18n="views.inside">内</button><button data-v="fpv" class="q550-only" title="機体のカメラから見る" aria-label="機体のカメラから見る">眼</button>
   <hr><button class="tgl on" data-t="labels" aria-pressed="true" title="ラベル"><i></i><span data-i18n="views.labels">名</span></button><button id="bigBtn" title="大きく読む" aria-label="大きく読む" aria-pressed="false" data-i18n="big">大</button><button class="tgl" data-t="sound" aria-pressed="false" title="音を出す" aria-label="音を出す"><i></i>音</button><button id="shareBtn" title="この画面のリンク" aria-label="この画面のリンクをコピー">🔗</button><button id="photoBtn" title="記念写真" aria-label="記念写真を撮る">📷</button><button id="fsBtn" title="全画面">⤢</button>
 </div>
 
@@ -2119,6 +2161,351 @@ const DSHOW_REG = {
   outside: '教則の中: 6.1.1 は、飛行領域に<b>危険半径（高度と同じ数値又は30mのいずれか長い方）</b>を加えた範囲を、立入管理措置を講じて無人地帯としたうえで飛行する、としています。落下の水平到達距離の式 <b>x = v√(2h/g)</b> は 4.3.5(4)〔一等〕にあります。<br><br>教則の外: 催し場所上空の<b>立入禁止区画</b>は、国土交通省の審査要領（カテゴリーⅡ飛行）が飛行高度ごとに定めています ―― <b>20m未満は飛行範囲の外周から30m／20m以上50m未満は40m／50m以上100m未満は60m／100m以上150m未満は70m／150m以上は落下距離（70m未満のときは70m）</b>。ここでいう<b>落下距離</b>は「飛行の高度及び使用する機体に基づき、当該使用する機体が飛行する地点から当該機体が落下する地点までの距離として算定されるもの」で、<b>製造者等が保証した</b>値を使います。教則が「第三者上空」の<b>上空</b>を、直上だけでなくこの落下距離を踏まえて機体が落下する可能性のある領域とみなす、としているのはこのためです。多数機同時運航のガイドライン（国土交通省）がドローンショーを対象外としている点も、教則の外の資料です。',
 };
 
+// ===== 機種: 550クラス(既定) / PD6B-CAT3 =====
+// 機種は URL の ?model=pd6b で選ぶ（Artifact の枠内などでURLを書き換えられないときは sessionStorage を使う）。
+// 切り替えはページを読み込み直す。部品・材質・カメラ・物理をまるごと作り直すほうが、実行中に差し替えるより確実なため。
+const MODEL = (() => {
+  try { const q = new URLSearchParams(location.search).get('model'); if (q) return q === 'pd6b' ? 'pd6b' : 'q550'; } catch (e) {}
+  try { if (sessionStorage.getItem('drone3d.model') === 'pd6b') return 'pd6b'; } catch (e) {}
+  return 'q550';
+})();
+const IS_PD6B = MODEL === 'pd6b';
+// 実寸(m)で作った PD6B を、550クラスと同じ舞台(床・影・カメラ)に載せるための縮尺。スキッドの底(-0.53m)を床(-0.158)に合わせる
+const PD6B_K = 0.158 / 0.53;
+const PD6B_DATE = '2026年10月時点';
+const PD6B_SRC = {
+  mlit: { name: '国土交通省 報道発表「無人航空機の第一種型式認証の申請を受け付けました」(2023年11月10日)', url: 'https://www.mlit.go.jp/report/press/kouku11_hh_000115.html' },
+  official: { name: 'Prodrone 製品ページ PD6B-Type3（CAT3のベース機）', url: 'https://www.prodrone.com/products/pd6b-type3' },
+  news: { name: 'Prodrone ニュース「JMS2026のSTATION Aiブースに出展」(2026年10月12日)', url: 'https://www.prodrone.com/news/20261013' },
+  logi: { name: 'LOGISTICS TODAY「Prodrone、第一種型式認証目指す大型ドローン公開」(2025年6月5日)', url: 'https://www.logi-today.com/787585' },
+  parasafe: { name: '日本化薬 PARASAFE（ドローン用パラシュート）', url: 'https://www.parasafe.jp/' },
+  license: { name: '国土交通省 無人航空機操縦者技能証明（限定変更）', url: 'https://www.mlit.go.jp/koku/level4/license/' },
+  portal: { name: '国土交通省 飛行許可・承認申請ポータル（カテゴリーⅡ）', url: 'https://www.mlit.go.jp/koku/permitapproval/' },
+};
+
+// 部品の解説。「公式」=メーカー公表値、「国交省」=型式認証申請時の発表値、「写真から推定」=展示機の外観からの推定
+const PD6B_PARTS = {
+  hubTop: {
+    name: 'センターハブ上板', en: 'Hub top plate', group: 'frame', count: 1,
+    role: '機体中央の天板。バッテリー4本の差し込み口があり、GNSSアンテナ・通信アンテナ・パラシュートがここに並ぶ。6本のアームの付け根をまとめる骨格の上面でもある。',
+    structure: ['バッテリーの取っ手が天面に出て、上から抜き差しできる配置', '機首側の中央にGNSSアンテナ、後方右にパラシュートの筒（展示機）', '金属の削り出し板で、機器の取付面と骨格を兼ねる（外観から）'],
+    spec: [['外形', '約 400 × 400 mm（写真から推定）'], ['根拠', 'JMS2026の展示機の外観']],
+    check: ['バッテリー差込口の異物・変形', '天面の機器の固定ネジのゆるみ', 'ひび・打痕'],
+    tip: '重い機器を機体の中心に集めるほど、機体を傾けるのに必要な力（慣性モーメント）が小さくなり、姿勢をすばやく直せる。',
+  },
+  hubBody: {
+    name: 'センターハブ（胴体）', en: 'Center hub', group: 'frame', count: 1,
+    role: '6本のアームが集まる機体の中心。中にフライトコントローラー・電源基板・無線機を収め、下面で腰下ユニットを受ける。',
+    structure: ['バッテリー4本を縦に収めるケースを兼ねる', '電装を内部に収める。防水・防塵はIP44（公式）', '下面に腰下ユニットのピン受けが4か所'],
+    spec: [['機体重量', '20.0 kg（バッテリー4本込み・公式）'], ['最大離陸重量', '約 45 kg（国交省）'], ['防水・防塵', 'IP44（公式）']],
+    check: ['ケースの割れ・パッキンの傷み（防水性能が落ちる）', '腰下ユニットのピン受けのガタ', '通気口・コネクター部の汚れ'],
+    tip: 'IP44は「直径1mm以上の固形物が入らない」「あらゆる方向からの水の飛まつに耐える」という保護等級。雨の中を飛べるかどうかは、等級ではなく取扱説明書の運用範囲で確かめる。',
+  },
+  arm: {
+    name: 'アーム', en: 'Arm (CFRP tube)', group: 'frame', count: 6,
+    role: 'モーターを機体の中心から同じ距離に保つ腕。6本が60°おきに並ぶヘキサコプター（6発機）で、向かい合うモーターの中心距離（モーター軸間）は1,623mm。',
+    structure: ['カーボンの丸パイプ（太さは写真から約45mm）', '付け根の折りたたみ継手で畳める', '中に動力線と信号線を通す'],
+    spec: [['本数', '6本（60°間隔）'], ['モーター軸間距離', '1,623 mm（公式）'], ['展開時の大きさ', '2,181 × 2,398 mm（公式）']],
+    check: ['曲がり・割れ・繊維のささくれ', '継手まわりのガタ', '展開したときにロックが確実にかかるか'],
+    tip: '550クラスの「550」も、この1,623mmも同じ「モーター軸間の距離」。この機体は550クラスのおよそ3倍の大きさになる。',
+  },
+  foldJoint: {
+    name: '折りたたみ継手', en: 'Folding joint', group: 'frame', count: 6,
+    role: 'アームを付け根で折りたたむ関節。運ぶときは直径945mmの円柱に収まり、現場ではワンタッチで広げてすぐ飛べる（公式）。',
+    structure: ['アームの付け根のヒンジ（蝶番）とロック', '広げた位置でアームを固定するラッチ', '畳む向き・角度は公表資料で確認できないため、この図は上向きに畳む例'],
+    spec: [['折りたたみ時', 'φ945 mm の円柱内（公式）'], ['展開', 'ワンタッチ（公式）']],
+    check: ['ロックが最後までかかっているか（手で引いて確かめる）', 'ヒンジのガタ・摩耗', '配線が折り目で挟まれていないか'],
+    tip: '折りたたみ機では、ロックのかけ忘れがそのまま空中分解につながる。広げたら1本ずつ手で引いて確かめるのが基本。',
+  },
+  motorMount: {
+    name: 'モーターマウント', en: 'Motor mount', group: 'frame', count: 6,
+    role: 'アームの先端にモーターを固定する台座。プロペラの推力をアームへ伝える。最大離陸重量45kgでホバリングすると、1基あたり約74N（約7.5kg分）を支える。',
+    structure: ['アームの管を抱えるクランプと、モーターを載せる板', '下にESC、横に灯火を抱える（展示機）'],
+    spec: [['1基あたりの推力（ホバリング）', '約 74 N（45kg × 9.8 ÷ 6・計算値）']],
+    check: ['クランプのゆるみ（モーター面が傾く）', '板のひび'],
+  },
+  motor: {
+    name: 'ブラシレスモーター（大型）', en: 'Brushless motor', group: 'prop', count: 6,
+    role: 'プロペラを直接回す大型のアウターローター式モーター。6基のうち3基が時計回り、3基が反時計回りで、回転の反動（反トルク）を打ち消し合う。',
+    structure: ['外側の缶（ベル）ごと回るアウターローター', '直径30インチのプロペラを直接駆動する（減速ギアなし）', '図の歯と磁石の数は550クラスと同じ12N14Pで簡略化（実機の大型モーターはもっと多い）'],
+    spec: [['方式', 'アウターローター・ブラシレスDC'], ['型番・出力', '非公表'], ['回転方向', '3基ずつ逆回転（並びは一般的なヘキサXの例）']],
+    check: ['手で回して異音・引っかかりがないか', '飛行後の温度の偏り', 'ベアリングのガタ', '固定ネジのゆるみ'],
+    tip: '同じ推力なら、大きなプロペラをゆっくり回すほうが電力が少なくて済む。だから大型機は「大径プロペラ＋低回転・高トルクのモーター」を使う。',
+  },
+  bell: {
+    name: 'ベル（ローター）', en: 'Bell (rotor)', group: 'prop', count: 6,
+    role: '磁石を内側に貼った回る缶。プロペラはこの上に固定される。',
+    structure: ['アルミの削り出し', '内側に永久磁石が並ぶ'],
+    check: ['打痕・へこみ（磁石とステーターが擦れる）', '磁石の浮き'],
+  },
+  stator: {
+    name: 'ステーター（固定子）', en: 'Stator', group: 'prop', count: 6,
+    role: '回らない鉄心。歯に巻いた銅線に電流を流して磁界を作り、ベルの磁石を引っぱる。',
+    structure: ['薄い電磁鋼板を重ねた積層鉄心（渦電流の損失を減らす）'],
+    check: ['錆・汚れ（屋外の大型機は特に）'],
+  },
+  winding: {
+    name: '巻線', en: 'Windings', group: 'prop', count: 6,
+    role: 'ステーターの歯に巻かれた銅線。ESCが順番に電流を流して回転磁界を作る。',
+    structure: ['エナメル線を歯ごとに巻く', '3相（U・V・W）'],
+    check: ['焦げ・変色（過電流のしるし）'],
+  },
+  magnet: {
+    name: '永久磁石', en: 'Magnets', group: 'prop', count: 6,
+    role: 'ベルの内側に並ぶN極とS極の磁石。ステーターの磁界に引かれてベルが回る。',
+    structure: ['ネオジム磁石が一般的'],
+    check: ['欠け・浮き'],
+  },
+  shaft: {
+    name: 'シャフトとベアリング', en: 'Shaft & bearings', group: 'prop', count: 6,
+    role: 'ベルの回転を支える軸と軸受け。大きなプロペラの重さと推力を受ける。',
+    check: ['ガタ・ゴリ感', '水や砂の侵入'],
+  },
+  motorBase: {
+    name: 'モーターベース', en: 'Motor base', group: 'prop', count: 6,
+    role: 'ステーターを支え、モーターをマウントにネジで固定する土台。',
+    check: ['固定ネジのゆるみ'],
+  },
+  prop: {
+    name: '折りたたみプロペラ', en: 'Folding propeller (30 in)', group: 'prop', count: 6,
+    role: '直径30インチ（約76cm）のカーボン製プロペラ。根元のヒンジで折りたためるので、アームと一緒に小さく畳める。回り始めると遠心力で自然に開いて一直線になる。',
+    structure: ['カーボン繊維の2枚羽根', '根元をクランプのヒンジで挟む折りたたみ式', '6基ぶんの回転面の合計は約2.7m²'],
+    spec: [['直径', '30 インチ（762 mm・公式）'], ['回転面積（6基の合計）', '約 2.74 m²（計算値）'], ['ディスク荷重', '約 16 kg/m²（45kgの場合・計算値）']],
+    check: ['欠け・割れ・層間はく離', 'ヒンジの動きが軽いか（固着していると2枚の開き方がそろわない）', '取付の向き（時計回り用・反時計回り用）'],
+    tip: '同じ計算で、550クラス（12インチ×4枚・約2.4kg）のディスク荷重は約8kg/m²。PD6B-CAT3は満載のとき、1m²あたりその約2倍の重さを空気で支えている。',
+  },
+  propClamp: {
+    name: 'プロペラクランプ（折りたたみ金具）', en: 'Folding prop clamp', group: 'prop', count: 6,
+    role: '2枚の羽根をモーターに固定し、ヒンジで折りたためるようにする金具。',
+    structure: ['上下2枚の板で羽根の根元を挟む', '羽根ごとにヒンジのボルトが1本'],
+    check: ['ヒンジボルトのゆるみ・摩耗', '羽根の根元の割れ'],
+  },
+  esc: {
+    name: 'ESC（電子速度制御器）', en: 'ESC', group: 'prop', count: 6,
+    role: 'バッテリーの直流を、モーターを回す三相の電流に変えて回転数を調整する。大電流で熱を持つため、プロペラの吹きおろしが当たるアーム先端に置かれている。',
+    structure: ['モーターの直下の箱（展示機の写真から推定）', '放熱フィン付きのケース', 'フライトコントローラーの指令で出力を細かく変える'],
+    spec: [['配置', 'アーム先端・モーターの下（写真から推定）']],
+    check: ['ケースの割れ・浸水', '配線の焼け・コネクターのゆるみ', '飛行後の温度'],
+  },
+  battery: {
+    name: 'インテリジェントバッテリー', en: 'Smart battery', group: 'elec', count: 4,
+    role: '残量・温度・セルの電圧を自分で監視して機体へ伝えるバッテリー。4本を天面から差し込む。電源を入れたまま交換できる「ホットスワップ」に対応（公式）。',
+    structure: ['天面の取っ手で上へ抜き差しする', '電池の管理回路（BMS）を内蔵', '4本とも機体重量20.0kgに含まれる（公式）'],
+    spec: [['本数', '4本（公式）'], ['交換', 'ホットスワップ対応（公式）'], ['容量・電圧', '非公表']],
+    check: ['膨らみ・傷・端子の焦げ', '4本の残量と温度がそろっているか', '差し込みのロック'],
+    tip: 'ホットスワップは「全部を一度に抜かない」ことで電源を切らずに交換する仕組み。頭脳が再起動しないので、起動と初期化を待たずに次の飛行へ移れる。',
+  },
+  cells: {
+    name: 'セル（電池の素子）', en: 'Cells', group: 'elec', count: 4,
+    role: 'バッテリーの中身。小さな電池（セル）を直列・並列につないで、必要な電圧と容量を作る。',
+    structure: ['セルの種類と構成は非公表'],
+    check: ['（分解しない）外装の膨らみで異常を見つける'],
+  },
+  powerConn: {
+    name: '電源コネクター', en: 'Power connectors', group: 'elec', count: 1,
+    role: '大電流を流すための太いコネクター。展示機では天面の左側に橙色のコネクターが4つ並んでいた。',
+    structure: ['抜けにくい形状の大電流用コネクター', '用途の割り当ては写真から推定（バッテリー系統の接続）'],
+    spec: [['根拠', '展示機の写真（用途は推定）']],
+    check: ['焦げ・変色', '差し込みの浅さ', 'ピンの曲がり'],
+  },
+  pdb: {
+    name: '電源基板', en: 'Power distribution', group: 'elec', count: 1,
+    role: 'バッテリー4本の電力をまとめ、6基のESCと電装に分ける。1本が抜かれても電気が途切れないよう、複数の系統をまとめる役目も持つ。',
+    structure: ['センターハブの内部（外からは見えない）', 'この図の配置は構成例'],
+    check: ['（分解しない）飛行前の電圧表示で確かめる'],
+  },
+  fc: {
+    name: 'フライトコントローラー', en: 'Flight controller', group: 'elec', count: 1,
+    role: '機体の頭脳。ジャイロ・加速度・GNSSの情報から姿勢と位置を計算し、6基のモーターの回転数を決める。PRODRONEの独自開発（公式）。',
+    structure: ['センターハブの内部（この図の位置は構成例）', '離陸から着陸までの自動飛行に対応（公式）', '故障したときの振る舞いも含めて、設計が安全基準に合うかを確かめるのが型式認証'],
+    spec: [['開発', '独自開発（公式）'], ['自動飛行', '離陸〜着陸（公式）']],
+    check: ['起動時の自己診断の結果', 'センサーの較正（コンパス・加速度）', 'ファームウェアの版'],
+    tip: '6発機は、4発機に比べて「1基の推力が落ちたとき、残りで補える余地」を設計で持たせやすい。どこまで耐えられるかは機体ごとの設計と試験による。',
+  },
+  wiring: {
+    name: '配線', en: 'Wiring', group: 'elec', count: 6,
+    role: 'アームの中を通る動力線と信号線。折りたたみ継手をまたぐので、曲げに強い取り回しが要る。',
+    structure: ['動力線（太い）と信号線（細い）', '継手の部分はたるみを持たせる'],
+    check: ['継手部分の被覆の傷', 'コネクターのゆるみ'],
+  },
+  gps: {
+    name: 'GNSSアンテナ', en: 'GNSS antenna', group: 'nav', count: 1,
+    role: '衛星の電波から機体の位置を求める。天面の機首寄りに載り、矢印を機首に向けて取り付ける（展示機）。',
+    structure: ['空がよく見える天面の最も高い位置に置く', '電流の流れる動力線から離して置く（磁気の影響を避ける）'],
+    spec: [['位置', '天面・機首寄り（展示機）']],
+    check: ['取付の向き（矢印）', 'ケーブルのゆるみ', '近くに金属・磁石を置いていないか'],
+  },
+  antenna: {
+    name: '通信アンテナ', en: 'Comm antennas', group: 'nav', count: 2,
+    role: '機体と地上をつなぐ無線のアンテナ。PD6B-Type3はLTE通信をオプションで載せられる（公式）。展示機では天面前方に黒い筒が2本並んでいた。',
+    structure: ['天面前方の2本（用途の割り当ては写真から推定）', '2本を離して置くと、機体の向きが変わっても電波を拾いやすい'],
+    spec: [['オプション', 'LTE・GCS対応（公式）']],
+    check: ['折れ・ゆるみ', 'ケーブルの断線'],
+  },
+  rxAnt: {
+    name: '送受信アンテナ', en: 'Control link antennas', group: 'nav', count: 2,
+    role: '操縦信号とテレメトリーのアンテナ（写真から推定）。左右のアームの付け根に1本ずつ立てて、片方が機体の陰になってももう片方で受ける。',
+    structure: ['左右に離して置くダイバーシティ配置', 'オプションの「操舵信号多重化」は、操縦の信号経路を複数持たせて途切れにくくするもの（公式のオプション名）'],
+    check: ['折れ・ゆるみ', '先端がカーボンに触れていないか'],
+  },
+  remoteId: {
+    name: 'リモートID', en: 'Remote ID', group: 'nav', count: 1,
+    role: '機体の登録記号・位置・高度などを電波で発信し続ける装置。登録した機体は、原則として備えることが求められる。',
+    structure: ['内蔵か外付けかは機体による（この図の位置は例）'],
+    check: ['飛行前に作動状況を確かめる（法定の点検項目）'],
+  },
+  tof: {
+    name: 'ToFセンサー', en: 'ToF sensor', group: 'nav', count: 1,
+    role: '光を当てて、跳ね返ってくるまでの時間から距離を測るセンサー。PD6B-Type3は「ToFセンサーによる対象物検知」を備える（公式）。',
+    structure: ['機首側の下（写真から推定）', '光の飛行時間（Time of Flight）で距離を測る'],
+    spec: [['機能', '対象物の検知（公式）']],
+    check: ['窓の汚れ・傷（測れなくなる）'],
+  },
+  led: {
+    name: '灯火', en: 'Navigation lights', group: 'nav', count: 6,
+    role: '機体の向きと姿勢を遠くから見分けるための灯り。前の左が赤、前の右が緑、そのほかが白（この図の配色）。',
+    structure: ['モーターマウントの下（配置は写真から推定）'],
+    check: ['点灯・点滅', 'カバーの割れ'],
+  },
+  parachute: {
+    name: 'パラシュート', en: 'Parachute (PARASAFE)', group: 'safety', count: 1,
+    role: '機体が飛べなくなったときに傘を開き、落ちる速さを下げて、地上の人や物への衝撃を小さくする安全装置。展示機には日本化薬の「PARASAFE」が載っていた。',
+    structure: ['筒の中に傘を畳んで収める', '火薬の力で傘を押し出し、低い高度でも素早く開く（PARASAFEの方式）', '天面の後方右（展示機）'],
+    spec: [['製品', '日本化薬 PARASAFE（展示機）'], ['この機体用の型式', '非公表'], ['参考', '25kg級用 PS CA12-01：傘の面積11m²・降下速度6m/s（理論値）・最低展開高度30m（同社発表）']],
+    check: ['筒の固定', '使用期限・点検時期', '電気の接続'],
+    tip: '45kgの機体が6m/sで降りるときの運動エネルギーは約0.8kJ。50mから落ちた場合（約31m/s・空気抵抗なしの計算）の約22kJに比べ、およそ27分の1になる。',
+  },
+  regMark: {
+    name: '登録記号', en: 'Registration mark', group: 'safety', count: 1,
+    role: '国に登録した機体の番号。最大離陸重量25kg以上の機体は、文字の高さ25mm以上で表示する（25kg未満は3mm以上）。',
+    structure: ['取り外しにくく、外から見やすい場所に表示する', 'この図の番号と位置は例'],
+    spec: [['文字の高さ', '25 mm以上（最大離陸重量25kg以上の場合）']],
+    check: ['はがれ・かすれ'],
+  },
+  lowerMount: {
+    name: '腰下ユニット取付部', en: 'Lower-unit mount', group: 'payload', count: 1,
+    role: '機体の下半分（腰下ユニット）を付け替えるための取付部。ピン4か所の差し替えで交換できる（一部例外あり・公式）。',
+    structure: ['標準の腰下ユニットは「測量用」「物流ボックス リリース型」「物流ボックス 引き出し型」の3種類（公式）', '用途に合わせて、同じ上半分を使い回せる'],
+    spec: [['交換', 'ピン4か所（公式）'], ['標準ユニット', '測量用・物流ボックス2種（公式）']],
+    check: ['ピンが最後まで差さっているか', 'ピン穴の摩耗'],
+  },
+  cargoBox: {
+    name: '物流ボックス', en: 'Cargo box', group: 'payload', count: 1, variant: 'cargo',
+    role: '荷物を入れる箱。機体の真下、重心の下に荷物が来るので、積んでも傾きにくい。最大積載重量は約20kg（国交省・申請時）。',
+    structure: ['白い箱を腰下ユニットが抱える', 'リリース型は、着陸したあと箱を切り離して置いていける', '2025年の一般公開時の報道では最大積載重量18kg'],
+    spec: [['最大積載重量', '約 20 kg（国交省・申請時）／18 kg（2025年6月の報道）'], ['箱の大きさ', '約 400 × 360 × 400 mm（写真から推定）']],
+    check: ['荷物の固定と重心（偏ると傾く）', '箱の割れ', 'ふたの閉まり'],
+  },
+  boxLatch: {
+    name: 'ボックスリリース機構', en: 'Box release latch', group: 'payload', count: 1, variant: 'cargo',
+    role: '物流ボックスをつかみ、着陸したあとに離す爪。人が箱を受け取りに行かなくても荷物を置いていける。',
+    structure: ['箱の四隅をつかむ爪（この図の形は例）', '飛行中に開かないことが最も大事'],
+    check: ['爪が確実に閉じているか', '作動の確認（荷物を積む前に）'],
+  },
+  surveyUnit: {
+    name: '測量ユニット', en: 'Survey unit (LiDAR)', group: 'payload', count: 1, variant: 'survey',
+    role: '腰下ユニットを測量用に付け替えると、LiDAR（レーザー測距）やカメラを積める。PD6B-Type3はLiDAR・可視カメラ・赤外線カメラなどを搭載できる（公式）。',
+    structure: ['レーザーを回しながら当てて、地形を点の集まり（点群）として測る', 'この図の形は例'],
+    spec: [['搭載例', 'LiDAR・可視カメラ・赤外線カメラ・スポットライト・スピーカー（公式）']],
+    check: ['センサー窓の汚れ', '取付の傾き（測量の誤差になる）'],
+  },
+  landingGear: {
+    name: '脚（降着装置）', en: 'Landing gear', group: 'gear', count: 2,
+    role: '着陸のときに機体を支える。腰下ユニットと一体で、荷物の箱を囲む枠にもなる。全高は676mm（標準スキッド装着時・公式）。',
+    structure: ['左右2組の脚', '前後の脚を横の桟でつなぐ', '荷物の箱が脚の間に収まる'],
+    spec: [['全高', '676 mm（標準スキッド・公式）']],
+    check: ['曲がり・割れ', '取付ピンのゆるみ'],
+  },
+  skid: {
+    name: 'スキッド', en: 'Skids', group: 'gear', count: 2,
+    role: '地面に接するそり。前後に長く、着陸の衝撃と横すべりを受け止める。',
+    structure: ['前後に長い管', '両端にゴムの足'],
+    check: ['ゴムの足の脱落', '曲がり'],
+  },
+};
+const PD6B_LIST_ORDER = ['hubTop', 'hubBody', 'arm', 'foldJoint', 'motorMount', 'motor', 'bell', 'stator', 'winding', 'magnet', 'shaft', 'motorBase', 'prop', 'propClamp', 'esc',
+  'battery', 'cells', 'powerConn', 'pdb', 'fc', 'wiring', 'gps', 'antenna', 'rxAnt', 'remoteId', 'tof', 'led', 'parachute', 'regMark', 'lowerMount', 'cargoBox', 'boxLatch', 'surveyUnit', 'landingGear', 'skid'];
+const PD6B_SUB = { bell: 'motor', stator: 'motor', winding: 'motor', magnet: 'motor', shaft: 'motor', motorBase: 'motor', cells: 'battery', propClamp: 'prop', boxLatch: 'cargoBox', skid: 'landingGear' };
+const PD6B_PER_MOTOR = ['motor', 'prop', 'esc', 'arm', 'bell', 'stator', 'winding', 'magnet', 'shaft', 'motorBase', 'propClamp', 'led', 'foldJoint', 'motorMount', 'wiring'];
+const PD6B_SIMPLE = {
+  prop:      { role: '大きな羽根で空気を下に押して、45kgの機体を浮かせます。使わないときは折りたためます。', analogy: '扇風機の羽根の、大人の腕くらいある版' },
+  motor:     { role: 'プロペラを回す力の元。6つのうち半分が右回り、半分が左回りです。', analogy: '6人でこぐボート。半分ずつ逆向きにこぐとまっすぐ進む' },
+  arm:       { role: 'モーターを機体の真ん中から同じ距離に支える棒。6本あります。', analogy: '傘の骨' },
+  foldJoint: { role: 'アームを折りたたむ関節。たたむと直径1mくらいの筒に収まります。', analogy: '折りたたみ傘のつけ根' },
+  battery:   { role: '電気のもと。4本を上から差し込み、電源を入れたまま入れ替えられます。', analogy: 'リレーのバトン。全員が同時に手を離さなければ止まらない' },
+  fc:        { role: '機体の頭脳。傾きと位置を測って、6つのモーターの速さを決めます。', analogy: '自転車に乗るときの「小脳」' },
+  parachute: { role: 'もしも落ちるときに傘を開いて、ゆっくり降ろす安全装置です。', analogy: '飛行機の脱出用パラシュートの、ドローン版' },
+  cargoBox:  { role: '荷物を入れる箱。着陸したら箱だけ置いていけます。', analogy: '宅配便の箱を、空から玄関先へ' },
+};
+const PD6B_SIMPLE_NAME = { prop: 'プロペラ', motor: 'モーター', arm: 'アーム', foldJoint: '折りたたみ', battery: 'バッテリー', fc: '頭脳（FC）', parachute: 'パラシュート', cargoBox: '荷物の箱' };
+const PD6B_TRIVIA = {
+  arm: '6本のアームの先を結ぶと正六角形。向かい合うモーターの距離1,623mmは、軽自動車の幅（約1.48m）より長い。',
+  prop: '回っていないときは羽根がだらりと折れていても、回り始めると遠心力で一直線に開く。だから折りたたみ式でも飛べる。',
+  foldJoint: '広げると約2.4m、たたむと直径945mm。車に積めるかどうかが、現場で使えるかどうかを決める。',
+  battery: '4本を一度に抜かずに1本ずつ入れ替えれば、電源は切れない。',
+  parachute: '傘を開くまでにも落ちる距離が要る。だから「どの高さから開けるか（最低展開高度）」が製品ごとに決まっている。',
+  motor: '6発機は、どれか1基の推力が落ちても残りで補う余地を設計で持たせやすい。4発機ではどの1基も欠かせない。',
+  cargoBox: '荷物は重心の真下に積む。前後左右にずれると、モーターごとの負担が偏って飛べる時間が縮む。',
+  lowerMount: '上半分（飛ぶ部分）はそのままで、下半分を物流用・測量用に付け替える。1台を何役にも使う設計。',
+  regMark: '25kg以上の機体は登録記号の文字を25mm以上にする。遠くからでも読めるように。',
+};
+const PD6B_TRIVIA_ACT = { foldJoint: { pd6b: 'fold' }, arm: { pd6b: 'fold' }, prop: { pd6b: 'fold' }, battery: { pd6b: 'swap' }, parachute: { pd6b: 'chute' }, cargoBox: { pd6b: 'drop' }, boxLatch: { pd6b: 'drop' }, lowerMount: { pd6b: 'unit' } };
+// モーターの並び（上から見て）。M1から時計回り。回転方向は一般的なヘキサXの例
+const PD6B_MOTOR_INFO = [
+  { id: 'M1', pos: '前右', dir: 'CCW' }, { id: 'M2', pos: '右', dir: 'CW' }, { id: 'M3', pos: '後右', dir: 'CCW' },
+  { id: 'M4', pos: '後左', dir: 'CW' }, { id: 'M5', pos: '左', dir: 'CCW' }, { id: 'M6', pos: '前左', dir: 'CW' },
+];
+// 6基の位置（機首=−Z、右=+X）。前右から時計回りに 30°, 90°, 150°, 210°, 270°, 330°
+const PD6B_ARM_DEG = [30, 90, 150, 210, 270, 330];
+const PD6B_U = PD6B_ARM_DEG.map(a => ({ x: Math.sin(a * Math.PI / 180), z: -Math.cos(a * Math.PI / 180) }));
+const PD6B_DIR = PD6B_MOTOR_INFO.map(m => m.dir === 'CCW' ? 1 : -1);
+const PD6B_FLIGHT = {
+  hover: { name: 'ホバリング', mult: PD6B_U.map(() => 1),
+    note: '6つのモーターが同じ推力を出し、合計が機体の重さと釣り合うと空中で止まる。隣どうしが逆回転なので、回転の反動も打ち消し合う。' },
+  climb: { name: '上昇', mult: PD6B_U.map(() => 1.25),
+    note: '6つとも同時に速くする。推力の合計が重さを上回ると上昇し、遅くすれば下降する。' },
+  pitch: { name: '前進', mult: PD6B_U.map(u => +(1 + 0.15 * u.z / 0.866).toFixed(3)),
+    note: '後ろの2つ（M3・M4）を速く、前の2つ（M1・M6）を遅くすると機首が下がる。真横の2つ（M2・M5）はそのまま。推力が前に傾き、その水平な成分で前へ進む。' },
+  roll: { name: '右へ移動', mult: PD6B_U.map(u => +(1 - 0.15 * u.x).toFixed(3)),
+    note: '左の3つを速く、右の3つを遅くすると、機体が右に傾いて右へ進む。真横のM2・M5の差がいちばん大きい。' },
+  yaw: { name: '右旋回（ヨー）', mult: PD6B_DIR.map(d => 1 + 0.15 * d),
+    note: '反時計回りの3つ（M1・M3・M5）を速く、時計回りの3つ（M2・M4・M6）を遅くする。回転の反動の釣り合いが崩れて、機体が時計回りに回る。推力の合計は変わらない。' },
+};
+// 制度の注記（判定はせず「求められている」「確認する」で止める）
+const PD6B_REG = {
+  hubBody: [
+    { text: '最大離陸重量が25kg以上なので、カテゴリーⅡの飛行では、技能証明と機体認証があっても飛行の許可・承認が要る（許可・承認を不要にできる例外は総重量25kg未満に限られる）。', ky: '3.1', src: 'pd6bPortal' },
+    { text: '技能証明で25kg以上の機体を飛ばすには、限定変更「最大離陸重量の拡大（25kg以上）」が要る（新規申請のときから含めることもできる）。', ky: '3.1', src: 'pd6bLicense' },
+    { text: '第一種型式認証は、立入管理措置を講じずに第三者の上空を飛ぶ特定飛行（カテゴリーⅢ）を目的とした型式が対象。PD6B-CAT3は2023年11月10日に申請が受理され（国内3件目）、2026年10月時点で取得を目指している段階（同社発表）。', ky: '3.1', src: 'pd6bMlit' },
+  ],
+  cargoBox: [
+    { text: '飛行中に物を落とす「物件投下」は承認が要る特定飛行。この図の動きは、着陸してから箱を離す例。', ky: '3.1', src: 'permit' },
+  ],
+};
+const PD6B_KY_PART = { hubTop: '4.1', hubBody: '4.1', arm: '4.1', foldJoint: '4.6', motorMount: '4.1', motor: '4.4', bell: '4.4', stator: '4.4', winding: '4.4', magnet: '4.4', shaft: '4.6', motorBase: '4.1',
+  prop: '4.4', propClamp: '4.6', esc: '4.4', battery: '4.4', cells: '4.4', powerConn: '4.4', pdb: '4.4', fc: '4.4', wiring: '4.4', gps: '4.5', antenna: '4.5', rxAnt: '4.5', remoteId: '3.1', tof: '4.5',
+  led: '4.2', parachute: '4.4', regMark: '3.1', lowerMount: '4.1', cargoBox: '4.4', boxLatch: '4.6', surveyUnit: '4.4', landingGear: '4.1', skid: '4.1' };
+
+// 機種を PD6B にするとき、共通の表を PD6B の中身に入れ替える（表は const なので中身だけ差し替える）
+if (IS_PD6B) {
+  const swap = (obj, next) => { for (const k of Object.keys(obj)) delete obj[k]; Object.assign(obj, next); };
+  swap(PARTS, PD6B_PARTS);
+  GROUPS.splice(GROUPS.findIndex(g => g.id === 'payload'), 0, { id: 'safety', name: '安全装置', color: '#e5484d' });
+  swap(SIMPLE, PD6B_SIMPLE); SIMPLE_KEYS.splice(0, SIMPLE_KEYS.length, ...Object.keys(PD6B_SIMPLE));
+  swap(SIMPLE_NAME, PD6B_SIMPLE_NAME);
+  swap(TRIVIA, PD6B_TRIVIA); swap(TRIVIA_ACT, PD6B_TRIVIA_ACT);
+  MOTOR_INFO.splice(0, MOTOR_INFO.length, ...PD6B_MOTOR_INFO);
+  swap(FLIGHT, PD6B_FLIGHT);
+  // 制度: 登録記号・リモートID・灯火は機種を問わない注記なので残し、PD6B固有を足す
+  { const keep = {}; for (const k of ['regMark', 'remoteId', 'led']) if (REG[k]) keep[k] = REG[k]; swap(REG, Object.assign(keep, PD6B_REG)); }
+  swap(KY_PART, PD6B_KY_PART);
+  REG_SOURCES.pd6bPortal = PD6B_SRC.portal; REG_SOURCES.pd6bLicense = PD6B_SRC.license; REG_SOURCES.pd6bMlit = PD6B_SRC.mlit;
+  // やさしい日本語・英語の部品名は550クラス用なので外す（日本語の解説に戻す）
+  for (const L of Object.values(I18N)) if (L && L.parts) for (const k of Object.keys(L.parts)) delete L.parts[k];
+  FIND_ALIAS.foldJoint = '折り畳み ヒンジ 関節 たたむ'; FIND_ALIAS.parachute = 'パラシュート 落下傘 PARASAFE パラセーフ'; FIND_ALIAS.cargoBox = '荷物 箱 ボックス 物流';
+  FIND_ALIAS.battery = '電池 バッテリ'; FIND_ALIAS.fc = '頭脳 FC'; FIND_ALIAS.tof = '距離 センサー 障害物'; FIND_ALIAS.surveyUnit = 'LiDAR ライダー 測量 点群';
+}
+
 // ===== 手続き生成テクスチャと材質 (v2: 製品レンダリング品質) =====
 function makeCanvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
 function mulberry(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -2996,6 +3383,339 @@ function buildGhost(def, mat) {
   return m;
 }
 
+// ===== PD6B-CAT3 の手続き生成 =====
+// 寸法は実寸(m)。公式値: モーター軸間1,623mm・プロペラ30インチ・全高676mm・展開2,181×2,398mm。
+// 公表されていない部分（ハブの形・脚・箱・アンテナの配置）は JMS2026 の展示機の写真から起こしている。
+// 機首=−Z、右=+X、アームの中心線が y=0。全体を PD6B_K 倍して 550クラスと同じ舞台に載せる。
+function pd6bCanvas(w, h, draw) { const c = makeCanvas(w, h); draw(c.getContext('2d'), w, h); return c; }
+function pd6bMaterials(M) {
+  const std = (o) => new THREE.MeshStandardMaterial(o), phy = (o) => new THREE.MeshPhysicalMaterial(o);
+  const decal = (c) => std({ map: canvasTex(c, { wrap: false }), roughness: 0.5, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+  const sans = '-apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif';
+  // 30インチの折りたたみプロペラ: 光沢のある黒いカーボン。翼端の細い帯だけ回転方向の色（550クラスと同じ約束）
+  const propCanvas = (dir) => pd6bCanvas(512, 1024, (g, w, h) => {
+    g.fillStyle = '#121316'; g.fillRect(0, 0, w, h);
+    g.strokeStyle = 'rgba(255,255,255,0.045)'; g.lineWidth = 5; for (let x = -h; x < w + h; x += 22) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x + h * 0.35, h); g.stroke(); }
+    g.fillStyle = dir > 0 ? '#14b8a6' : '#3b7df7'; g.fillRect(0, h * 0.965, w, h * 0.035);
+    g.save(); g.translate(w * 0.30, h * 0.30); g.rotate(Math.PI / 2); g.fillStyle = '#8d9097'; g.font = `bold 34px ${sans}`; g.fillText(`30"  ${dir > 0 ? 'CCW' : 'CW'}`, 0, 0); g.restore();
+  });
+  const propMat = (dir) => Object.assign(phy({ map: canvasTex(propCanvas(dir), { wrap: false }), roughness: 0.32, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.08, specularIntensity: 0.7, side: THREE.DoubleSide }), { userData: { flatTint: true } });
+  const boxLabel = pd6bCanvas(1024, 256, (g, w, h) => {
+    g.fillStyle = '#eef0f2'; g.fillRect(0, 0, w, h); g.fillStyle = '#1d1f24'; g.textBaseline = 'middle';
+    g.font = `800 132px ${sans}`; const a = g.measureText('PRO').width; g.font = `300 132px ${sans}`; const b = g.measureText('DRONE').width;
+    const x0 = (w - a - b) / 2; g.font = `800 132px ${sans}`; g.fillText('PRO', x0, h / 2); g.font = `300 132px ${sans}`; g.fillText('DRONE', x0 + a, h / 2);
+  });
+  const paraLabel = pd6bCanvas(1024, 256, (g, w, h) => {
+    g.fillStyle = '#1b1c20'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#3fae49'; g.beginPath(); g.arc(150, 128, 82, 0, Math.PI * 2); g.fill(); g.fillStyle = '#1b1c20'; g.beginPath(); g.arc(150, 128, 34, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#f2f3f5'; g.font = `bold 92px ${sans}`; g.textBaseline = 'middle'; g.fillText('PARA', 270, 88); g.fillText('SAFE', 270, 176);
+    g.font = `bold 34px ${sans}`; g.fillStyle = '#c9ccd2'; g.fillText('NIPPON KAYAKU', 560, 214);
+  });
+  const escLabel = pd6bCanvas(256, 128, (g, w, h) => { g.fillStyle = '#f2f3f5'; g.fillRect(0, 0, w, h); g.fillStyle = '#26282d'; g.font = `bold 44px ${sans}`; g.fillText('ESC', 22, 58); g.font = `26px ${sans}`; g.fillStyle = '#6b7079'; g.fillText('FOC · 12S', 22, 100); });
+  const regLabel = pd6bCanvas(1024, 160, (g, w, h) => { g.fillStyle = '#f4f4f2'; g.fillRect(0, 0, w, h); g.fillStyle = '#17181b'; g.font = 'bold 112px "SF Mono", Menlo, Consolas, monospace'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('JU 1234 5678 9012', w / 2, h / 2 + 4); });
+  const gnssTop = pd6bCanvas(256, 256, (g, w, h) => { g.fillStyle = '#c7cacf'; g.fillRect(0, 0, w, h); g.fillStyle = '#2b2e34'; g.beginPath(); g.moveTo(128, 40); g.lineTo(92, 112); g.lineTo(116, 112); g.lineTo(116, 196); g.lineTo(140, 196); g.lineTo(140, 112); g.lineTo(164, 112); g.closePath(); g.fill(); });
+  return {
+    hub: phy({ color: 0x2b2d33, metalness: 0.55, roughness: 0.42, clearcoat: 0.35, clearcoatRoughness: 0.35, anisotropy: 0.3 }),
+    hubPlate: phy({ color: 0x34373e, metalness: 0.7, roughness: 0.36, anisotropy: 0.5, anisotropyRotation: Math.PI / 2 }),
+    legBlack: phy({ color: 0x1f2024, metalness: 0.25, roughness: 0.36, clearcoat: 0.45, clearcoatRoughness: 0.3 }),
+    boxWhite: phy({ color: 0xeef0f2, roughness: 0.52, clearcoat: 0.2, clearcoatRoughness: 0.4 }),
+    boxLabel: decal(boxLabel), paraLabel: decal(paraLabel), escLabel: decal(escLabel), regLabel: decal(regLabel), gnssTop: decal(gnssTop),
+    para: phy({ color: 0x1c1d21, roughness: 0.42, clearcoat: 0.35, clearcoatRoughness: 0.3 }),
+    orange: phy({ color: 0xff6a13, roughness: 0.42, clearcoat: 0.35, clearcoatRoughness: 0.3 }),
+    gnss: phy({ color: 0x9da2aa, roughness: 0.4, metalness: 0.2, clearcoat: 0.5 }),
+    tofGlass: phy({ color: 0x0b0d12, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.04, iridescence: 0.5, iridescenceIOR: 1.3 }),
+    lidarGlass: phy({ color: 0x1a2230, roughness: 0.1, metalness: 0.3, clearcoat: 1, clearcoatRoughness: 0.05 }),
+    propCCW: propMat(1), propCW: propMat(-1),
+    canopy: phy({ color: 0xf26b1d, roughness: 0.8, sheen: 0.6, sheenRoughness: 0.6, sheenColor: new THREE.Color(0xffffff), side: THREE.DoubleSide }),
+    canopyWhite: phy({ color: 0xf4f4f2, roughness: 0.8, sheen: 0.6, sheenRoughness: 0.6, sheenColor: new THREE.Color(0xffffff), side: THREE.DoubleSide }),
+    line: new THREE.MeshBasicMaterial({ color: 0xd9dbe0 }),
+  };
+}
+
+function buildPD6B(M) {
+  const K = PD6B_K;
+  const root = new THREE.Group(); root.name = 'drone';
+  const sg = new THREE.Group(); sg.name = 'pd6b'; sg.scale.setScalar(K); root.add(sg);
+  const parts = [], pick = [], wires = [], motors = [], legs = [];
+  const G = motorGeometries(), X = pd6bMaterials(M);
+  const idxCount = {};
+  function reg(obj, key, explode, opts = {}) {
+    const idx = (idxCount[key] = (idxCount[key] || 0) + 1) - 1;
+    const p = { key, idx, obj, home: obj.position.clone(), homeQuat: obj.quaternion.clone(), explode: explode.clone(), meshes: [], coarse: !!opts.coarse, label: opts.label || null, hidden: false, anim: null };
+    obj.userData.part = p;
+    obj.traverse(m => { if (m.isMesh && !m.userData.noPart) { p.meshes.push(m); if (!m.userData.fine) m.userData.fine = p; if (opts.coarse) m.userData.coarse = p; if (!m.userData.noPick) pick.push(m); } });
+    parts.push(p); return p;
+  }
+  const rw = (m) => { wires.push(m); m.userData.wire = true; return m; };
+  const noPart = (o) => { o.traverse(c => { c.userData.noPart = true; c.userData.noPick = true; }); return o; };
+  // 縮尺の逆数を掛けた入れ物。矢印・光など「画面上の大きさ」で決めたいものをここに入れる
+  const unscaled = (parent, x, y, z) => { const o = new THREE.Group(); o.position.set(x, y, z); o.scale.setScalar(1 / K); parent.add(o); return o; };
+  const plane = (w, h, mat) => mesh(new THREE.PlaneGeometry(w, h), mat, { cast: false });
+
+  // ---------- センターハブ ----------
+  const BAT = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([sx, sz]) => ({ x: sx * 0.058, z: sz * 0.064, sx, sz }));
+  const hub = new THREE.Group();
+  hub.add(at(mesh(rboxGeo(0.36, 0.13, 0.36, 0.028, 3), X.hub), 0, -0.010, 0));
+  hub.add(at(mesh(rboxGeo(0.30, 0.010, 0.30, 0.004), X.hubPlate), 0, -0.078, 0));
+  // 側面の帯(継ぎ目)と通気のスリット
+  hub.add(at(mesh(rboxGeo(0.364, 0.006, 0.364, 0.028, 2), M.aluDark), 0, 0.030, 0));
+  for (const s of [-1, 1]) for (let k = 0; k < 5; k++) hub.add(at(mesh(new THREE.BoxGeometry(0.004, 0.032, 0.002), M.plasticBlack), -0.030 + k * 0.015, -0.025, s * 0.1805));
+  // アームの差し込み口(短い管)
+  PD6B_U.forEach(u => { const st = tubeBetween(V3(u.x * 0.15, 0, u.z * 0.15), V3(u.x * 0.218, 0, u.z * 0.218), 0.0235, M.carbonArm, 28); hub.add(st); });
+  sg.add(hub); reg(hub, 'hubBody', V3(0, 0, 0), { label: V3(0.17, -0.05, 0.12) });
+  const regMark = at(plane(0.13, 0.021, X.regLabel), 0, -0.052, 0.1812); sg.add(regMark); reg(regMark, 'regMark', V3(0, 0, 0.10));
+  // 上板: バッテリーの差込口4つ
+  const topHoles = BAT.map(b => ({ w: 0.096, h: 0.116, rr: 0.008, x: b.x, s: -b.z }));
+  const top = at(mesh(plateGeometry(0.40, 0.40, 0.035, topHoles, 0.008), [X.hubPlate, M.carbonEdge]), 0, 0.055, 0);
+  sg.add(top); reg(top, 'hubTop', V3(0, 0.42, 0), { label: V3(0.16, 0.01, -0.16) });
+
+  // ---------- バッテリー ×4 (天面から差し込み・取っ手つき) ----------
+  let batPart = null;
+  BAT.forEach((b, i) => {
+    const bat = new THREE.Group(); at(bat, b.x, 0.004, b.z);
+    const shell = mesh(rboxGeo(0.090, 0.140, 0.110, 0.008, 3), M.plasticBlack); bat.add(shell);
+    const cap = mesh(rboxGeo(0.094, 0.012, 0.114, 0.004), M.heatShrink); at(cap, 0, 0.074, 0); bat.add(cap);
+    // 取っ手(U字)と残量LED
+    const hpts = []; for (let n = 0; n <= 16; n++) { const t = n / 16 * Math.PI; hpts.push(V3(-0.030 * Math.cos(t), 0.080 + 0.026 * Math.sin(t), 0)); }
+    bat.add(mesh(tubeGeo(hpts, 0.0065, 32, 12), M.rubber));
+    for (let k = 0; k < 4; k++) { const l = mesh(new THREE.BoxGeometry(0.008, 0.0016, 0.004), k < 3 ? M.ledGreen : M.chip); at(l, -0.016 + k * 0.011, 0.0808, b.sz * 0.042); bat.add(l); }
+    const cells = mesh(merged(Array.from({ length: 6 }, (_, k) => new THREE.BoxGeometry(0.011, 0.122, 0.096).translate(-0.0325 + k * 0.013, -0.004, 0))), M.cell); bat.add(cells);
+    sg.add(bat);
+    reg(cells, 'cells', V3(0, 0, 0));
+    const bp = reg(bat, 'battery', V3(b.sx * 0.10, 0.70, b.sz * 0.10), { coarse: true, label: i === 1 ? V3(0, 0.10, 0) : null });
+    bp.shell = shell; if (!batPart) batPart = bp;
+  });
+  // 電源コネクター(橙)×4 天面右
+  const pc = new THREE.Group();
+  for (let k = 0; k < 4; k++) { const z = -0.075 + k * 0.05; pc.add(at(mesh(rboxGeo(0.030, 0.020, 0.024, 0.003), X.orange), -0.168, 0.075, z)); pc.add(at(mesh(rboxGeo(0.012, 0.016, 0.020, 0.002), M.plasticBlack), -0.188, 0.075, z)); }
+  sg.add(pc); reg(pc, 'powerConn', V3(-0.30, 0.30, 0), { label: V3(-0.19, 0.09, 0) });
+
+  // ---------- 内部の電装 (外からは見えない。すけて見る・分解で見える) ----------
+  const fc = new THREE.Group(); at(fc, 0, -0.030, -0.150);
+  fc.add(mesh(rboxGeo(0.120, 0.030, 0.048, 0.004), M.aluBrushDark));
+  fc.add(at(mesh(new THREE.BoxGeometry(0.10, 0.0016, 0.040), [M.pcbEdge, M.pcbEdge, M.pcbFC, M.pcbEdge, M.pcbEdge, M.pcbEdge]), 0, 0.016, 0));
+  fc.add(at(mesh(new THREE.BoxGeometry(0.0016, 0.0008, 0.0016), M.ledBlue), 0.04, 0.0172, 0.012));
+  sg.add(fc); reg(fc, 'fc', V3(0, 0.30, -0.15), { label: V3(0, 0.02, 0) });
+  const pdb = new THREE.Group(); at(pdb, 0, -0.035, 0.150);
+  pdb.add(at(mesh(new THREE.BoxGeometry(0.15, 0.0024, 0.05), [M.pcbEdge, M.pcbEdge, M.pcbPDB, M.pcbEdge, M.pcbEdge, M.pcbEdge]), 0, 0, 0));
+  for (let k = 0; k < 4; k++) pdb.add(at(mesh(cylGeo(0.007, 0.007, 0.018, 20), M.plasticBlack), -0.055 + k * 0.036, 0.010, 0.010));
+  sg.add(pdb); reg(pdb, 'pdb', V3(0, 0.26, 0.15));
+  const rid = new THREE.Group(); at(rid, -0.135, 0.063, 0.150);
+  rid.add(at(mesh(rboxGeo(0.050, 0.016, 0.034, 0.004), M.plasticGray), 0, 0.008, 0));
+  rid.add(at(mesh(new THREE.BoxGeometry(0.0025, 0.001, 0.0025), M.ledBlue), -0.015, 0.0165, -0.009));
+  sg.add(rid); reg(rid, 'remoteId', V3(-0.12, 0.40, 0.10), { label: V3(0, 0.02, 0) });
+
+  // ---------- 天面の機器 ----------
+  const gps = new THREE.Group(); at(gps, 0, 0.063, -0.150);
+  gps.add(mesh(cylGeo(0.012, 0.016, 0.045, 24).translate(0, 0.0225, 0), M.aluDark));
+  gps.add(at(mesh(lathe([[0, 0], [0.040, 0], [0.042, 0.004], [0.042, 0.012], [0.036, 0.022], [0.020, 0.028], [0, 0.029]], 64), X.gnss), 0, 0.045, 0));
+  { const t = mesh(new THREE.CircleGeometry(0.022, 40), X.gnssTop, { cast: false }); t.rotation.x = -Math.PI / 2; t.rotation.z = 0; at(t, 0, 0.0742, 0); gps.add(t); }
+  sg.add(gps); reg(gps, 'gps', V3(0, 0.80, -0.10), { label: V3(0, 0.08, 0) });
+  for (const sx of [-1, 1]) {
+    const an = new THREE.Group(); at(an, sx * 0.150, 0.063, -0.150);
+    an.add(mesh(cylGeo(0.016, 0.019, 0.010, 24).translate(0, 0.005, 0), M.aluDark));
+    an.add(mesh(cylGeo(0.017, 0.017, 0.085, 32).translate(0, 0.052, 0), M.plasticBlack));
+    an.add(mesh(new THREE.SphereGeometry(0.017, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2).translate(0, 0.0945, 0), M.plasticBlack));
+    sg.add(an); reg(an, 'antenna', V3(sx * 0.10, 0.55, -0.12), { label: sx > 0 ? V3(0, 0.11, 0) : null });
+  }
+  // パラシュート(後方左・台座つき)
+  const para = new THREE.Group(); at(para, 0.175, 0.063, 0.175);
+  para.add(mesh(rboxGeo(0.15, 0.010, 0.15, 0.004), M.aluDark).translateY(0.005));
+  para.add(mesh(cylGeo(0.090, 0.090, 0.165, 64).translate(0, 0.0925, 0), X.para));
+  para.add(mesh(hardLathe([[0, 0], [0.091, 0], [0.091, 0.006], [0.084, 0.012], [0, 0.014]], 64).translate(0, 0.175, 0), M.aluDark));
+  { const band = mesh(new THREE.CylinderGeometry(0.0905, 0.0905, 0.075, 64, 1, true, -0.55 * Math.PI, 1.1 * Math.PI), X.paraLabel, { cast: false }); band.position.y = 0.105; band.rotation.y = Math.PI * 0.25; para.add(band); }
+  para.add(rw(mesh(tubeGeo([V3(-0.06, 0.03, -0.06), V3(-0.09, 0.02, -0.09), V3(-0.11, 0.0, -0.11), V3(-0.13, -0.02, -0.12)], 0.004, 24), M.wireWhite)));
+  sg.add(para); const paraPart = reg(para, 'parachute', V3(0.20, 0.72, 0.20), { label: V3(0, 0.19, 0) });
+
+  // ---------- 前面の ToF センサー ----------
+  const tof = new THREE.Group(); at(tof, 0, -0.030, -0.182);
+  tof.add(mesh(rboxGeo(0.070, 0.034, 0.014, 0.004), M.plasticBlack));
+  for (const sx of [-1, 1]) { const g2 = mesh(cylGeo(0.0075, 0.0075, 0.004, 24), X.tofGlass); g2.rotation.x = Math.PI / 2; at(g2, sx * 0.017, 0, -0.0075); tof.add(g2); }
+  tof.add(at(mesh(new THREE.BoxGeometry(0.003, 0.003, 0.002), M.ledRed), 0, 0.011, -0.0075));
+  sg.add(tof); reg(tof, 'tof', V3(0, -0.04, -0.32), { label: V3(0, -0.01, -0.01) });
+
+  // ---------- アーム ×6 ----------
+  const HINGE_X = 0.262, HINGE_Y = 0.024, MOTOR_X = 0.8115 - HINGE_X;
+  const LEDC = [{ m: M.ledGreen, g: 0x18ff4a }, { m: M.ledWhite, g: 0xffffff }, { m: M.ledWhite, g: 0xffffff }, { m: M.ledWhite, g: 0xffffff }, { m: M.ledWhite, g: 0xffffff }, { m: M.ledRed, g: 0xff2a1a }];
+  // 大型モーター用の共有形状
+  const bladeGeo = (dir) => { const g = propGeometry(dir, [0]); g.scale(2.5, 2.2, 2.5); return g; };
+  const fullGeo = (dir) => { const g = propGeometry(dir); g.scale(2.5, 2.2, 2.5); return g; };
+  const PG = { bCCW: bladeGeo(1), bCW: bladeGeo(-1), fCCW: fullGeo(1), fCW: fullGeo(-1) };
+  const clampGeo = hardLathe([[0.006, 0], [0.034, 0], [0.036, 0.002], [0.036, 0.006], [0.034, 0.008], [0.006, 0.008], [0.006, 0]], 48);
+  const pivots = [];
+  PD6B_U.forEach((u, k) => {
+    const dir = PD6B_DIR[k];
+    const ag = new THREE.Group(); ag.name = 'arm' + (k + 1); ag.rotation.y = Math.atan2(-u.z, u.x); sg.add(ag);
+    // 折りたたみ継手(ハブ側に固定): 台座・ヒンジの軸・ロックレバー・ロック表示
+    const fj = new THREE.Group();
+    fj.add(at(mesh(rboxGeo(0.052, 0.054, 0.056, 0.006), M.aluDark), 0.236, 0, 0));
+    for (const s of [-1, 1]) fj.add(at(mesh(cylGeo(0.010, 0.010, 0.014, 24).rotateX(Math.PI / 2), M.aluDark), HINGE_X, HINGE_Y - 0.004, s * 0.021));
+    fj.add(at(mesh(cylGeo(0.0045, 0.0045, 0.062, 16).rotateX(Math.PI / 2), M.steel), HINGE_X, HINGE_Y - 0.004, 0));
+    fj.add(at(mesh(rboxGeo(0.060, 0.010, 0.020, 0.004), M.plasticBlack), 0.262, -0.031, 0));
+    const lock = at(mesh(new THREE.BoxGeometry(0.010, 0.002, 0.010), M.ledGreen), 0.236, 0.0275, 0); fj.add(lock);
+    ag.add(fj); const fjp = reg(fj, 'foldJoint', V3(0.12, 0, 0), { label: k === 1 ? V3(0.236, 0.035, 0) : null }); fjp.lock = lock;
+    if (k === 1 || k === 4) {   // 送受信アンテナ: 左右のアームの付け根に1本ずつ(ハブ側に固定なので畳んでも動かない)
+      const rx = new THREE.Group(); at(rx, 0.222, 0.027, 0.020);
+      rx.add(mesh(cylGeo(0.008, 0.009, 0.012, 16).translate(0, 0.006, 0), M.aluDark));
+      rx.add(mesh(cylGeo(0.0045, 0.0055, 0.120, 16).translate(0, 0.072, 0), M.plasticBlack));
+      ag.add(rx); reg(rx, 'rxAnt', V3(0.06, 0.34, 0), { label: k === 1 ? V3(0, 0.13, 0) : null });
+    }
+    // 折りたたみの軸より先(ここが回る)
+    const pv = new THREE.Group(); pv.name = 'fold'; at(pv, HINGE_X, HINGE_Y, 0); ag.add(pv); pivots.push(pv);
+    const arm = new THREE.Group();
+    const tube = mesh(cylGeo(0.0225, 0.0225, MOTOR_X - 0.016, 40), M.carbonArm); tube.rotation.z = -Math.PI / 2; at(tube, 0.008 + (MOTOR_X - 0.016) / 2, -HINGE_Y, 0); arm.add(tube);
+    arm.add(at(mesh(rboxGeo(0.034, 0.050, 0.050, 0.006), M.aluDark), 0.012, -HINGE_Y, 0));
+    arm.add(at(mesh(cylGeo(0.010, 0.010, 0.026, 24).rotateX(Math.PI / 2), M.aluDark), 0, -0.004, 0));
+    pv.add(arm); reg(arm, 'arm', V3(0.28, 0, 0), { label: k === 4 ? V3(0.30, 0.0, 0) : null });
+    // モーターマウント
+    const mount = new THREE.Group(); at(mount, MOTOR_X, -HINGE_Y, 0);
+    mount.add(mesh(rboxGeo(0.078, 0.052, 0.060, 0.008), M.aluDark));
+    mount.add(at(mesh(hardLathe([[0.010, 0], [0.050, 0], [0.050, 0.007], [0.010, 0.007], [0.010, 0]], 48), M.aluDark), 0, 0.026, 0));
+    mount.add(at(mesh(cylGeo(0.020, 0.020, 0.004, 32).rotateZ(Math.PI / 2), M.plasticBlack), 0.041, 0, 0));
+    pv.add(mount); reg(mount, 'motorMount', V3(0.42, 0.03, 0));
+    // モーター本体(550クラスの形を扁平に拡大: 直径約112mm・高さ約60mm)
+    const mg = new THREE.Group(); mg.name = 'motor'; at(mg, MOTOR_X, -HINGE_Y + 0.033, 0); pv.add(mg);
+    const core = new THREE.Group(); core.scale.set(3.2, 1.7, 3.2); mg.add(core);
+    const base = new THREE.Group(); const bp = [cylGeo(0.0105, 0.0105, 0.004).translate(0, 0.002, 0)]; for (let q = 0; q < 4; q++) { const a = q * Math.PI / 2 + Math.PI / 4; bp.push(rboxGeo(0.021, 0.0032, 0.008, 0.0014).rotateY(-a).translate(Math.cos(a) * 0.0115, 0.0016, -Math.sin(a) * 0.0115)); }
+    bp.push(hardLathe([[0.0046, 0.004], [0.0052, 0.004], [0.0052, 0.022], [0.0046, 0.022], [0.0046, 0.004]], 32)); base.add(mesh(merged(bp), M.aluDark)); core.add(base); reg(base, 'motorBase', V3(0, 0, 0));
+    const stator = at(mesh(G.teeth, M.lamination), 0, 0.013, 0); stator.castShadow = false; core.add(stator); reg(stator, 'stator', V3(0, 0.04, 0));
+    const coils = at(mesh(G.coils, M.copper), 0, 0.013, 0); coils.castShadow = false; core.add(coils); reg(coils, 'winding', V3(0, 0.04, 0));
+    const mags = at(mesh(G.magnets, M.magnet), 0, 0.013, 0); mags.castShadow = false; core.add(mags); reg(mags, 'magnet', V3(0, 0.10, 0));
+    const bell = new THREE.Group(); bell.add(at(mesh(G.bellWall, M.bell), 0, 0.005, 0)); bell.add(at(mesh(G.bellTop, M.aluDark), 0, 0.0295, 0)); bell.add(at(mesh(cylGeo(0.0065, 0.0075, 0.0035), M.alu), 0, 0.0333, 0));
+    core.add(bell); reg(bell, 'bell', V3(0, 0.10, 0));
+    const shaft = new THREE.Group(); shaft.add(at(mesh(cylGeo(0.002, 0.002, 0.040, 16), M.steel), 0, 0.016, 0)); shaft.add(at(mesh(G.bearing, M.steel), 0, 0.005, 0)); shaft.add(at(mesh(G.bearing, M.steel), 0, 0.017, 0));
+    core.add(shaft); reg(shaft, 'shaft', V3(0, 0.10, 0));
+    // プロペラ(回る入れ物): クランプ・ヒンジ・羽根2枚
+    const PY = 0.064;
+    const propG = new THREE.Group(); propG.name = 'prop'; at(propG, 0, PY, 0); mg.add(propG);
+    const hubCap = mesh(cylGeo(0.012, 0.014, 0.010, 32), M.alu); at(hubCap, 0, 0.012, 0); propG.add(hubCap);   // 最初の子メッシュ = mo.hubMesh
+    const clamp = new THREE.Group();
+    clamp.add(at(mesh(clampGeo, M.aluDark), 0, -0.012, 0)); clamp.add(at(mesh(clampGeo, M.aluDark), 0, 0.004, 0));
+    for (const s of [-1, 1]) clamp.add(at(mesh(G.screwHead, M.steelBlack), s * 0.032, 0.012, 0));
+    for (const s of [-1, 1]) clamp.add(at(mesh(rboxGeo(0.030, 0.012, 0.030, 0.004), M.aluDark), s * 0.034, -0.002, 0));
+    propG.add(clamp);
+    const blades = [], hinges = [];
+    for (const s of [1, -1]) {
+      const hg = new THREE.Group(); at(hg, s * 0.032, -0.002, 0);
+      const bl = mesh(dir > 0 ? PG.bCCW : PG.bCW, dir > 0 ? X.propCCW : X.propCW); bl.position.x = -s * 0.032; if (s < 0) { bl.rotation.y = Math.PI; bl.position.x = 0.032; }
+      hg.add(bl); propG.add(hg); blades.push(bl); hinges.push({ g: hg, s });
+    }
+    const ghosts = [0, 1].map(() => { const gm = (dir > 0 ? X.propCCW : X.propCW).clone(); gm.transparent = true; gm.opacity = 0.35; gm.depthWrite = false;
+      const gh = new THREE.Mesh(dir > 0 ? PG.fCCW : PG.fCW, gm); gh.position.y = -0.002; gh.visible = false; gh.userData.noPart = true; gh.userData.noPick = true; propG.add(gh); return gh; });
+    reg(clamp, 'propClamp', V3(0, 0.05, 0));
+    reg(propG, 'prop', V3(0.42, 0.50, 0), { label: k === 0 ? V3(0.22, 0.01, 0.0) : null });
+    const disc = new THREE.Mesh(new THREE.CircleGeometry(0.385, 72), (dir > 0 ? M.propDiscCCW : M.propDiscCW).clone()); disc.rotation.x = -Math.PI / 2; disc.userData.noAO = true; at(disc, 0, PY - 0.002, 0);
+    disc.renderOrder = 5; disc.userData.noPart = true; disc.userData.noPick = true; mg.add(disc);
+    const mp = reg(mg, 'motor', V3(0.42, 0.26, 0), { coarse: true, label: k === 1 ? V3(0, 0.035, 0) : null });
+    // ESC (モーターの下に吊る箱・放熱フィン)
+    const esc = new THREE.Group(); at(esc, MOTOR_X + 0.006, -HINGE_Y - 0.060, 0);
+    esc.add(mesh(rboxGeo(0.066, 0.044, 0.084, 0.006), M.heatShrink));
+    esc.add(mesh(merged(Array.from({ length: 7 }, (_, q) => new THREE.BoxGeometry(0.058, 0.010, 0.003).translate(0, -0.026, -0.033 + q * 0.011))), M.aluBrushDark));
+    { const l = plane(0.040, 0.020, X.escLabel); l.rotation.y = Math.PI / 2; at(l, 0.0332, 0.004, 0); esc.add(l); }
+    pv.add(esc); reg(esc, 'esc', V3(0.42, -0.20, 0), { label: k === 5 ? V3(0.03, -0.01, 0) : null });
+    // 灯火 (マウントの外側の下)
+    const led = new THREE.Group(); at(led, MOTOR_X + 0.052, -HINGE_Y - 0.012, 0);
+    led.add(mesh(rboxGeo(0.014, 0.026, 0.028, 0.004), M.plasticBlack));
+    led.add(at(mesh(new THREE.BoxGeometry(0.003, 0.010, 0.014), LEDC[k].m), 0.0075, 0, 0));
+    { const cv = mesh(rboxGeo(0.006, 0.020, 0.024, 0.003), M.ledCover); cv.userData.noAO = true; led.add(at(cv, 0.0095, 0, 0)); }
+    const gl = unscaled(led, 0.014, 0, 0);
+    const core2 = new THREE.Sprite(M.glowCore(LEDC[k].g)); core2.scale.set(0.009, 0.009, 1); core2.renderOrder = 6; gl.add(core2);
+    const halo = new THREE.Sprite(M.glowHalo(LEDC[k].g)); halo.scale.set(0.022, 0.022, 1); halo.position.x = 0.002; halo.renderOrder = 6; gl.add(halo);
+    pv.add(led); reg(led, 'led', V3(0.58, -0.06, 0), { label: k === 0 ? V3(0.012, 0, 0) : null });
+    led.userData.halo = halo; led.userData.core = core2; halo.userData.baseColor = halo.material.color.clone();
+    // 配線: 継手をまたぐたるみ + 管の先からESCへ
+    const wg = new THREE.Group();
+    wg.add(rw(mesh(tubeGeo([V3(-0.050, -0.052, 0.012), V3(-0.030, -0.066, 0.014), V3(0.000, -0.068, 0.014), V3(0.028, -0.058, 0.012), V3(0.044, -0.046, 0.010)], 0.0055, 40), M.wireBlack)));
+    wg.add(rw(mesh(tubeGeo([V3(MOTOR_X - 0.040, -HINGE_Y - 0.018, 0.010), V3(MOTOR_X - 0.030, -HINGE_Y - 0.040, 0.014), V3(MOTOR_X - 0.020, -HINGE_Y - 0.052, 0.012)], 0.0045, 24), M.wireBlack)));
+    wg.add(rw(mesh(tubeGeo([V3(MOTOR_X - 0.040, -HINGE_Y - 0.018, -0.010), V3(MOTOR_X - 0.030, -HINGE_Y - 0.040, -0.014), V3(MOTOR_X - 0.020, -HINGE_Y - 0.052, -0.012)], 0.0045, 24), M.wireRed)));
+    pv.add(wg); reg(wg, 'wiring', V3(0.20, -0.08, 0));
+    // 推力・回転の矢印は画面上の大きさで作る(縮尺の逆数の入れ物に入れる)
+    const ua = unscaled(mg, 0, PY, 0);
+    const mo = { group: mg, prop: propG, propMesh: blades[0], blades, hinges, ghosts, disc, bell, mags, shaft, adapter: clamp, dir, arm: ag, pivot: pv, id: 'M' + (k + 1), u: V3(u.x, 0, u.z), part: mp, arrowAnchor: ua };
+    motors.push(mo);
+  });
+
+  // ---------- 腰下ユニット ----------
+  const lm = new THREE.Group();
+  lm.add(at(mesh(rboxGeo(0.24, 0.012, 0.24, 0.004), M.aluDark), 0, -0.090, 0));
+  for (const sz of [-1, 1]) lm.add(at(mesh(rboxGeo(0.54, 0.020, 0.030, 0.005), M.aluDark), 0, -0.094, sz * 0.13));
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) { const pin = mesh(cylGeo(0.005, 0.005, 0.030, 16), M.steel); pin.rotation.z = Math.PI / 2; at(pin, sx * 0.105, -0.084, sz * 0.105); lm.add(pin);
+    lm.add(at(mesh(cylGeo(0.0075, 0.0075, 0.004, 16).rotateZ(Math.PI / 2), M.aluOrange), sx * 0.122, -0.084, sz * 0.105)); }
+  sg.add(lm); reg(lm, 'lowerMount', V3(0, -0.04, 0), { label: V3(0.27, -0.09, 0.13) });
+  // 脚 (左右)・スキッド
+  const LEG_TOP = (sx, sz) => V3(sx * 0.255, -0.104, sz * 0.13), LEG_BOT = (sx, sz) => V3(sx * 0.300, -0.500, sz * 0.19);
+  for (const sx of [-1, 1]) {
+    const lg = new THREE.Group();
+    for (const sz of [-1, 1]) {
+      const a = LEG_TOP(sx, sz), b = LEG_BOT(sx, sz);
+      lg.add(tubeBetween(a, b, 0.0145, X.legBlack, 24));
+      lg.add(at(mesh(rboxGeo(0.040, 0.026, 0.040, 0.005), M.aluDark), a.x, a.y + 0.004, a.z));
+      lg.add(at(mesh(rboxGeo(0.036, 0.034, 0.036, 0.006), M.plasticBlack), b.x, b.y - 0.003, b.z));
+    }
+    // 前後の脚をつなぐ横の桟
+    const yM = -0.31, t = (yM - (-0.104)) / (-0.500 - (-0.104)), xM = sx * (0.255 + (0.300 - 0.255) * t), zM = 0.13 + (0.19 - 0.13) * t;
+    lg.add(tubeBetween(V3(xM, yM, -zM), V3(xM, yM, zM), 0.011, X.legBlack, 20));
+    sg.add(lg); reg(lg, 'landingGear', V3(sx * 0.30, 0, 0), { label: sx > 0 ? V3(0.29, -0.40, -0.17) : null });
+    legs.push({ group: lg, sx, pivots: [] });
+    const sk = new THREE.Group();
+    const skid = mesh(cylGeo(0.015, 0.015, 0.78, 28), X.legBlack); skid.rotation.x = Math.PI / 2; at(skid, sx * 0.300, -0.515, 0); sk.add(skid);
+    for (const sz of [-1, 1]) { const cap = mesh(new THREE.CapsuleGeometry(0.017, 0.040, 6, 16), M.rubber); cap.rotation.x = Math.PI / 2; at(cap, sx * 0.300, -0.515, sz * 0.39); sk.add(cap); }
+    sg.add(sk); reg(sk, 'skid', V3(sx * 0.42, 0, 0), { label: sx < 0 ? V3(-0.30, -0.52, 0.30) : null });
+  }
+  // 物流ボックス (白い箱 + 黒い台)
+  const box = new THREE.Group(); at(box, 0, -0.330, 0);
+  box.add(at(mesh(rboxGeo(0.400, 0.300, 0.400, 0.012, 3), X.boxWhite), 0, 0.02, 0));
+  box.add(at(mesh(rboxGeo(0.404, 0.050, 0.404, 0.010, 2), X.boxWhite), 0, 0.150, 0));   // ふた
+  box.add(at(mesh(rboxGeo(0.406, 0.004, 0.406, 0.002), M.plasticGray), 0, 0.125, 0));   // ふたの合わせ目
+  box.add(at(mesh(rboxGeo(0.420, 0.030, 0.420, 0.006), X.legBlack), 0, -0.150, 0));    // 台
+  for (let q = 0; q < 5; q++) box.add(at(mesh(rboxGeo(0.040, 0.020, 0.012, 0.003), X.boxWhite), -0.144 + q * 0.072, -0.150, -0.212));
+  { const l = plane(0.30, 0.075, X.boxLabel); at(l, 0, 0.05, -0.2012); l.rotation.y = Math.PI; box.add(l); }
+  { const l = plane(0.30, 0.075, X.boxLabel); at(l, 0.2012, 0.05, 0); l.rotation.y = Math.PI / 2; box.add(l); }
+  { const l = plane(0.20, 0.05, X.boxLabel); at(l, 0, 0.1755, 0); l.rotation.set(-Math.PI / 2, 0, Math.PI); box.add(l); }   /* 前に立って上から読める向き */
+  sg.add(box); const boxPart = reg(box, 'cargoBox', V3(0, 0, -0.62), { label: V3(-0.1, 0.0, -0.21) });
+  // ボックスリリース機構 (四隅の爪)
+  const latch = new THREE.Group(); const claws = [];
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    latch.add(at(mesh(rboxGeo(0.034, 0.020, 0.034, 0.004), M.aluDark), sx * 0.165, -0.104, sz * 0.165));
+    const cp = new THREE.Group(); at(cp, sx * 0.165, -0.112, sz * 0.165);
+    const claw = mesh(merged([new THREE.BoxGeometry(0.010, 0.080, 0.022).translate(sx * 0.047, -0.040, 0), new THREE.BoxGeometry(0.018, 0.010, 0.022).translate(sx * 0.040, -0.075, 0)]), M.aluOrange);
+    cp.add(claw); cp.rotation.z = 0; latch.add(cp); claws.push({ g: cp, sx });
+  }
+  sg.add(latch); const latchPart = reg(latch, 'boxLatch', V3(0, 0.06, 0), { label: V3(0.17, -0.13, -0.17) }); latchPart.claws = claws;
+  // 測量ユニット (付け替えたときだけ出す)
+  const sv = new THREE.Group(); at(sv, 0, -0.100, 0);
+  sv.add(at(mesh(rboxGeo(0.20, 0.014, 0.20, 0.004), M.aluDark), 0, -0.012, 0));
+  sv.add(at(mesh(rboxGeo(0.16, 0.090, 0.12, 0.010), M.plasticGray), 0, -0.065, 0.020));
+  { const lid = mesh(cylGeo(0.052, 0.052, 0.090, 48), X.gnss); at(lid, 0, -0.160, -0.060); sv.add(lid);
+    const win = mesh(cylGeo(0.0525, 0.0525, 0.040, 48, true), X.lidarGlass); at(win, 0, -0.165, -0.060); sv.add(win); }
+  { const cam = mesh(rboxGeo(0.07, 0.06, 0.07, 0.008), M.plasticBlack); at(cam, 0, -0.150, 0.075); sv.add(cam);
+    const lens = mesh(cylGeo(0.022, 0.022, 0.012, 32), M.lens); lens.rotation.x = Math.PI / 2; at(lens, 0, -0.150, 0.034); sv.add(lens); }
+  sg.add(sv); const svPart = reg(sv, 'surveyUnit', V3(0, 0, -0.50), { label: V3(0, -0.17, -0.06) }); svPart.hidden = true;
+
+  // ---------- パラシュートの傘 (開いたときだけ出す。部品には数えない) ----------
+  const chute = new THREE.Group(); chute.visible = false; chute.position.set(0.175, 0.24, 0.175); sg.add(chute);
+  { const R = 1.15, segs = 16, can = new THREE.Group();
+    for (let i = 0; i < segs; i++) { const gore = new THREE.SphereGeometry(R, 4, 10, i / segs * Math.PI * 2, Math.PI * 2 / segs, 0, Math.PI * 0.42); can.add(new THREE.Mesh(gore, i % 2 ? X.canopyWhite : X.canopy)); }
+    can.position.y = 1.15; chute.add(can);
+    const rimY = 1.15 + R * Math.cos(Math.PI * 0.42), rimR = R * Math.sin(Math.PI * 0.42);
+    for (let i = 0; i < segs; i++) { const a = i / segs * Math.PI * 2; chute.add(tubeBetween(V3(0, 0, 0), V3(Math.cos(a) * rimR, rimY, Math.sin(a) * rimR), 0.003, X.line, 4)); }
+    chute.userData.canopy = can; noPart(chute); chute.traverse(o => { o.userData.noAO = true; }); }
+
+  // ---------- 矢印 ----------
+  const arrows = { thrust: [], rot: [], move: null, yaw: null };
+  motors.forEach(mo => {
+    const th = arrowMesh(0xffffff, 0.06, 0.0035); th.position.set(0, 0.012, 0); th.visible = false; mo.arrowAnchor.add(th); arrows.thrust.push(th);
+    const rot = rotationArc(mo.dir, 0.075); rot.position.set(0, 0.016, 0); rot.visible = false; mo.arrowAnchor.add(rot); arrows.rot.push(rot);
+  });
+  const move = arrowMesh(0xef6a2d, 0.14, 0.005); move.visible = false; root.add(move); arrows.move = move;
+  const yaw = rotationArc(-1, 0.40); yaw.position.set(0, 0.10, 0); yaw.visible = false; root.add(yaw); arrows.yaw = yaw;
+  const cgMarker = new THREE.Group(); cgMarker.visible = false; root.add(cgMarker);
+
+  const propPart = parts.find(p => p.key === 'prop' && p.idx === 0);
+  return { root, sg, parts, pick, wires, motors, legs, arrows, batPart, G, cgMarker, personGroup: null, pivots, chute, paraPart, boxPart, latchPart, svPart,
+    rotor: { R: 0.381 * K, y0: 0 }, moveR: 0.42, moveY: 0.12, rpmScale: 0.5, labelPropPart: propPart };
+}
+
 // ===== 描画エンジン: レンダラー・照明・ポスト処理・状態・共通ユーティリティ =====
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -3010,7 +3730,7 @@ const narrow = () => matchMedia('(max-width: 1100px)').matches;
 // （body.mode だけで見分けると、生きている感じ（alive）が入っているときに素通りする）
 const camScripted = () => (typeof whatif === 'object' && whatif.active) || (typeof theater === 'object' && theater.active)
   || (typeof descent === 'object' && descent.active) || (typeof dshow === 'object' && dshow.on)
-  || (typeof weather === 'object' && weather.on) || (typeof fpv === 'object' && fpv.on);
+  || (typeof weather === 'object' && weather.on) || (typeof fpv === 'object' && fpv.on) || (typeof pd6b === 'object' && !!pd6b.act);
 const compact = () => matchMedia('(max-width: 760px)').matches;
 const T0 = performance.now(); const TL = {}; const mark = k => { TL[k] = Math.round(performance.now() - T0); };
 
@@ -3045,7 +3765,7 @@ controls.addEventListener('change', () => { S.aoDirty = true; });
 
 mark('gl');
 const M = makeMaterials(renderer.capabilities.getMaxAnisotropy()); mark('mat');
-const D = buildDrone(M); mark('geo');
+const D = IS_PD6B ? buildPD6B(M) : buildDrone(M); mark('geo');
 scene.add(D.root);
 if (D.personGroup) scene.add(D.personGroup);
 
@@ -3656,10 +4376,12 @@ function showDroneOn(on) {
 
 // ===== 機体の力学: ホバー・飛行デモ・フリック/スティック(free)・モーター/プロペラ表現 =====
 const RPM_MAX = 9000, HOVER_RPM = RPM_MAX * 0.5, GRAV = 9.81;
-const MOTOR_U = [[1, -1], [1, 1], [-1, 1], [-1, -1]].map(([x, z]) => ({ x: x / Math.SQRT2, z: z / Math.SQRT2 }));
+// モーターの向き(機体中心から見た水平の単位ベクトル)。機種ごとに機体から取る（550クラスは4基、PD6Bは6基）
+const MOTOR_U = D.motors.map(mo => { const l = Math.hypot(mo.u.x, mo.u.z) || 1; return { x: mo.u.x / l, z: mo.u.z / l }; });
+const NM = D.motors.length;
 const body = {
   px: 0, py: 0, pz: 0, vx: 0, vy: 0, vz: 0, tx: 0, tz: 0, wx: 0, wz: 0, ax: 0, az: 0, yaw: 0, yawRate: 0, vyF: 0,
-  home: { x: 0, z: 0 }, mode: 'idle', mult: [1, 1, 1, 1], t: 0, lookYaw: null,
+  home: { x: 0, z: 0 }, mode: 'idle', mult: D.motors.map(() => 1), t: 0, lookYaw: null,
   hold: null, stick: { x: 0, y: 0, yaw: 0, thr: 0, active: false, fx: 0, fy: 0 }, stickWas: false, tilt: { x: 0, y: 0, active: false }, v: new THREE.Vector3(),
 };
 const free = { Kx: THREE.MathUtils.degToRad(34), Kv: THREE.MathUtils.degToRad(12.7), KvBrake: THREE.MathUtils.degToRad(17), wAtt: 14, zAtt: 0.70, tiltMax: THREE.MathUtils.degToRad(22), holdMax: THREE.MathUtils.degToRad(18), kappa: 0.0057, hoverY: 0.06 };
@@ -3726,11 +4448,11 @@ function stepFree(dt) {
   if (!st.active) { body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); const look = (S.alive && body.lookYaw != null && !body.hold && !ti.active && !reduceMotion); body.yaw = dl(body.yaw, look ? body.lookYaw : 0, dt, look ? 2.5 : 1.5); }   // ⑧: ポインタの方へ数度だけ向く
   // モーター配分: α_z = −τ̈x, α_x = τ̈z
   const collective = 1 / Math.cos(th) - 1; const alz = -body.ax, alx = body.az;
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < NM; i++) {
     if (S.scale) break;   // 重さモードでは重心から決めた負担率を使う
     const u = MOTOR_U[i]; let d = free.kappa * (alz * u.x - alx * u.z);
     if (body.hold) d += 0.25 * (u.x * body.hold.x + u.z * body.hold.z) / Math.max(1e-6, body.hold.th) * (body.hold.th / free.holdMax);
-    d += 0.12 * (st.active ? st.yaw : 0) * (i % 2 === 0 ? 1 : -1);
+    d += 0.12 * (st.active ? st.yaw : 0) * D.motors[i].dir;   /* 反時計回り(dir=+1)を速くすると機首が右へ */
     body.mult[i] = clamp(1 + collective + d, 0.55, 1.35);
   }
 }
@@ -3751,14 +4473,14 @@ function stepDemo(dt) {
   const ox = body.px, oy = body.py, oz = body.pz;
   body.px = dl(body.px, px, dt, r); body.py = dl(body.py, py, dt, r); body.pz = dl(body.pz, pz, dt, r);
   const idt = 1 / Math.max(dt, 1e-3); body.vx = (body.px - ox) * idt; body.vy = (body.py - oy) * idt; body.vz = (body.pz - oz) * idt;
-  for (let i = 0; i < 4; i++) body.mult[i] = f ? 1 + (f.mult[i] - 1) * k : 1;
+  for (let i = 0; i < NM; i++) body.mult[i] = f ? 1 + (f.mult[i] - 1) * k : 1;
 }
 function stepIdle(dt) {
   const r = 4; body.tx = dl(body.tx, 0, dt, r); body.tz = dl(body.tz, 0, dt, r); body.wx = body.wz = 0;
   body.px = dl(body.px, 0, dt, r); body.pz = dl(body.pz, 0, dt, r); body.vx = body.vz = body.vy = 0;
   { const ay = 25 * (0 - body.py) - 10 * body.vyF; body.vyF += ay * dt; body.py = Math.max(0, body.py + body.vyF * dt); if (body.py === 0) body.vyF = 0; }   // 着陸は初速0のS字(臨界減衰)
   body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); body.yaw = dl(body.yaw, 0, dt, 3);
-  if (!S.scale) for (let i = 0; i < 4; i++) body.mult[i] = dl(body.mult[i], 1, dt, 4);
+  if (!S.scale) for (let i = 0; i < NM; i++) body.mult[i] = dl(body.mult[i], 1, dt, 4);
 }
 function stepBody(dtSim, dtReal) {
   const prev = { x: body.px, y: body.py, z: body.pz };
@@ -3768,7 +4490,7 @@ function stepBody(dtSim, dtReal) {
 }
 // 浮遊層(実時間): ホバー中の呼吸と微揺れ
 function ambient(dtReal) {
-  ambientT.t += dtReal; const t = ambientT.t; const avg = D.motors.reduce((a, mo) => a + mo.rpm, 0) / 4;
+  ambientT.t += dtReal; const t = ambientT.t; const avg = D.motors.reduce((a, mo) => a + mo.rpm, 0) / NM;
   const hov = smoothstep(900, 3600, avg) * (S.slow ? 0.6 : 1) * (reduceMotion ? 0 : 1);
   const d = THREE.MathUtils.degToRad(0.25) / Math.sqrt(3);
   return { py: hov * (0.002 * Math.sin(2 * Math.PI * 0.35 * t) + 0.0007 * Math.sin(2 * Math.PI * 1.7 * t + 1.3)),
@@ -3787,7 +4509,7 @@ function applyBody(dtReal) {
 
 // ---------- モーター / プロペラ ----------
 for (const mo of D.motors) { mo.rpm = 0; mo.angle = 0; mo.pct = 0; mo.rpmTarget = null; mo.rpmRate = null;
-  mo.propMesh.material = mo.propMesh.material.clone(); mo.propMesh.userData.origMat = mo.propMesh.material;
+  { const pm = mo.propMesh.material.clone(); for (const b of (mo.blades || [mo.propMesh])) { b.material = pm; b.userData.origMat = pm; } }   /* 折りたたみプロペラは羽根が2つのメッシュ。同じ複製を共有して残像の薄めを両方に効かせる */
   mo.hubMesh = mo.prop.children.find(c => c.isMesh && c !== mo.propMesh); if (mo.hubMesh) { mo.hubMesh.material = mo.hubMesh.material.clone(); mo.hubMesh.userData.origMat = mo.hubMesh.material; } }   // 複製を origMat にもしておく(表示モードから戻るときに共有材質へ戻らないように)
 let shadowTick = 0;
 function updateMotors(dtSim, dtReal) {
@@ -3800,7 +4522,7 @@ function updateMotors(dtSim, dtReal) {
     const dpf = mo.rpm * S.ts * 0.1;   // 60fps換算の1フレーム回転角[deg] (fps非依存)
     const wReal = 1 - smoothstep(30, 90, dpf) * 0.85, wGhost = smoothstep(20, 60, dpf) * (1 - smoothstep(60, 120, dpf)), wDisc = smoothstep(24, 72, dpf);
     // 残像の薄めはこのプロペラ専用の材質にだけ掛ける。X線・線画では共有材質(xrayMat/paperMat)が割り当たっているので、それを書き換えると機体全体が消える
-    const blurMats = []; for (const mesh of [mo.propMesh, mo.hubMesh]) { if (!mesh) continue; const u = mesh.userData; for (const mm of [u.origMat, u.tintMat]) if (mm && !Array.isArray(mm)) blurMats.push(mm); }
+    const blurMats = []; for (const mesh of [...(mo.blades || [mo.propMesh]), mo.hubMesh]) { if (!mesh) continue; const u = mesh.userData; for (const mm of [u.origMat, u.tintMat]) if (mm && !Array.isArray(mm)) blurMats.push(mm); }
     for (const m of blurMats) { if (!m) continue; if (wReal >= 0.999) { if (m.transparent) { m.transparent = false; m.opacity = 1; m.needsUpdate = true; } } else { if (!m.transparent) { m.transparent = true; m.needsUpdate = true; } m.opacity = Math.max(0.15, wReal); } }
     mo.ghosts.forEach((gh, k) => { const on = Q.ghosts && wGhost > 0.02 && S.mode === 'normal'; gh.visible = on; if (on) { gh.rotation.y = (k ? 1 : -1) * THREE.MathUtils.degToRad(dpf / 3); gh.material.opacity = 0.35 * wGhost; } });
     mo.disc.material.opacity = wDisc * 0.85; mo.disc.rotation.z += mo.dir * 4 * dtReal;
@@ -3809,7 +4531,7 @@ function updateMotors(dtSim, dtReal) {
     const th = D.arrows.thrust[i]; th.visible = !th.userData.forceHide && (body.mode === 'demo' || body.mode === 'free' || body.mode === 'theater') && partVisible(mo.part) && mo.rpm > 100 && !(typeof alive === 'object' && alive.on && !body.hold && Math.hypot(body.tx, body.tz) < 0.035);   // 生きているだけの間は矢印を出さない
     if (th.visible) {
       th.userData.setLength(0.02 + 0.11 * mo.rpm / RPM_MAX);
-      const base = S.scale ? D.motors.reduce((a, m) => a + m.rpm, 0) / 4 : Math.max(1, S.power * RPM_MAX);   // 重さモードは4基平均との比
+      const base = S.scale ? D.motors.reduce((a, m) => a + m.rpm, 0) / NM : Math.max(1, S.power * RPM_MAX);   // 重さモードは4基平均との比
       const rel = mo.rpm / Math.max(1, base); let col = rel > 1.03 ? 0x22c55e : rel < 0.97 ? 0xf59e0b : arrowNeutral;
       if (S.scale && typeof scale === 'object' && scale.share[i] > SCALE_OVER) col = 0xff3b30;   // バッジの赤と揃える
       if (mo.rpmTarget === 0) col = arrowNeutral;                                                // 着陸の減速は「遅い」ではない
@@ -3824,18 +4546,22 @@ function updateMoveArrow() {
   if (body.mode === 'demo' && S.flight && S.flight !== 'yaw' && S.flight !== 'hover' && spd > 0.004) {
     mv.visible = true; const dir = body.v.clone().normalize(); const local = dir.clone().applyQuaternion(D.root.getWorldQuaternion(tmpQ).invert());
     mv.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), local);
-    if (S.flight === 'climb') mv.position.set(0, 0.16, 0); else if (S.flight === 'pitch') mv.position.set(0, 0.05, -0.22 * Math.sign(-dir.z || 1)); else mv.position.set(0.22 * Math.sign(dir.x || 1), 0.05, 0);
+    const mr = D.moveR || 0.22; if (S.flight === 'climb') mv.position.set(0, D.moveY || 0.16, 0); else if (S.flight === 'pitch') mv.position.set(0, 0.05, -mr * Math.sign(-dir.z || 1)); else mv.position.set(mr * Math.sign(dir.x || 1), 0.05, 0);
     mv.userData.setLength(0.03 + 1.3 * spd);
   } else mv.visible = false;
   D.arrows.yaw.visible = body.mode === 'demo' && S.flight === 'yaw';
 }
 
 // ===== 気流の粒子 (GPU完結: 位置は頂点シェーダの時間関数) =====
-const air = { mesh: null, N: 0, phase: [0, 0, 0, 0], mat: null, groundY: -0.158, cols: null, colT: [0, 0, 0, 0] };
+// 回転面の大きさと高さは機体から取る（550クラス: 半径0.152・モーター座標でy=0.043 / PD6B: 縮尺を打ち消した入れ物の原点が回転面）
+const AIR_NR = 6;   /* シェーダーの配列の長さ。機体のモーター数はこれ以下 */
+const airRotor = () => D.rotor || { R: 0.152, y0: 0.043 };
+const airObj = (mo) => mo.arrowAnchor || mo.group;
+const air = { mesh: null, N: 0, phase: [0, 0, 0, 0, 0, 0], mat: null, groundY: -0.158, cols: null, colT: [0, 0, 0, 0, 0, 0] };
 // 柱の本体: 各モーターの下に開放円筒(R→0.72Rに絞る)。縁だけ濃く(フレネル)、縦に流れる縞
 function buildAirColumns() {
   air.cols = D.motors.map((mo) => {
-    const geo = new THREE.CylinderGeometry(0.150, 0.105, 0.30, 48, 1, true).translate(0, 0.043 - 0.15, 0);
+    const { R, y0 } = airRotor(); const geo = new THREE.CylinderGeometry(R * 0.987, R * 0.69, 0.30, 48, 1, true).translate(0, y0 - 0.15, 0);
     const mat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, side: THREE.DoubleSide,
       uniforms: { uColor: { value: new THREE.Color(0x2f6fe8) }, uT: { value: 0 }, uK: { value: 0 }, uA: { value: 1 }, uGroundY: { value: -0.158 } },
       vertexShader: `uniform float uGroundY; varying vec2 vUv; varying vec3 vN, vV; varying float vG; void main(){ vUv = uv; vec4 wp = modelMatrix * vec4(position, 1.0); wp.y = max(wp.y, uGroundY + 0.003); vG = smoothstep(uGroundY, uGroundY + 0.07, wp.y); vec4 mv = viewMatrix * wp; vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }`,
@@ -3846,27 +4572,27 @@ function buildAirColumns() {
           float a = uA * uK * (0.03 + 0.09 * fr) * (0.6 + 0.4 * stripe) * smoothstep(0.0, 0.25, vUv.y) * vG * (1.0 - 0.35 * smoothstep(0.85, 1.0, vUv.y));
           gl_FragColor = vec4(uColor, a); }` });
     const m = new THREE.Mesh(geo, mat); m.frustumCulled = false; m.renderOrder = 3; m.visible = false;
-    m.userData.noShadow = m.userData.noPart = m.userData.noPick = m.userData.noAO = true; mo.group.add(m); return m;
+    m.userData.noShadow = m.userData.noPart = m.userData.noPick = m.userData.noAO = true; airObj(mo).add(m); return m;
   });
 }
 function buildAirflow(N) {
   if (air.mesh) { air.mesh.geometry.dispose(); }
-  const NR = 4;
+  const NR = D.motors.length;
   const geo = new THREE.InstancedBufferGeometry().copy(new THREE.PlaneGeometry(1, 1)); geo.instanceCount = N * NR;
   const seed = new Float32Array(N * NR * 4);
   for (let i = 0; i < N * NR; i++) seed.set([i % NR, Math.random(), 0.55 + 0.45 * Math.random(), Math.random() * 6.2832], i * 4);   // 縁寄せ
   geo.setAttribute('seed', new THREE.InstancedBufferAttribute(seed, 4));
   if (!air.mat) air.mat = new THREE.ShaderMaterial({
-    uniforms: { uPhase: { value: new THREE.Vector4() }, uRpm: { value: new THREE.Vector4() }, uDir: { value: new THREE.Vector4(1, -1, 1, -1) }, uRotor: { value: [0, 1, 2, 3].map(() => new THREE.Matrix4()) },
-      uWind: { value: new THREE.Vector3() }, uR: { value: 0.152 }, uSize: { value: new THREE.Vector2(0.0016, 0.04) }, uColor: { value: new THREE.Color(0x3b7df7) }, uAlpha: { value: 0.30 }, uGroundY: { value: -0.158 },
+    uniforms: { uPhase: { value: new Array(AIR_NR).fill(0) }, uRpm: { value: new Array(AIR_NR).fill(0) }, uDir: { value: Array.from({ length: AIR_NR }, (_, i) => D.motors[i] ? D.motors[i].dir : 1) }, uRotor: { value: Array.from({ length: AIR_NR }, () => new THREE.Matrix4()) },
+      uWind: { value: new THREE.Vector3() }, uR: { value: airRotor().R }, uY0: { value: airRotor().y0 }, uSize: { value: new THREE.Vector2(0.0016, 0.04) }, uColor: { value: new THREE.Color(0x3b7df7) }, uAlpha: { value: 0.30 }, uGroundY: { value: -0.158 },
       tDepth: { value: null }, uCam: { value: new THREE.Vector2(0.02, 40) }, uRes: { value: new THREE.Vector2(1, 1) }, uSoft: { value: 0.02 }, uTime: { value: 0 } },
-    vertexShader: `attribute vec4 seed; uniform vec4 uPhase, uRpm, uDir; uniform mat4 uRotor[4]; uniform vec3 uWind; uniform float uR, uGroundY, uTime; uniform vec2 uSize;
+    vertexShader: `attribute vec4 seed; uniform float uPhase[${AIR_NR}], uRpm[${AIR_NR}], uDir[${AIR_NR}]; uniform mat4 uRotor[${AIR_NR}]; uniform vec3 uWind; uniform float uR, uY0, uGroundY, uTime; uniform vec2 uSize;
       varying float vA; varying vec2 vUv; varying float vDepth;
       vec3 flow(float life, float r0, float a0, float dir, float s) {
         float y, c;
-        if (life < 0.22) { float t = life / 0.22; y = 0.043 + 0.05 * (1.0 - t) * (1.0 - t); c = mix(1.25, 1.0, t); }   // 上から吸い込まれて円盤へ収束
-        else { float l = (life - 0.22) / 0.78; y = 0.043 + mix(0.006, -0.42, l); c = mix(1.0, 0.70, min(1.0, (0.043 - y) / 0.30)); }
-        float rel = y - 0.043;
+        if (life < 0.22) { float t = life / 0.22; y = uY0 + 0.05 * (1.0 - t) * (1.0 - t); c = mix(1.25, 1.0, t); }   // 上から吸い込まれて円盤へ収束
+        else { float l = (life - 0.22) / 0.78; y = uY0 + mix(0.006, -0.42, l); c = mix(1.0, 0.70, min(1.0, (uY0 - y) / 0.30)); }
+        float rel = y - uY0;
         float a = a0 + dir * (2.2 * max(0.0, -rel) + uTime * 0.2);
         return vec3(cos(a) * r0 * uR * c, y, sin(a) * r0 * uR * c);
       }
@@ -3875,9 +4601,9 @@ function buildAirflow(N) {
         float life = fract(seed.y + uPhase[k]);
         vec3 p0 = flow(life, seed.z, seed.w, dir, s), p1 = flow(life - 0.015, seed.z, seed.w, dir, s);
         vec4 w0 = uRotor[k] * vec4(p0, 1.0), w1 = uRotor[k] * vec4(p1, 1.0);
-        float down = max(0.0, 0.043 - p0.y); w0.xyz += uWind * down * 1.2; w1.xyz += uWind * down * 1.2;
+        float down = max(0.0, uY0 - p0.y); w0.xyz += uWind * down * 1.2; w1.xyz += uWind * down * 1.2;
         // 床に当たると外へ広がる
-        vec3 rc = (uRotor[k] * vec4(0.0, 0.043, 0.0, 1.0)).xyz; float g = clamp((uGroundY + 0.035 - w0.y) / 0.035, 0.0, 1.0);
+        vec3 rc = (uRotor[k] * vec4(0.0, uY0, 0.0, 1.0)).xyz; float g = clamp((uGroundY + 0.035 - w0.y) / 0.035, 0.0, 1.0);
         vec2 rad = normalize(w0.xz - rc.xz + 1e-5); w0.xz += rad * g * g * 0.16; w1.xz += rad * g * g * 0.16; w0.y = max(w0.y, uGroundY + 0.004); w1.y = max(w1.y, uGroundY + 0.004);
         vec4 v0 = viewMatrix * w0, v1 = viewMatrix * w1;
         vec2 d = v0.xy - v1.xy; float dl = length(d); d = dl > 1e-6 ? d / dl : vec2(0.0, 1.0); vec2 n = vec2(-d.y, d.x);
@@ -3904,12 +4630,12 @@ function updateAirflow(dtSim, dtReal) {
   const m = air.mesh; if (!m) return;
   const on = S.air && S.explodeT < 0.2 && S.mode !== 'cut' && !(S.theater && S.theater.broken);
   let vis = false;
-  D.motors.forEach((mo, i) => { const s = mo.rpm / RPM_MAX; if (mo.rpm > 600) vis = true; air.phase[i] = (air.phase[i] + dtSim * (0.4 + 3.6 * s)) % 1000; air.mat.uniforms.uRotor.value[i].copy(mo.group.matrixWorld); air.mat.uniforms.uRpm.value.setComponent(i, on ? mo.rpm : 0); });
+  D.motors.forEach((mo, i) => { const s = mo.rpm / RPM_MAX; if (mo.rpm > 600) vis = true; air.phase[i] = (air.phase[i] + dtSim * (0.4 + 3.6 * s)) % 1000; air.mat.uniforms.uRotor.value[i].copy(airObj(mo).matrixWorld); air.mat.uniforms.uRpm.value[i] = on ? mo.rpm : 0; });
   if (!air.cols && D.motors[0] && D.motors[0].group) buildAirColumns();
   if (air.cols) air.cols.forEach((c, i) => { const mo = D.motors[i]; const k = on ? mo.rpm / RPM_MAX : 0; c.material.uniforms.uK.value = k; c.visible = on && vis && mo.rpm > 600 && !air.windOverride; /* 柱は風で傾かないので風の場面では隠す */ air.colT[i] += dtSim * (1 + 3 * k); c.material.uniforms.uT.value = air.colT[i]; });
   m.visible = on && vis;
   if (!m.visible) return;
-  const u = air.mat.uniforms; u.uPhase.value.set(air.phase[0], air.phase[1], air.phase[2], air.phase[3]); if (air.windOverride) u.uWind.value.copy(air.windOverride); else u.uWind.value.copy(body.v).negate(); u.uTime.value += dtSim;
+  const u = air.mat.uniforms; for (let i = 0; i < D.motors.length; i++) u.uPhase.value[i] = air.phase[i]; if (air.windOverride) u.uWind.value.copy(air.windOverride); else u.uWind.value.copy(body.v).negate(); u.uTime.value += dtSim;
   u.uCam.value.set(camera.near, camera.far); u.uRes.value.set(W * DPR, H * DPR);
 }
 function airflowTheme(dark) { if (air.cols) for (const c of air.cols) { c.material.uniforms.uColor.value.set(dark ? 0x8fc9ff : 0x2f6fe8); c.material.uniforms.uA.value = dark ? 1.3 : 1; c.material.blending = dark ? THREE.AdditiveBlending : THREE.NormalBlending; c.material.needsUpdate = true; }
@@ -4609,12 +5335,14 @@ function initScale() {
 // 見た部品を静かに数え、今日の一部品をうっすら光らせ、記念写真を持ち帰れるようにする。
 // バッジ・称号・ランキング・音は作らない（数字ひとつと控えめな光だけ）。
 const codex = { seen: new Set(), today: null, pending: null, done: false, t: 0, litKey: null, total: 40 };
+// 見た部品は機種ごとに数える（PD6B の部品で 550クラスの記録を上書きしない）
+const CODEX_KEY = IS_PD6B ? 'codex.pd6b' : 'codex', CODEX_DONE = IS_PD6B ? 'codexDone.pd6b' : 'codexDone';
 
 function codexLoad() {
-  try { const a = JSON.parse(store.get('codex') || '[]'); if (Array.isArray(a)) codex.seen = new Set(a.filter(k => PARTS[k])); } catch (e) { codex.seen = new Set(); }
-  codex.done = store.get('codexDone') === '1';
+  try { const a = JSON.parse(store.get(CODEX_KEY) || '[]'); if (Array.isArray(a)) codex.seen = new Set(a.filter(k => PARTS[k])); } catch (e) { codex.seen = new Set(); }
+  codex.done = store.get(CODEX_DONE) === '1';
 }
-function codexSave() { try { store.set('codex', JSON.stringify([...codex.seen])); } catch (e) {} }
+function codexSave() { try { store.set(CODEX_KEY, JSON.stringify([...codex.seen])); } catch (e) {} }
 
 // 日付から今日の一部品を決める（端末内で完結。通信も乱数も使わない）
 function codexToday() {
@@ -4639,7 +5367,7 @@ function renderCodexCount(pulse) {
 }
 
 function codexUnlock() {
-  codex.done = true; store.set('codexDone', '1');
+  codex.done = true; store.set(CODEX_DONE, '1');
   const b = $('#modeSeg [data-mode=blueprint]'); if (b) b.hidden = false;
   showCoach('全部の部品を見ました', '設計図モードが使えるようになりました。見え方の「設計図」で開けます', () => setMode('blueprint'));
 }
@@ -4670,6 +5398,7 @@ function codexTriviaRow(key) { if (!TRIVIA[key]) return ''; const act = typeof T
 // 豆知識の内容を機体に演じさせる
 function triviaAct(key) {
   const a = TRIVIA_ACT && TRIVIA_ACT[key]; if (!a) return;
+  if (a.pd6b) { pd6bAction(a.pd6b); return; }
   if (a.explode != null) { setTab('see'); setExplode(a.explode); }
   else if (a.mode) { setTab('see'); setMode(a.mode); if (a.mode === 'cut' && key !== 'motor') select(partsOf(key)[0], true, { quiet: true }); }
   else if (a.question) askQuestion(a.question);
@@ -4729,8 +5458,8 @@ async function photoShare() {
 }
 
 function initCodex() {
-  codexLoad(); codex.today = codexToday(); renderCodexCount(false);
-  if (codex.seen.size >= codex.total && !codex.done) { codex.done = true; store.set('codexDone', '1'); }   // 既に全部見ている状態で開いた場合は静かに解放
+  codex.total = LIST_ORDER.length; codexLoad(); codex.today = codexToday(); renderCodexCount(false);
+  if (codex.seen.size >= codex.total && !codex.done) { codex.done = true; store.set(CODEX_DONE, '1'); }   // 既に全部見ている状態で開いた場合は静かに解放
   const b = $('#modeSeg [data-mode=blueprint]'); if (b) b.hidden = !codex.done;
   window.codexPoster = codexPoster;   // 検証用
   $('#photoBtn').addEventListener('click', photoShare);
@@ -4747,7 +5476,7 @@ const hasSpeech = 'speechSynthesis' in window && typeof SpeechSynthesisUtterance
 // ---------- A. 生きている機体 ----------
 function aliveWanted() {
   if (!S.alive || alive.forcedOff) return false;
-  return S.tab === 'see' && !S.selected && S.explode < 0.02 && S.mode === 'normal' && !S.question && !theater.active && !whatif.active && !S.lesson && !S.scale && !S.use && !S.expert && !(typeof quiz !== 'undefined' && quiz.active);
+  return S.tab === 'see' && !S.selected && S.explode < 0.02 && S.mode === 'normal' && !S.question && !theater.active && !whatif.active && !S.lesson && !S.scale && !S.use && !S.expert && !(typeof quiz !== 'undefined' && quiz.active) && !(typeof pd6bBusy === 'function' && pd6bBusy());
 }
 function stepAlive(dtReal) {
   const w = aliveWanted();
@@ -8575,7 +9304,8 @@ function sndBuild() {
   const master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
   const buf = sndNoiseBuf(ctx);
   // モーター: のこぎり波（整数倍音を全部含む）を低域で切る。回転が上がるほど開く
-  for (let i = 0; i < 4; i++) {
+  const NMs = D.motors.length;
+  for (let i = 0; i < NMs; i++) {
     const osc = ctx.createOscillator(); osc.type = 'sawtooth'; osc.frequency.value = 40;
     const filt = ctx.createBiquadFilter(); filt.type = 'lowpass'; filt.frequency.value = 300; filt.Q.value = 0.9;
     const gain = ctx.createGain(); gain.gain.value = 0;
@@ -8584,7 +9314,7 @@ function sndBuild() {
     osc.connect(filt); filt.connect(gain); out.connect(master); osc.start();
     // 4基をきっちり同じ高さで鳴らすと機械の合成音になる。実機は個体差があって、
     // わずかな差が「うなり」になる。これが無いと、いくら倍音を足しても本物に聞こえない
-    snd.mot.push({ osc, filt, gain, pan: out === gain ? null : out, det: 1 + (i - 1.5) * 0.0052 });
+    snd.mot.push({ osc, filt, gain, pan: out === gain ? null : out, det: 1 + (i - (NMs - 1) / 2) * (0.0156 / Math.max(1, NMs - 1)) });
   }
   snd.air = sndNoiseVoice(ctx, buf, master, { freq: 900, q: 0.7 });    // 羽根が空気を切る音
   snd.wind = sndNoiseVoice(ctx, buf, master, { freq: 420, q: 0.45 });  // 空もようの風
@@ -8655,16 +9385,17 @@ function stepSound(dtReal) {
   } else {
     // ---- モーター4基 ----
     let sum = 0;
-    for (let i = 0; i < 4; i++) {
+    const NMs = snd.mot.length, fK = D.rpmScale || 1, gK = 4 / NMs;   /* 大きなプロペラは回転が遅い(音が低い)。基数が増えても全体の音量は揃える */
+    for (let i = 0; i < NMs; i++) {
       const mo = D.motors[i], m = snd.mot[i], rpm = mo.rpm; sum += rpm;
       const k = clamp(rpm / RPM_MAX, 0, 1);
-      m.osc.frequency.setTargetAtTime(Math.max(24, rpm / 60 * SND_BLADES * m.det), t, T);
+      m.osc.frequency.setTargetAtTime(Math.max(24, rpm * fK / 60 * SND_BLADES * m.det), t, T);
       m.filt.frequency.setTargetAtTime(260 + rpm * 0.46, t, T);
       // 静かなところは静かに、上げると効いてくる。2乗だとホバリングが静かすぎる（全開との差が12dB）
-      m.gain.gain.setTargetAtTime(Math.pow(k, 1.5) * 0.125, t, T);
+      m.gain.gain.setTargetAtTime(Math.pow(k, 1.5) * 0.125 * gK, t, T);
       if (m.pan) m.pan.pan.setTargetAtTime(clamp(mo.u.x * 0.55, -1, 1), t, 0.12);
     }
-    const avg = sum / 4;
+    const avg = sum / NMs;
     // ---- 羽根が空気を切る音 ----
     { const k = clamp(avg / RPM_MAX, 0, 1);
       snd.air.filt.frequency.setTargetAtTime(500 + k * 2600, t, T);
@@ -8856,10 +9587,262 @@ function initShare() {
   window.__share = { shareUrl, shareSummary, shareNow, applyShare, gotoState, stateUrl };
 }
 
+// ===== 機種の切り替え と PD6B-CAT3 の固有の動き =====
+// 固有の動き: たたむ（アームとプロペラ）・電池交換（ホットスワップ）・荷物を置く（ボックスリリース）・パラシュート・付け替え（腰下ユニット）・大きさ
+const pd6b = { variant: 'cargo', fold: 0, foldTo: 0, act: null, sizeOn: false, person: null, ghost: null, chuteK: 0, chuteTo: 0, pendingPower: false };
+
+// ---------- 機種の切り替え (どちらの機種でも使う) ----------
+function setModel(m) {
+  try { sessionStorage.setItem('drone3d.model', m); } catch (e) {}
+  const u = new URL(location.href);
+  if (m === 'pd6b') u.searchParams.set('model', 'pd6b'); else u.searchParams.delete('model');
+  for (const k of SHARE_KEYS) u.searchParams.delete(k);   /* 部品の名前が機種ごとに違うので、共有の状態は持ち越さない */
+  u.hash = '';
+  $('#loading').classList.remove('gone'); $('#loadMsg').textContent = m === 'pd6b' ? 'PD6B-CAT3 を組み立てています…' : '550クラスを組み立てています…';
+  setTimeout(() => { try { location.assign(u.toString()); } catch (e) { location.reload(); } }, 30);
+}
+function initModelUI() {
+  document.body.classList.toggle('pd6b', IS_PD6B);
+  $('#modelName').textContent = IS_PD6B ? 'PD6B-CAT3' : '550クラス';
+  for (const b of $$('#modelPop [data-model]')) { const on = b.dataset.model === MODEL; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }
+  const btn = $('#modelBtn'), pop = $('#modelPop');
+  btn.addEventListener('click', e => { e.stopPropagation(); pop.hidden = !pop.hidden; btn.setAttribute('aria-expanded', String(!pop.hidden)); $('#settings').hidden = true; $('#askPop').hidden = true; });
+  pop.addEventListener('click', e => { const b = e.target.closest('[data-model]'); if (!b) return; if (b.dataset.model === MODEL) { pop.hidden = true; return; } setModel(b.dataset.model); });
+  document.addEventListener('click', e => { if (!e.target.closest('#modelPop') && !e.target.closest('#modelBtn')) { pop.hidden = true; btn.setAttribute('aria-expanded', 'false'); } });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !pop.hidden) { pop.hidden = true; e.stopPropagation(); } }, true);
+}
+
+// ---------- 状態の問い合わせ (ui.js / live.js から呼ばれる) ----------
+function pd6bBusy() { return IS_PD6B && (pd6b.foldTo > 0 || pd6b.fold > 0.001 || !!pd6b.act || pd6b.chuteTo > 0); }
+function pd6bShadowExtra() { return (pd6b.sizeOn ? 0.45 : 0) + (pd6b.act && pd6b.act.id === 'drop' ? 0.1 : 0); }
+function pd6bBlockPower() {
+  if (!IS_PD6B) return false;
+  if (pd6b.act) { pd6bStop(); return false; }
+  if (pd6b.fold > 0.001 || pd6b.foldTo > 0) { pd6b.foldTo = 0; pd6b.pendingPower = true; syncPdChips(); showToast('アームを広げてからプロペラを回します'); return true; }
+  return false;
+}
+function pd6bOnTab(tab) {
+  if (!IS_PD6B) return;
+  if (tab !== 'see') { pd6bStop(); if (pd6b.chuteTo > 0) setChute(false); }
+  if (tab === 'fly' && (pd6b.foldTo > 0 || pd6b.fold > 0.001)) { pd6b.foldTo = 0; syncPdChips(); showToast('アームを広げました'); }
+}
+
+// ---------- 動きの入口 ----------
+function pd6bAction(id) {
+  if (!IS_PD6B) return;
+  if (S.tab !== 'see') setTab('see');
+  if (id === 'about') { renderPdAbout(); return; }
+  if (id === 'size') { setSize(!pd6b.sizeOn); return; }
+  if (id === 'chute') { setChute(!(pd6b.chuteTo > 0)); return; }
+  if (pd6b.act) pd6bStop();
+  stopOthers('pd6b');
+  if (S.explode > 0.02) setExplode(0);
+  if (S.mode === 'cut') setMode('normal');
+  if (id === 'fold') {
+    pd6b.foldTo = pd6b.foldTo > 0 ? 0 : 1; pd6b.pendingPower = false;
+    if (pd6b.foldTo > 0 && S.power > 0) setPower(0, true);
+    renderPdNote('fold'); syncPdChips(); return;
+  }
+  if (pd6b.foldTo > 0 || pd6b.fold > 0.001) { pd6b.foldTo = 0; syncPdChips(); showToast('アームを広げてから始めます'); }
+  if (S.power > 0) setPower(0, true);
+  if (id === 'drop' && pd6b.variant !== 'cargo') { pd6bSetVariant('cargo'); }
+  if (id === 'unit') { pd6b.act = { id, t: 0, from: pd6b.variant, to: pd6b.variant === 'cargo' ? 'survey' : 'cargo', swapped: false }; renderPdNote('unit'); syncPdChips(); return; }
+  if (id === 'swap') { pd6b.act = { id, t: 0, p: D.parts.filter(p => p.key === 'battery')[1] }; renderPdNote('swap'); syncPdChips(); return; }
+  if (id === 'drop') { pd6b.act = { id, t: 0, body: true }; syncBodyMode(); renderPdNote('drop'); syncPdChips(); focusOn([D.root], { pull: false, margin: 1.7 }); return; }
+}
+function pd6bStop() {
+  if (!IS_PD6B || !pd6b.act) return;
+  const a = pd6b.act; pd6b.act = null;
+  if (a.id === 'swap' && a.p) { a.p.anim = null; a.p.animReset = true; setTint(a.p, PD_OLD, 0); }
+  if (a.id === 'drop') {
+    D.boxPart.anim = null; D.boxPart.animReset = true; for (const c of D.latchPart.claws) c.g.rotation.z = 0;
+    for (const mo of D.motors) { mo.rpmTarget = null; mo.rpmRate = null; } body.py = 0; body.vyF = 0;
+  }
+  if (a.id === 'unit') { for (const p of [D.boxPart, D.latchPart, D.svPart]) { p.anim = null; p.animReset = true; } if (!a.swapped) pd6bSetVariant(a.to); }
+  syncBodyMode(); syncPdChips();
+  const kind = $('#noteCard').dataset.kind; if (kind === 'pd6b-' + a.id) renderNote(null);
+}
+function pd6bSetVariant(v) {
+  pd6b.variant = v;
+  for (const p of D.parts) if (PARTS[p.key] && PARTS[p.key].variant) p.hidden = PARTS[p.key].variant !== v;
+  if (S.selected && PARTS[S.selected.key] && PARTS[S.selected.key].variant && PARTS[S.selected.key].variant !== v) select(null);
+  if (S.isolated && PARTS[S.isolated] && PARTS[S.isolated].variant && PARTS[S.isolated].variant !== v) S.isolated = null;
+  applyVisibility(); buildList();
+}
+function syncPdChips() {
+  const set = (id, on, label) => { const b = $(`#pdChips [data-pd="${id}"]`); if (!b) return; b.classList.toggle('on', !!on); if (b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', String(!!on)); if (label) b.textContent = label; };
+  set('fold', pd6b.foldTo > 0, pd6b.foldTo > 0 ? 'ひろげる' : 'たたむ');
+  set('chute', pd6b.chuteTo > 0); set('size', pd6b.sizeOn);
+  set('swap', pd6b.act && pd6b.act.id === 'swap'); set('drop', pd6b.act && pd6b.act.id === 'drop');
+  set('unit', false, pd6b.variant === 'cargo' ? '測量用に付け替え' : '物流用に付け替え');
+}
+
+// ---------- 説明カード ----------
+const PD_SRC_LINK = (k) => { const s = PD6B_SRC[k]; return `<a href="${s.url}" target="_blank" rel="noopener">${s.name}</a>`; };
+function renderPdAbout() {
+  const row = (k, v, src) => `<tr><th>${k}</th><td>${v}${src ? `<small>${src}</small>` : ''}</td></tr>`;
+  const html = `<p><b>第一種型式認証をめざす、物流用の大型ヘキサコプター（6発機）。</b>2023年11月10日に国土交通省が第一種型式認証の申請を受理（国内3件目）。2026年10月のジャパンモビリティショーで展示され、同社は「取得を目指す」としています。</p>
+    <table class="pd-spec">
+      ${row('最大離陸重量', '約 45 kg', '国交省')}${row('最大積載重量', '約 20 kg', '国交省・申請時／2025年の報道では18kg')}
+      ${row('機体寸法', '約 2.2 × 2.4 × 0.7 m', '国交省')}${row('最大飛行速度', '約 12 m/s（約43km/h）', '国交省')}${row('最大飛行時間', '約 30 分', '国交省')}
+      ${row('機体重量', '20.0 kg（バッテリー4本込み）', '公式・PD6B-Type3')}${row('モーター軸間', '1,623 mm', '公式')}${row('プロペラ', '30 インチ × 6', '公式')}
+      ${row('折りたたみ時', 'φ945 mm の円柱内', '公式')}${row('防水・防塵', 'IP44', '公式')}
+    </table>
+    <h4>550クラスとのちがい</h4>
+    <ul class="pd-diff"><li><b>4発 → 6発</b>：1基の推力が落ちても残りで補う余地を設計で持たせやすい</li><li><b>2.4kg → 45kg</b>：25kg以上なので登録記号の文字は25mm以上、カテゴリーⅡでも許可・承認が要る</li><li><b>12 → 30インチ</b>：大きな羽根をゆっくり回して効率を上げる</li><li><b>腰下ユニット</b>：箱・測量機器を付け替える</li><li><b>パラシュート</b>：落ちる速さを下げる安全装置</li></ul>
+    <p class="caveat">この3Dモデルは、公表資料と展示機の写真から起こした教材用の再現です。内部の配置・脚や箱の寸法・アンテナの用途・畳む向きは推定を含みます（解説の「写真から推定」）。</p>
+    <details class="pd-src"><summary>出典（${PD6B_DATE}）</summary><ul>${['mlit', 'official', 'news', 'logi', 'parasafe'].map(k => `<li>${PD_SRC_LINK(k)}</li>`).join('')}</ul></details>`;
+  renderNote({ kind: 'pd6b-about', title: 'PD6B-CAT3（プロドローン）', html, actions: [{ label: 'たたんでみる', fn: () => pd6bAction('fold') }, { label: '大きさをくらべる', fn: () => { renderNote(null); setSize(true); } }] });
+}
+function renderPdNote(id) {
+  const N = {
+    fold: () => ({ title: pd6b.foldTo > 0 ? 'アームをたたむ' : 'アームを広げる', html: `<p>プロペラの羽根を根元のヒンジで寄せてから、6本のアームを付け根の継手で畳みます。運ぶときは<b>直径945mmの円柱</b>に収まり、広げるとワンタッチで飛べる状態になります（公式）。</p><p>継手の上の小さな印は、ロックがかかっていれば緑・外れていれば赤（この図の表現）。<b>広げたら1本ずつ手で引いてロックを確かめる</b>のが飛行前点検の基本です。</p><p class="caveat">畳む向き・角度は公表資料で確認できないため、上向きに畳む例で描いています。</p>`,
+      actions: [{ label: pd6b.foldTo > 0 ? '広げる' : 'たたむ', primary: true, fn: () => pd6bAction('fold') }] }),
+    swap: () => ({ title: 'バッテリーを入れ替える（ホットスワップ）', html: `<p>4本のうち<b>1本だけ</b>を抜いて、充電済みの1本を差し込みます。残りの3本が電気を送り続けるので、頭脳（フライトコントローラー）は止まりません（ホットスワップ対応は公式）。</p><p id="pdSwapState" class="pd-state">給電中のバッテリー: <b>4本</b></p><p class="caveat">赤くなるのが抜く1本、緑になるのが差し込む1本。入れ替える順番・本数の決まりは取扱説明書で確かめます。</p>`,
+      actions: [{ label: 'もう一度', fn: () => pd6bAction('swap') }] }),
+    drop: () => ({ title: '荷物を置いて離陸する', html: `<p>着陸したら四隅の爪を開いて物流ボックスを離し、機体だけが上昇します。受け取る人が機体に近づかなくても、荷物を置いていけます（リリース型の腰下ユニット）。</p><p id="pdDropState" class="pd-state">爪を開いています…</p><p class="caveat">飛行中に物を落とす「物件投下」は承認が要る特定飛行です。この図は着陸してから箱を離す例。爪の形と動きは例です。</p>`,
+      actions: [{ label: 'もう一度', fn: () => pd6bAction('drop') }] }),
+    unit: () => ({ title: '腰下ユニットを付け替える', html: `<p>機体の下半分（腰下ユニット）は、<b>ピン4か所の差し替え</b>で交換できます（一部例外あり・公式）。標準は「測量用」「物流ボックス リリース型」「物流ボックス 引き出し型」の3種類。</p><p>上半分（飛ぶ部分）はそのままに、用途に合わせて下半分だけを替える設計です。</p><p class="caveat">測量ユニットの形は例です。</p>`,
+      actions: [{ label: pd6b.variant === 'cargo' ? '測量用にする' : '物流用にもどす', fn: () => pd6bAction('unit') }] }),
+    chute: () => ({ title: 'パラシュートを開く', html: `<p>機体が飛べなくなったとき、筒から傘を押し出して開き、落ちる速さを下げます。展示機には日本化薬の「PARASAFE」が載っていました。PARASAFEは火薬の力で傘を押し出すので、低い高度でも素早く開きます。</p><p><b>45kgの機体が6m/sで降りる</b>ときの運動エネルギーは約0.8kJ。50mから落ちた場合（約31m/s・空気抵抗なしの計算）の約22kJの、およそ27分の1です。</p><p class="caveat">傘の大きさ・色・ひもの本数は例です（この機体用の型式は非公表）。参考: 25kg級用 PS CA12-01 は傘の面積11m²・降下速度6m/s（理論値）・最低展開高度30m（同社発表）。</p>`,
+      actions: [{ label: 'たたむ', fn: () => setChute(false) }], onClose: () => setChute(false) }),
+    size: () => ({ title: '大きさをくらべる', html: `<p>同じ縮尺で、<b>身長170cmの人</b>と、青い半透明の<b>550クラスのクアッド</b>（対角550mm・約2.4kg）を並べています。</p><p>PD6B-CAT3は展開時 2,181 × 2,398 mm（公式）。両手を広げた大人より大きく、最大離陸重量は550クラスの約19倍の約45kgです。</p>`,
+      actions: [{ label: 'もどす', fn: () => setSize(false) }], onClose: () => setSize(false) }),
+  };
+  const o = N[id](); renderNote(Object.assign({ kind: 'pd6b-' + id }, o));
+}
+
+// ---------- パラシュート / 大きさ ----------
+function setChute(on) {
+  pd6b.chuteTo = on ? 1 : 0; syncPdChips();
+  if (on) {
+    if (pd6b.act) pd6bStop(); if (S.explode > 0.02) setExplode(0); if (S.power > 0) setPower(0, true);
+    renderPdNote('chute');
+    const t = new THREE.Vector3(0, 0.30, 0), dir = camera.position.clone().sub(controls.target).normalize(); dir.y = Math.max(dir.y, 0.18); dir.normalize();
+    flyTo(t.clone().addScaledVector(dir, 2.3 * viewScale() * bandK()), t, 1100);
+  } else {
+    if ($('#noteCard').dataset.kind === 'pd6b-chute') renderNote(null);
+    focusOn([D.root], { pull: true });
+  }
+}
+function setSize(on) {
+  pd6b.sizeOn = !!on; syncPdChips();
+  if (pd6b.person) pd6b.person.visible = pd6b.sizeOn; if (pd6b.ghost) pd6b.ghost.visible = pd6b.sizeOn;
+  S.shadowDirty = S.csDirty = S.aoDirty = true;
+  if (on && pd6b.person && pd6b.person.userData.face) pd6b.person.userData.face(camera.position.x, camera.position.z);   /* 人は見ている人の方を向かせる */
+  if (on) { renderPdNote('size'); focusOn([D.root, pd6b.person, pd6b.ghost], { pull: true, margin: 1.12 }); }
+  else { if ($('#noteCard').dataset.kind === 'pd6b-size') renderNote(null); focusOn([D.root], { pull: true }); }
+}
+// 550クラスの半透明の影絵（大きさの物差し。部品には数えない）
+function pd6bQuadGhost() {
+  const mat = new THREE.MeshPhysicalMaterial({ color: 0x3b7df7, transparent: true, opacity: 0.5, roughness: 0.4, metalness: 0, depthWrite: false, side: THREE.DoubleSide });
+  const disc = mat.clone(); disc.opacity = 0.18;
+  const g = new THREE.Group();
+  g.add(at(mesh(rboxGeo(0.15, 0.04, 0.17, 0.01), mat), 0, 0.018, 0));
+  for (const [x, z] of [[1, -1], [1, 1], [-1, 1], [-1, -1]]) {
+    const u = V3(x, 0, z).normalize();
+    g.add(tubeBetween(V3(u.x * 0.06, 0.02, u.z * 0.06), V3(u.x * 0.275, 0.02, u.z * 0.275), 0.008, mat, 16));
+    g.add(at(mesh(cylGeo(0.0175, 0.0175, 0.035, 24), mat), u.x * 0.275, 0.05, u.z * 0.275));
+    const d = mesh(new THREE.CircleGeometry(0.152, 48), disc); d.rotation.x = -Math.PI / 2; at(d, u.x * 0.275, 0.077, u.z * 0.275); g.add(d);
+  }
+  for (const sx of [-1, 1]) { g.add(at(mesh(cylGeo(0.006, 0.006, 0.27, 16).rotateX(Math.PI / 2), mat), sx * 0.112, -0.150, 0)); for (const sz of [-1, 1]) g.add(tubeBetween(V3(sx * 0.055, -0.006, sz * 0.045), V3(sx * 0.112, -0.148, sz * 0.088), 0.005, mat, 12)); }
+  g.traverse(o => { o.castShadow = false; o.userData.noPick = true; });
+  g.scale.setScalar(PD6B_K); g.position.set(0.66, -0.158 + 0.156 * PD6B_K, 0.10); g.visible = false;
+  return g;
+}
+
+// ---------- 毎フレーム ----------
+const PD_OLD = new THREE.Color(0xff3b30), PD_NEW = new THREE.Color(0x22c55e);
+const pdEase = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
+function setLock(red) {
+  for (const p of D.parts) if (p.key === 'foldJoint' && p.lock) { const m = p.lock, want = red ? M.ledRed : M.ledGreen; if (m.userData.origMat === want) continue; const was = m.userData.origMat; m.userData.origMat = want; if (m.material === was) m.material = want; }
+}
+function stepPd6b(dt) {
+  let dirty = false;
+  // --- たたむ / 広げる ---
+  if (pd6b.foldTo > pd6b.fold) {
+    const spinning = D.motors.some(mo => mo.rpm > 30) || body.py > 0.003;
+    if (!spinning) {
+      // 羽根を畳む前に、プロペラを「羽根がアームと直角」の向きにそろえる
+      let aligned = true;
+      for (const mo of D.motors) { const tgt = Math.PI / 2 + Math.round((mo.angle - Math.PI / 2) / (Math.PI * 2)) * Math.PI * 2; const d = tgt - mo.angle; if (Math.abs(d) > 0.005) { aligned = false; mo.angle += d * (1 - Math.exp(-dt / 0.12)); } else mo.angle = tgt; mo.prop.rotation.y = mo.angle; }
+      if (aligned || pd6b.fold > 0) pd6b.fold = Math.min(pd6b.foldTo, pd6b.fold + dt / 2.4);
+      dirty = true;
+    }
+  } else if (pd6b.foldTo < pd6b.fold) { pd6b.fold = Math.max(pd6b.foldTo, pd6b.fold - dt / 2.4); dirty = true; }
+  if (dirty || pd6b._lastFold !== pd6b.fold) {
+    const f = pd6b.fold, bk = pdEase(f / 0.38), ak = pdEase((f - 0.32) / 0.68);
+    D.pivots.forEach(pv => { pv.rotation.z = ak * THREE.MathUtils.degToRad(78);   /* 真上まで起こすと畳んだ羽根がハブの機器に当たる */ });
+    for (const mo of D.motors) for (const h of mo.hinges) h.g.rotation.y = h.s * bk * Math.PI / 2;
+    setLock(f > 0.002); pd6b._lastFold = f; dirty = true;
+    if (f === 0 && pd6b.foldTo === 0 && pd6b.pendingPower) { pd6b.pendingPower = false; setPower(0.5); }
+  }
+  // --- 動き ---
+  const a = pd6b.act;
+  if (a) {
+    a.t += dt; const t = a.t; dirty = true;
+    if (a.id === 'swap' && a.p) {
+      const p = a.p; if (!p.anim) p.anim = { pos: new THREE.Vector3(), quat: new THREE.Quaternion() };
+      const out = V3(Math.sign(p.home.x) || 1, 0, 0);
+      let up = 0, side = 0;
+      if (t < 1.3) up = pdEase(t / 1.3) * 0.30;
+      else if (t < 2.2) { up = 0.30; side = pdEase((t - 1.3) / 0.9) * 0.34; }
+      else if (t < 2.9) { up = 0.30; side = 0.34; }
+      else if (t < 3.8) { up = 0.30; side = 0.34 * (1 - pdEase((t - 2.9) / 0.9)); }
+      else if (t < 5.1) up = 0.30 * (1 - pdEase((t - 3.8) / 1.3));
+      p.anim.pos.set(out.x * side, up, 0);
+      setTint(p, t < 2.55 ? PD_OLD : PD_NEW, t < 0.2 ? t / 0.2 : t < 2.55 ? 0.7 : t < 5.1 ? 0.7 : Math.max(0, 0.7 * (1 - (t - 5.1) / 0.8)));
+      const st = $('#pdSwapState'); if (st) st.innerHTML = t < 0.6 ? '給電中のバッテリー: <b>4本</b>' : t < 4.7 ? '給電中のバッテリー: <b>3本</b>（電源は入ったまま）' : '給電中のバッテリー: <b>4本</b>（入れ替え完了）';
+      if (t > 6.0) { p.anim = null; p.animReset = true; setTint(p, PD_NEW, 0); pd6b.act = null; syncPdChips(); }
+    }
+    if (a.id === 'drop') {
+      const bp = D.boxPart; if (!bp.anim) bp.anim = { pos: new THREE.Vector3(), quat: new THREE.Quaternion() };
+      const open = t < 0.6 ? pdEase(t / 0.6) : t < 8.3 ? 1 : 1 - pdEase((t - 8.3) / 0.6);
+      for (const c of D.latchPart.claws) c.g.rotation.z = c.sx * 0.75 * open;
+      const fall = t < 0.6 ? 0 : t < 1.0 ? ((t - 0.6) / 0.4) ** 2 : t < 7.6 ? 1 : 1 - pdEase((t - 7.6) / 0.7);
+      let py = 0;
+      if (t > 2.0 && t < 4.0) py = 0.22 * pdEase((t - 2.0) / 2.0); else if (t >= 4.0 && t < 5.6) py = 0.22; else if (t >= 5.6 && t < 7.6) py = 0.22 * (1 - pdEase((t - 5.6) / 2.0));
+      body.py = py; body.vyF = 0; body.px = body.pz = 0; body.tx = body.tz = 0;
+      bp.anim.pos.set(0, -0.035 * fall - py / PD6B_K, 0);   /* 箱は床に残す: 機体が上がったぶんだけ下げる */
+      for (const mo of D.motors) { mo.rpmTarget = t > 1.0 && t < 7.4 ? HOVER_RPM * 0.9 : 0; mo.rpmRate = 2.5; }
+      const st = $('#pdDropState'); if (st) st.textContent = t < 0.6 ? '爪を開いています…' : t < 1.2 ? '箱が床に降りました' : t < 2.0 ? 'プロペラを回します' : t < 5.6 ? '箱を置いて上昇・ホバリング' : t < 7.6 ? 'もどって着陸します' : '爪で箱をつかみ直しました';
+      if (t > 9.2) { bp.anim = null; bp.animReset = true; for (const mo of D.motors) { mo.rpmTarget = null; mo.rpmRate = null; } pd6b.act = null; syncBodyMode(); syncPdChips(); }
+    }
+    if (a.id === 'unit') {
+      const outP = a.from === 'cargo' ? [D.boxPart, D.latchPart] : [D.svPart], inP = a.to === 'cargo' ? [D.boxPart, D.latchPart] : [D.svPart];
+      for (const p of [...outP, ...inP]) if (!p.anim) p.anim = { pos: new THREE.Vector3(), quat: new THREE.Quaternion() };
+      if (t < 0.8) { const e = pdEase(t / 0.8); for (const p of outP) p.anim.pos.set(0, -0.04 * e, -0.75 * e); }
+      else if (!a.swapped) { a.swapped = true; pd6bSetVariant(a.to); for (const p of inP) p.anim.pos.set(0, -0.04, -0.75); }
+      if (t >= 0.8) { const e = pdEase((t - 0.8) / 0.9); for (const p of inP) p.anim.pos.set(0, -0.04 * (1 - e), -0.75 * (1 - e)); }
+      if (t > 1.8) { for (const p of [D.boxPart, D.latchPart, D.svPart]) { p.anim = null; p.animReset = true; } pd6b.act = null; syncPdChips(); if ($('#noteCard').dataset.kind === 'pd6b-unit') renderPdNote('unit'); }
+    }
+  }
+  // --- パラシュート ---
+  if (Math.abs(pd6b.chuteTo - pd6b.chuteK) > 1e-4) {
+    pd6b.chuteK = pd6b.chuteTo > pd6b.chuteK ? Math.min(1, pd6b.chuteK + dt / 0.9) : Math.max(0, pd6b.chuteK - dt / 0.5);
+    const k = pd6b.chuteK, c = D.chute; c.visible = k > 0.002;
+    const e = pd6b.chuteTo > 0 ? 1 - Math.pow(1 - k, 3) * (1 - 2.2 * k * (1 - k)) : k;   /* 開くときは少し行き過ぎてから落ち着く */
+    c.scale.set(Math.max(0.01, e), Math.max(0.01, Math.min(1, k * 1.6)), Math.max(0.01, e));
+    dirty = true;
+  }
+  if (dirty) S.shadowDirty = S.csDirty = S.aoDirty = true;
+}
+
+// ---------- 起動 ----------
+function initPd6b() {
+  camera.position.sub(controls.target).multiplyScalar(1.15).add(controls.target);   /* 550クラスより一回り大きく見えるので、最初の画を少し引く */
+  for (const b of $$('#pdChips [data-pd]')) b.addEventListener('click', () => pd6bAction(b.dataset.pd));
+  pd6b.person = buildPerson(); pd6b.person.scale.setScalar(PD6B_K); pd6b.person.position.set(-0.66, -0.158, 0.06); pd6b.person.visible = false; scene.add(pd6b.person);
+  pd6b.ghost = pd6bQuadGhost(); scene.add(pd6b.ghost);
+  pd6bSetVariant('cargo'); syncPdChips();
+  const q = new URLSearchParams(location.search);
+  if (!SHARE_KEYS.some(k => q.has(k))) setTimeout(() => { if (!$('#noteCard').dataset.kind) renderPdAbout(); }, 900);   /* 共有リンクで開いたときは、その画面を優先する */
+}
+
 // ===== UI: タブ・扉・解説・ラベル・スティック・入力 =====
-const LIST_ORDER = ['frameTop', 'frameBottom', 'regMark', 'arm', 'armClamp', 'motorMount', 'standoff', 'screws', 'motor', 'bell', 'stator', 'winding', 'magnet', 'shaft', 'motorBase', 'prop', 'propNut', 'propAdapter', 'esc', 'fc', 'pdb', 'capacitor', 'buzzer', 'battery', 'cells', 'batteryTray', 'xt60', 'balance', 'strap', 'wiring', 'gps', 'remoteId', 'rx', 'vtx', 'telemetry', 'led', 'gimbal', 'camera', 'damper', 'landingGear'];
-const SUB = { bell: 'motor', stator: 'motor', winding: 'motor', magnet: 'motor', shaft: 'motor', motorBase: 'motor', cells: 'battery', propNut: 'prop', propAdapter: 'prop' };
-const PER_MOTOR = new Set(['motor', 'prop', 'esc', 'arm', 'bell', 'stator', 'winding', 'magnet', 'shaft', 'motorBase', 'propNut', 'propAdapter', 'led', 'armClamp', 'motorMount']);
+const LIST_ORDER = IS_PD6B ? PD6B_LIST_ORDER.slice() : ['frameTop', 'frameBottom', 'regMark', 'arm', 'armClamp', 'motorMount', 'standoff', 'screws', 'motor', 'bell', 'stator', 'winding', 'magnet', 'shaft', 'motorBase', 'prop', 'propNut', 'propAdapter', 'esc', 'fc', 'pdb', 'capacitor', 'buzzer', 'battery', 'cells', 'batteryTray', 'xt60', 'balance', 'strap', 'wiring', 'gps', 'remoteId', 'rx', 'vtx', 'telemetry', 'led', 'gimbal', 'camera', 'damper', 'landingGear'];
+const SUB = IS_PD6B ? PD6B_SUB : { bell: 'motor', stator: 'motor', winding: 'motor', magnet: 'motor', shaft: 'motor', motorBase: 'motor', cells: 'battery', propNut: 'prop', propAdapter: 'prop' };
+const PER_MOTOR = IS_PD6B ? new Set(PD6B_PER_MOTOR) : new Set(['motor', 'prop', 'esc', 'arm', 'bell', 'stator', 'winding', 'magnet', 'shaft', 'motorBase', 'propNut', 'propAdapter', 'led', 'armClamp', 'motorMount']);
 const ICON = {
   eye: '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10s3-5.5 8-5.5 8 5.5 8 5.5-3 5.5-8 5.5S2 10 2 10z"/><circle cx="10" cy="10" r="2.4"/></svg>',
   eyeOff: '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l14 14M8.6 8.7A2.4 2.4 0 0 0 11.3 11.4M6.2 6.3C3.6 7.9 2 10 2 10s3 5.5 8 5.5c1.5 0 2.8-.5 3.9-1.1M9 4.6C9.3 4.5 9.7 4.5 10 4.5c5 0 8 5.5 8 5.5s-.7 1.3-2 2.6"/></svg>',
@@ -8916,7 +9899,8 @@ function stopOthers(keep, arg) {
   if (keep !== 'descent' && descent.active) stopDescent(true);
   if (keep !== 'fpv' && typeof fpv === 'object' && fpv.on) fpvExit();
   if (keep !== 'dshow' && typeof dshow === 'object' && dshow.on) dshowOn(false);
-  if (keep !== 'weather' && keep !== 'fpv' && typeof weather === 'object' && weather.on) setWeather(null);   /* 場面は自前の空を使う。一人称は空もようのまま入れる */
+  if (keep !== 'weather' && keep !== 'fpv' && typeof weather === 'object' && weather.on) setWeather(null);
+  if (keep !== 'pd6b' && typeof pd6bStop === 'function') pd6bStop();   /* 場面は自前の空を使う。一人称は空もようのまま入れる */
 }
 function setTab(tab) {
   $('#coach').hidden = true;
@@ -8926,6 +9910,7 @@ function setTab(tab) {
   if (typeof dshow === 'object' && dshow.on) dshowOn(false);   /* ショーも同じ。操作列を畳んでいる */
   if ((theater.active || theater.done) && tab !== 'theater') { stopTheaterUI(); }
   if (whatif.active && tab !== 'theater') { stopWhatifUI(); }
+  if (typeof pd6bOnTab === 'function') pd6bOnTab(tab);
   S.tab = tab; segSet($('#tabs'), 'tab', tab);
   for (const row of $$('.ctx-row')) row.hidden = row.dataset.tab !== tab;
   if (tab === 'fly') { if (S.explode > 0.02) { setExplode(0); showToast('分解をもどしました'); } if (S.mode === 'cut') setMode('normal'); }
@@ -8944,23 +9929,23 @@ function setDepth(d) {
   S.depth = d; store.set('depth', d); document.body.classList.toggle('full', d === 'full'); segSet($('#depthSeg'), 'd', d); $('#coach').hidden = true;
   buildList(); renderDetail(); buildLabels(); buildMishapCards(); buildAsk(); updateBigBand(); if (S.scale) renderMassBar(S.selected && S.selected.key);
   buildWhatifCards(); if (typeof syncRegToggle === 'function') { syncRegToggle(); if (S.scale && typeof regGhosts === 'function') regGhosts(true); }
-  if (d === 'full') showToast('くわしく: 部品40種の仕様例と点検ポイントも見られます'); 
+  if (d === 'full') showToast(`くわしく: 部品${listKeys().length}種の仕様例と点検ポイントも見られます`);
 }
 $('#depthSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setDepth(b.dataset.d); });
 
 // ---------- モード / 分解 / モーター ----------
-function setMode(m) { const was = S.mode; S.mode = m; segSet($('#modeSeg'), 'mode', m); applyMode(); applyBlueprint(); if (m !== was) { if (m === 'cut') { setView('inside'); showToast('断面: モーター1つとバッテリーを半分に切った断面を見ています'); } else showToast({ normal: 'ふつうの見え方', xray: 'すけて見る: 外側を透かして中の部品が見えます', wire: '線だけ: 形の輪郭だけを見ます', blueprint: '設計図: 40部品をすべて見た人だけの見え方です' }[m]); } }
+function setMode(m) { const was = S.mode; S.mode = m; segSet($('#modeSeg'), 'mode', m); applyMode(); applyBlueprint(); if (m !== was) { if (m === 'cut') { setView('inside'); showToast('断面: モーター1つとバッテリーを半分に切った断面を見ています'); } else showToast({ normal: 'ふつうの見え方', xray: 'すけて見る: 外側を透かして中の部品が見えます', wire: '線だけ: 形の輪郭だけを見ます', blueprint: `設計図: ${LIST_ORDER.length}部品をすべて見た人だけの見え方です` }[m]); } }
 $('#modeSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.mode); });
 const explodeEl = $('#explode');
 explodeEl.addEventListener('input', () => { S.explodeAt = performance.now(); S.explode = explodeEl.value / 100; S.explodeT = S.explode; $('#explodeVal').textContent = explodeEl.value + '%'; explodePullBack(); S.shadowDirty = S.csDirty = true; });
 function explodePullBack() { if (S.explode < 0.35 || S.explodedCam) return; S.explodedCam = true; S.explodeFrame = true; }
 function setExplode(v) { S.explode = v; S.explodeAt = performance.now(); explodeEl.value = Math.round(v * 100); $('#explodeVal').textContent = Math.round(v * 100) + '%'; explodePullBack(); }
-function setPower(p, silent) { S.power = p; segSet($('#powerSeg'), 'p', p); const b = $('#powerBtn'); b.textContent = p > 0 ? t('stop') : t('power'); b.classList.toggle('primary', p === 0); syncBodyMode();
+function setPower(p, silent) { if (p > 0 && typeof pd6bBlockPower === 'function' && pd6bBlockPower()) return; S.power = p; segSet($('#powerSeg'), 'p', p); const b = $('#powerBtn'); b.textContent = p > 0 ? t('stop') : t('power'); b.classList.toggle('primary', p === 0); syncBodyMode();
   if (p > 0 && !silent && !store.get('coachFlick') && S.tab === 'fly') setTimeout(() => { if (S.power > 0 && body.mode === 'free') showCoach('機体をはじいてみよう', '浮いている機体を指やマウスでさっとはじくと、傾いたぶんを頭脳（FC）がモーターの速さで直します。', null, () => store.set('coachFlick', '1')); }, 2500); }
 $('#powerBtn').addEventListener('click', () => setPower(S.power > 0 ? 0 : (S.depth === 'full' ? (parseFloat($('#powerSeg .on')?.dataset.p) || 0.5) : 0.5)));
 $('#powerSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setPower(parseFloat(b.dataset.p)); });
 function syncBodyMode() {
-  if (theater.active || descent.active || dshow.on) return setBodyMode('theater');   /* ショー中に free に戻ると、カメラが手前の1機を追いかけて隊列から外れる */
+  if (theater.active || descent.active || dshow.on || (typeof pd6b === 'object' && pd6b.act && pd6b.act.body)) return setBodyMode('theater');   /* ショー中に free に戻ると、カメラが手前の1機を追いかけて隊列から外れる */
   if (S.flight) return setBodyMode('demo');
   if (S.power > 0 && (S.tab === 'fly' || S.scale || alive.on || fpv.on || (S.lesson && lesson.hover) || S.expert === 'sensors')) return setBodyMode('free');
   setBodyMode('idle');
@@ -8975,7 +9960,7 @@ function setFlight(f) {
   else if ($('#noteCard').dataset.kind === 'flight') renderNote(null);
 }
 $('#flightChips').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; setFlight(S.flight === b.dataset.f ? null : b.dataset.f); });
-function updateFlightTab() { const tab = $('#fnTab'); if (!tab) return; const mean = Math.max(1, D.motors.reduce((a, m) => a + m.pct, 0) / 4); tab.innerHTML = D.motors.map((mo, i) => { const pct = Math.round(mo.pct); const cls = mo.pct > mean * 1.03 ? 'up' : mo.pct < mean * 0.97 ? 'down' : ''; return `<div class="${cls}"><b>${MOTOR_INFO[i].id} ${pct}%</b>${MOTOR_INFO[i].pos} · ${MOTOR_INFO[i].dir === 'CW' ? '↻' : '↺'}${MOTOR_INFO[i].dir}</div>`; }).join(''); }
+function updateFlightTab() { const tab = $('#fnTab'); if (!tab) return; const mean = Math.max(1, D.motors.reduce((a, m) => a + m.pct, 0) / D.motors.length); tab.innerHTML = D.motors.map((mo, i) => { const pct = Math.round(mo.pct); const cls = mo.pct > mean * 1.03 ? 'up' : mo.pct < mean * 0.97 ? 'down' : ''; return `<div class="${cls}"><b>${MOTOR_INFO[i].id} ${pct}%</b>${MOTOR_INFO[i].pos} · ${MOTOR_INFO[i].dir === 'CW' ? '↻' : '↺'}${MOTOR_INFO[i].dir}</div>`; }).join(''); }
 // トグル
 document.addEventListener('click', e => {
   const b = e.target.closest('.tgl'); if (!b) return;
@@ -9018,7 +10003,7 @@ function applyFind() {
   for (const g of $$('#partList .grp')) { let n = 0; for (let e = g.nextElementSibling; e && e.classList.contains('row'); e = e.nextElementSibling) if (!e.hidden) n++; g.hidden = !n; }
   const note = $('#findNote');
   if (note) { note.hidden = !q; note.textContent = !q ? '' : hit.size ? (deep ? `名前では見つかりません。説明文から ${hit.size} 件` : `${hit.size} 件`) : '見つかりません。ちがう言い方で試してください'; }
-  $('#partCount').textContent = q ? `${hit.size} / ${LIST_ORDER.length}` : `${LIST_ORDER.length} 部品`;
+  $('#partCount').textContent = q ? `${hit.size} / ${listKeys().length}` : `${listKeys().length} 部品`;
 }
 // Enter で開く1件。名前が前方一致するものを一覧の順より優先する（「モーター」でモーターマウントが先に来ないように）
 function findBest() {
@@ -9032,14 +10017,16 @@ function findBest() {
 function findClear() { const inp = $('#partFind'); if (inp) { inp.value = ''; applyFind(); } }
 
 // ---------- 部品一覧 / 解説 ----------
+// 付け替え式の部品(PD6Bの腰下ユニット)は、いま付いている方だけを一覧に出す
+const listKeys = () => LIST_ORDER.filter(k => PARTS[k] && (!PARTS[k].variant || typeof pd6b !== 'object' || PARTS[k].variant === pd6b.variant));
 function buildList() {
   const list = $('#partList'); const prevFind = $('#partFind') ? $('#partFind').value : ''; let html = '';
-  if (S.depth === 'simple') { for (const k of SIMPLE_KEYS) html += `<div class="row" data-key="${k}" tabindex="0" role="button"><span class="nm">${partName(k)}</span><span class="cnt"></span><span></span></div>`; $('#partCount').textContent = `${SIMPLE_KEYS.length} 部品`; }
+  if (S.depth === 'simple') { for (const k of SIMPLE_KEYS.filter(k => listKeys().includes(k))) html += `<div class="row" data-key="${k}" tabindex="0" role="button"><span class="nm">${partName(k)}</span><span class="cnt"></span><span></span></div>`; $('#partCount').textContent = `${SIMPLE_KEYS.filter(k => listKeys().includes(k)).length} 部品`; }
   else {
     html += `<div class="p-find"><input id="partFind" type="search" autocomplete="off" spellcheck="false" placeholder="${t('find.ph')}" aria-label="${t('find.ph')}" aria-controls="partList"><p id="findNote" class="find-note" hidden></p></div>`;
-    for (const g of GROUPS) { const keys = LIST_ORDER.filter(k => PARTS[k] && PARTS[k].group === g.id); html += `<div class="grp" style="--c:${g.color}"><i></i>${g.name}</div>`;
+    for (const g of GROUPS) { const keys = listKeys().filter(k => PARTS[k].group === g.id); if (!keys.length) continue; html += `<div class="grp" style="--c:${g.color}"><i></i>${g.name}</div>`;
       for (const k of keys) { const d = PARTS[k]; const hid = partsOf(k).some(p => p.hidden); html += `<div class="row${SUB[k] ? ' sub' : ''}${hid ? ' off' : ''}" data-key="${k}" tabindex="0" role="button"><span class="nm">${partName(k)}</span><span class="cnt">${d.count > 1 ? '×' + d.count : ''}</span><button class="eye" aria-label="${d.name}の表示切替">${hid ? ICON.eyeOff : ICON.eye}</button></div>`; } }
-    $('#partCount').textContent = `${LIST_ORDER.length} 部品`;
+    $('#partCount').textContent = `${listKeys().length} 部品`;
   }
   list.innerHTML = html;
   for (const row of $$('#partList .row')) row.classList.toggle('on', !!S.selected && row.dataset.key === S.selected.key);
@@ -9051,7 +10038,7 @@ $('#partList').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key
 $('#inspBack').addEventListener('click', () => select(null));
 function toggleHidden(key) { const ps = partsOf(key); const h = !ps.some(p => p.hidden); for (const p of ps) p.hidden = h; applyVisibility(); buildList(); renderDetail(); }
 function onVisibilityChanged() {
-  const hiddenKeys = [...new Set(D.parts.filter(p => p.hidden).map(p => p.key))];
+  const hiddenKeys = [...new Set(D.parts.filter(p => p.hidden && !(PARTS[p.key] && PARTS[p.key].variant)).map(p => p.key))];   /* 付け替えで外れている部品は「非表示」と言わない */
   if (S.isolated) showToast(`${PARTS[S.isolated].name} だけを表示中`); else if (hiddenKeys.length) showToast(`非表示: ${hiddenKeys.map(k => PARTS[k].name).join('・')}`);
 }
 function select(p, all = false, opts = {}) {
@@ -9151,7 +10138,7 @@ function updateLabels() {
     B.el.hidden = !show; if (!show) continue;
     const a = B.mo.group.localToWorld(tmpV.set(0, 0.10, 0)); const pr = tmpV2.copy(a).project(camera); if (pr.z > 1) { B.el.hidden = true; continue; }
     const x = clamp((pr.x + 1) / 2 * W, 60, W - 60), y = clamp((1 - pr.y) / 2 * H, 40, H - 40); B.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%,-50%)`;
-    const pct = Math.round(B.mo.pct), mean = Math.max(1, D.motors.reduce((a, m) => a + m.pct, 0) / 4), up = B.mo.pct > mean * 1.03, dn = B.mo.pct < mean * 0.97; B.el.classList.toggle('up', up); B.el.classList.toggle('down', dn); B.el.classList.toggle('over', !!(S.scale && scale.share[B.i] > SCALE_OVER));
+    const pct = Math.round(B.mo.pct), mean = Math.max(1, D.motors.reduce((a, m) => a + m.pct, 0) / D.motors.length), up = B.mo.pct > mean * 1.03, dn = B.mo.pct < mean * 0.97; B.el.classList.toggle('up', up); B.el.classList.toggle('down', dn); B.el.classList.toggle('over', !!(S.scale && scale.share[B.i] > SCALE_OVER));
     B.el.innerHTML = S.depth === 'simple' && !S.scale ? (up ? 'はやい ▲' : dn ? 'おそい ▼' : 'ふつう') : `${MOTOR_INFO[B.i].id} ${pct}% ${up ? '▲' : dn ? '▼' : ''}<small>${MOTOR_INFO[B.i].pos} ${MOTOR_INFO[B.i].dir === 'CW' ? '↻' : '↺'}</small>`;
   }
 }
@@ -9468,7 +10455,7 @@ function onResized() {
 function initUI() {
   buildUseChips(); buildAsk(); buildMishapCards(); buildWhatifCards(); labelSticks(); segSet($('#modeSeg2'), 'm', stickMode);
   const d = store.get('depth') === 'full' ? 'full' : 'simple'; setDepth(d);
-  if (d === 'simple' && !store.get('coach')) setTimeout(() => showCoach(FIRST_QUESTION.q, FIRST_QUESTION.hint, () => { store.set('coach', '1'); askQuestion(FIRST_QUESTION.qid); }, () => store.set('coach', '1')), 1200);
+  if (d === 'simple' && !store.get('coach') && !IS_PD6B) setTimeout(() => showCoach(FIRST_QUESTION.q, FIRST_QUESTION.hint, () => { store.set('coach', '1'); askQuestion(FIRST_QUESTION.qid); }, () => store.set('coach', '1')), 1200);
 }
 
 // ===== 起動とメインループ =====
@@ -9490,14 +10477,14 @@ function tick(now) {
   controls.update();
   // 分解
   S.explodeT += (S.explode - S.explodeT) * (1 - Math.exp(-dt * 9)); if (Math.abs(S.explode - S.explodeT) < 0.0005) S.explodeT = S.explode; if (S.explode < 0.05 && S.explodedCam) { S.explodedCam = false; S.explodeFrame = true; }   // 戻したら組み上がった機体を再フレーミング
-  { const fs = 0.5 + 0.45 * S.explodeT + 0.3 * Math.max(0, body.py) + (S.scale && D.personGroup && D.personGroup.visible ? 0.8 : 0) + (S.scale && typeof regGhost === 'object' && regGhost.grp && regGhost.grp.visible ? 0.45 : 0);
+  { const fs = 0.5 + 0.45 * S.explodeT + 0.3 * Math.max(0, body.py) + (S.scale && D.personGroup && D.personGroup.visible ? 0.8 : 0) + (S.scale && typeof regGhost === 'object' && regGhost.grp && regGhost.grp.visible ? 0.45 : 0) + (IS_PD6B ? pd6bShadowExtra() : 0);
     const c = key.shadow.camera; if (Math.abs(c.right - fs) > 0.01) { c.left = c.bottom = -fs; c.right = c.top = fs; const kd = key.position.length(); c.near = Math.max(0.05, kd - fs * 1.8); c.far = kd + fs * 1.8; key.shadow.normalBias = 0.0006 * Math.max(1, fs / 0.5); c.updateProjectionMatrix(); S.shadowDirty = true; }   /* 枠を広げたら near/far とバイアスも合わせる(人型や区画が影から外れる・縞が出るのを防ぐ) */
     const si = 1 - 0.55 * S.explodeT; if (Math.abs((key.shadow.intensity ?? 1) - si) > 0.01) { key.shadow.intensity = si; S.shadowDirty = true; } }
   applyExplode();
   if (S.scale) stepScale();
   if (S.explodeFrame && Math.abs(S.explode - S.explodeT) < 0.01 && performance.now() - (S.explodeAt || 0) > 350) { S.explodeFrame = false; D.root.updateWorldMatrix(true, true); focusOn(D.parts.filter(p => partVisible(p) && effVisible(p.obj)).map(p => p.obj), { pull: true }); }   // 分解が落ち着いたら全体をフレーミング
   // 機体
-  stepAlive(dt); stepBody(dtSim, dt); if (theater.active) stepTheater(dtSim, dt); if (whatif.active) stepWhatif(dtSim, dt); if (descent.active) stepDescent(dtSim); if (weather.on) stepWeather(dtSim, dt); if (dshow.on) stepDshow(dt); applyBody(dt); stepSound(dt);   /* 音は状態が決まったあとに写す */
+  stepAlive(dt); stepBody(dtSim, dt); if (IS_PD6B) stepPd6b(dt); if (theater.active) stepTheater(dtSim, dt); if (whatif.active) stepWhatif(dtSim, dt); if (descent.active) stepDescent(dtSim); if (weather.on) stepWeather(dtSim, dt); if (dshow.on) stepDshow(dt); applyBody(dt); stepSound(dt);   /* 音は状態が決まったあとに写す */
   updateGimbal();   /* ジンバルは外から見ているときも傾きを打ち消す。本体の姿勢を当てた後に回す */
   if (fpv.on) stepFpv(dt);   /* カメラの姿勢は本体の姿勢が決まってから写す(1コマ遅れると水平が残る) */
   updateMotors(dtSim, dt); updateMoveArrow(); updateAirflow(dtSim, dt);
@@ -9531,13 +10518,13 @@ function tick(now) {
 }
 // 検証用に最小限だけグローバルへ出す(モジュールスコープのままだとコンソールから触れないため)
 window.LIST_ORDER = LIST_ORDER; window.PARTS = PARTS; window.WHATIF = WHATIF; window.WEAR = WEAR; window.MISHAPS = MISHAPS; window.USES = USES; window.FLIGHT = FLIGHT; window.EXPERT_MODES = EXPERT_MODES;
-window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: scale, __codex: codex, __whatif: whatif, __alive: alive, __lesson: lesson, __expert: expert, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
+window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: scale, __codex: codex, __whatif: whatif, __alive: alive, __lesson: lesson, __expert: expert, get pd6b() { return typeof pd6b === 'object' ? pd6b : null; }, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
 // ---------- 起動 ----------
 (async () => {
   $('#loadMsg').textContent = '照明と材質を準備しています…';
   buildList(); applyTheme(); resize();
   applyQuality(isMobile ? (HF ? 1 : 0) : 3);
-  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif(); initLive(); initLesson(); initExpert(); initReg(); initPreflight(); initDescent(); initFpv(); initWeather(); initDshow(); initSound(); initShare();
+  applyMode(); applyVisibility(); buildLabels(); rebuildAirflow(); initUI(); initScale(); initCodex(); initWhatif(); initLive(); initLesson(); initExpert(); initReg(); initPreflight(); initDescent(); initFpv(); initWeather(); initDshow(); initSound(); initShare(); initModelUI(); if (IS_PD6B) initPd6b();
   { const vs = viewScale(); if (vs > 1) camera.position.multiplyScalar(vs); }
   renderer.setClearColor(0x000000, 1);
   $('#loadMsg').textContent = 'シェーダーをコンパイルしています…'; mark('setup');

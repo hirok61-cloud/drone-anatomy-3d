@@ -578,6 +578,37 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
   #noteCard, #massBar { bottom: calc(var(--dock-h) + 8px + var(--sab)); }
   .tabs button { min-height: var(--tap); }
 }
+/* ===== 機種の切り替え / PD6B-CAT3 ===== */
+body.pd6b .q550-only, body:not(.pd6b) .pd6b-only { display: none !important; }
+.model-btn { gap: 6px; padding: 5px 12px; min-height: 32px; font-weight: 500; }
+.model-btn .mb-k { color: var(--ink3); font-size: 12px; } .model-btn b { font-weight: 700; } .model-btn .mb-c { color: var(--ink3); font-size: 11px; }
+body.pd6b .model-btn { box-shadow: inset 0 0 0 1.5px var(--accent); }
+#modelPop { left: 14px; right: auto; width: 360px; }
+#modelPop h3 { font-size: calc(15px * var(--fs, 1)); margin-bottom: 8px; }
+.model-list { display: flex; flex-direction: column; gap: 6px; }
+.model-list button { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; padding: 10px 12px; border-radius: 12px; background: var(--seg-bg); color: var(--ink); min-height: var(--tap); transition: background .15s; }
+.model-list button:hover { background: var(--hair2); }
+.model-list button b { font-size: calc(14px * var(--fs, 1)); }
+.model-list button span { font-size: calc(12px * var(--fs, 1)); color: var(--ink2); line-height: 1.5; }
+.model-list button.on { background: var(--accent-soft); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.pd-spec { width: 100%; border-collapse: collapse; margin: 8px 0 4px; font-size: calc(12.5px * var(--fs, 1)); }
+.pd-spec th { text-align: left; font-weight: 500; color: var(--ink2); padding: 4px 8px 4px 0; white-space: nowrap; vertical-align: top; width: 7.5em; }
+.pd-spec td { padding: 4px 0; font-variant-numeric: tabular-nums; border-bottom: 1px solid var(--hair); }
+.pd-spec th { border-bottom: 1px solid var(--hair); }
+.pd-spec small { display: block; color: var(--ink3); font-size: calc(11px * var(--fs, 1)); }
+#noteBody h4 { font-size: calc(13px * var(--fs, 1)); margin: 10px 0 4px; }
+.pd-diff { padding-left: 1.1em; font-size: calc(12.5px * var(--fs, 1)); line-height: 1.6; }
+.pd-src summary { cursor: pointer; font-size: calc(12px * var(--fs, 1)); color: var(--ink2); margin-top: 6px; }
+.pd-src ul { padding-left: 1.1em; font-size: calc(11.5px * var(--fs, 1)); line-height: 1.6; }
+.pd-src a { color: var(--accent-text); }
+.pd-state { margin-top: 6px; padding: 6px 10px; border-radius: 8px; background: var(--hair); font-size: calc(12.5px * var(--fs, 1)); }
+@media (max-width: 760px) {
+  .model-btn { padding: 4px 8px; min-height: 30px; } .model-btn .mb-k { display: none; } .model-btn b { font-size: 11.5px; }
+  .brand h1 { display: none; }   /* 狭い画面は機体ボタンが見出しを兼ねる（タイトル・機体・くわしさ・操作が1行に入らない） */
+  .model-btn { flex: none; }
+  #modelPop { left: calc(10px + var(--sal)); right: calc(10px + var(--sar)); width: auto; }
+}
+
 @media (pointer: coarse) {
   .tbform input, .tbform select, .xctl select, .xflights input, #expertBody input[type=number] { font-size: max(16px, calc(12.5px * var(--fs, 1))); }   /* 16px未満だと iOS がページごと拡大する */
 }

@@ -40,7 +40,8 @@ function sndBuild() {
   const master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
   const buf = sndNoiseBuf(ctx);
   // モーター: のこぎり波（整数倍音を全部含む）を低域で切る。回転が上がるほど開く
-  for (let i = 0; i < 4; i++) {
+  const NMs = D.motors.length;
+  for (let i = 0; i < NMs; i++) {
     const osc = ctx.createOscillator(); osc.type = 'sawtooth'; osc.frequency.value = 40;
     const filt = ctx.createBiquadFilter(); filt.type = 'lowpass'; filt.frequency.value = 300; filt.Q.value = 0.9;
     const gain = ctx.createGain(); gain.gain.value = 0;
@@ -49,7 +50,7 @@ function sndBuild() {
     osc.connect(filt); filt.connect(gain); out.connect(master); osc.start();
     // 4基をきっちり同じ高さで鳴らすと機械の合成音になる。実機は個体差があって、
     // わずかな差が「うなり」になる。これが無いと、いくら倍音を足しても本物に聞こえない
-    snd.mot.push({ osc, filt, gain, pan: out === gain ? null : out, det: 1 + (i - 1.5) * 0.0052 });
+    snd.mot.push({ osc, filt, gain, pan: out === gain ? null : out, det: 1 + (i - (NMs - 1) / 2) * (0.0156 / Math.max(1, NMs - 1)) });
   }
   snd.air = sndNoiseVoice(ctx, buf, master, { freq: 900, q: 0.7 });    // 羽根が空気を切る音
   snd.wind = sndNoiseVoice(ctx, buf, master, { freq: 420, q: 0.45 });  // 空もようの風
@@ -120,16 +121,17 @@ function stepSound(dtReal) {
   } else {
     // ---- モーター4基 ----
     let sum = 0;
-    for (let i = 0; i < 4; i++) {
+    const NMs = snd.mot.length, fK = D.rpmScale || 1, gK = 4 / NMs;   /* 大きなプロペラは回転が遅い(音が低い)。基数が増えても全体の音量は揃える */
+    for (let i = 0; i < NMs; i++) {
       const mo = D.motors[i], m = snd.mot[i], rpm = mo.rpm; sum += rpm;
       const k = clamp(rpm / RPM_MAX, 0, 1);
-      m.osc.frequency.setTargetAtTime(Math.max(24, rpm / 60 * SND_BLADES * m.det), t, T);
+      m.osc.frequency.setTargetAtTime(Math.max(24, rpm * fK / 60 * SND_BLADES * m.det), t, T);
       m.filt.frequency.setTargetAtTime(260 + rpm * 0.46, t, T);
       // 静かなところは静かに、上げると効いてくる。2乗だとホバリングが静かすぎる（全開との差が12dB）
-      m.gain.gain.setTargetAtTime(Math.pow(k, 1.5) * 0.125, t, T);
+      m.gain.gain.setTargetAtTime(Math.pow(k, 1.5) * 0.125 * gK, t, T);
       if (m.pan) m.pan.pan.setTargetAtTime(clamp(mo.u.x * 0.55, -1, 1), t, 0.12);
     }
-    const avg = sum / 4;
+    const avg = sum / NMs;
     // ---- 羽根が空気を切る音 ----
     { const k = clamp(avg / RPM_MAX, 0, 1);
       snd.air.filt.frequency.setTargetAtTime(500 + k * 2600, t, T);
