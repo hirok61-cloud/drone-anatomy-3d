@@ -16,7 +16,8 @@ q('#inspBack').click(); d.step(0.2, 30);
 A(V.powered, 'powered at start');
 q('#mvChips [data-mv=fold]').click(); d.step(6.5, 30);
 A(V.fold === 1, 'folded', V.fold); A(!V.powered, 'power off after fold');
-{ const F = d.D.folds; A(F.every(f => Math.abs(f.fg.rotation.y) > 1.5), 'arms rotated', F.map(f => f.fg.rotation.y.toFixed(2)).join(',')); }
+{ d.D.root.updateMatrixWorld(true); const zs = d.D.motors.map(m => m.group.getWorldPosition(d.camera.position.clone()));   // 前アームはモーターが後ろ下、後アームは前上へ
+  A(zs.every((p, i) => d.D.motors[i].front ? p.z > 0.04 && p.y < -0.11 : p.z < -0.04 && p.y > -0.10), 'arms folded', zs.map(p => p.z.toFixed(2) + '/' + p.y.toFixed(2)).join(',')); }
 q('#mvChips [data-mv=fold]').click(); d.step(4, 30);
 A(V.fold === 0 && V.powered, 'unfold → power on', V.fold, V.powered);
 // 電池交換: 畳んだ状態からでも、まず前アームを開く
@@ -38,8 +39,8 @@ q('#mvChips [data-mv=fov]').click(); d.step(0.3, 30);
 q('[data-mvlens=tele]').click(); d.step(0.2, 30);
 { const L = d.D.gimbalParts.lens, C = d.D.fovG.userData.cones; A(L.tele.userData.glow.visible && !L.main.userData.glow.visible && C.tele.visible && !C.main.visible, 'tele selected'); }
 q('[data-mvlens=main]').click(); q('[data-mvf="11"]').click(); d.step(1.5, 30);
-A(d.D.gimbalParts.iris.geometry.parameters.innerRadius < 0.0015, 'iris f/11', d.D.gimbalParts.iris.geometry.parameters.innerRadius);
-q('[data-mvf="2"]').click(); d.step(1.5, 30); A(d.D.gimbalParts.iris.geometry.parameters.innerRadius > 0.006, 'iris f/2');
+A(d.D.gimbalParts.iris.geometry.parameters.innerRadius < 0.0018, 'iris f/11', d.D.gimbalParts.iris.geometry.parameters.innerRadius);
+q('[data-mvf="2"]').click(); d.step(1.5, 30); A(d.D.gimbalParts.iris.geometry.parameters.innerRadius > 0.0075, 'iris f/2');
 q('[data-mvlens=all]').click(); q('#mvChips [data-mv=fov]').click(); d.step(0.3, 30);
 // 機体のカメラから見る: レンズでFOVが変わる・チルトは70°まで
 q('#viewCol [data-v=fpv]').click(); d.step(1, 30);

@@ -383,6 +383,7 @@ function bottomCover() {
   const H2 = window.innerHeight; let cov = 0;
   for (const sel of ['#dock', '#inspector.open', '#lesson.open', '#expert.open', '#dshowPanel.open', '#noteCard', '#massBar', '#bigBand']) {
     if (sel === '#bigBand' && H2 <= 520) continue;   /* 横向きは高さが足りない。名前の帯は3Dに重ねて浮かせ、機体は小さくしない */
+    if (sel === '#noteCard' && H2 <= 520 && innerWidth > H2 && IS_ALT) continue;   /* 横向きのカードは左に立つ。機体はその右へ寄せる(pdFrame)ので、下の覆いには数えない */
     const el = document.querySelector(sel); if (!el || el.hidden) continue;
     const r = el.getBoundingClientRect(); if (r.height < 4 || r.top > H2 - 8 || r.bottom < H2 * 0.6) continue;
     // 画面の一部しか覆っていないもの（幅の広い画面で左に寄ったカードなど）は、真ん中に載っていなければ帯を狭めない
@@ -401,7 +402,7 @@ function topCover() {
     const r = el.getBoundingClientRect(); if (r.height < 4 || r.top > H2 * 0.4) continue;
     cov = Math.max(cov, r.bottom);
   }
-  return Math.min(cov, H2 * 0.3);
+  return Math.min(cov, H2 * (IS_ALT && H2 <= 520 && innerWidth > H2 ? 0.42 : 0.3));   /* 横向きは視点ボタンの列が右上の機体の位置に重なるので、その下までを覆いとして数える */
 }
 // 「帯が画面」の約束: シートやバーで機体の帯が狭まったぶんカメラを引き、帯の中に同じ画を同じ割合で収める(帯が広がれば寄る)
 const bandK = () => narrow() ? 1 / (S.bandFrac || 1) : 1;
@@ -436,6 +437,7 @@ function setView(v) {
   if (v === 'inside') {
     const mo = D.motors[0]; const c = mo.group.localToWorld(new THREE.Vector3(0, 0.02, 0));
     const u = new THREE.Vector3(1, 0, 0).applyQuaternion(mo.arm.getWorldQuaternion(new THREE.Quaternion())); const tan = new THREE.Vector3(u.z, 0, -u.x); const vs = viewScale();
+    if (IS_ALT) { pdFrame([mo.group, D.batPart.obj], { pull: true, margin: 1.12, dir: u.clone().multiplyScalar(0.19).addScaledVector(tan, 0.12).add(new THREE.Vector3(0, 0.14, 0)).normalize() }); return; }   /* 切ったモーターとバッテリーの両方を、カードと部品の一覧を避けた枠に収める */
     flyTo(c.clone().addScaledVector(u, 0.19 * vs).addScaledVector(tan, 0.12 * vs).add(new THREE.Vector3(0, 0.015 * vs, 0)), c, 1100);
   } else if (IS_ALT && VIEWS[v]) { const [p] = VIEWS[v]; focusOn([D.root], { dir: new THREE.Vector3(...p).normalize(), pull: true, margin: 1.12 });   /* 機種ごとに大きさが違うので、向きだけ決めて枠に収める */
   } else { const [p, t] = VIEWS[v]; const tv = new THREE.Vector3(...t); const pv = new THREE.Vector3(...p).sub(tv).multiplyScalar(viewScale() * (D.viewK ? D.viewK() : 1)).add(tv); flyTo(pv, tv, 800); }   /* 翼幅の広い機体(PD6B)は視点ボタンでも引く */

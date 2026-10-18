@@ -2570,27 +2570,27 @@ const MAVIC_PARTS = {
   body: {
     name: '機体本体（胴体）', en: 'Airframe body', group: 'frame', count: 1,
     role: 'バッテリー・電装・ジンバルを収める胴。空気抵抗が小さくなるよう、角を丸めた流線形にしている。4本のアームは胴のヒンジで折りたためる。',
-    structure: ['前にジンバルと前向きLiDAR、上にバッテリー、下に3D赤外線検知システムと補助ライト（取説の各部名称）', '中にフライトコントローラー・ESC・映像伝送（O4+）を収める', '胴の形と細部は写真からの推定'],
+    structure: ['前にジンバル、上の後ろに排気口、下に3D赤外線検知システムと補助ライト（取説の各部名称・製品写真）', 'バッテリーは胴の下半分を占め、後ろへ抜く（製品写真）', '着地は前の脚2本と、胴の後ろ下（推定）', '中にフライトコントローラー・ESC・映像伝送（O4+）を収める', '胴の断面の形は公式の真上・正面の写真から読んだ推定'],
     spec: [['離陸重量', '約 1063 g（公式）'], ['折りたたみ時', '257.6 × 124.8 × 103.4 mm（プロペラなし・公式）'], ['展開時', '328.7 × 390.5 × 135.2 mm（プロペラなし・公式）'], ['動作環境温度', '−10〜40 ℃（公式）']],
     check: ['外殻の割れ・変形', '通気口がふさがれていないか（取説）', 'センサーの窓の汚れ・傷'],
     tip: '展開すると約17.4L、折りたたむと約3.3Lの箱に収まる。体積はおよそ5分の1になる（プロペラなしの公式寸法からの計算）。',
   },
   frontArm: {
     name: '前アーム', en: 'Front arm', group: 'frame', count: 2,
-    role: '前の2つのモーターを支える腕。胴の横のヒンジで水平に回り、胴の脇へ折りたためる。下にランディングギア（アンテナ内蔵）とフロントLEDがある。',
-    structure: ['胴のヒンジで水平に回る（畳む向きは例）', 'バッテリーを抜き差しする前に、前アームを展開する（前向きLiDARを傷めないため・取説）'],
+    role: '前の2つのモーターを支える腕。胴の前寄り・低い位置から前へ約20°振って伸びる。先の下に長いランディングギア（アンテナ内蔵）、前面にフロントLED、右前には前向きLiDARがある。',
+    structure: ['下へ振り下ろして後ろへ畳む。畳むとモーターが下・脚が上になり、胴の後ろの角に収まる（取説の図）', '展開は後アーム→前アームの順（取説の図）', 'バッテリーを抜き差しする前に、前アームを展開する。畳むと右前のLiDARがバッテリーの脇に来るため（取説・図からの解釈）'],
     check: ['展開しきっているか', 'ヒンジのガタ', 'ひび'],
   },
   rearArm: {
     name: '後アーム', en: 'Rear arm', group: 'frame', count: 2,
-    role: '後ろの2つのモーターを支える腕。前アームより低い位置にあり、斜めに回って胴の下側へ折りたためる。後方右アームを展開すると機体の電源が入る（初期設定・取説）。',
-    structure: ['アーム展開による電源オンは初期設定で有効、アーム折りたたみによる電源オフは初期設定で無効（取説）', '前アームと高さをずらしてあり、畳んでも重ならない（推定）'],
+    role: '後ろの2つのモーターを支える腕。胴の後ろ上から斜め上へ伸び、後ろのモーターは胴より高い位置で回る。前へ回して胴の上の段に畳む。後方右アームを展開すると機体の電源が入る（初期設定・取説）。',
+    structure: ['アーム展開による電源オンは初期設定で有効、アーム折りたたみによる電源オフは初期設定で無効（取説）', '前のプロペラより約5cm高い面で回るので、前後の羽根の円が平面では少し重なっても当たらない（寸法からの計算）', '先にステータスインジケーター（右後ろ・取説）'],
     check: ['展開しきっているか', 'ヒンジのガタ', 'ひび'],
     tip: '開くと電源が入るので、準備の手順が「開く → 確かめる」のひと続きになる。',
   },
   landingGear: {
     name: 'ランディングギア（アンテナ内蔵）', en: 'Landing gear (antennas)', group: 'gear', count: 2,
-    role: '前アームの下の脚。着地を支えるとともに、中に映像伝送のアンテナを収めている（取説の各部名称）。脚の中に置くことで、アンテナが機体の陰になりにくいと考えられる（推定）。',
+    role: '前アームの先の下に伸びる長い脚。胴の後ろ下と合わせて着地を支え、中に映像伝送のアンテナを収めている（取説の各部名称）。脚の中に置くことで、アンテナが機体の陰になりにくいと考えられる（推定）。',
     structure: ['脚の中にアンテナ（取説）', '映像伝送は O4+（公式）'],
     spec: [['映像伝送', 'O4+（公式）'], ['最大伝送距離（日本）', '15 km（障害物・電波干渉なし・公式）'], ['建物の多い所', '約 0〜0.7 km（障害物・干渉あり・公式）']],
     check: ['ひび・欠け（中のアンテナを守っている）'],
@@ -2626,7 +2626,7 @@ const MAVIC_PARTS = {
   },
   battery: {
     name: 'インテリジェントフライトバッテリー', en: 'Intelligent Flight Battery', group: 'elec', count: 1,
-    role: '機体の電気のもと。残量・温度・セルの電圧を自分で監視する。胴の上に収まり、左右のバックルで固定する。',
+    role: '機体の電気のもと。残量・温度・セルの電圧を自分で監視する。胴の下半分に後ろから差し込み、左右のバックルで固定する。',
     structure: ['リチウムイオン 4S（LiNiMnCoO2・公式）', 'カチッと音がするまで差し込む（取説）', '抜き差しの前に前アームを展開する（取説）'],
     spec: [['容量', '6654 mAh（公式）'], ['公称電圧', '14.32 V（公式）'], ['電力量', '95.3 Wh（公式）'], ['重さ', '約 332 g（公式）'], ['最大飛行時間', '51 分（公式）'], ['充電時間', '約 51 分（240W アダプター・公式）']],
     check: ['膨らみ・傷', 'バックルがロックされているか', '電源が入ったまま抜き差ししない（取説）'],
@@ -2643,7 +2643,7 @@ const MAVIC_PARTS = {
     role: 'バッテリーの電源ボタンと残量を示す4つのLED。ボタンを1回押すとバッテリーが起動し、残量が表示される（取説）。',
     check: ['飛行前に残量を確認'],
   },
-  ports: { view: [-1, 0.3, 0.25], name: 'USB-C ポートと microSD スロット', en: 'USB-C & microSD', group: 'elec', count: 1, role: '充電・データ転送のUSB-Cと、写真・動画を記録するmicroSDカードの差し込み口（取説の各部名称）。本体内にもストレージ（64GB・利用可能 約42GB・公式）がある。', check: ['ふたの閉まり', 'USB-C使用中はアームを開いても電源が入らない（取説）'] },
+  ports: { view: [0.1, 0.35, 1], name: 'USB-C ポートと microSD スロット', en: 'USB-C & microSD', group: 'elec', count: 1, role: '充電・データ転送のUSB-Cと、写真・動画を記録するmicroSDカードの差し込み口（取説の各部名称）。本体内にもストレージ（64GB・利用可能 約42GB・公式）がある。', check: ['ふたの閉まり', 'USB-C使用中はアームを開いても電源が入らない（取説）'] },
   fc: {
     name: 'フライトコントローラー', en: 'Flight controller', group: 'elec', count: 1,
     role: '機体の頭脳。ジャイロ・加速度・GNSS・ビジョンシステムの情報から姿勢と位置を計算し、4基のモーターの回転数を決める。',
@@ -2653,16 +2653,16 @@ const MAVIC_PARTS = {
   },
   gnss: { name: 'GNSS', en: 'GNSS', group: 'nav', count: 1, role: '衛星の電波から位置を求める。GPS・Galileo・BeiDou の3つを使う（公式）。', structure: ['胴の上側の中（この図の位置は例）'], spec: [['衛星', 'GPS + Galileo + BeiDou（公式）']], check: ['離陸前に衛星をつかんでいるか'] },
   lidar: {
-    name: '前向きLiDAR', en: 'Forward LiDAR', group: 'nav', count: 1,
+    view: [0.35, 0.05, -1], name: '前向きLiDAR', en: 'Forward LiDAR', group: 'nav', count: 1,
     role: 'レーザーを当てて前方の物までの距離を測る。暗くてカメラが見えにくい夜でも、前の障害物を測れる。',
-    structure: ['機首の上（この図の位置は例）', 'クラス1レーザー製品の安全基準を満たす（取説）'],
+    structure: ['右前アームの先、フロントLEDの隣の窓（公式の製品写真・取説の各部名称）', 'クラス1レーザー製品の安全基準を満たす（取説）'],
     spec: [['夜間の測定範囲', '0.5〜25 m（反射率10%超・公式）'], ['視野', '上下・左右とも 60°（公式）']],
     check: ['窓の汚れ・傷'],
   },
   vision: {
     name: '全方向ビジョンシステム', en: 'Omnidirectional vision', group: 'nav', count: 6,
     role: '魚眼のカメラで周りの障害物との距離を測り、ぶつかる前に止まったり避けたりする。GNSSが弱いときは位置の保持にも使う。',
-    structure: ['低照度対応の魚眼センサー6基（レビュー記事）', '配置はこの図では胴の四隅と下面（推定）', 'スポーツモードでは無効になる（取説）'],
+    structure: ['低照度対応の魚眼センサー6基（レビュー記事）', '上面の前2基と中央、下面の前2基と中央（製品写真から。下面中央は推定）', 'スポーツモードでは無効になる（取説）'],
     spec: [['測定範囲', '前 0.5〜24 m・後 0.5〜22 m・横 0.5〜21 m・上 0.5〜18 m・下 0.5〜17 m（公式）']],
     check: ['窓の汚れ', '模様のない床・水面・電線は苦手（取説）'],
     tip: '取説は、送電線や吊り橋のようなケーブル構造、枝や電線のような細い物は正しく見分けられないとしている。ビジョンがあっても操縦者の確認は欠かせない。',
@@ -2671,11 +2671,11 @@ const MAVIC_PARTS = {
   auxLight: { view: [0.4, -0.8, 0.4], name: '補助ライト', en: 'Auxiliary light', group: 'nav', count: 1, role: '機体の下の白いライト。暗い所で下方ビジョンシステムを助ける。高さ5m未満の暗い所で自動で点く（取説）。', check: ['点灯するか'] },
   led: {
     name: 'フロントLED', en: 'Front LEDs', group: 'nav', count: 2,
-    role: '前アームの下の灯り。電源が入ってモーターが止まっている間は緑に点いて機首の向きを示す。モーターが回ると緑に点滅する（取説）。',
+    role: '前アームの先の前面の灯り。電源が入ってモーターが止まっている間は緑に点いて機首の向きを示す。モーターが回ると緑に点滅する（取説）。',
     structure: ['撮影中は自動で消える設定がある（取説）'],
     check: ['点灯するか'],
   },
-  statusLed: { view: [0.6, -0.55, 0.6], name: '機体ステータスインジケーター', en: 'Status indicator', group: 'nav', count: 1, role: '機体の状態を色と点滅で知らせる。緑のゆっくり点滅＝GNSS有効、黄のすばやい点滅＝送信機の信号喪失、赤の点灯＝重大なエラー、など（取説）。', structure: ['後アームの下（この図の位置は例）'], check: ['離陸前に色を見る'] },
+  statusLed: { view: [0.55, -0.45, -0.6], name: '機体ステータスインジケーター', en: 'Status indicator', group: 'nav', count: 1, role: '機体の状態を色と点滅で知らせる。緑のゆっくり点滅＝GNSS有効、黄のすばやい点滅＝送信機の信号喪失、赤の点灯＝重大なエラー、など（取説）。', structure: ['右後ろアームの先の下（取説の各部名称。図の形は例）'], check: ['離陸前に色を見る'] },
   remoteId: { name: 'リモートID', en: 'Remote ID', group: 'nav', count: 1, role: '登録記号・位置・高度などを電波で発信する。登録した機体は原則として備えることが求められる。', structure: ['内蔵かどうかは販売国の仕様で確認（この図の位置は例）'], check: ['飛行前に作動状況を確かめる（法定の点検項目）'] },
   gimbal: {
     name: 'インフィニティジンバル', en: 'Infinity gimbal', group: 'payload', count: 1,
@@ -3975,36 +3975,40 @@ function buildPD6B(M) {
 
 // ===== DJI Mavic 4 Pro の手続き生成 =====
 // 寸法は実寸(m)・等倍。公式値: 展開 328.7×390.5×135.2mm・折りたたみ 257.6×124.8×103.4mm（プロペラなし）。
-// プロペラは販売店の表記で直径10.5インチ。胴の形・センサーの配置・アームの畳み方は写真と取説の図からの推定。
-// 機首=−Z、右=+X。脚の先(y=−0.075)が床に来るよう、入れ物ごと下げる。
+// プロペラは販売店の表記で直径10.5インチ。形は公式の真上・正面・斜めの製品写真と、取説の各部名称・背面図から読んだ推定値。
+// 機首=−Z、右=+X。脚の先と後ろのゴム足(y=−0.041)が床に来るよう、入れ物ごと下げる。
 function mavicMaterials(M) {
   const phy = (o) => new THREE.MeshPhysicalMaterial(o), std = (o) => new THREE.MeshStandardMaterial(o);
   const decal = (c) => std({ map: canvasTex(c, { wrap: false }), roughness: 0.5, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+  const decalT = (c) => std({ map: canvasTex(c, { wrap: false }), roughness: 0.6, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });   // 背景が透ける印字
   const sans = '-apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif';
   const propCanvas = (dir) => pd6bCanvas(256, 1024, (g, w, h) => {
-    g.fillStyle = '#2b2e34'; g.fillRect(0, 0, w, h);
-    g.fillStyle = 'rgba(255,255,255,0.05)'; for (let y = 0; y < h; y += 6) g.fillRect(0, y, w, 1);
-    g.fillStyle = dir > 0 ? '#14b8a6' : '#3b7df7'; g.fillRect(0, h * 0.955, w, h * 0.045);
-    g.fillStyle = dir > 0 ? '#c9ccd2' : '#2b2e34'; g.beginPath(); g.arc(w * 0.5, h * 0.12, w * 0.12, 0, Math.PI * 2); g.fill();   /* 根元の印（取付の組み合わせ） */
+    g.fillStyle = '#18191c'; g.fillRect(0, 0, w, h);   /* 黒い羽根の先がオレンジ（公式写真） */
+    g.fillStyle = 'rgba(255,255,255,0.04)'; for (let y = 0; y < h; y += 6) g.fillRect(0, y, w, 1);
+    g.fillStyle = '#f0821e'; g.fillRect(0, h * 0.962, w, h * 0.038);
+    g.fillStyle = dir > 0 ? '#9aa0a8' : '#18191c'; g.beginPath(); g.arc(w * 0.5, h * 0.12, w * 0.10, 0, Math.PI * 2); g.fill();   /* 根元の印（取付の組み合わせ・図の例） */
   });
   const propMat = (dir) => Object.assign(phy({ map: canvasTex(propCanvas(dir), { wrap: false }), roughness: 0.55, metalness: 0, clearcoat: 0.3, clearcoatRoughness: 0.4, side: THREE.DoubleSide }), { userData: { flatTint: true } });
   const regLabel = pd6bCanvas(512, 96, (g, w, h) => { g.fillStyle = '#f4f4f2'; g.fillRect(0, 0, w, h); g.fillStyle = '#17181b'; g.font = 'bold 60px "SF Mono", Menlo, monospace'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('JU 1234 5678', w / 2, h / 2 + 2); });
   const hasselblad = pd6bCanvas(512, 72, (g, w, h) => { g.fillStyle = '#121418'; g.fillRect(0, 0, w, h); g.fillStyle = '#c9ccd2'; g.font = `500 46px ${sans}`; g.textAlign = 'center'; g.textBaseline = 'middle'; if ('letterSpacing' in g) g.letterSpacing = '9px'; g.fillText('HASSELBLAD', w / 2, h / 2 + 2); });
-  const brand = pd6bCanvas(512, 96, (g, w, h) => { g.fillStyle = '#3c3f45'; g.fillRect(0, 0, w, h); g.fillStyle = '#c9ccd2'; g.font = `600 54px ${sans}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('MAVIC 4 PRO', w / 2, h / 2 + 2); });
+  const djiLogo = pd6bCanvas(256, 112, (g, w, h) => { g.fillStyle = '#8c9097'; g.font = `italic 700 92px ${sans}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('dji', w / 2, h / 2 + 4); });
+  const brand = pd6bCanvas(512, 72, (g, w, h) => { g.fillStyle = '#b9bdc4'; g.font = `500 50px ${sans}`; g.textAlign = 'center'; g.textBaseline = 'middle'; if ('letterSpacing' in g) g.letterSpacing = '4px'; g.fillText('MAVIC 4 PRO', w / 2, h / 2 + 2); });
   return {
-    shell: phy({ color: 0x45484e, metalness: 0.15, roughness: 0.42, clearcoat: 0.45, clearcoatRoughness: 0.3 }),
-    shellDark: phy({ color: 0x2c2e33, metalness: 0.1, roughness: 0.5, clearcoat: 0.25 }),
+    shell: phy({ color: 0x63666c, metalness: 0.08, roughness: 0.58, clearcoat: 0.18, clearcoatRoughness: 0.5 }),   /* 艶を抑えた中間のグレー（製品写真） */
+    belly: phy({ color: 0x25272b, metalness: 0.05, roughness: 0.72 }),
+    shellDark: phy({ color: 0x232529, metalness: 0.1, roughness: 0.52, clearcoat: 0.3, clearcoatRoughness: 0.4 }),
     shellLight: phy({ color: 0x5a5e66, metalness: 0.2, roughness: 0.38, clearcoat: 0.5, clearcoatRoughness: 0.25 }),
     glass: phy({ color: 0x07090d, roughness: 0.05, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.03, iridescence: 0.6, iridescenceIOR: 1.3 }),
     lensRing: phy({ color: 0x1d1f23, metalness: 0.8, roughness: 0.3 }),
     goldRing: phy({ color: 0xb08d57, metalness: 1, roughness: 0.3 }),
     bezel: phy({ color: 0x121418, metalness: 0.2, roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.08 }),
     lensBack: new THREE.MeshBasicMaterial({ color: 0x020305 }),
+    window: phy({ color: 0x060708, metalness: 0.3, roughness: 0.16, clearcoat: 1, clearcoatRoughness: 0.06 }),
     lensClear: phy({ color: 0x0b1020, metalness: 0, roughness: 0.04, clearcoat: 1, clearcoatRoughness: 0.03, iridescence: 0.5, iridescenceIOR: 1.35, transparent: true, opacity: 0.26, depthWrite: false, envMapIntensity: 0.6 }),
     iris: phy({ color: 0x8d929c, metalness: 0.7, roughness: 0.32, side: THREE.DoubleSide }),
     hasselblad: decal(hasselblad),
     propCCW: propMat(1), propCW: propMat(-1),
-    regLabel: decal(regLabel), brand: decal(brand),
+    regLabel: decal(regLabel), brand: decalT(brand), djiLogo: decalT(djiLogo),
     fovMain: new THREE.MeshBasicMaterial({ color: 0xef6a2d, transparent: true, opacity: 0.16, depthWrite: false, side: THREE.DoubleSide }),
     fovMid: new THREE.MeshBasicMaterial({ color: 0x3b7df7, transparent: true, opacity: 0.18, depthWrite: false, side: THREE.DoubleSide }),
     fovTele: new THREE.MeshBasicMaterial({ color: 0x22c55e, transparent: true, opacity: 0.22, depthWrite: false, side: THREE.DoubleSide }),
@@ -4016,7 +4020,7 @@ function mavicMaterials(M) {
 }
 
 function buildMavic(M) {
-  const K = MAVIC_K, LEG_Y = -0.075;
+  const K = MAVIC_K, LEG_Y = -0.051;   // 脚の先と後ろのゴム足の高さ（胴の中心から）
   const root = new THREE.Group(); root.name = 'drone';
   const sg = new THREE.Group(); sg.name = 'mavic'; sg.scale.setScalar(K); sg.position.y = -0.158 - LEG_Y * K; root.add(sg);
   const parts = [], pick = [], wires = [], motors = [], legs = [];
@@ -4032,130 +4036,181 @@ function buildMavic(M) {
   const noPart = (o) => { o.traverse(c => { c.userData.noPart = true; c.userData.noPick = true; c.userData.noAO = true; c.castShadow = false; }); return o; };
   const plane = (w, h, mat) => mesh(new THREE.PlaneGeometry(w, h), mat, { cast: false });
 
-  // ---------- 胴 (横から見た形を左右に押し出し、角を丸める) ----------
-  const prof = new THREE.Shape();
-  prof.moveTo(-0.118, -0.004);
-  prof.quadraticCurveTo(-0.118, 0.016, -0.096, 0.024); prof.quadraticCurveTo(-0.060, 0.032, -0.020, 0.032);
-  prof.lineTo(0.100, 0.030); prof.quadraticCurveTo(0.124, 0.028, 0.125, 0.008);
-  prof.quadraticCurveTo(0.125, -0.022, 0.104, -0.030); prof.lineTo(-0.070, -0.034);
-  prof.quadraticCurveTo(-0.112, -0.032, -0.118, -0.004);
-  const bodyGeo = new THREE.ExtrudeGeometry(prof, { depth: 0.072, bevelEnabled: true, bevelThickness: 0.012, bevelSize: 0.008, bevelSegments: 5, curveSegments: 18 });
-  bodyGeo.rotateY(-Math.PI / 2); bodyGeo.translate(0.036, 0, 0); bodyGeo.computeVertexNormals();
-  const bodyG = new THREE.Group();
-  bodyG.add(mesh(bodyGeo, X.shell));
-  bodyG.add(at(mesh(rboxGeo(0.060, 0.004, 0.120, 0.002), X.shellDark), 0, -0.035, 0.010));   // 底の板
-  { const b = plane(0.050, 0.009, X.brand); b.rotation.y = Math.PI / 2; at(b, 0.0485, 0.004, 0.035); bodyG.add(b); }
-  sg.add(bodyG); reg(bodyG, 'body', V3(0, 0, 0), { label: V3(-0.05, 0.0, 0.07) });
-  const rm = plane(0.034, 0.0065, X.regLabel); rm.rotation.y = -Math.PI / 2; at(rm, -0.0485, -0.010, 0.045); sg.add(rm); reg(rm, 'regMark', V3(-0.04, 0, 0));
-  const ports = new THREE.Group();
-  ports.add(at(mesh(rboxGeo(0.002, 0.008, 0.016, 0.0008), X.shellDark), -0.0492, -0.012, 0.090));
-  ports.add(at(mesh(rboxGeo(0.002, 0.004, 0.012, 0.0008), M.chip), -0.0492, 0.004, 0.090));
-  sg.add(ports); reg(ports, 'ports', V3(-0.05, 0, 0), { label: V3(-0.051, -0.004, 0.09) });
+  // ---------- 胴 (断面をつないだ流線形。寸法は公式の真上・正面の写真から読んだ値) ----------
+  // 断面は [z, 半幅, 上端, 下端, 上の丸み, 下の丸み]。丸みは超楕円の指数(2=楕円・大きいほど角ばる)
+  // 前は頭(ジンバル)を抱える幅広の面、腰で少し細り、後ろはバッテリーの下で広がって丸く閉じる
+  const UPPER = [
+    [-0.1010, 0.016, 0.026, 0.000, 2.2, 2.2], [-0.0975, 0.033, 0.0300, -0.012, 2.3, 2.4], [-0.0920, 0.0395, 0.0330, -0.022, 2.4, 2.4],
+    [-0.0800, 0.0430, 0.0350, -0.034, 2.5, 2.4], [-0.0600, 0.0440, 0.0358, -0.0385, 2.6, 2.5], [-0.0400, 0.0415, 0.0362, -0.0400, 2.6, 2.5],
+    [-0.0270, 0.0395, 0.0365, -0.0400, 2.6, 2.5], [-0.0215, 0.0385, 0.0366, 0.0010, 2.6, 6.0], [0.0000, 0.0370, 0.0368, 0.0020, 2.6, 8.0],
+    [0.0300, 0.0390, 0.0375, 0.0020, 2.6, 8.0], [0.0520, 0.0430, 0.0378, 0.0020, 2.6, 8.0], [0.0760, 0.0420, 0.0368, 0.0020, 2.6, 8.0],
+    [0.0900, 0.0380, 0.0340, 0.0020, 2.5, 8.0], [0.0980, 0.0300, 0.0285, 0.0025, 2.4, 6.0], [0.1020, 0.0160, 0.0185, 0.0040, 2.3, 4.0], [0.1032, 0.0040, 0.0100, 0.0060, 2.2, 2.2],
+  ];
+  const BATT = [
+    [-0.0272, 0.0273, 0.0005, -0.032, 6, 2.2], [-0.024, 0.0356, 0.0015, -0.039, 8, 2.3], [0, 0.0359, 0.0015, -0.04, 8, 2.4],
+    [0.052, 0.0414, 0.0015, -0.04, 8, 2.4], [0.076, 0.0405, 0.0015, -0.04, 8, 2.4], [0.09, 0.0369, 0.0015, -0.039, 8, 2.4],
+    [0.098, 0.0297, 0.0015, -0.035, 8, 2.3], [0.102, 0.0175, 0.0005, -0.026, 6, 2.2], [0.1032, 0.0049, -0.003, -0.018, 2.4, 2.2],
+  ];
+  // 断面の補間（Catmull-Rom）。部品を胴の面に置くときにも使う
+  const crs = (S, u) => { const n = S.length - 1, i = Math.min(n - 1, Math.max(0, Math.floor(u))), t = u - i;
+    const p0 = S[Math.max(0, i - 1)], p1 = S[i], p2 = S[i + 1], p3 = S[Math.min(n, i + 2)];
+    return p1.map((_, k) => 0.5 * ((2 * p1[k]) + (-p0[k] + p2[k]) * t + (2 * p0[k] - 5 * p1[k] + 4 * p2[k] - p3[k]) * t * t + (-p0[k] + 3 * p1[k] - 3 * p2[k] + p3[k]) * t * t * t)); };
+  const secAt = (S, z) => { for (let i = 0; i < S.length - 1; i++) if (z <= S[i + 1][0]) { const t = (z - S[i][0]) / (S[i + 1][0] - S[i][0]); return crs(S, i + clamp(t, 0, 1)); } return S[S.length - 1].slice(); };
+  // 超楕円の断面の輪郭上の点（a: 0=右, π/2=上）
+  const ring = (sec, a) => { const [, w, top, bot, nt, nb] = sec, c = Math.cos(a), s = Math.sin(a), mid = (top + bot) / 2;
+    const n = s >= 0 ? nt : nb, x = w * Math.sign(c) * Math.abs(c) ** (2 / n), y = s >= 0 ? mid + (top - mid) * Math.abs(s) ** (2 / n) : mid - (mid - bot) * Math.abs(s) ** (2 / n); return [x, y]; };
+  function loftGeo(S, sub = 6, around = 64) {
+    const rings = [], N = (S.length - 1) * sub;
+    for (let k = 0; k <= N; k++) rings.push(crs(S, k / sub));
+    const pos = [], idx = [];
+    for (const r of rings) for (let j = 0; j < around; j++) { const [x, y] = ring(r, j / around * Math.PI * 2); pos.push(x, y, r[0]); }
+    const R = rings.length;
+    for (let k = 0; k < R - 1; k++) for (let j = 0; j < around; j++) { const a = k * around + j, b = k * around + (j + 1) % around, c = a + around, d = b + around; idx.push(a, b, c, b, d, c); }
+    const cap = (k, flip) => { const r = rings[k], ci = pos.length / 3; pos.push(0, (r[2] + r[3]) / 2, r[0] + (flip ? 0.0006 : -0.0006)); for (let j = 0; j < around; j++) { const a = k * around + j, b = k * around + (j + 1) % around; if (flip) idx.push(ci, a, b); else idx.push(ci, b, a); } };
+    cap(0, false); cap(R - 1, true);
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals(); return g;
+  }
+  // 胴の表面の点（z と角度で指定）と、その向き
+  const onBody = (S, z, a, lift = 0) => { const s = secAt(S, z), [x, y] = ring(s, a), [x2, y2] = ring(s, a + 0.01), nx = y2 - y, ny = -(x2 - x), l = Math.hypot(nx, ny) || 1; return { p: V3(x + nx / l * lift, y + ny / l * lift, z), n: V3(nx / l, ny / l, 0) }; };
 
-  // ---------- バッテリー (胴の上・後ろへ抜く) ----------
-  const bat = new THREE.Group(); at(bat, 0, 0.030, 0.048);
-  const shell = mesh(rboxGeo(0.086, 0.024, 0.150, 0.008, 3), X.shellLight); at(shell, 0, 0.006, 0); bat.add(shell);
-  for (let k = 0; k < 7; k++) bat.add(at(mesh(rboxGeo(0.070, 0.0015, 0.004, 0.0007), X.shellDark), 0, 0.0185, 0.040 + k * 0.0055));   // 後ろの滑り止め
-  const cells = mesh(merged(Array.from({ length: 4 }, (_, k) => new THREE.BoxGeometry(0.019, 0.016, 0.130).translate(-0.0315 + k * 0.021, 0.004, 0))), M.cell); bat.add(cells);
-  const bled = new THREE.Group();
-  bled.add(at(mesh(cylGeo(0.0035, 0.0035, 0.002, 20).rotateX(Math.PI / 2), M.plasticGray), 0.022, 0.006, 0.0752));
-  for (let k = 0; k < 4; k++) bled.add(at(mesh(new THREE.BoxGeometry(0.004, 0.0016, 0.001), k < 3 ? M.ledGreen : M.chip), -0.018 + k * 0.007, 0.006, 0.0755));
+  const bodyG = new THREE.Group();
+  bodyG.add(mesh(loftGeo(UPPER), X.shell));
+  // 上面: 前の魚眼2基の台・中央の魚眼・dji のロゴ・後ろの排気口
+  { const vent = new THREE.Group(), vz = 0.084, s = secAt(UPPER, vz);
+    vent.add(at(mesh(rboxGeo(0.036, 0.004, 0.012, 0.0018), X.shellDark), 0, s[2] - 0.0012, vz));
+    for (let k = 0; k < 9; k++) vent.add(at(mesh(new THREE.BoxGeometry(0.0016, 0.0022, 0.009), X.shell), -0.0144 + k * 0.0036, s[2] + 0.0004, vz));
+    bodyG.add(vent); }
+  { const t = plane(0.016, 0.0072, X.djiLogo); t.rotation.x = -Math.PI / 2; at(t, 0, secAt(UPPER, 0.052)[2] + 0.0004, 0.052); bodyG.add(t); }
+  // 下面の前: 下向きの魚眼の間に3D赤外線の窓、その後ろに細長い窓
+  bodyG.add(at(mesh(rboxGeo(0.010, 0.002, 0.004, 0.0009), X.shellDark), 0, -0.0402, -0.050));
+  // 底のセンサー板（黒・ひだ付き）。バッテリーはこの板と胴の上側の間に後ろから差し込む
+  const plate = new THREE.Group();
+  plate.add(at(mesh(rboxGeo(0.048, 0.0066, 0.122, 0.0028, 3), X.belly), 0, -0.0432, 0.031));
+  for (let k = 0; k < 14; k++) for (const s of [-1, 1]) plate.add(at(mesh(new THREE.BoxGeometry(0.010, 0.0012, 0.0024), X.shellDark), s * 0.0165, -0.0468, -0.012 + k * 0.0066));
+  for (const s of [-1, 1]) plate.add(at(mesh(cylGeo(0.0038, 0.0042, 0.0016, 16), M.rubber), s * 0.022, -0.0499, 0.078));   // 後ろの足（ゴム）
+  bodyG.add(plate);
+  sg.add(bodyG); reg(bodyG, 'body', V3(0, 0, 0), { label: V3(-0.03, 0.036, 0.02) });
+  const rm = plane(0.030, 0.0058, X.regLabel); rm.rotation.y = -Math.PI / 2; { const q = onBody(UPPER, 0.040, Math.PI * 0.98, 0.0004); at(rm, q.p.x, 0.016, 0.040); } sg.add(rm); reg(rm, 'regMark', V3(-0.04, 0, 0));
+  // 後面の上: USB-C と microSD（バッテリーの上・排気口の下）
+  const ports = new THREE.Group();
+  ports.add(at(mesh(rboxGeo(0.010, 0.0034, 0.002, 0.0012), M.chip), -0.008, 0.012, 0.1022));
+  ports.add(at(mesh(rboxGeo(0.012, 0.0022, 0.002, 0.0008), M.chip), 0.008, 0.012, 0.1022));
+  sg.add(ports); reg(ports, 'ports', V3(0, 0.02, 0.05), { label: V3(0, 0.012, 0.103) });
+
+  // ---------- バッテリー (胴の下半分・後ろへ抜く) ----------
+  const bat = new THREE.Group();
+  const shell = mesh(loftGeo(BATT), X.shell); bat.add(shell);
+  const cells = mesh(merged(Array.from({ length: 4 }, (_, k) => new THREE.BoxGeometry(0.0128, 0.024, 0.100).translate(-0.0201 + k * 0.0134, -0.0180, 0.038))), M.cell); bat.add(cells);
+  const bled = new THREE.Group();   // 後面: 電源ボタンと残量LED 4つ（取説）
+  bled.add(at(mesh(rboxGeo(0.0085, 0.0040, 0.0016, 0.0014), M.plasticGray), -0.0055, -0.0170, 0.1028));
+  for (let k = 0; k < 4; k++) bled.add(at(mesh(new THREE.CylinderGeometry(0.0007, 0.0007, 0.001, 10).rotateX(Math.PI / 2), k < 3 ? M.ledGreen : M.chip), 0.0018 + k * 0.0026, -0.0170, 0.1024));
   bat.add(bled);
-  const buckle = new THREE.Group();
-  for (const s of [-1, 1]) buckle.add(at(mesh(rboxGeo(0.004, 0.012, 0.022, 0.0015), X.shellDark), s * 0.0445, 0.004, -0.050));
+  const buckle = new THREE.Group();   // 左右のバックル（後ろ下の側面）
+  for (const s of [-1, 1]) { const q = onBody(BATT, 0.070, s > 0 ? -0.35 : Math.PI + 0.35, 0.0006); const b = mesh(rboxGeo(0.0026, 0.010, 0.016, 0.0011), X.shellDark); at(b, q.p.x, q.p.y, 0.070); b.rotation.z = s * 0.35; buckle.add(b); }
   bat.add(buckle);
   sg.add(bat);
   reg(cells, 'cells', V3(0, 0, 0)); reg(bled, 'batteryLed', V3(0, 0, 0.02)); reg(buckle, 'batteryBuckle', V3(0, 0, 0));
-  const batPart = reg(bat, 'battery', V3(0, 0.10, 0.10), { coarse: true, label: V3(0.02, 0.022, 0.03) }); batPart.shell = shell;
+  const batPart = reg(bat, 'battery', V3(0, -0.06, 0.12), { coarse: true, label: V3(0.03, -0.016, 0.06) }); batPart.shell = shell;
 
   // ---------- 内部の電装 ----------
-  const fc = at(mesh(rboxGeo(0.050, 0.008, 0.060, 0.002), M.aluBrushDark), 0, 0.006, -0.040); sg.add(fc); reg(fc, 'fc', V3(0, 0.10, -0.06), { label: V3(0, 0.006, 0) });
-  const esc = at(mesh(rboxGeo(0.060, 0.006, 0.050, 0.002), [M.pcbEdge, M.pcbEdge, M.pcbPDB, M.pcbEdge, M.pcbEdge, M.pcbEdge]), 0, -0.018, 0.040); sg.add(esc); reg(esc, 'esc', V3(0, -0.05, 0.07));
-  const gnss = at(mesh(rboxGeo(0.028, 0.004, 0.028, 0.002), M.gpsBody), 0, 0.024, -0.070); sg.add(gnss); reg(gnss, 'gnss', V3(0, 0.14, -0.06), { label: V3(0, 0.004, 0) });
-  const rid = at(mesh(rboxGeo(0.016, 0.004, 0.012, 0.001), M.plasticGray), 0.020, -0.018, 0.090); sg.add(rid); reg(rid, 'remoteId', V3(0.05, -0.05, 0.06));
+  const fc = at(mesh(rboxGeo(0.050, 0.006, 0.058, 0.002), M.aluBrushDark), 0, 0.016, -0.050); sg.add(fc); reg(fc, 'fc', V3(0, 0.10, -0.06), { label: V3(0, 0.004, 0) });
+  const esc = at(mesh(rboxGeo(0.058, 0.005, 0.050, 0.002), [M.pcbEdge, M.pcbEdge, M.pcbPDB, M.pcbEdge, M.pcbEdge, M.pcbEdge]), 0, 0.010, 0.040); sg.add(esc); reg(esc, 'esc', V3(0, 0.08, 0.07));
+  const gnss = at(mesh(rboxGeo(0.026, 0.004, 0.026, 0.002), M.gpsBody), 0, 0.030, -0.018); sg.add(gnss); reg(gnss, 'gnss', V3(0, 0.14, -0.04), { label: V3(0, 0.003, 0) });
+  const rid = at(mesh(rboxGeo(0.016, 0.004, 0.012, 0.001), M.plasticGray), 0.018, 0.022, 0.080); sg.add(rid); reg(rid, 'remoteId', V3(0.05, 0.06, 0.06));
 
-  // ---------- 機首: LiDAR・下面: 3D赤外線・補助ライト ----------
-  const lidar = new THREE.Group(); at(lidar, 0, 0.014, -0.122);
-  lidar.add(mesh(rboxGeo(0.034, 0.012, 0.006, 0.003), X.shellDark));
-  lidar.add(at(mesh(rboxGeo(0.028, 0.008, 0.002, 0.002), X.glass), 0, 0, -0.003));
-  sg.add(lidar); reg(lidar, 'lidar', V3(0, 0.05, -0.08), { label: V3(0, 0.008, 0) });
-  const ir = new THREE.Group(); at(ir, 0, -0.037, -0.010);
-  ir.add(mesh(rboxGeo(0.030, 0.004, 0.014, 0.002), X.shellDark)); for (const s of [-1, 1]) ir.add(at(mesh(cylGeo(0.004, 0.004, 0.0015, 16), X.glass), s * 0.008, -0.0025, 0));
-  sg.add(ir); reg(ir, 'ir3d', V3(0, -0.04, 0), { label: V3(0, -0.004, 0) });
-  const aux = new THREE.Group(); at(aux, 0, -0.037, 0.030);
-  aux.add(mesh(cylGeo(0.005, 0.005, 0.003, 20), M.ledCover)); aux.add(at(mesh(cylGeo(0.003, 0.003, 0.001, 16), M.ledWhite), 0, -0.0015, 0));
+  // ---------- 下面: 3D赤外線・補助ライト ----------
+  const ir = new THREE.Group(); at(ir, 0, -0.0398, -0.066);
+  { const chev = new THREE.Shape(); chev.moveTo(-0.008, 0.002); chev.lineTo(0, -0.002); chev.lineTo(0.008, 0.002); chev.lineTo(0.008, -0.002); chev.lineTo(0, -0.006); chev.lineTo(-0.008, -0.002); chev.closePath();
+    const cg = new THREE.ExtrudeGeometry(chev, { depth: 0.0016, bevelEnabled: false }); cg.rotateX(Math.PI / 2); ir.add(mesh(cg, X.glass)); }
+  ir.add(at(mesh(rboxGeo(0.009, 0.0016, 0.0036, 0.0008), X.glass), 0, -0.0004, 0.010));
+  sg.add(ir); reg(ir, 'ir3d', V3(0, -0.04, 0), { label: V3(0, -0.002, 0) });
+  const aux = new THREE.Group(); at(aux, 0, -0.0466, 0.006);
+  aux.add(mesh(cylGeo(0.0046, 0.0046, 0.0016, 20), M.ledCover)); aux.add(at(mesh(cylGeo(0.0030, 0.0030, 0.0008, 16), M.ledWhite), 0, -0.0006, 0));
   sg.add(aux); reg(aux, 'auxLight', V3(0, -0.04, 0.02));
-  // 魚眼センサー 6基（四隅の上と、下面の前後）
-  const VIS = [[0.040, 0.026, -0.090, 0.5, 0.6, -0.6], [-0.040, 0.026, -0.090, -0.5, 0.6, -0.6], [0.042, 0.024, 0.100, 0.5, 0.6, 0.6], [-0.042, 0.024, 0.100, -0.5, 0.6, 0.6], [0, -0.034, -0.060, 0, -1, -0.15], [0, -0.032, 0.085, 0, -1, 0.15]];
-  VIS.forEach(([x, y, z, nx, ny, nz], i) => {
-    const v = new THREE.Group(); at(v, x, y, z); const n = V3(nx, ny, nz).normalize(); v.quaternion.setFromUnitVectors(UP, n);
-    v.add(mesh(cylGeo(0.0062, 0.0068, 0.003, 24), X.shellDark));
-    const dome = mesh(new THREE.SphereGeometry(0.0048, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), X.glass); dome.scale.y = 0.6; at(dome, 0, 0.0015, 0); v.add(dome);
+  // 魚眼センサー 6基（上: 前の左右と中央 / 下: 前の左右と中央）。上の前2基は小さな台に載り、前・横・上をまたいで見る
+  const VIS = [
+    [0.0270, null, -0.066, 0.35, 0.80, -0.48, 'up'], [-0.0270, null, -0.066, -0.35, 0.80, -0.48, 'up'], [0, null, 0.012, 0, 0.92, 0.40, 'up'],
+    [0.0235, null, -0.074, 0.18, -0.92, -0.35, 'dn'], [-0.0235, null, -0.074, -0.18, -0.92, -0.35, 'dn'], [0, -0.0466, 0.020, 0, -0.95, 0.30, 'plate'],
+  ];
+  VIS.forEach(([x, y, z, nx, ny, nz, where], i) => {
+    const v = new THREE.Group(); const yy = where === 'plate' ? y : (() => { const s = secAt(UPPER, z), a = Math.acos(clamp(x / s[1] * 0.98, -1, 1)); return ring(s, where === 'up' ? a : -a)[1]; })();
+    at(v, x, yy, z); const n = V3(nx, ny, nz).normalize(); v.quaternion.setFromUnitVectors(UP, n);
+    if (where === 'up' && i < 2) v.add(at(mesh(cylGeo(0.0072, 0.0090, 0.0040, 24), X.shell), 0, -0.0010, 0));   // 台
+    v.add(at(mesh(cylGeo(0.0056, 0.0060, 0.0026, 24), X.shellDark), 0, 0.0008, 0));
+    const dome = mesh(new THREE.SphereGeometry(0.0042, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), X.glass); dome.scale.y = 0.62; at(dome, 0, 0.0020, 0); v.add(dome);
     sg.add(v); reg(v, 'vision', n.clone().multiplyScalar(0.05), { label: i === 0 ? V3(0, 0.006, 0) : null });
   });
 
   // ---------- インフィニティジンバルと3眼カメラ ----------
-  // 形は公式写真から: 機首の下のパン軸 → 右側面へ回る腕 → 胴の横のチルト用モーター → 胴の中で前面ごと回るロール。
+  // 頭は直径約61mmの球＋円筒（公式写真から）。胴の前面に半分埋まり、上と左右を暗色の腕(ヨーク)が抱える。
   // 前面は上に大きなHasselbladのレンズ、下に2つ（向かって左＝機体の右が70mm・右が168mm。公式のセンサー図の並び）。
   // チルトが外・ロールが内なので、ロールはいつもレンズの光軸まわり（＝ダッチアングル・縦撮り）。軸の順番は写真からの推定。
-  const gim = new THREE.Group(); at(gim, 0, -0.030, -0.112);
-  gim.add(mesh(cylGeo(0.011, 0.012, 0.007, 28), X.shellDark));                 // パンの付け根（機首の下）
+  const HC = V3(0, -0.0135, -0.1145), HR = 0.033;
+  const gim = new THREE.Group(); gim.position.copy(HC);
   const pan = new THREE.Group(); gim.add(pan);
   const yoke = new THREE.Group(); pan.add(yoke);
-  yoke.add(tubeBetween(V3(0.003, -0.003, -0.004), V3(0.026, -0.006, -0.021), 0.0042, X.shell, 16));
-  yoke.add(tubeBetween(V3(0.026, -0.006, -0.021), V3(0.0305, -0.010, -0.035), 0.0042, X.shell, 16));
-  yoke.add(at(mesh(new THREE.SphereGeometry(0.0042, 16, 10), X.shell), 0.026, -0.006, -0.021));
-  yoke.add(at(mesh(cylGeo(0.0098, 0.0098, 0.0075, 32).rotateZ(Math.PI / 2), X.shell), 0.0285, -0.010, -0.037));   // チルトのモーター（軸は左右）
-  const tilt = new THREE.Group(); at(tilt, 0, -0.010, -0.037); pan.add(tilt);
-  tilt.add(mesh(lathe([[0.0005, -0.0215], [0.010, -0.021], [0.0175, -0.0185], [0.0222, -0.012], [0.0236, -0.004], [0.0236, 0.0125], [0.0228, 0.0158]], 56).rotateX(-Math.PI / 2), X.shellDark));   // 円筒の胴（後ろは丸い）
-  tilt.add(at(mesh(cylGeo(0.0072, 0.0072, 0.002, 28).rotateZ(Math.PI / 2), X.shellDark), -0.0238, 0, 0));   // 反対側のふた
+  for (const s of [-1, 1]) {   // 左右のチルト軸の蓋（頭の丸みに沿う）
+    yoke.add(at(mesh(new THREE.SphereGeometry(1, 40, 12, 0, Math.PI * 2, 0, 0.42).rotateZ(-s * Math.PI / 2).scale(HR + 0.0016, HR + 0.0016, HR + 0.0016), X.shellDark), 0, 0.0005, 0.0015));   // 左右のチルト軸の蓋（頭の丸みに沿ったふくらみ）
+    yoke.add(at(mesh(cylGeo(0.0052, 0.0052, 0.0010, 28).rotateZ(Math.PI / 2), X.shell), s * (HR + 0.0016), 0.0005, 0.0015));
+  }
+  yoke.add(at(mesh(rboxGeo(0.052, 0.014, 0.026, 0.006, 3), X.shellDark), 0, 0.024, 0.020));   // 頭の上の首（胴の前面の下にもぐる）
+  const tilt = new THREE.Group(); pan.add(tilt);
+  tilt.add(mesh(lathe([[0.0005, -HR], [0.013, -0.0308], [0.0228, -0.0240], [0.0290, -0.0157], [0.0325, -0.0060], [HR, 0.0], [HR, 0.0212], [0.0322, 0.0230]], 64).rotateX(-Math.PI / 2), X.shellDark));   // 後ろは球・前は円筒
+  tilt.add(mesh(new THREE.TorusGeometry(HR - 0.0002, 0.0007, 8, 64), X.shell).translateZ(-0.0050));   // 前寄りの細い明るい帯
   const roll = new THREE.Group(); tilt.add(roll);
   const head = new THREE.Group(); roll.add(head);
-  head.add(at(mesh(cylGeo(0.0229, 0.0229, 0.0052, 64).rotateX(Math.PI / 2), X.bezel), 0, 0, -0.0178));   // 前面（ロールで回る）
-  { const t = plane(0.020, 0.0027, X.hasselblad); t.rotation.y = Math.PI; at(t, 0, 0.0186, -0.02045); t.userData.noPick = true; head.add(t); }   // 写真では前面の上の縁に HASSELBLAD
-  head.add(at(mesh(rboxGeo(0.0205, 0.0178, 0.0024, 0.0042, 3), X.lensRing), 0, 0.0063, -0.0205));     // 主レンズの角窓
-  head.add(at(mesh(rboxGeo(0.0310, 0.0128, 0.0022, 0.0055, 3), X.lensRing), 0, -0.0093, -0.0205));    // 下の2眼の窓
-  const lensAt = (r, x, y, glowCol, ringMat, glassMat) => { const g = new THREE.Group(); at(g, x, y, -0.0222);
-    g.add(mesh(cylGeo(r + 0.0016, r + 0.0016, 0.0026, 40, true).rotateX(Math.PI / 2), X.lensRing));
-    g.add(at(mesh(new THREE.TorusGeometry(r + 0.0010, 0.0005, 8, 40), ringMat || X.lensRing), 0, 0, -0.0013));
+  const FZ = -0.0276;   // 前面の位置
+  head.add(at(mesh(cylGeo(0.0320, 0.0320, 0.0052, 64).rotateX(Math.PI / 2), X.bezel), 0, 0, FZ + 0.0026));   // 前面（ロールで回る）
+  { const t = plane(0.0276, 0.0037, X.hasselblad); t.rotation.y = Math.PI; at(t, 0, 0.0258, FZ - 0.00005); t.userData.noPick = true; head.add(t); }   // 写真では前面の上の縁に HASSELBLAD
+  head.add(at(mesh(rboxGeo(0.0284, 0.0247, 0.0016, 0.0054, 3), X.window), 0, 0.0087, FZ - 0.0006));     // 主レンズの角窓
+  head.add(at(mesh(rboxGeo(0.0433, 0.0182, 0.0016, 0.0081, 3), X.window), 0, -0.0132, FZ - 0.0006));    // 下の2眼の窓（8の字）
+  const lensAt = (r, x, y, glowCol, ringMat, glassMat) => { const g = new THREE.Group(); at(g, x, y, FZ - 0.0017);
+    g.add(mesh(cylGeo(r + 0.0018, r + 0.0018, 0.0028, 40, true).rotateX(Math.PI / 2), X.lensRing));
+    g.add(at(mesh(new THREE.TorusGeometry(r + 0.0011, 0.00055, 8, 40), ringMat || X.lensRing), 0, 0, -0.0014));
     g.add(at(mesh(new THREE.CircleGeometry(r + 0.0002, 32).rotateY(Math.PI), X.lensBack), 0, 0, 0.0010));   // 奥の暗がり
-    const gl = mesh(new THREE.SphereGeometry(r, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), glassMat || M.lens); gl.scale.y = 0.32; gl.rotation.x = -Math.PI / 2; at(gl, 0, 0, -0.0010); g.add(gl);
-    const glow = at(mesh(new THREE.TorusGeometry(r + 0.0019, 0.00055, 8, 48), new THREE.MeshBasicMaterial({ color: glowCol, toneMapped: false })), 0, 0, -0.0016); glow.visible = false; glow.renderOrder = 9; g.add(glow); g.userData.glow = glow;
+    const gl = mesh(new THREE.SphereGeometry(r, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), glassMat || M.lens); gl.scale.y = 0.32; gl.rotation.x = -Math.PI / 2; at(gl, 0, 0, -0.0011); g.add(gl);
+    const glow = at(mesh(new THREE.TorusGeometry(r + 0.0021, 0.0006, 8, 48), new THREE.MeshBasicMaterial({ color: glowCol, toneMapped: false })), 0, 0, -0.0017); glow.visible = false; glow.renderOrder = 9; g.add(glow); g.userData.glow = glow;
     head.add(g); return g; };
-  const camMain = lensAt(0.0066, 0, 0.0063, 0xef6a2d, null, X.lensClear), camMid = lensAt(0.0043, 0.0074, -0.0093, 0x3b7df7), camTele = lensAt(0.0047, -0.0074, -0.0093, 0x22c55e);
+  const camMain = lensAt(0.0091, 0, 0.0087, 0xef6a2d, null, X.lensClear), camMid = lensAt(0.0060, 0.0106, -0.0132, 0x3b7df7), camTele = lensAt(0.0065, -0.0106, -0.0132, 0x22c55e);
   // 絞り（Hasselbladのみ f/2.0〜f/11・公式）。半透明のガラス越しに、開口が狭まるのが見える
-  const iris = mesh(new THREE.RingGeometry(0.0062, 0.0067, 48).rotateY(Math.PI), X.iris); at(iris, 0, 0, 0.0002); iris.renderOrder = 2; camMain.add(iris); iris.userData.r = 0.0067;
+  const iris = mesh(new THREE.RingGeometry(0.0086, 0.0092, 48).rotateY(Math.PI), X.iris); at(iris, 0, 0, 0.0002); iris.renderOrder = 2; camMain.add(iris); iris.userData.r = 0.0092;
   for (const c of [camMain, camMid, camTele]) noPart(c.userData.glow);
   reg(camMain, 'camMain', V3(0, 0.004, -0.04), { label: V3(0, 0, -0.004) }); reg(camMid, 'camMid', V3(0.006, -0.004, -0.05), { label: V3(0, 0, -0.004) }); reg(camTele, 'camTele', V3(-0.006, -0.004, -0.05), { label: V3(0, 0, -0.004) });
-  sg.add(gim); reg(gim, 'gimbal', V3(0, -0.02, -0.09), { coarse: true, label: V3(0.034, -0.012, -0.035) });
+  sg.add(gim); reg(gim, 'gimbal', V3(0, -0.01, -0.09), { coarse: true, label: V3(0.036, 0.004, 0.0) });
 
-  // ---------- アーム ×4 (前は高く水平に畳む・後ろは低く斜め下へ畳む) ----------
+  // ---------- アーム ×4 ----------
+  // 前アームは胴の前寄り・低い位置から前へ約20°振って伸び、先にモーターと長い脚（アンテナ入り）。
+  // 後アームは胴の後ろ上から斜め上へ約14°上がり、後ろのモーターは胴より高い（公式写真・取説の背面図）。
+  // 着地は前の脚2本と、胴の後ろ下のゴム足。たたむと後アームは上の段で前へ、前アームは下の段で後ろへ重なる
   const bladeGeo = (dir) => { const g = propGeometry(dir, [0]); g.scale(0.877, 0.8, 0.877); return g; };
   const fullGeo = (dir) => { const g = propGeometry(dir); g.scale(0.877, 0.8, 0.877); return g; };
   const PG = { bCCW: bladeGeo(1), bCW: bladeGeo(-1), fCCW: fullGeo(1), fCW: fullGeo(-1) };
-  const ARMS = [   // 並びは M1前右 M2後右 M3後左 M4前左（550クラスと同じ）
-    { id: 'M1', front: true, sx: 1, hinge: V3(0.050, 0.012, -0.062), motor: V3(0.174, 0.016, -0.134), dir: 1 },
-    { id: 'M2', front: false, sx: 1, hinge: V3(0.044, -0.014, 0.084), motor: V3(0.162, -0.004, 0.140), dir: -1 },
-    { id: 'M3', front: false, sx: -1, hinge: V3(-0.044, -0.014, 0.084), motor: V3(-0.162, -0.004, 0.140), dir: 1 },
-    { id: 'M4', front: true, sx: -1, hinge: V3(-0.050, 0.012, -0.062), motor: V3(-0.174, 0.016, -0.134), dir: -1 },
+  const ARMS = [   // 並びは M1前右 M2後右 M3後左 M4前左（550クラスと同じ）。motor はモーター台(ポッド)の中心
+    { id: 'M1', front: true, sx: 1, hinge: V3(0.045, -0.004, -0.054), motor: V3(0.175, -0.002, -0.100), dir: 1 },
+    { id: 'M2', front: false, sx: 1, hinge: V3(0.038, 0.027, 0.066), motor: V3(0.154, 0.055, 0.1625), dir: -1 },
+    { id: 'M3', front: false, sx: -1, hinge: V3(-0.038, 0.027, 0.066), motor: V3(-0.154, 0.055, 0.1625), dir: 1 },
+    { id: 'M4', front: true, sx: -1, hinge: V3(-0.045, -0.004, -0.054), motor: V3(-0.175, -0.002, -0.100), dir: -1 },
   ];
+  const POD_F = [[0, -0.009], [0.0115, -0.0090], [0.0160, -0.0062], [0.0168, -0.0010], [0.0166, 0.0062], [0.0150, 0.0090], [0, 0.0090]];
+  const POD_R = [[0, -0.0105], [0.0090, -0.0100], [0.0140, -0.0068], [0.0160, -0.0010], [0.0160, 0.0060], [0.0145, 0.0080], [0, 0.0080]];
   const folds = [];
   ARMS.forEach((A, k) => {
     const d = V3().subVectors(A.motor, A.hinge), len = Math.hypot(d.x, d.z), yaw = Math.atan2(-d.z, d.x), rise = Math.atan2(d.y, len);
     const ag = new THREE.Group(); ag.position.copy(A.hinge); ag.rotation.y = yaw; sg.add(ag);
     const fg = new THREE.Group(); ag.add(fg);        // 畳むときに回る入れ物
     const arm = new THREE.Group();
-    const beam = mesh(rboxGeo(len - 0.012, A.front ? 0.014 : 0.012, A.front ? 0.022 : 0.020, 0.005, 3), X.shell); beam.rotation.z = rise; at(beam, len / 2 - 0.004, d.y / 2, 0); arm.add(beam);
-    arm.add(at(mesh(cylGeo(0.008, 0.008, 0.020, 20), X.shellDark), 0, 0, 0));    // ヒンジ
-    // 先端のポッド(モーターの台)
-    arm.add(at(mesh(cylGeo(0.0205, 0.0185, 0.014, 32), X.shell), len, d.y - 0.004, 0));
-    if (!A.front) {   // 後アームの脚
-      arm.add(tubeBetween(V3(len - 0.004, d.y - 0.010, 0), V3(len - 0.010, LEG_Y - A.hinge.y + 0.004, 0), 0.0042, X.shellDark, 14));
-      arm.add(at(mesh(new THREE.SphereGeometry(0.0055, 16, 10), M.rubber), len - 0.010, LEG_Y - A.hinge.y + 0.004, 0));
-    }
-    fg.add(arm); reg(arm, A.front ? 'frontArm' : 'rearArm', V3(0.05, 0, 0), { label: (A.front && k === 0) || (!A.front && k === 1) ? V3(len * 0.55, 0.01, 0) : null });
+    const r0 = A.front ? 0.0068 : 0.0064, r1 = A.front ? 0.0053 : 0.0050, L = Math.hypot(len, d.y) - 0.010;
+    const bg = new THREE.CylinderGeometry(r1, r0, L, 28, 1).rotateZ(-Math.PI / 2).scale(1, 0.88, 1).translate(L / 2 + 0.002, 0, 0).rotateZ(rise);
+    arm.add(mesh(bg, X.shell));
+    arm.add(at(mesh(new THREE.SphereGeometry(1, 28, 16).scale(0.014, 0.0088, 0.0102), X.shell), 0.001, 0, 0));   // 付け根の膨らみ（胴に溶け込む）
+    const pod = mesh(lathe(A.front ? POD_F : POD_R, 40), X.shell); at(pod, len, d.y, 0); arm.add(pod);
+    // 前アーム: 脚の付け根も同じ部品
+    fg.add(arm); reg(arm, A.front ? 'frontArm' : 'rearArm', V3(0.05, 0, 0), { label: (A.front && k === 0) || (!A.front && k === 1) ? V3(len * 0.55, d.y * 0.55 + 0.008, 0) : null });
+    // ポッドの上の飾りの向きを機体に合わせる入れ物（腕の振りを打ち消す）
+    const wg = new THREE.Group(); at(wg, len, d.y, 0); wg.rotation.y = -yaw; fg.add(wg);
     // モーター
-    const mg = new THREE.Group(); mg.name = 'motor'; at(mg, len, d.y + 0.003, 0); fg.add(mg);
+    const podTop = A.front ? 0.0090 : 0.0080;
+    const mg = new THREE.Group(); mg.name = 'motor'; at(mg, len, d.y + podTop, 0); fg.add(mg);
     const core = new THREE.Group(); core.scale.set(0.95, 0.62, 0.95); mg.add(core);
     const base = new THREE.Group(); base.add(mesh(cylGeo(0.0105, 0.0105, 0.004).translate(0, 0.002, 0), M.aluDark)); base.add(mesh(hardLathe([[0.0046, 0.004], [0.0052, 0.004], [0.0052, 0.022], [0.0046, 0.022], [0.0046, 0.004]], 32), M.aluDark)); core.add(base); reg(base, 'motorBase', V3(0, 0, 0));
     const stator = at(mesh(G.teeth, M.lamination), 0, 0.013, 0); stator.castShadow = false; core.add(stator); reg(stator, 'stator', V3(0, 0.04, 0));
@@ -4179,27 +4234,44 @@ function buildMavic(M) {
     const disc = new THREE.Mesh(new THREE.CircleGeometry(0.135, 64), (A.dir > 0 ? M.propDiscCCW : M.propDiscCW).clone()); disc.rotation.x = -Math.PI / 2; disc.userData.noAO = true; at(disc, 0, PY, 0);
     disc.renderOrder = 5; disc.userData.noPart = true; disc.userData.noPick = true; mg.add(disc);
     const mp = reg(mg, 'motor', V3(0.04, 0.06, 0), { coarse: true, label: k === 0 ? V3(0, 0.02, 0) : null });
-    // 前アーム: 脚(アンテナ入り)とフロントLED / 後アーム: ステータスインジケーター
+    // 前アーム: 長い脚(アンテナ入り)とフロントLED。右前だけLiDARの窓 / 後アーム(右): ステータスインジケーター
     if (A.front) {
-      const lg = new THREE.Group();
-      const legShape = polyShape([[0, 0], [0.020, 0], [0.012, LEG_Y - A.hinge.y - d.y + 0.010], [0.004, LEG_Y - A.hinge.y - d.y + 0.010]]);
-      const lgeo = new THREE.ExtrudeGeometry(legShape, { depth: 0.006, bevelEnabled: true, bevelThickness: 0.0015, bevelSize: 0.0015, bevelSegments: 2 }); lgeo.translate(-0.010, 0, -0.003);
-      const leg = mesh(lgeo, X.shellDark); at(leg, len - 0.006, d.y - 0.010, 0); leg.rotation.y = Math.PI / 2; lg.add(leg);
-      lg.add(at(mesh(new THREE.SphereGeometry(0.004, 14, 10), M.rubber), len - 0.006, LEG_Y - A.hinge.y + 0.004, 0));
-      fg.add(lg); reg(lg, 'landingGear', V3(0, -0.03, 0), { label: k === 0 ? V3(len - 0.006, -0.05, 0) : null }); legs.push({ group: lg, sx: A.sx, pivots: [] });
-      const led = new THREE.Group(); at(led, len + 0.016, d.y - 0.008, 0);
-      led.add(mesh(rboxGeo(0.006, 0.004, 0.010, 0.0015), M.ledCover)); led.add(at(mesh(new THREE.BoxGeometry(0.004, 0.0012, 0.007), M.ledGreen), 0, -0.0016, 0));
-      const core2 = new THREE.Sprite(M.glowCore(0x18ff4a)); core2.scale.set(0.009, 0.009, 1); core2.position.y = -0.003; core2.renderOrder = 6; led.add(core2);
-      const halo = new THREE.Sprite(M.glowHalo(0x18ff4a)); halo.scale.set(0.022, 0.022, 1); halo.position.y = -0.004; halo.renderOrder = 6; led.add(halo);
-      fg.add(led); reg(led, 'led', V3(0.04, -0.02, 0), { label: k === 0 ? V3(0.004, -0.004, 0) : null }); led.userData.halo = halo; led.userData.core = core2; halo.userData.baseColor = halo.material.color.clone();
+      const lg = new THREE.Group(); at(lg, len, d.y, 0); lg.rotation.y = -yaw;   // 機体の向きにそろえる（脚の幅は前後方向）
+      const top = -0.0085, tipY = LEG_Y - A.motor.y + 0.0026, H = top - tipY;
+      const legShape = polyShape([[-0.0075, 0], [0.0085, 0], [0.0042, -H], [-0.0018, -H]]);
+      const lgeo = new THREE.ExtrudeGeometry(legShape, { depth: 0.0044, bevelEnabled: true, bevelThickness: 0.0011, bevelSize: 0.0011, bevelSegments: 2, curveSegments: 4 });
+      lgeo.translate(0, 0, -0.0022); lgeo.rotateY(-Math.PI / 2);   // 形は z(前後)×y、厚みは x
+      const splay = new THREE.Group(); at(splay, A.sx * 0.0035, top, 0.0005); splay.rotation.z = A.sx * 0.09; lg.add(splay);   // 先は少し外へ開く
+      splay.add(mesh(lgeo, X.shell));
+      splay.add(at(mesh(new THREE.SphereGeometry(0.0026, 14, 10), M.rubber), 0, -H, 0.0012));
+      fg.add(lg); reg(lg, 'landingGear', V3(0, -0.03, 0), { label: k === 0 ? V3(A.sx * 0.006, -0.026, 0) : null }); legs.push({ group: lg, sx: A.sx, pivots: [] });
+      const led = new THREE.Group(); at(led, A.sx * 0.0068, -0.0030, -0.0158); wg.add(led);
+      led.add(mesh(rboxGeo(0.0046, 0.0034, 0.0024, 0.0011), M.ledCover)); led.add(at(mesh(new THREE.BoxGeometry(0.0034, 0.0024, 0.0010), M.ledGreen), 0, 0, -0.0006));
+      const core2 = new THREE.Sprite(M.glowCore(0x18ff4a)); core2.scale.set(0.008, 0.008, 1); core2.position.z = -0.003; core2.renderOrder = 6; led.add(core2);
+      const halo = new THREE.Sprite(M.glowHalo(0x18ff4a)); halo.scale.set(0.020, 0.020, 1); halo.position.z = -0.004; halo.renderOrder = 6; led.add(halo);
+      reg(led, 'led', V3(0, -0.01, -0.03), { label: k === 0 ? V3(0, 0, -0.004) : null }); led.userData.halo = halo; led.userData.core = core2; halo.userData.baseColor = halo.material.color.clone();
+      if (A.sx > 0) {   // 前向きLiDAR: 右前アームの先、フロントLEDの内側（公式の製品写真・取説の各部名称）
+        const lidar = new THREE.Group(); at(lidar, -0.0035, -0.0028, -0.0160); wg.add(lidar);
+        lidar.add(mesh(rboxGeo(0.0090, 0.0060, 0.0024, 0.0016), X.shellDark));
+        lidar.add(at(mesh(rboxGeo(0.0072, 0.0044, 0.0012, 0.0012), X.glass), 0, 0, -0.0010));
+        reg(lidar, 'lidar', V3(0, 0, -0.04), { label: V3(0, 0, -0.004) });
+      }
     } else if (k === 1) {
-      const st = new THREE.Group(); at(st, len + 0.012, d.y - 0.011, 0);
-      st.add(mesh(rboxGeo(0.008, 0.003, 0.012, 0.0012), M.ledCover)); const lamp = at(mesh(new THREE.BoxGeometry(0.006, 0.001, 0.008), M.ledGreen), 0, -0.0012, 0); st.add(lamp);
-      fg.add(st); const sp = reg(st, 'statusLed', V3(0.04, -0.02, 0), { label: V3(0.004, -0.004, 0) }); sp.lamp = lamp;
+      const st = new THREE.Group(); at(st, 0.004, -0.0082, -0.008); st.rotation.x = 0.5; wg.add(st);
+      st.add(mesh(rboxGeo(0.0070, 0.0024, 0.0050, 0.0010), M.ledCover)); const lamp = at(mesh(new THREE.BoxGeometry(0.0052, 0.0008, 0.0036), M.ledGreen), 0, -0.0010, 0); st.add(lamp);
+      const sp = reg(st, 'statusLed', V3(0.02, -0.03, 0), { label: V3(0, -0.004, 0) }); sp.lamp = lamp;
+    }
+    if (k === 3) {   // 左前アームの前面に「MAVIC 4 PRO」（公式写真）
+      const t = plane(0.042, 0.0058, X.brand); const mid = len * 0.56, rr = 0.0059, th = 0.55;
+      t.rotation.x = th; at(t, mid, Math.sin(rise) * mid - Math.sin(th) * rr * 0.9, Math.cos(th) * rr + 0.0003); t.userData.noPick = true; arm.add(t);
     }
     const ua = new THREE.Group(); ua.position.set(0, PY, 0); ua.scale.setScalar(1 / K); mg.add(ua);
     const mo = { group: mg, prop: propG, propMesh: blades[0], blades, hinges, ghosts, disc, bell, mags, shaft, adapter: hubCap, dir: A.dir, arm: ag, id: A.id, u: V3(A.motor.x, 0, A.motor.z), part: mp, arrowAnchor: ua, front: A.front, sx: A.sx, fold: fg, yaw };
-    motors.push(mo); folds.push({ fg, front: A.front, sx: A.sx, yaw, len });
+    // 前アームの畳み方: 下へ振り下ろして後ろへ半回転（畳むとモーターが下・脚が上。取説の背面図）。回転軸は「今の向き＋畳んだ向き」の二等分
+    let flip = null;
+    if (A.front) { const d0 = V3(d.x, 0, d.z).normalize(), dT = V3(A.sx * 0.10, 0, 1).normalize(), ax = d0.clone().add(dT).normalize().applyAxisAngle(UP, -yaw);
+      const test = V3(1, 0, 0).applyAxisAngle(ax, Math.PI / 2); flip = { axis: ax, sign: test.y < 0 ? 1 : -1 }; }
+    motors.push(mo); folds.push({ fg, front: A.front, sx: A.sx, yaw, len, rise, flip });
   });
 
   // ---------- 説明用の重ね絵 (画角・検知範囲。部品には数えない) ----------
@@ -4214,8 +4286,8 @@ function buildMavic(M) {
   { const S2 = 0.022;   // 実際の測定範囲(m)を 1/45 にした概念図
     const lobe = (dir, r) => { const m = new THREE.Mesh(new THREE.SphereGeometry(r, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2.4), X.sense); m.quaternion.setFromUnitVectors(UP, dir.clone().normalize()); m.renderOrder = 7; return m; };
     senseG.add(lobe(V3(0, 0, -1), 24 * S2), lobe(V3(0, 0, 1), 22 * S2), lobe(V3(1, 0, 0), 21 * S2), lobe(V3(-1, 0, 0), 21 * S2), lobe(V3(0, 1, 0), 18 * S2), lobe(V3(0, -1, 0), 17 * S2 * 0.25));
-    const beam = new THREE.Mesh(new THREE.ConeGeometry(Math.tan(Math.PI / 6) * 25 * S2, 25 * S2, 4, 1, true), X.lidarBeam); beam.rotation.y = Math.PI / 4;   /* 視野は上下・左右とも60°（公式） */ beam.rotation.x = -Math.PI / 2; beam.position.set(0, 0.014, -0.125 - 25 * S2 / 2); beam.renderOrder = 8; senseG.add(beam);
-    const irb = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.075, 24, 1, true), X.irBeam); irb.position.set(0, -0.037 - 0.0375, -0.010); irb.renderOrder = 8; senseG.add(irb);
+    const beam = new THREE.Mesh(new THREE.ConeGeometry(Math.tan(Math.PI / 6) * 25 * S2, 25 * S2, 4, 1, true), X.lidarBeam); beam.rotation.y = Math.PI / 4;   /* 視野は上下・左右とも60°（公式） */ beam.rotation.x = -Math.PI / 2; beam.position.set(0.1745, -0.0048, -0.1185 - 25 * S2 / 2);   /* 右前アームの先から前へ */ beam.renderOrder = 8; senseG.add(beam);
+    const irb = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.075, 24, 1, true), X.irBeam); irb.position.set(0, -0.040 - 0.0375, -0.066); irb.renderOrder = 8; senseG.add(irb);
     noPart(senseG); }
 
   // ---------- 矢印 ----------
@@ -4229,7 +4301,7 @@ function buildMavic(M) {
   const cgMarker = new THREE.Group(); cgMarker.visible = false; root.add(cgMarker);
 
   return { root, sg, halfSpan: 0.31, focusMin: 0.26, parts, pick, wires, motors, legs, arrows, batPart, G, cgMarker, personGroup: null, folds, gimbalParts: { pan, roll, tilt, head, yoke, iris, lens: { main: camMain, mid: camMid, tele: camTele } }, fovG, senseG,
-    rotor: { R: 0.1334 * K, y0: 0 }, moveR: 0.26, moveY: 0.05, rpmScale: 1.1 };
+    rotor: { R: 0.1334 * K, y0: 0.024 }, moveR: 0.26, moveY: 0.05, rpmScale: 1.1 };
 }
 
 // ===== 描画エンジン: レンダラー・照明・ポスト処理・状態・共通ユーティリティ =====
@@ -4617,6 +4689,7 @@ function bottomCover() {
   const H2 = window.innerHeight; let cov = 0;
   for (const sel of ['#dock', '#inspector.open', '#lesson.open', '#expert.open', '#dshowPanel.open', '#noteCard', '#massBar', '#bigBand']) {
     if (sel === '#bigBand' && H2 <= 520) continue;   /* 横向きは高さが足りない。名前の帯は3Dに重ねて浮かせ、機体は小さくしない */
+    if (sel === '#noteCard' && H2 <= 520 && innerWidth > H2 && IS_ALT) continue;   /* 横向きのカードは左に立つ。機体はその右へ寄せる(pdFrame)ので、下の覆いには数えない */
     const el = document.querySelector(sel); if (!el || el.hidden) continue;
     const r = el.getBoundingClientRect(); if (r.height < 4 || r.top > H2 - 8 || r.bottom < H2 * 0.6) continue;
     // 画面の一部しか覆っていないもの（幅の広い画面で左に寄ったカードなど）は、真ん中に載っていなければ帯を狭めない
@@ -4635,7 +4708,7 @@ function topCover() {
     const r = el.getBoundingClientRect(); if (r.height < 4 || r.top > H2 * 0.4) continue;
     cov = Math.max(cov, r.bottom);
   }
-  return Math.min(cov, H2 * 0.3);
+  return Math.min(cov, H2 * (IS_ALT && H2 <= 520 && innerWidth > H2 ? 0.42 : 0.3));   /* 横向きは視点ボタンの列が右上の機体の位置に重なるので、その下までを覆いとして数える */
 }
 // 「帯が画面」の約束: シートやバーで機体の帯が狭まったぶんカメラを引き、帯の中に同じ画を同じ割合で収める(帯が広がれば寄る)
 const bandK = () => narrow() ? 1 / (S.bandFrac || 1) : 1;
@@ -4670,6 +4743,7 @@ function setView(v) {
   if (v === 'inside') {
     const mo = D.motors[0]; const c = mo.group.localToWorld(new THREE.Vector3(0, 0.02, 0));
     const u = new THREE.Vector3(1, 0, 0).applyQuaternion(mo.arm.getWorldQuaternion(new THREE.Quaternion())); const tan = new THREE.Vector3(u.z, 0, -u.x); const vs = viewScale();
+    if (IS_ALT) { pdFrame([mo.group, D.batPart.obj], { pull: true, margin: 1.12, dir: u.clone().multiplyScalar(0.19).addScaledVector(tan, 0.12).add(new THREE.Vector3(0, 0.14, 0)).normalize() }); return; }   /* 切ったモーターとバッテリーの両方を、カードと部品の一覧を避けた枠に収める */
     flyTo(c.clone().addScaledVector(u, 0.19 * vs).addScaledVector(tan, 0.12 * vs).add(new THREE.Vector3(0, 0.015 * vs, 0)), c, 1100);
   } else if (IS_ALT && VIEWS[v]) { const [p] = VIEWS[v]; focusOn([D.root], { dir: new THREE.Vector3(...p).normalize(), pull: true, margin: 1.12 });   /* 機種ごとに大きさが違うので、向きだけ決めて枠に収める */
   } else { const [p, t] = VIEWS[v]; const tv = new THREE.Vector3(...t); const pv = new THREE.Vector3(...p).sub(tv).multiplyScalar(viewScale() * (D.viewK ? D.viewK() : 1)).add(tv); flyTo(pv, tv, 800); }   /* 翼幅の広い機体(PD6B)は視点ボタンでも引く */
@@ -10448,7 +10522,7 @@ function mavicAction(id) {
     if (mav.foldTo > 0 || mav.fold > 0.001) mav.foldTo = 0;
     mav.act = { id, t: 0 }; mav.gim.tilt = mav.gim.roll = 0; renderMvNote('gimbal'); syncMvChips();
     const g = D.gimbalParts.head; g.updateWorldMatrix(true, false); const c = new THREE.Vector3().setFromMatrixPosition(g.matrixWorld);
-    mvFrameBox([c.x - 0.05, c.y - 0.045, c.z - 0.04], [c.x + 0.05, c.y + 0.05, c.z + 0.05], [0.25, 0.16, -0.95], 1.1); return;   /* ほぼ正面のやや上から、カメラの頭を主役に（斜め横からだと前アームが視線をふさぐ） */
+    mvFrameBox([c.x - 0.085, c.y - 0.05, c.z - 0.035], [c.x + 0.085, c.y + 0.07, c.z + 0.09], [0.30, 0.14, -0.94], 1.08); return;   /* ほぼ正面のやや上から、カメラの頭を主役に（斜め横からだと前アームが視線をふさぐ） */
   }
 }
 function mavicStop() {
@@ -10510,18 +10584,18 @@ function renderMvAbout() {
       ${row('検知', '全方向デュアルビジョン＋前向きLiDAR＋下向き赤外線', '公式')}${row('プロペラ', '10.5 × 5.8 インチ', '販売店の表記')}
     </table>
     <h4>550クラスとのちがい</h4>
-    <ul class="pd-diff"><li><b>折りたたみ</b>：4本のアームを畳むと約5分の1の体積に。後方右アームを開くと電源が入る</li><li><b>カメラが3つ</b>：28・70・168mm相当を持ち替える。ジンバルが縦向き撮影にも回る。「眼」ボタンでカメラの映像を見られる</li><li><b>周りを見る</b>：魚眼センサーとLiDARで、ぶつかる前に止まる・避ける</li><li><b>部品が一体</b>：フレーム・ESC・受信機が胴の中にまとまり、配線や基板は外から見えない</li></ul>
-    <p class="caveat">この3Dモデルは、公式の仕様・取扱説明書と写真から起こした教材用の再現です。胴の形・センサーの配置・ジンバルの軸の順番・アームの畳み方・内部の配置は推定を含みます（解説の「推定」「例」）。</p>
+    <ul class="pd-diff"><li><b>折りたたみ</b>：前アームは下から後ろへ、後アームは上の段で前へ畳み、約5分の1の体積に。後方右アームを開くと電源が入る</li><li><b>高さの違う前後のモーター</b>：後ろのモーターは胴より高く、前は長い脚で立つ</li><li><b>カメラが3つ</b>：28・70・168mm相当を持ち替える。ジンバルが縦向き撮影にも回る。「眼」ボタンでカメラの映像を見られる</li><li><b>周りを見る</b>：魚眼センサーとLiDARで、ぶつかる前に止まる・避ける</li><li><b>部品が一体</b>：フレーム・ESC・受信機が胴の中にまとまり、配線や基板は外から見えない</li></ul>
+    <p class="caveat">この3Dモデルは、公式の仕様・取扱説明書と写真から起こした教材用の再現です。形は公式の真上・正面・斜めの製品写真と取説の図から寸法を読み取って起こしました。胴の断面の細かな形・センサーの一部の配置・ジンバルの軸の順番・内部の配置は推定を含みます（解説の「推定」「例」）。</p>
     <details class="pd-src"><summary>出典（${MAVIC_DATE}）</summary><ul>${['specs', 'product', 'manual', 'prop', 'review'].map(k => `<li>${MV_SRC_LINK(k)}</li>`).join('')}</ul></details>`;
   renderNote({ kind: 'mavic-about', title: 'DJI Mavic 4 Pro', html, actions: [{ label: 'たたんでみる', fn: () => mavicAction('fold') }, { label: '3眼のカメラを見る', fn: () => { renderNote(null); mavicAction('fov'); } }] });
 }
 function renderMvNote(id) {
   const N = {
     fold: () => ({ title: mav.foldTo > 0 ? 'アームをたたむ' : 'アームを広げる', html: mav.foldTo > 0
-      ? `<p>羽根を寄せてから、後ろのアームを前へ、前のアームを後ろへ回して、胴の脇に畳みます。折りたたむと 257.6 × 124.8 mm（公式）。</p><p>アームを畳んでも、初期設定では電源は切れません（アーム折りたたみによる電源オフは初期設定で無効・取説）。この図では畳み終えたら電源ボタンで切った状態にします。</p><p class="caveat">畳む順番と角度は例です。実機はアームが胴のくぼみに収まりますが、この図は胴を単純な形にしているので、畳んだ大きさ（特に幅と高さ）が実機より大きくなります。</p>`
-      : `<p>前のアームを開いてから、後ろのアームを開きます。<b>後方右アームを開くと、電源ボタンを押さなくても電源が入ります</b>（アーム展開による電源オン・初期設定で有効・取説）。フロントLEDが緑に点き、機首の向きを示します。</p><p class="caveat">USB-Cポートを使っている間は、アームを開いても電源は入りません（取説）。畳む順番と角度は例です。</p>`,
+      ? `<p>羽根を寄せ、<b>前アームを下へ振り下ろして後ろへ</b>回します（畳むとモーターが下・脚が上になり、胴の後ろの角に収まる）。最後に<b>後アームを前へ</b>回し、胴の上の段に重ねます。折りたたむと 257.6 × 124.8 × 103.4 mm（公式）。</p><p>アームを畳んでも、初期設定では電源は切れません（アーム折りたたみによる電源オフは初期設定で無効・取説）。この図では畳み終えたら電源ボタンで切った状態にします。</p><p class="caveat">回し方は取説の展開図と製品写真から起こしたものです。この図は胴のくぼみを作っていないので、畳んだ幅が実機より少し大きくなります。</p>`
+      : `<p>まず後アームを後ろへ開きます。<b>後方右アームを開くと、電源ボタンを押さなくても電源が入ります</b>（アーム展開による電源オン・初期設定で有効・取説）。続いて前アームを下から前へ振り上げて開きます。フロントLEDが緑に点き、機首の向きを示します。</p><p class="caveat">USB-Cポートを使っている間は、アームを開いても電源は入りません（取説）。順番は取説の展開図から。</p>`,
       actions: [{ label: mav.foldTo > 0 ? '広げる' : 'たたむ', primary: true, fn: () => mavicAction('fold') }] }),
-    battery: () => ({ title: 'バッテリーを入れ替える', html: `<p id="mvBatState" class="pd-state">電源を切っています…</p><p>電源を切り、左右のバックルを押して、バッテリーを引き抜きます（この図では後ろへ）。差し込むときはカチッと音がするまで（取説）。</p><p><b>抜き差しの前に前アームを展開する</b>のが決まりです。前向きLiDARを傷めないため（取説）。</p><p class="caveat">バッテリーの抜き方向とバックルの形は図の例です。</p>`, actions: [{ label: 'もう一度', fn: () => mavicAction('battery') }], onClose: () => { mavicStop(); focusOn([D.root], { pull: true }); } }),
+    battery: () => ({ title: 'バッテリーを入れ替える', html: `<p id="mvBatState" class="pd-state">電源を切っています…</p><p>電源を切り、左右のバックルを押して、胴の下半分のバッテリーを後ろへ引き抜きます。差し込むときはカチッと音がするまで（取説）。</p><p><b>抜き差しの前に前アームを展開する</b>のが決まりです。前向きLiDARを傷めないため（取説）。</p><p class="caveat">バッテリーの位置と抜く向きは製品写真と取説の背面図から。バックルの形は図の例です。</p>`, actions: [{ label: 'もう一度', fn: () => mavicAction('battery') }], onClose: () => { mavicStop(); focusOn([D.root], { pull: true }); } }),
     gimbal: () => ({ title: 'インフィニティジンバル', html: `<p id="mvGimState" class="pd-state">上へ向けます…</p><p>カメラの頭は、機首の下の付け根から右側面へ回る腕に、横向きのモーター（チルト）で吊られています。前面はさらに光軸のまわりに回り（ロール）、<b>機体を傾けずに縦向きの撮影や、傾いた構図（ダッチアングル）</b>が撮れます。上は70°まで向けられます（公式）。</p><table class="pd-spec"><tr><th>操作できる範囲</th><td>チルト −90°〜70°・ロール −40°〜400°<small>公式</small></td></tr><tr><th>最大制御速度</th><td>チルト・ロールとも 100°/秒<small>公式</small></td></tr><tr><th>ぶれの範囲</th><td>ホバリング（無風）±0.001°<small>公式</small></td></tr></table><p class="caveat">機械的にはロール −90°〜450°・チルト −164°〜160°・パン ±22°（公式）。パンは操作できず、揺れの打ち消しに使います。回る範囲は軸の角度・風・速さで変わります（公式の注記）。腕の形と軸の順番は写真からの推定です。</p>`, actions: [{ label: 'もう一度', fn: () => mavicAction('gimbal') }, { label: 'カメラから見る', fn: () => mvCamView() }], onClose: () => { mavicStop(); focusOn([D.root], { pull: true }); } }),
     fov: () => mvCamNote(),
     sense: () => ({ title: '検知範囲', html: `<p>魚眼センサーで全方向の障害物を見て、ぶつかる前に止まる・避けます。暗い夜は前向きLiDARが前を測ります（公式）。</p><table class="pd-spec"><tr><th>ビジョン</th><td>前 24・後 22・横 21・上 18・下 17 m<small>いずれも 0.5 m から・公式</small></td></tr><tr><th>LiDAR</th><td>夜間 0.5〜25 m・視野 60°<small>公式</small></td></tr><tr><th>下向き赤外線</th><td>0.3〜8 m<small>公式</small></td></tr></table><p class="caveat">図は測定範囲を約45分の1に縮めた概念図です（下向きのドームと赤外線の線はさらに縮めています）。スポーツモードではビジョンシステムが働かず、細い電線や枝は見分けにくい（取説）。</p>`, actions: [{ label: 'もどす', fn: () => mvOverlays(null) }], onClose: () => mvOverlays(null) }),
@@ -10607,17 +10681,17 @@ function stepMavic(dt) {
     }
   } else if (mav.foldTo < mav.fold) { mav.fold = Math.max(mav.foldTo, mav.fold - dt / 2.6); dirty = true; }
   if (mav.fold !== mav._last) {
-    const f = mav.fold, fb = mvEase(f / 0.3), fr = mvEase(f / 0.6), ff = mvEase((f - 0.4) / 0.6);   /* 畳む: 羽根→後ろ→前 / 広げる: 前→後ろ→羽根 */
+    const f = mav.fold, fb = mvEase(f / 0.3), ff = mvEase((f - 0.25) / 0.4), fr = mvEase((f - 0.6) / 0.4);   /* 畳む: 羽根→前アーム(下の段)→後アーム(上の段) / 広げる: 後ろ→前→羽根（取説の展開順） */
     D.motors.forEach((mo, i) => {
       const F = D.folds[i];
-      if (F.front) { const yawT = Math.atan2(-1, 0); F.fg.rotation.set(0, mvNorm(yawT - F.yaw) * ff, 0.14 * ff); }   /* 真後ろへ回し、胴の肩より上に起こして重ねる */
-      else { const yawT = Math.atan2(0.998, F.sx * 0.061); F.fg.rotation.set(0, mvNorm(yawT - F.yaw) * fr, 0); }   /* 真前へ回し、胴の脇に寄せる（実機は胴のくぼみに収まる。下へ倒すと脚が床に潜る） */
+      if (F.front) F.fg.quaternion.setFromAxisAngle(F.flip.axis, F.flip.sign * Math.PI * ff);   /* 下へ振り下ろして後ろへ。畳むと上下が逆さになる */
+      else { const yawT = Math.atan2(1, F.sx * 0.06); F.fg.rotation.set(0, mvNorm(yawT - F.yaw) * fr, -F.rise * 1.15 * fr); }   /* 前へ回して胴の上の段に寝かせる */
       for (const h of mo.hinges) h.g.rotation.y = h.s * fb * Math.PI / 2;
     });
     // 後方右アーム(M2)を開ききったら電源が入る / 畳み終えたら電源を切った状態に
-    const rr = mvEase(f / 0.6);
+    const rr = fr;
     if (mav.foldTo === 0 && !mav.powered && rr < 0.02 && !mav.act) setMvPower(true, '後方右アームを開いて電源オン');
-    if (mav.foldTo === 1 && f >= 1 && mav.powered) { setMvPower(false, '電源ボタンで電源を切りました'); mvFrameBox([-0.09, -0.16, -0.18], [0.09, 0.05, 0.16], [0.62, 0.42, -0.66], 1.15); }   /* 畳み終えたら畳んだ大きさに寄せ直す */
+    if (mav.foldTo === 1 && f >= 1 && mav.powered) { setMvPower(false, '電源ボタンで電源を切りました'); mvFrameBox([-0.09, -0.16, -0.16], [0.09, -0.04, 0.14], [0.62, 0.42, -0.66], 1.15); }   /* 畳み終えたら畳んだ大きさに寄せ直す */
     if (f === 0 && mav.foldTo === 0 && mav.pendingPower) { mav.pendingPower = false; setPower(0.5); }
     mav._last = f; dirty = true;
   }
@@ -10632,8 +10706,7 @@ function stepMavic(dt) {
         if (t > 0.3 && mav.powered) setMvPower(false);
         let back = 0, up = 0;
         if (t > 0.8 && t < 2.0) back = mvEase((t - 0.8) / 1.2) * 0.17; else if (t >= 2.0 && t < 2.8) back = 0.17; else if (t >= 2.8 && t < 4.0) back = 0.17 * (1 - mvEase((t - 2.8) / 1.2));
-        up = Math.min(back, 0.012);
-        p.anim.pos.set(0, up, back);
+        p.anim.pos.set(0, 0, back);   /* 胴の上側と底の板の間を、まっすぐ後ろへ */
         const st = $('#mvBatState'); if (st) st.textContent = t < 0.8 ? '電源を切りました' : t < 2.0 ? 'バックルを押して後ろへ引き抜きます' : t < 2.8 ? '充電済みのバッテリーに持ち替え' : t < 4.0 ? 'カチッと音がするまで差し込みます' : '電源ボタンを押して起動しました';
         if (t > 4.2 && !mav.powered) setMvPower(true);
         if (t > 4.6) { p.anim = null; p.animReset = true; mav.act = null; syncMvChips(); }

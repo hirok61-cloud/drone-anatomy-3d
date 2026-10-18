@@ -52,7 +52,7 @@ function mavicAction(id) {
     if (mav.foldTo > 0 || mav.fold > 0.001) mav.foldTo = 0;
     mav.act = { id, t: 0 }; mav.gim.tilt = mav.gim.roll = 0; renderMvNote('gimbal'); syncMvChips();
     const g = D.gimbalParts.head; g.updateWorldMatrix(true, false); const c = new THREE.Vector3().setFromMatrixPosition(g.matrixWorld);
-    mvFrameBox([c.x - 0.05, c.y - 0.045, c.z - 0.04], [c.x + 0.05, c.y + 0.05, c.z + 0.05], [0.25, 0.16, -0.95], 1.1); return;   /* ほぼ正面のやや上から、カメラの頭を主役に（斜め横からだと前アームが視線をふさぐ） */
+    mvFrameBox([c.x - 0.085, c.y - 0.05, c.z - 0.035], [c.x + 0.085, c.y + 0.07, c.z + 0.09], [0.30, 0.14, -0.94], 1.08); return;   /* ほぼ正面のやや上から、カメラの頭を主役に（斜め横からだと前アームが視線をふさぐ） */
   }
 }
 function mavicStop() {
@@ -114,18 +114,18 @@ function renderMvAbout() {
       ${row('検知', '全方向デュアルビジョン＋前向きLiDAR＋下向き赤外線', '公式')}${row('プロペラ', '10.5 × 5.8 インチ', '販売店の表記')}
     </table>
     <h4>550クラスとのちがい</h4>
-    <ul class="pd-diff"><li><b>折りたたみ</b>：4本のアームを畳むと約5分の1の体積に。後方右アームを開くと電源が入る</li><li><b>カメラが3つ</b>：28・70・168mm相当を持ち替える。ジンバルが縦向き撮影にも回る。「眼」ボタンでカメラの映像を見られる</li><li><b>周りを見る</b>：魚眼センサーとLiDARで、ぶつかる前に止まる・避ける</li><li><b>部品が一体</b>：フレーム・ESC・受信機が胴の中にまとまり、配線や基板は外から見えない</li></ul>
-    <p class="caveat">この3Dモデルは、公式の仕様・取扱説明書と写真から起こした教材用の再現です。胴の形・センサーの配置・ジンバルの軸の順番・アームの畳み方・内部の配置は推定を含みます（解説の「推定」「例」）。</p>
+    <ul class="pd-diff"><li><b>折りたたみ</b>：前アームは下から後ろへ、後アームは上の段で前へ畳み、約5分の1の体積に。後方右アームを開くと電源が入る</li><li><b>高さの違う前後のモーター</b>：後ろのモーターは胴より高く、前は長い脚で立つ</li><li><b>カメラが3つ</b>：28・70・168mm相当を持ち替える。ジンバルが縦向き撮影にも回る。「眼」ボタンでカメラの映像を見られる</li><li><b>周りを見る</b>：魚眼センサーとLiDARで、ぶつかる前に止まる・避ける</li><li><b>部品が一体</b>：フレーム・ESC・受信機が胴の中にまとまり、配線や基板は外から見えない</li></ul>
+    <p class="caveat">この3Dモデルは、公式の仕様・取扱説明書と写真から起こした教材用の再現です。形は公式の真上・正面・斜めの製品写真と取説の図から寸法を読み取って起こしました。胴の断面の細かな形・センサーの一部の配置・ジンバルの軸の順番・内部の配置は推定を含みます（解説の「推定」「例」）。</p>
     <details class="pd-src"><summary>出典（${MAVIC_DATE}）</summary><ul>${['specs', 'product', 'manual', 'prop', 'review'].map(k => `<li>${MV_SRC_LINK(k)}</li>`).join('')}</ul></details>`;
   renderNote({ kind: 'mavic-about', title: 'DJI Mavic 4 Pro', html, actions: [{ label: 'たたんでみる', fn: () => mavicAction('fold') }, { label: '3眼のカメラを見る', fn: () => { renderNote(null); mavicAction('fov'); } }] });
 }
 function renderMvNote(id) {
   const N = {
     fold: () => ({ title: mav.foldTo > 0 ? 'アームをたたむ' : 'アームを広げる', html: mav.foldTo > 0
-      ? `<p>羽根を寄せてから、後ろのアームを前へ、前のアームを後ろへ回して、胴の脇に畳みます。折りたたむと 257.6 × 124.8 mm（公式）。</p><p>アームを畳んでも、初期設定では電源は切れません（アーム折りたたみによる電源オフは初期設定で無効・取説）。この図では畳み終えたら電源ボタンで切った状態にします。</p><p class="caveat">畳む順番と角度は例です。実機はアームが胴のくぼみに収まりますが、この図は胴を単純な形にしているので、畳んだ大きさ（特に幅と高さ）が実機より大きくなります。</p>`
-      : `<p>前のアームを開いてから、後ろのアームを開きます。<b>後方右アームを開くと、電源ボタンを押さなくても電源が入ります</b>（アーム展開による電源オン・初期設定で有効・取説）。フロントLEDが緑に点き、機首の向きを示します。</p><p class="caveat">USB-Cポートを使っている間は、アームを開いても電源は入りません（取説）。畳む順番と角度は例です。</p>`,
+      ? `<p>羽根を寄せ、<b>前アームを下へ振り下ろして後ろへ</b>回します（畳むとモーターが下・脚が上になり、胴の後ろの角に収まる）。最後に<b>後アームを前へ</b>回し、胴の上の段に重ねます。折りたたむと 257.6 × 124.8 × 103.4 mm（公式）。</p><p>アームを畳んでも、初期設定では電源は切れません（アーム折りたたみによる電源オフは初期設定で無効・取説）。この図では畳み終えたら電源ボタンで切った状態にします。</p><p class="caveat">回し方は取説の展開図と製品写真から起こしたものです。この図は胴のくぼみを作っていないので、畳んだ幅が実機より少し大きくなります。</p>`
+      : `<p>まず後アームを後ろへ開きます。<b>後方右アームを開くと、電源ボタンを押さなくても電源が入ります</b>（アーム展開による電源オン・初期設定で有効・取説）。続いて前アームを下から前へ振り上げて開きます。フロントLEDが緑に点き、機首の向きを示します。</p><p class="caveat">USB-Cポートを使っている間は、アームを開いても電源は入りません（取説）。順番は取説の展開図から。</p>`,
       actions: [{ label: mav.foldTo > 0 ? '広げる' : 'たたむ', primary: true, fn: () => mavicAction('fold') }] }),
-    battery: () => ({ title: 'バッテリーを入れ替える', html: `<p id="mvBatState" class="pd-state">電源を切っています…</p><p>電源を切り、左右のバックルを押して、バッテリーを引き抜きます（この図では後ろへ）。差し込むときはカチッと音がするまで（取説）。</p><p><b>抜き差しの前に前アームを展開する</b>のが決まりです。前向きLiDARを傷めないため（取説）。</p><p class="caveat">バッテリーの抜き方向とバックルの形は図の例です。</p>`, actions: [{ label: 'もう一度', fn: () => mavicAction('battery') }], onClose: () => { mavicStop(); focusOn([D.root], { pull: true }); } }),
+    battery: () => ({ title: 'バッテリーを入れ替える', html: `<p id="mvBatState" class="pd-state">電源を切っています…</p><p>電源を切り、左右のバックルを押して、胴の下半分のバッテリーを後ろへ引き抜きます。差し込むときはカチッと音がするまで（取説）。</p><p><b>抜き差しの前に前アームを展開する</b>のが決まりです。前向きLiDARを傷めないため（取説）。</p><p class="caveat">バッテリーの位置と抜く向きは製品写真と取説の背面図から。バックルの形は図の例です。</p>`, actions: [{ label: 'もう一度', fn: () => mavicAction('battery') }], onClose: () => { mavicStop(); focusOn([D.root], { pull: true }); } }),
     gimbal: () => ({ title: 'インフィニティジンバル', html: `<p id="mvGimState" class="pd-state">上へ向けます…</p><p>カメラの頭は、機首の下の付け根から右側面へ回る腕に、横向きのモーター（チルト）で吊られています。前面はさらに光軸のまわりに回り（ロール）、<b>機体を傾けずに縦向きの撮影や、傾いた構図（ダッチアングル）</b>が撮れます。上は70°まで向けられます（公式）。</p><table class="pd-spec"><tr><th>操作できる範囲</th><td>チルト −90°〜70°・ロール −40°〜400°<small>公式</small></td></tr><tr><th>最大制御速度</th><td>チルト・ロールとも 100°/秒<small>公式</small></td></tr><tr><th>ぶれの範囲</th><td>ホバリング（無風）±0.001°<small>公式</small></td></tr></table><p class="caveat">機械的にはロール −90°〜450°・チルト −164°〜160°・パン ±22°（公式）。パンは操作できず、揺れの打ち消しに使います。回る範囲は軸の角度・風・速さで変わります（公式の注記）。腕の形と軸の順番は写真からの推定です。</p>`, actions: [{ label: 'もう一度', fn: () => mavicAction('gimbal') }, { label: 'カメラから見る', fn: () => mvCamView() }], onClose: () => { mavicStop(); focusOn([D.root], { pull: true }); } }),
     fov: () => mvCamNote(),
     sense: () => ({ title: '検知範囲', html: `<p>魚眼センサーで全方向の障害物を見て、ぶつかる前に止まる・避けます。暗い夜は前向きLiDARが前を測ります（公式）。</p><table class="pd-spec"><tr><th>ビジョン</th><td>前 24・後 22・横 21・上 18・下 17 m<small>いずれも 0.5 m から・公式</small></td></tr><tr><th>LiDAR</th><td>夜間 0.5〜25 m・視野 60°<small>公式</small></td></tr><tr><th>下向き赤外線</th><td>0.3〜8 m<small>公式</small></td></tr></table><p class="caveat">図は測定範囲を約45分の1に縮めた概念図です（下向きのドームと赤外線の線はさらに縮めています）。スポーツモードではビジョンシステムが働かず、細い電線や枝は見分けにくい（取説）。</p>`, actions: [{ label: 'もどす', fn: () => mvOverlays(null) }], onClose: () => mvOverlays(null) }),
@@ -211,17 +211,17 @@ function stepMavic(dt) {
     }
   } else if (mav.foldTo < mav.fold) { mav.fold = Math.max(mav.foldTo, mav.fold - dt / 2.6); dirty = true; }
   if (mav.fold !== mav._last) {
-    const f = mav.fold, fb = mvEase(f / 0.3), fr = mvEase(f / 0.6), ff = mvEase((f - 0.4) / 0.6);   /* 畳む: 羽根→後ろ→前 / 広げる: 前→後ろ→羽根 */
+    const f = mav.fold, fb = mvEase(f / 0.3), ff = mvEase((f - 0.25) / 0.4), fr = mvEase((f - 0.6) / 0.4);   /* 畳む: 羽根→前アーム(下の段)→後アーム(上の段) / 広げる: 後ろ→前→羽根（取説の展開順） */
     D.motors.forEach((mo, i) => {
       const F = D.folds[i];
-      if (F.front) { const yawT = Math.atan2(-1, 0); F.fg.rotation.set(0, mvNorm(yawT - F.yaw) * ff, 0.14 * ff); }   /* 真後ろへ回し、胴の肩より上に起こして重ねる */
-      else { const yawT = Math.atan2(0.998, F.sx * 0.061); F.fg.rotation.set(0, mvNorm(yawT - F.yaw) * fr, 0); }   /* 真前へ回し、胴の脇に寄せる（実機は胴のくぼみに収まる。下へ倒すと脚が床に潜る） */
+      if (F.front) F.fg.quaternion.setFromAxisAngle(F.flip.axis, F.flip.sign * Math.PI * ff);   /* 下へ振り下ろして後ろへ。畳むと上下が逆さになる */
+      else { const yawT = Math.atan2(1, F.sx * 0.06); F.fg.rotation.set(0, mvNorm(yawT - F.yaw) * fr, -F.rise * 1.15 * fr); }   /* 前へ回して胴の上の段に寝かせる */
       for (const h of mo.hinges) h.g.rotation.y = h.s * fb * Math.PI / 2;
     });
     // 後方右アーム(M2)を開ききったら電源が入る / 畳み終えたら電源を切った状態に
-    const rr = mvEase(f / 0.6);
+    const rr = fr;
     if (mav.foldTo === 0 && !mav.powered && rr < 0.02 && !mav.act) setMvPower(true, '後方右アームを開いて電源オン');
-    if (mav.foldTo === 1 && f >= 1 && mav.powered) { setMvPower(false, '電源ボタンで電源を切りました'); mvFrameBox([-0.09, -0.16, -0.18], [0.09, 0.05, 0.16], [0.62, 0.42, -0.66], 1.15); }   /* 畳み終えたら畳んだ大きさに寄せ直す */
+    if (mav.foldTo === 1 && f >= 1 && mav.powered) { setMvPower(false, '電源ボタンで電源を切りました'); mvFrameBox([-0.09, -0.16, -0.16], [0.09, -0.04, 0.14], [0.62, 0.42, -0.66], 1.15); }   /* 畳み終えたら畳んだ大きさに寄せ直す */
     if (f === 0 && mav.foldTo === 0 && mav.pendingPower) { mav.pendingPower = false; setPower(0.5); }
     mav._last = f; dirty = true;
   }
@@ -236,8 +236,7 @@ function stepMavic(dt) {
         if (t > 0.3 && mav.powered) setMvPower(false);
         let back = 0, up = 0;
         if (t > 0.8 && t < 2.0) back = mvEase((t - 0.8) / 1.2) * 0.17; else if (t >= 2.0 && t < 2.8) back = 0.17; else if (t >= 2.8 && t < 4.0) back = 0.17 * (1 - mvEase((t - 2.8) / 1.2));
-        up = Math.min(back, 0.012);
-        p.anim.pos.set(0, up, back);
+        p.anim.pos.set(0, 0, back);   /* 胴の上側と底の板の間を、まっすぐ後ろへ */
         const st = $('#mvBatState'); if (st) st.textContent = t < 0.8 ? '電源を切りました' : t < 2.0 ? 'バックルを押して後ろへ引き抜きます' : t < 2.8 ? '充電済みのバッテリーに持ち替え' : t < 4.0 ? 'カチッと音がするまで差し込みます' : '電源ボタンを押して起動しました';
         if (t > 4.2 && !mav.powered) setMvPower(true);
         if (t > 4.6) { p.anim = null; p.animReset = true; mav.act = null; syncMvChips(); }
