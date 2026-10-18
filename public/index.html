@@ -10281,6 +10281,8 @@ function stepPd6b(dt) {
     const f = pd6b.fold, bk = pdEase(f / 0.38), ak = pdEase((f - 0.32) / 0.68);
     D.pivots.forEach(pv => { pv.rotation.z = ak * THREE.MathUtils.degToRad(78);   /* 真上まで起こすと畳んだ羽根がハブの機器に当たる */ });
     for (const mo of D.motors) for (const h of mo.hinges) h.g.rotation.y = h.s * bk * Math.PI / 2;
+    if (f >= 1 && pd6b._lastFold < 1 && pd6b.foldTo === 1) frameBox([-0.16, -0.16, -0.16], [0.16, 0.20, 0.16], [0.62, 0.42, -0.66], 1.1);   /* 畳み終えたら畳んだ大きさに寄せ直す */
+    if (f === 0 && pd6b._lastFold > 0 && pd6b.foldTo === 0 && S.tab === 'see' && !pd6b.act) pdFrame([D.root], { pull: true });   /* 広げ終えたら広げた大きさで収め直す */
     setLock(f > 0.002); pd6b._lastFold = f; dirty = true;
     if (f === 0 && pd6b.foldTo === 0 && pd6b.pendingPower) { pd6b.pendingPower = false; setPower(0.5); }
   }
