@@ -26,7 +26,7 @@ function pd6bMaterials(M) {
     g.fillStyle = '#f2f3f5'; g.font = `bold 92px ${sans}`; g.textBaseline = 'middle'; g.fillText('PARA', 270, 88); g.fillText('SAFE', 270, 176);
     g.font = `bold 34px ${sans}`; g.fillStyle = '#c9ccd2'; g.fillText('NIPPON KAYAKU', 560, 214);
   });
-  const escLabel = pd6bCanvas(256, 128, (g, w, h) => { g.fillStyle = '#f2f3f5'; g.fillRect(0, 0, w, h); g.fillStyle = '#26282d'; g.font = `bold 44px ${sans}`; g.fillText('ESC', 22, 58); g.font = `26px ${sans}`; g.fillStyle = '#6b7079'; g.fillText('FOC · 12S', 22, 100); });
+  const escLabel = pd6bCanvas(256, 128, (g, w, h) => { g.fillStyle = '#f2f3f5'; g.fillRect(0, 0, w, h); g.fillStyle = '#26282d'; g.font = `bold 44px ${sans}`; g.fillText('ESC', 22, 58); });
   const regLabel = pd6bCanvas(1024, 160, (g, w, h) => { g.fillStyle = '#f4f4f2'; g.fillRect(0, 0, w, h); g.fillStyle = '#17181b'; g.font = 'bold 112px "SF Mono", Menlo, Consolas, monospace'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('JU 1234 5678 9012', w / 2, h / 2 + 4); });
   const gnssTop = pd6bCanvas(256, 256, (g, w, h) => { g.fillStyle = '#c7cacf'; g.fillRect(0, 0, w, h); g.fillStyle = '#2b2e34'; g.beginPath(); g.moveTo(128, 40); g.lineTo(92, 112); g.lineTo(116, 112); g.lineTo(116, 196); g.lineTo(140, 196); g.lineTo(140, 112); g.lineTo(164, 112); g.closePath(); g.fill(); });
   return {
@@ -326,7 +326,8 @@ function buildPD6B(M) {
   const yaw = rotationArc(-1, 0.40); yaw.position.set(0, 0.10, 0); yaw.visible = false; root.add(yaw); arrows.yaw = yaw;
   const cgMarker = new THREE.Group(); cgMarker.visible = false; root.add(cgMarker);
 
+  for (const p of parts) p.explode.multiplyScalar(0.78);   /* 実寸で決めた分解量のままだと縦に伸び、スマホでは部品が粒になる */
   const propPart = parts.find(p => p.key === 'prop' && p.idx === 0);
-  return { root, sg, parts, pick, wires, motors, legs, arrows, batPart, G, cgMarker, personGroup: null, pivots, chute, paraPart, boxPart, latchPart, svPart,
+  return { root, sg, halfSpan: 1.20 * K, viewK: () => narrow() ? 1.32 : 1.15, parts, pick, wires, motors, legs, arrows, batPart, G, cgMarker, personGroup: null, pivots, chute, paraPart, boxPart, latchPart, svPart,
     rotor: { R: 0.381 * K, y0: 0 }, moveR: 0.42, moveY: 0.12, rpmScale: 0.5, labelPropPart: propPart };
 }

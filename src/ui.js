@@ -237,7 +237,7 @@ function renderDetail() {
   if (!simple && d.tip) h += `<div class="tipbox"><b>Note</b>${d.tip}</div>`;
   if (simple) h += `<div class="d-actions" style="margin-top:14px"><button id="dMore">${t('ui.more')}</button></div>`;
   box.innerHTML = h; box.hidden = false; box.scrollTop = 0; body_.classList.add('detail'); $('#inspBack').hidden = false; $('#inspTitle').textContent = '';
-  $('#dFocus').onclick = () => focusOn(S.selAll ? partsOf(p.key).map(x => x.obj) : [p.obj]);
+  $('#dFocus').onclick = () => focusOn(S.selAll ? partsOf(p.key).map(x => x.obj) : [p.obj], d.view ? { dir: new THREE.Vector3(...d.view).normalize() } : {});   /* 胴の左面・下面にある部品は、その面が見える向きから */
   const iso = $('#dIsolate'); if (iso) iso.onclick = () => { S.isolated = S.isolated === p.key ? null : p.key; applyVisibility(); renderDetail(); if (S.isolated) focusOn(partsOf(p.key).map(x => x.obj)); };
   const hd = $('#dHide'); if (hd) hd.onclick = () => toggleHidden(p.key);
   // ブザーは音が役目の部品。読むより鳴らしたほうが早い（音が切のままでも、押した人の意思なので鳴らす）
@@ -268,6 +268,7 @@ function updateLabels() {
     const p = L.p;
     let show = (forced || (S.labels && !S.labelsSuppressed)) && !live && partVisible(p) && effVisible(p.obj) && (!S.labelOnly || S.labelOnly.has(p.key));
     if (show && camDist < 0.5 && !(S.selected && S.selected.key === p.key)) show = false;
+    if (show && S.mode === 'cut' && narrow() && !['motor', 'battery', 'bell', 'stator', 'winding', 'magnet', 'cells'].includes(p.key)) show = false;   /* 断面は切った部品が主役。細い帯の画が名前で埋まらないように */
     if (show && !forced && S.depth === 'full' && camDist > 1.0 && !SIMPLE_KEYS.includes(p.key) && !(S.selected && S.selected.key === p.key)) show = false;   // 引きの画では主要8枚だけ
     if (show) {
       const a = p.labelObj ? p.labelObj.getWorldPosition(tmpV) : p.obj.localToWorld(tmpV.copy(p.label));
@@ -276,7 +277,7 @@ function updateLabels() {
         L.ax = (pr.x + 1) / 2 * W; L.ay = (1 - pr.y) / 2 * H;
         let dx = L.ax - W / 2, dy = L.ay - H / 2; const len = Math.hypot(dx, dy); if (len < 24) { dx = 0; dy = -1; } else { dx /= len; dy /= len; }
         const off = 70 + 90 * Math.abs(dx); const rightLim = narrow() ? W - 70 : W - 344 - 40 - 60;
-        L.x = clamp(L.ax + dx * off, 70, rightLim); L.y = clamp(L.ay + dy * off, 90, H - 130); L.dim = depth > 0.07;
+        L.x = clamp(L.ax + dx * off, 8 + (L.w || 120) / 2, Math.max(8 + (L.w || 120) / 2, Math.min(rightLim, W - 8 - (L.w || 120) / 2))); L.y = clamp(L.ay + dy * off, 90, H - 130); L.dim = depth > 0.07;   /* 長い名前が画面の端で切れないように */
         if (!L.w) { L.w = L.el.offsetWidth; L.h = L.el.offsetHeight; }
       }
     }
@@ -296,9 +297,16 @@ function updateLabels() {
     const show = (live || S.scale) && B.mo.rpm > 100 && partVisible(B.mo.part) && !theater.active && !altActing();   /* PD6Bの荷物投下はモーターの差を見せる場面ではない */
     B.el.hidden = !show; if (!show) continue;
     const a = B.mo.group.localToWorld(tmpV.set(0, 0.10, 0)); const pr = tmpV2.copy(a).project(camera); if (pr.z > 1) { B.el.hidden = true; continue; }
-    const x = clamp((pr.x + 1) / 2 * W, 60, W - 60), y = clamp((1 - pr.y) / 2 * H, 40, H - 40); B.el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%,-50%)`;
+    const x = clamp((pr.x + 1) / 2 * W, 60, W - 60), y = clamp((1 - pr.y) / 2 * H, 40, H - 40);
     const pct = Math.round(B.mo.pct), mean = Math.max(1, D.motors.reduce((a, m) => a + m.pct, 0) / D.motors.length), up = B.mo.pct > mean * 1.03, dn = B.mo.pct < mean * 0.97; B.el.classList.toggle('up', up); B.el.classList.toggle('down', dn); B.el.classList.toggle('over', !!(S.scale && scale.share[B.i] > SCALE_OVER));
     B.el.innerHTML = S.depth === 'simple' && !S.scale ? (up ? 'はやい ▲' : dn ? 'おそい ▼' : 'ふつう') : `${MOTOR_INFO[B.i].id} ${pct}% ${up ? '▲' : dn ? '▼' : ''}<small>${MOTOR_INFO[B.i].pos} ${MOTOR_INFO[B.i].dir === 'CW' ? '↻' : '↺'}</small>`;
+    B.x = x; B.y = y;
+  }
+  { // 小さな機体・6発機では%表示が重なるので、上下に押し離してから置く
+    const vis = badgeEls.filter(B => !B.el.hidden && B.x != null);
+    for (const B of vis) { B.w = B.el.offsetWidth || 90; B.h = B.el.offsetHeight || 26; B.px = B.x; B.py = B.y; }
+    for (let it = 0; it < 6; it++) for (let i = 0; i < vis.length; i++) for (let j = i + 1; j < vis.length; j++) { const a = vis[i], b = vis[j]; const ox = (a.w + b.w) / 2 + 4 - Math.abs(a.px - b.px), oy = (a.h + b.h) / 2 + 3 - Math.abs(a.py - b.py); if (ox > 0 && oy > 0) { const s2 = a.py < b.py ? -1 : 1; a.py += s2 * oy / 2; b.py -= s2 * oy / 2; } }
+    for (const B of vis) B.el.style.transform = `translate(${B.px.toFixed(1)}px, ${clamp(B.py, 40, H - 40).toFixed(1)}px) translate(-50%,-50%)`;
   }
 }
 
@@ -439,7 +447,7 @@ function onTheaterChanged() {
 const STICK_MAP = { 1: { L: { v: 'pitch', h: 'yaw' }, R: { v: 'thr', h: 'roll' } }, 2: { L: { v: 'thr', h: 'yaw' }, R: { v: 'pitch', h: 'roll' } } };
 const AXIS_LBL = { pitch: ['前', '後'], yaw: ['←向き', '向き→'], thr: ['上', '下'], roll: ['←左', '右→'] };
 let stickMode = ['1', '2'].includes(store.get('stickMode')) ? store.get('stickMode') : '1';
-function setSticks(on) { S.sticks = on; for (const x of $$('.tgl[data-t=sticks]')) x.classList.toggle('on', on); $('#sticks').hidden = !on; document.body.classList.toggle('sticks-on', !!on); if (typeof updateFpvHud === 'function') updateFpvHud(); if (on) { if (S.power === 0) setPower(0.5, true); if (!store.get('stickSeen')) { showToast(`スティックをたおすと、${D.motors.length}つのモーターがそれぞれ違う速さになります。`, 3600); store.set('stickSeen', '1'); } } else { body.stick.active = false; body.stick.x = body.stick.y = body.stick.yaw = body.stick.thr = 0; } labelSticks(); }
+function setSticks(on) { if (on) $('#coach').hidden = true; S.sticks = on; for (const x of $$('.tgl[data-t=sticks]')) x.classList.toggle('on', on); $('#sticks').hidden = !on; document.body.classList.toggle('sticks-on', !!on); if (typeof updateFpvHud === 'function') updateFpvHud(); if (on) { if (S.power === 0) setPower(0.5, true); if (!store.get('stickSeen')) { showToast(`スティックをたおすと、${D.motors.length}つのモーターがそれぞれ違う速さになります。`, 3600); store.set('stickSeen', '1'); } } else { body.stick.active = false; body.stick.x = body.stick.y = body.stick.yaw = body.stick.thr = 0; } labelSticks(); }
 function labelSticks() { for (const side of ['L', 'R']) { const map = STICK_MAP[stickMode][side]; const el = $(side === 'L' ? '#stickL' : '#stickR'); el.querySelector('.lbl.t').textContent = AXIS_LBL[map.v][0]; el.querySelector('.lbl.b').textContent = AXIS_LBL[map.v][1]; el.querySelector('.lbl.l').textContent = AXIS_LBL[map.h][0]; el.querySelector('.lbl.r').textContent = AXIS_LBL[map.h][1]; } }
 $('#modeSeg2').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; stickMode = b.dataset.m; store.set('stickMode', stickMode); segSet($('#modeSeg2'), 'm', stickMode); labelSticks(); });
 for (const side of ['L', 'R']) {

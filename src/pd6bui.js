@@ -8,12 +8,12 @@ function pd6bShadowExtra() { return (pd6b.sizeOn ? 0.45 : 0) + (pd6b.act && pd6b
 function pd6bBlockPower() {
   if (!IS_PD6B) return false;
   if (pd6b.act) { pd6bStop(); return false; }
-  if (pd6b.fold > 0.001 || pd6b.foldTo > 0) { pd6b.foldTo = 0; pd6b.pendingPower = true; syncPdChips(); showToast('アームを広げてからプロペラを回します'); return true; }
+  if (pd6b.fold > 0.001 || pd6b.foldTo > 0) { pd6b.foldTo = 0; pd6b.pendingPower = true; syncPdChips(); if ($('#noteCard').dataset.kind === 'pd6b-fold') renderNote(null); showToast('アームを広げてから回します'); return true; }
   return false;
 }
 function pd6bOnTab(tab) {
   if (!IS_PD6B) return;
-  if (tab !== 'see') { pd6bStop(); if (pd6b.chuteTo > 0) setChute(false); }
+  if (tab !== 'see') { pd6bStop(); if (pd6b.chuteTo > 0) setChute(false, true); if (pd6b.sizeOn) setSize(false, true); if ($('#noteCard').dataset.kind === 'pd6b-fold') renderNote(null); }   /* 「みる」の重ね絵・カードを「とばす」へ持ち込まない */
   if (tab === 'fly' && (pd6b.foldTo > 0 || pd6b.fold > 0.001)) { pd6b.foldTo = 0; syncPdChips(); showToast('アームを広げました'); }
 }
 
@@ -21,7 +21,7 @@ function pd6bOnTab(tab) {
 function pd6bAction(id) {
   if (!IS_PD6B) return;
   if (S.tab !== 'see') setTab('see');
-  if (id === 'about') { renderPdAbout(); return; }
+  if (id === 'about') { if (pd6b.act) pd6bStop(); if (pd6b.chuteTo > 0) setChute(false, true); if (pd6b.sizeOn) setSize(false, true); renderPdAbout(); pdFrame([D.root], { pull: true }); return; }   /* 説明だけを見せる。前の重ね絵を残さない */
   // 同時に1つ: 傘を開いたまま箱を置く・大きさを比べたまま付け替える、のような重ね方はさせない
   if (id !== 'chute' && pd6b.chuteTo > 0) setChute(false, true);
   if (id !== 'size' && pd6b.sizeOn) setSize(false, true);
@@ -39,7 +39,7 @@ function pd6bAction(id) {
   if (pd6b.foldTo > 0 || pd6b.fold > 0.001) { pd6b.foldTo = 0; syncPdChips(); showToast('アームを広げてから始めます'); }
   if (S.power > 0) setPower(0, true);
   if (id === 'drop' && pd6b.variant !== 'cargo') { pd6bSetVariant('cargo'); }
-  if (id === 'unit') { pd6b.act = { id, t: 0, from: pd6b.variant, to: pd6b.variant === 'cargo' ? 'survey' : 'cargo', swapped: false }; renderPdNote('unit'); syncPdChips(); return; }
+  if (id === 'unit') { pd6b.act = { id, t: 0, from: pd6b.variant, to: pd6b.variant === 'cargo' ? 'survey' : 'cargo', swapped: false }; renderPdNote('unit'); syncPdChips(); pdFrame([D.root], { pull: true, margin: 1.2 }); return; }
   if (id === 'swap') { pd6b.act = { id, t: 0, p: D.parts.filter(p => p.key === 'battery')[1] }; renderPdNote('swap'); syncPdChips(); return; }
   if (id === 'drop') { for (const th of D.arrows.thrust) th.userData.forceHide = true; pd6b.act = { id, t: 0, body: true }; syncBodyMode(); renderPdNote('drop'); syncPdChips(); pdFrame([D.root], { pull: false, margin: 1.5 }); return; }
 }
@@ -84,23 +84,23 @@ function renderPdAbout() {
     </table>
     <h4>550クラスとのちがい</h4>
     <ul class="pd-diff"><li><b>4発 → 6発</b>：1基の推力が落ちても残りで補う余地を設計で持たせやすい</li><li><b>2.4kg → 45kg</b>：25kg以上なので登録記号の文字は25mm以上、カテゴリーⅡでも許可・承認が要る</li><li><b>12 → 30インチ</b>：大きな羽根をゆっくり回して効率を上げる</li><li><b>腰下ユニット</b>：箱・測量機器を付け替える</li><li><b>パラシュート</b>：落ちる速さを下げる安全装置</li></ul>
-    <p class="caveat">この3Dモデルは、公表資料と展示機の写真から起こした教材用の再現です。内部の配置・脚や箱の寸法・アンテナの用途・畳む向きは推定を含みます（解説の「写真から推定」）。</p>
+    <p class="caveat">「公式」と書いた数値は、CAT3のベース機 PD6B-Type3 の公式ページの値です。この3Dモデルは、公表資料と展示機の写真から起こした教材用の再現です。内部の配置・脚や箱の寸法・アンテナの用途・畳む向きは推定を含みます（解説の「写真から推定」）。</p>
     <details class="pd-src"><summary>出典（${PD6B_DATE}）</summary><ul>${['mlit', 'official', 'news', 'logi', 'parasafe'].map(k => `<li>${PD_SRC_LINK(k)}</li>`).join('')}</ul></details>`;
   renderNote({ kind: 'pd6b-about', title: 'PD6B-CAT3（プロドローン）', html, actions: [{ label: 'たたんでみる', fn: () => pd6bAction('fold') }, { label: '大きさをくらべる', fn: () => { renderNote(null); setSize(true); } }] });
 }
 function renderPdNote(id) {
   const N = {
-    fold: () => ({ title: pd6b.foldTo > 0 ? 'アームをたたむ' : 'アームを広げる', html: `<p>プロペラの羽根を根元のヒンジで寄せてから、6本のアームを付け根の継手で畳みます。運ぶときは<b>直径945mmの円柱</b>に収まり、広げるとワンタッチで飛べる状態になります（公式）。</p><p>継手の上の小さな印は、ロックがかかっていれば緑・外れていれば赤（この図の表現）。<b>広げたら1本ずつ手で引いてロックを確かめる</b>のが飛行前点検の基本です。</p><p class="caveat">畳む向き・角度は公表資料で確認できないため、上向きに畳む例で描いています。</p>`,
+    fold: () => ({ title: pd6b.foldTo > 0 ? 'アームをたたむ' : 'アームを広げる', html: `<p>プロペラの羽根を根元のヒンジで寄せてから、6本のアームを付け根の継手で畳みます。運ぶときは<b>直径945mmの円柱</b>に収まり、アームはワンタッチで広げられます（ベース機 PD6B-Type3 の公式値）。</p><p>継手の上の小さな印は、ロックがかかっていれば緑・外れていれば赤（この図の表現）。<b>広げたら1本ずつ手で引いてロックを確かめる</b>のが飛行前点検の基本です。</p><p class="caveat">畳む向き・角度は公表資料で確認できないため、上向きに畳む例で描いています。</p>`,
       actions: [{ label: pd6b.foldTo > 0 ? '広げる' : 'たたむ', primary: true, fn: () => pd6bAction('fold') }] }),
-    swap: () => ({ title: 'バッテリーを入れ替える（ホットスワップ）', html: `<p>4本のうち<b>1本だけ</b>を抜いて、充電済みの1本を差し込みます。残りの3本が電気を送り続けるので、頭脳（フライトコントローラー）は止まりません（ホットスワップ対応は公式）。</p><p id="pdSwapState" class="pd-state">給電中のバッテリー: <b>4本</b></p><p class="caveat">赤くなるのが抜く1本、緑になるのが差し込む1本。入れ替える順番・本数の決まりは取扱説明書で確かめます。</p>`,
+    swap: () => ({ title: 'バッテリーを入れ替える（ホットスワップ）', html: `<p id="pdSwapState" class="pd-state">給電中のバッテリー: <b>4本</b></p><p>4本のうち<b>1本だけ</b>を抜いて、充電済みの1本を差し込みます。残りの3本が電気を送り続けるので、頭脳（フライトコントローラー）は止まりません（ホットスワップ対応は公式）。</p><p class="caveat">赤くなるのが抜く1本、緑になるのが差し込む1本。入れ替える順番・本数の決まりは取扱説明書で確かめます。</p>`,
       actions: [{ label: 'もう一度', fn: () => pd6bAction('swap') }] }),
-    drop: () => ({ title: '荷物を置いて離陸する', html: `<p>着陸したら四隅の爪を開いて物流ボックスを離し、機体だけが上昇します。受け取る人が機体に近づかなくても、荷物を置いていけます（リリース型の腰下ユニット）。</p><p id="pdDropState" class="pd-state">爪を開いています…</p><p class="caveat">飛行中に物を落とす「物件投下」は承認が要る特定飛行です。この図は着陸してから箱を離す例。爪の形と動きは例です。</p>`,
+    drop: () => ({ title: '荷物を置いて離陸する', html: `<p id="pdDropState" class="pd-state">爪を開いています…</p><p>着陸したら四隅の爪を開いて物流ボックスを離し、機体だけが上昇します。受け取る人が機体に近づかなくても、荷物を置いていけます（リリース型の腰下ユニット）。</p><p class="caveat">飛行中に物を落とす「物件投下」は承認が要る特定飛行です。この図は着陸してから箱を離す例。爪の形と動きは例です。</p>`,
       actions: [{ label: 'もう一度', fn: () => pd6bAction('drop') }] }),
     unit: () => ({ title: '腰下ユニットを付け替える', html: `<p>機体の下半分（腰下ユニット）は、<b>ピン4か所の差し替え</b>で交換できます（一部例外あり・公式）。標準は「測量用」「物流ボックス リリース型」「物流ボックス 引き出し型」の3種類。</p><p>上半分（飛ぶ部分）はそのままに、用途に合わせて下半分だけを替える設計です。</p><p class="caveat">測量ユニットの形は例です。</p>`,
       actions: [{ label: pd6b.variant === 'cargo' ? '測量用にする' : '物流用にもどす', fn: () => pd6bAction('unit') }] }),
-    chute: () => ({ title: 'パラシュートを開く', html: `<p>機体が飛べなくなったとき、筒から傘を押し出して開き、落ちる速さを下げます。展示機には日本化薬の「PARASAFE」が載っていました。PARASAFEは火薬の力で傘を押し出すので、低い高度でも素早く開きます。</p><p><b>45kgの機体が6m/sで降りる</b>ときの運動エネルギーは約0.8kJ。50mから落ちた場合（約31m/s・空気抵抗なしの計算）の約22kJの、およそ27分の1です。</p><p class="caveat">傘の大きさ・色・ひもの本数は例です（この機体用の型式は非公表）。参考: 25kg級用 PS CA12-01 は傘の面積11m²・降下速度6m/s（理論値）・最低展開高度30m（同社発表）。</p>`,
+    chute: () => ({ title: 'パラシュートを開く', html: `<p>機体が飛べなくなったとき、筒から傘を押し出して開き、落ちる速さを下げます。展示機には日本化薬の「PARASAFE」が載っていました。PARASAFEは火薬の力で傘を押し出すので、低い高度でも素早く開きます。</p><p>仮に<b>45kgの機体を6m/sまで落とせたとすると</b>（25kg級用製品の理論値を当てはめた計算）、運動エネルギーは約0.8kJ。50mから落ちた場合（約31m/s・空気抵抗なし）の約22kJの、およそ27分の1です。</p><p class="caveat">傘の大きさ・色・ひもの本数は例です（この機体用の型式は非公表）。参考: 25kg級用 PS CA12-01 は傘の面積11m²・降下速度6m/s（理論値）・最低展開高度30m（同社発表）。</p>`,
       actions: [{ label: 'たたむ', fn: () => setChute(false) }], onClose: () => setChute(false) }),
-    size: () => ({ title: '大きさをくらべる', html: `<p>同じ縮尺で、<b>身長170cmの人</b>と、青い半透明の<b>550クラスのクアッド</b>（対角550mm・約2.4kg）を並べています。</p><p>PD6B-CAT3は展開時 2,181 × 2,398 mm（公式）。両手を広げた大人より大きく、最大離陸重量は550クラスの約19倍の約45kgです。</p>`,
+    size: () => ({ title: '大きさをくらべる', html: `<p>同じ縮尺で、<b>身長170cmの人</b>と、青い半透明の<b>550クラスのクアッド</b>（対角550mm・約2.4kg）を並べています。</p><p>ベース機 PD6B-Type3 の公式値で展開時 2,181 × 2,398 mm（CAT3は国交省の発表で約2.2 × 2.4 m）。両手を広げた大人より大きく、最大離陸重量は550クラスの約19倍の約45kgです。</p>`,
       actions: [{ label: 'もどす', fn: () => setSize(false) }], onClose: () => setSize(false) }),
   };
   const o = N[id](); renderNote(Object.assign({ kind: 'pd6b-' + id }, o));
@@ -112,8 +112,7 @@ function setChute(on, quiet) {
   if (on) {
     if (pd6b.act) pd6bStop(); if (S.explode > 0.02) setExplode(0); if (S.power > 0) setPower(0, true);
     renderPdNote('chute');
-    const t = new THREE.Vector3(0, 0.30, 0), dir = camera.position.clone().sub(controls.target).normalize(); dir.y = Math.max(dir.y, 0.18); dir.normalize();
-    flyTo(t.clone().addScaledVector(dir, 2.3 * viewScale() * bandK()), t, 1100);
+    frameBox([-0.40, -0.16, -0.40], [0.45, 0.78, 0.45], [0.62, 0.26, -0.74], 1.02);   /* 開ききった傘と機体をまとめて、カードを避けて収める */
   } else {
     if ($('#noteCard').dataset.kind === 'pd6b-chute') renderNote(null);
     if (!quiet) focusOn([D.root], { pull: true });
@@ -122,15 +121,22 @@ function setChute(on, quiet) {
 // 枠決め: PCでは説明カードが左側を覆うので、カードの右端から視点列までの空いた範囲の中央に被写体を寄せ、狭いぶん引く
 function pdFrame(objs, opts) {
   focusOn(objs, opts);
-  const card = $('#noteCard'); if (narrow() || !S.camSpring || card.hidden) return;
-  const r = card.getBoundingClientRect(), cw = canvas.clientWidth - 384, vc = $('#viewCol').getBoundingClientRect();
-  const f0 = Math.min(r.right + 12, cw * 0.6), f1 = Math.max(f0 + 200, Math.min(cw, vc.left) - 12);
+  const card = $('#noteCard'), land = narrow() && innerHeight <= 520; if ((narrow() && !land) || !S.camSpring || card.hidden) return;   /* 縦長のスマホはカードが下にあるので帯で足りる。横向きはカードが左に立つ */
+  const r = card.getBoundingClientRect(), cw = land ? canvas.clientWidth : canvas.clientWidth - 384, vc = $('#viewCol').getBoundingClientRect();
+  const f0 = Math.min(r.right + 12, cw * 0.6), f1 = Math.max(f0 + 200, (land ? cw : Math.min(cw, vc.left)) - 12);
   const sp = S.camSpring, back = sp.p1.clone().sub(sp.q1), k = clamp(0.8 * cw / (f1 - f0), 1, 1.7);
   sp.p1.copy(sp.q1).addScaledVector(back, k);
   const d = sp.p1.distanceTo(sp.q1), tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect;
   const px = (f0 + f1) / 2 - cw / 2, right = new THREE.Vector3().crossVectors(back.normalize().negate(), camera.up).normalize();
   const shift = right.multiplyScalar(-(px / cw) * 2 * d * tanH); sp.p1.add(shift); sp.q1.add(shift);
   controls.maxDistance = Math.max(controls.maxDistance, d * 1.02);
+}
+// 見えない箱（材質だけ非表示）を一瞬置いて pdFrame に渡す。重ね絵（傘・画角など）は部品ではないので focusOn が数えないため
+function frameBox(min, max, dir, margin) {
+  const proxy = new THREE.Mesh(new THREE.BoxGeometry(max[0] - min[0], max[1] - min[1], max[2] - min[2]), new THREE.MeshBasicMaterial({ visible: false }));
+  proxy.position.set((min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2); scene.add(proxy);
+  pdFrame([proxy], { pull: true, min: 0.08, margin: (margin || 1.1) * (narrow() ? 0.72 : 1), dir: new THREE.Vector3(...dir).normalize() });   /* 枠決めは「注目」の最短距離に縛られない */   /* スマホは帯に合わせて引くぶん、元の余白を詰める */
+  scene.remove(proxy); proxy.geometry.dispose();
 }
 function setSize(on, quiet) {
   pd6b.sizeOn = !!on; syncPdChips();
@@ -170,6 +176,7 @@ function setLock(red) {
 }
 function stepPd6b(dt) {
   let dirty = false;
+  if (S.explode > 0.02 && pd6b.foldTo > 0) { pd6b.foldTo = 0; syncPdChips(); if ($('#noteCard').dataset.kind === 'pd6b-fold') renderNote(null); }   /* 畳んだ姿勢のまま部品を散らさない */
   { const sup = pd6b.sizeOn || pd6b.chuteTo > 0 || !!(pd6b.act && pd6b.act.id === 'drop'); if (sup !== pd6b._sup) { pd6b._sup = sup; S.labelsSuppressed = sup; } }   /* 引いた画では部品名が重なって読めないので、その間だけ隠す（PD6Bでは他にこの旗を使う機能がない） */
   // --- たたむ / 広げる ---
   if (pd6b.foldTo > pd6b.fold) {
@@ -248,5 +255,5 @@ function initPd6b() {
   pd6b.ghost = pd6bQuadGhost(); scene.add(pd6b.ghost);
   pd6bSetVariant('cargo'); syncPdChips();
   const q = new URLSearchParams(location.search);
-  if (!SHARE_KEYS.some(k => q.has(k))) setTimeout(() => { if (!$('#noteCard').dataset.kind) renderPdAbout(); }, 900);   /* 共有リンクで開いたときは、その画面を優先する */
+  if (!SHARE_KEYS.some(k => q.has(k))) setTimeout(() => { if (!$('#noteCard').dataset.kind) { renderPdAbout(); pdFrame([D.root], { pull: true }); } }, 900);   /* 共有リンクで開いたときは、その画面を優先する */
 }

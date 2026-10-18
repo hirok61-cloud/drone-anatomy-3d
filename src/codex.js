@@ -28,7 +28,7 @@ function codexOnSelect(p) { codex.pending = p && PARTS[p.key] && !codex.seen.has
 
 function renderCodexCount(pulse) {
   const el = $('#codexCount'); if (!el) return;
-  el.textContent = `${codex.seen.size}/${codex.total}`;
+  el.textContent = `見た ${codex.seen.size}/${codex.total}`;
   el.title = `見た部品 ${codex.seen.size} / ${codex.total}`; el.setAttribute('aria-label', `見た部品 ${codex.seen.size} / ${codex.total}`);
   if (pulse && !reduceMotion) { el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
 }

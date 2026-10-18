@@ -409,8 +409,10 @@ function applyBand(bf) {
   const old = S.bandFrac; S.bandFrac = bf; if (old == null || Math.abs(bf - old) < 0.02) return;
   if ((typeof theater !== 'undefined' && theater.active) || (typeof whatif !== 'undefined' && whatif.active) || (typeof descent !== 'undefined' && descent.active) || (typeof dshow !== 'undefined' && dshow.on)) return;   /* 台本が組んだ画には触らない */
   const k = old / bf;
-  if (S.camSpring) { const sp = S.camSpring; sp.p1.sub(sp.q1).multiplyScalar(k).add(sp.q1); controls.maxDistance = Math.max(controls.maxDistance, sp.p1.distanceTo(sp.q1) * 1.02); return; }
-  const t = controls.target.clone(), p = camera.position.clone().sub(t).multiplyScalar(k).add(t);
+  // 帯の高さに比例して寄せると、横に広い機体(PD6B等)は横幅が画面からはみ出す。機体全体を見ていたときは、横幅が収まる距離より寄らない
+  const fitK = (d0) => { if (!D.halfSpan || k >= 1) return k; const dmin = D.halfSpan * 1.32 / (Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * Math.max(0.3, camera.aspect)); return d0 >= dmin * 0.98 ? Math.max(k, dmin / d0) : k; };
+  if (S.camSpring) { const sp = S.camSpring; sp.p1.sub(sp.q1).multiplyScalar(fitK(sp.p1.distanceTo(sp.q1))).add(sp.q1); controls.maxDistance = Math.max(controls.maxDistance, sp.p1.distanceTo(sp.q1) * 1.02); return; }
+  const t = controls.target.clone(), p = camera.position.clone().sub(t).multiplyScalar(fitK(camera.position.distanceTo(t))).add(t);
   flyTo(p, t, 380, false);
 }
 function viewScale() { const a = W / H; return a < 1 ? Math.min(2.0, Math.pow(1 / a, 0.9)) : 1; }
@@ -423,9 +425,9 @@ function focusOn(objs, opts = {}) {
   const dir = opts.dir ? opts.dir.clone() : camera.position.clone().sub(controls.target); if (dir.lengthSq() < 1e-6) dir.set(0.6, 0.4, -0.6); dir.normalize();
   // 箱の8隅を視野に収める距離(球ではなく実際の投影で決める)
   const fwd = dir.clone().negate(), right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize(), up = new THREE.Vector3().crossVectors(right, fwd).normalize();
-  const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / bandK(), tanH = tanV * bandK() * Math.max(0.6, camera.aspect); let need = 0.05; const rel = new THREE.Vector3();   /* 縦はシートに隠れない帯の高さで見る */
+  const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / bandK(), tanH = tanV * bandK() * Math.max(IS_ALT ? 0.4 : 0.6, camera.aspect);   /* 翼幅の広い機種は、縦長の画面の本当の横幅で収める */ let need = 0.05; const rel = new THREE.Vector3();   /* 縦はシートに隠れない帯の高さで見る */
   for (const q of pts) { rel.copy(q).sub(sph.center); const t = rel.dot(dir); need = Math.max(need, Math.abs(rel.dot(right)) / tanH + t, Math.abs(rel.dot(up)) / tanV + t); }
-  const dist = clamp((need * (opts.margin || 1.18) + 0.02) * viewScale(), 0.12, (opts.max || 3.2) * viewScale() * bandK());
+  const dist = clamp((need * (opts.margin || 1.18) + 0.02) * viewScale(), (opts.min != null ? opts.min : (D.focusMin || 0.12)) * viewScale(), (opts.max || 3.2) * viewScale() * bandK());
   const dur = 600 + 500 * clamp((camera.position.distanceTo(sph.center.clone().addScaledVector(dir, dist)) + controls.target.distanceTo(sph.center)) / 0.6, 0, 1);
   flyTo(sph.center.clone().addScaledVector(dir, dist), sph.center, dur, opts.pull !== false);
 }
@@ -435,7 +437,8 @@ function setView(v) {
     const mo = D.motors[0]; const c = mo.group.localToWorld(new THREE.Vector3(0, 0.02, 0));
     const u = new THREE.Vector3(1, 0, 0).applyQuaternion(mo.arm.getWorldQuaternion(new THREE.Quaternion())); const tan = new THREE.Vector3(u.z, 0, -u.x); const vs = viewScale();
     flyTo(c.clone().addScaledVector(u, 0.19 * vs).addScaledVector(tan, 0.12 * vs).add(new THREE.Vector3(0, 0.015 * vs, 0)), c, 1100);
-  } else { const [p, t] = VIEWS[v]; const tv = new THREE.Vector3(...t); const pv = new THREE.Vector3(...p).sub(tv).multiplyScalar(viewScale()).add(tv); flyTo(pv, tv, 800); }
+  } else if (IS_ALT && VIEWS[v]) { const [p] = VIEWS[v]; focusOn([D.root], { dir: new THREE.Vector3(...p).normalize(), pull: true, margin: 1.12 });   /* 機種ごとに大きさが違うので、向きだけ決めて枠に収める */
+  } else { const [p, t] = VIEWS[v]; const tv = new THREE.Vector3(...t); const pv = new THREE.Vector3(...p).sub(tv).multiplyScalar(viewScale() * (D.viewK ? D.viewK() : 1)).add(tv); flyTo(pv, tv, 800); }   /* 翼幅の広い機体(PD6B)は視点ボタンでも引く */
 }
 
 // ---------- テーマ ----------

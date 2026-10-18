@@ -601,12 +601,36 @@ body.alt .model-btn { box-shadow: inset 0 0 0 1.5px var(--accent); }
 .pd-src summary { cursor: pointer; font-size: calc(12px * var(--fs, 1)); color: var(--ink2); margin-top: 6px; }
 .pd-src ul { padding-left: 1.1em; font-size: calc(11.5px * var(--fs, 1)); line-height: 1.6; }
 .pd-src a { color: var(--accent-text); }
+body.pd6b .mtab { grid-template-columns: repeat(3, 1fr); }   /* 6基は3列×2行（六角形の左右の並びと合う） */
 .pd-state { margin-top: 6px; padding: 6px 10px; border-radius: 8px; background: var(--hair); font-size: calc(12.5px * var(--fs, 1)); }
 @media (max-width: 760px) {
   .model-btn { padding: 4px 8px; min-height: 30px; } .model-btn .mb-k { display: none; } .model-btn b { font-size: 11.5px; }
   .brand h1 { display: none; }   /* 狭い画面は機体ボタンが見出しを兼ねる（タイトル・機体・くわしさ・操作が1行に入らない） */
   .model-btn { flex: none; }
   #modelPop { left: calc(10px + var(--sal)); right: calc(10px + var(--sar)); width: auto; }
+}
+
+/* ===== 再点検(10/18)で足した共通の決まり ===== */
+/* 機種の動きのチップを、スマホでは1段目に独立させ、部品一覧・分解・見え方は2段目で横に送る（同じ行に並べると、どちらかが画面外に出る） */
+.see-main { display: contents; }
+@media (max-width: 760px) {
+  body.alt .ctx-row[data-tab=see] { flex-direction: column; flex-wrap: nowrap; align-items: stretch; overflow: visible; padding-right: 0; gap: 6px; mask-image: none; -webkit-mask-image: none; }
+  body.alt .ctx-row[data-tab=see] > .dock-group { min-width: 0; } body.alt .ctx-row[data-tab=see] > .dock-group > label { display: none; }
+  body.alt .ctx-row[data-tab=see] > .dock-group .chips { overflow-x: auto; scrollbar-width: none; padding-right: 30px; mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); }
+  body.alt .see-main { display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; align-items: flex-end; gap: 12px; padding-right: 46px; mask-image: linear-gradient(to right, #000 calc(100% - 42px), transparent); -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 42px), transparent); }
+}
+
+/* 説明カードの操作ボタンは、本文を送らなくても押せるよう下端に貼り付ける */
+#noteCard > .note-actions { position: sticky; bottom: -12px; margin: 10px -14px -12px -16px; padding: 8px 14px 12px 16px; background: linear-gradient(var(--glass-strong), var(--glass-strong)), var(--bg); z-index: 2; }   /* 不透明にして本文が透けない */
+/* スティックを出している間は、説明カードをスティックの上に置く（%の表がスティックの裏に回らない） */
+@media (max-width: 760px) { body.sticks-on #noteCard { bottom: calc(var(--dock-h) + 136px); max-height: calc(100vh - var(--dock-h) - 136px - 140px - var(--sat)); } }
+/* 横向きのスマホ(高さ520px以下): 操作列は1段で横に送り、見出しを畳む。説明カードは左に縦長で */
+@media (min-width: 761px) and (max-height: 520px) {
+  .ctx-row { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; align-items: flex-end; gap: 12px; padding-right: 46px; mask-image: linear-gradient(to right, #000 calc(100% - 42px), transparent); -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 42px), transparent); }
+  .dock-group { flex: none; } .dock-group.grow { flex: none; width: 150px; } .chips { flex-wrap: nowrap; }
+  .ctx-row .dock-group > label, .ctx-row .dock-group > .dg-label { display: none; }
+  .ctx { padding: 6px 10px 4px; } .tabs button { padding: 4px 6px; }
+  #noteCard { width: min(360px, 46vw); bottom: calc(var(--dock-h) + 10px); max-height: calc(100vh - var(--dock-h) - 80px - var(--sat) - var(--sab)); }   /* 上のバー(約60px)の下に収める */
 }
 
 @media (pointer: coarse) {

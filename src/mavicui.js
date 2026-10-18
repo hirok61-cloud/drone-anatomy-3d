@@ -9,21 +9,21 @@ function mavicShadowExtra() { return mav.sizeOn ? 1.1 : 0; }
 function mavicBlockPower() {
   if (!IS_MAVIC) return false;
   if (mav.act) { mavicStop(); return false; }
-  if (mav.fold > 0.001 || mav.foldTo > 0) { mav.foldTo = 0; mav.pendingPower = true; syncMvChips(); showToast('アームを広げてからプロペラを回します'); return true; }
+  if (mav.fold > 0.001 || mav.foldTo > 0) { mav.foldTo = 0; mav.pendingPower = true; syncMvChips(); if ($('#noteCard').dataset.kind === 'mavic-fold') renderNote(null); showToast('アームを広げてから回します'); frameBox([-0.32, -0.16, -0.26], [0.32, 0.03, 0.27], [0.62, 0.42, -0.66], 1.12); return true; }
   if (!mav.powered) { setMvPower(true, '電源を入れました'); }
   return false;
 }
 function mavicOnTab(tab) {
   if (!IS_MAVIC) return;
-  if (tab !== 'see') { mavicStop(); mvOverlays(null, true); }
-  if (tab === 'fly' && (mav.foldTo > 0 || mav.fold > 0.001)) { mav.foldTo = 0; syncMvChips(); showToast('アームを広げました'); }
+  if (tab !== 'see') { const had = !!mav.act; mavicStop(); mvOverlays(null, true); if ($('#noteCard').dataset.kind === 'mavic-fold') renderNote(null); if (had) focusOn([D.root], { pull: true }); }   /* 寄った画のまま「とばす」へ行かない */
+  if (tab === 'fly' && (mav.foldTo > 0 || mav.fold > 0.001)) { mav.foldTo = 0; syncMvChips(); showToast('アームを広げました'); frameBox([-0.32, -0.16, -0.26], [0.32, 0.03, 0.27], [0.62, 0.42, -0.66], 1.12); }   /* 畳んだ大きさに寄った画のまま広げない */
 }
 
 // ---------- 動きの入口 ----------
 function mavicAction(id) {
   if (!IS_MAVIC) return;
   if (S.tab !== 'see') setTab('see');
-  if (id === 'about') { renderMvAbout(); return; }
+  if (id === 'about') { if (mav.act) mavicStop(); mvOverlays(null, true); renderMvAbout(); mvFrameDrone(null, 1.05); return; }   /* 説明だけを見せる。前の重ね絵を残さない */
   if (id === 'fov' || id === 'sense' || id === 'size') { if (mav.act) mavicStop(); const was = id === 'fov' ? mav.fovOn : id === 'sense' ? mav.senseOn : mav.sizeOn; mvOverlays(was ? null : id); return; }
   mvOverlays(null, true);
   if (mav.act) mavicStop();
@@ -44,7 +44,7 @@ function mavicAction(id) {
     if (mav.foldTo > 0 || mav.fold > 0.001) mav.foldTo = 0;
     mav.act = { id, t: 0 }; renderMvNote('gimbal'); syncMvChips();
     const g = D.gimbalParts.head; g.updateWorldMatrix(true, false); const c = new THREE.Vector3().setFromMatrixPosition(g.matrixWorld);
-    mvFrameBox([c.x - 0.07, c.y - 0.06, c.z - 0.05], [c.x + 0.07, c.y + 0.07, c.z + 0.06], [0.55, 0.18, -0.82], 1.15); return;
+    mvFrameBox([c.x - 0.05, c.y - 0.045, c.z - 0.04], [c.x + 0.05, c.y + 0.05, c.z + 0.05], [0.42, -0.02, -0.91], 1.1); return;   /* 前やや下から、カメラの頭を主役に */
   }
 }
 function mavicStop() {
@@ -54,6 +54,7 @@ function mavicStop() {
   if (a.id === 'gimbal') { const gp = D.gimbalParts; gp.roll.rotation.z = 0; gp.tilt.rotation.x = 0; }
   syncBodyMode(); syncMvChips();
   if ($('#noteCard').dataset.kind === 'mavic-' + a.id) renderNote(null);
+  if (a.id === 'gimbal' || a.id === 'battery') focusOn([D.root], { pull: true });
 }
 // 画角・検知範囲・大きさは「重ね絵」。同時には1つだけ
 function mvOverlays(id, quiet) {
@@ -89,12 +90,7 @@ function syncMvChips() {
 }
 
 // 枠決め: 見えない箱（材質だけ非表示）を一瞬置いて pdFrame に渡す。重ね絵は部品ではないので focusOn が数えないため
-function mvFrameBox(min, max, dir, margin) {
-  const proxy = new THREE.Mesh(new THREE.BoxGeometry(max[0] - min[0], max[1] - min[1], max[2] - min[2]), new THREE.MeshBasicMaterial({ visible: false }));
-  proxy.position.set((min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2); scene.add(proxy);
-  pdFrame([proxy], { pull: true, margin: (margin || 1.1) * (narrow() ? 0.72 : 1), dir: new THREE.Vector3(...dir).normalize() });   /* スマホは帯に合わせて引くぶん、元の余白を詰める */
-  scene.remove(proxy); proxy.geometry.dispose();
-}
+const mvFrameBox = (min, max, dir, margin) => frameBox(min, max, dir, margin);
 const mvFrameDrone = (dir, margin) => pdFrame([D.root], { pull: true, margin: (margin || 1.25) * (narrow() ? 0.8 : 1), dir: dir ? new THREE.Vector3(...dir).normalize() : undefined });
 
 // ---------- 説明カード ----------
@@ -109,7 +105,7 @@ function renderMvAbout() {
       ${row('検知', '全方向デュアルビジョン＋前向きLiDAR＋下向き赤外線', '公式')}${row('プロペラ', '10.5 × 5.8 インチ', '販売店の表記')}
     </table>
     <h4>550クラスとのちがい</h4>
-    <ul class="pd-diff"><li><b>折りたたみ</b>：4本のアームを畳むと約5分の1の体積に。後方右アームを開くと電源が入る</li><li><b>カメラが3つ</b>：28・70・168mm相当を持ち替える。ジンバルが縦向き撮影にも回る</li><li><b>周りを見る</b>：魚眼センサーとLiDARで、ぶつかる前に止まる・避ける</li><li><b>部品が一体</b>：フレーム・ESC・受信機が胴の中にまとまり、外から見えるのはアームとセンサーだけ</li></ul>
+    <ul class="pd-diff"><li><b>折りたたみ</b>：4本のアームを畳むと約5分の1の体積に。後方右アームを開くと電源が入る</li><li><b>カメラが3つ</b>：28・70・168mm相当を持ち替える。ジンバルが縦向き撮影にも回る</li><li><b>周りを見る</b>：魚眼センサーとLiDARで、ぶつかる前に止まる・避ける</li><li><b>部品が一体</b>：フレーム・ESC・受信機が胴の中にまとまり、配線や基板は外から見えない</li></ul>
     <p class="caveat">この3Dモデルは、公式の仕様・取扱説明書と写真から起こした教材用の再現です。胴の形・センサーの配置・カメラの並び・アームの畳み方・内部の配置は推定を含みます（解説の「推定」「例」）。</p>
     <details class="pd-src"><summary>出典（${MAVIC_DATE}）</summary><ul>${['specs', 'product', 'manual', 'prop', 'review'].map(k => `<li>${MV_SRC_LINK(k)}</li>`).join('')}</ul></details>`;
   renderNote({ kind: 'mavic-about', title: 'DJI Mavic 4 Pro', html, actions: [{ label: 'たたんでみる', fn: () => mavicAction('fold') }, { label: '3眼の画角を見る', fn: () => { renderNote(null); mavicAction('fov'); } }] });
@@ -117,13 +113,13 @@ function renderMvAbout() {
 function renderMvNote(id) {
   const N = {
     fold: () => ({ title: mav.foldTo > 0 ? 'アームをたたむ' : 'アームを広げる', html: mav.foldTo > 0
-      ? `<p>羽根を寄せてから、後ろのアームを斜め下へ、前のアームを胴の脇へ畳みます。折りたたむと 257.6 × 124.8 mm（公式）。</p><p>アームを畳んでも、初期設定では電源は切れません（アーム折りたたみによる電源オフは初期設定で無効・取説）。この図では畳み終えたら電源ボタンで切った状態にします。</p><p class="caveat">畳む順番と角度は例です。</p>`
+      ? `<p>羽根を寄せてから、後ろのアームを前へ、前のアームを後ろへ回して、胴の脇に畳みます。折りたたむと 257.6 × 124.8 mm（公式）。</p><p>アームを畳んでも、初期設定では電源は切れません（アーム折りたたみによる電源オフは初期設定で無効・取説）。この図では畳み終えたら電源ボタンで切った状態にします。</p><p class="caveat">畳む順番と角度は例です。実機はアームが胴のくぼみに収まりますが、この図は胴を単純な形にしているので、畳んだ大きさ（特に幅と高さ）が実機より大きくなります。</p>`
       : `<p>前のアームを開いてから、後ろのアームを開きます。<b>後方右アームを開くと、電源ボタンを押さなくても電源が入ります</b>（アーム展開による電源オン・初期設定で有効・取説）。フロントLEDが緑に点き、機首の向きを示します。</p><p class="caveat">USB-Cポートを使っている間は、アームを開いても電源は入りません（取説）。畳む順番と角度は例です。</p>`,
       actions: [{ label: mav.foldTo > 0 ? '広げる' : 'たたむ', primary: true, fn: () => mavicAction('fold') }] }),
-    battery: () => ({ title: 'バッテリーを入れ替える', html: `<p>電源を切り、左右のバックルを押して、バッテリーを後ろへ引き抜きます。差し込むときはカチッと音がするまで（取説）。</p><p><b>抜き差しの前に前アームを展開する</b>のが決まりです。前向きLiDARを傷めないため（取説）。</p><p id="mvBatState" class="pd-state">電源を切っています…</p><p class="caveat">バッテリーの抜き方向とバックルの形は図の例です。</p>`, actions: [{ label: 'もう一度', fn: () => mavicAction('battery') }] }),
-    gimbal: () => ({ title: 'インフィニティジンバル', html: `<p>3軸のジンバルで、上は70°まで、下は真下（−90°）まで向けられます。ロールの軸が大きく回るので、<b>機体を傾けずに縦向きの撮影</b>ができます（公式・取説）。</p><p id="mvGimState" class="pd-state">上へ向けます…</p><p class="caveat">操作できる範囲はチルト −90°〜70°・ロール −40°〜400°、機械的にはロール −90°〜450°（公式）。図は360°回して見せています。</p>`, actions: [{ label: 'もう一度', fn: () => mavicAction('gimbal') }] }),
-    fov: () => ({ title: '3眼の画角', html: `<p>同じ場所から撮っても、写る範囲がこれだけ違います（水平の画角・35mm判換算からの計算）。</p><ul class="pd-diff"><li><b style="color:#ef6a2d">28mm 相当</b>（Hasselblad・4/3型）：約65°</li><li><b style="color:#3b7df7">70mm 相当</b>（中望遠・1/1.3インチ）：約29°</li><li><b style="color:#22c55e">168mm 相当</b>（望遠・1/1.5インチ）：約12°</li></ul><p>望遠は近づかずに大きく写せるので、人や物から距離をとったまま撮れます。そのぶん、わずかな揺れも大きく写ります。</p><p class="caveat">画角の錐の長さは見やすさのための長さで、距離の意味はありません。カメラの並びは例です。</p>`, actions: [{ label: 'もどす', fn: () => mvOverlays(null) }], onClose: () => mvOverlays(null) }),
-    sense: () => ({ title: '検知範囲', html: `<p>魚眼センサーで全方向の障害物を見て、ぶつかる前に止まる・避けます。暗い夜は前向きLiDARが前を測ります（公式）。</p><table class="pd-spec">${[['前', '0.5〜24 m'], ['後', '0.5〜22 m'], ['横', '0.5〜21 m'], ['上', '0.5〜18 m'], ['下', '0.5〜17 m'], ['LiDAR（夜間）', '0.5〜25 m'], ['下向き赤外線', '0.3〜8 m']].map(([k, v]) => `<tr><th>${k}</th><td>${v}<small>公式</small></td></tr>`).join('')}</table><p class="caveat">図は測定範囲を約45分の1に縮めた概念図です（下向きはさらに縮めています）。スポーツモードではビジョンシステムが働かず、細い電線や枝は見分けにくい（取説）。</p>`, actions: [{ label: 'もどす', fn: () => mvOverlays(null) }], onClose: () => mvOverlays(null) }),
+    battery: () => ({ title: 'バッテリーを入れ替える', html: `<p id="mvBatState" class="pd-state">電源を切っています…</p><p>電源を切り、左右のバックルを押して、バッテリーを引き抜きます（この図では後ろへ）。差し込むときはカチッと音がするまで（取説）。</p><p><b>抜き差しの前に前アームを展開する</b>のが決まりです。前向きLiDARを傷めないため（取説）。</p><p class="caveat">バッテリーの抜き方向とバックルの形は図の例です。</p>`, actions: [{ label: 'もう一度', fn: () => mavicAction('battery') }], onClose: () => { mavicStop(); focusOn([D.root], { pull: true }); } }),
+    gimbal: () => ({ title: 'インフィニティジンバル', html: `<p id="mvGimState" class="pd-state">上へ向けます…</p><p>3軸のジンバルで、上は70°まで、下は真下（−90°）まで向けられます。ロールの軸が大きく回るので、<b>機体を傾けずに縦向きの撮影</b>ができます（公式・取説）。</p><p class="caveat">操作できる範囲はチルト −90°〜70°・ロール −40°〜400°、機械的にはロール −90°〜450°（公式）。図は360°回して見せています。</p>`, actions: [{ label: 'もう一度', fn: () => mavicAction('gimbal') }], onClose: () => { mavicStop(); focusOn([D.root], { pull: true }); } }),
+    fov: () => ({ title: '3眼の画角', html: `<p>同じ場所から撮っても、写る範囲がこれだけ違います（画角・公式）。</p><ul class="pd-diff"><li><b style="color:#ef6a2d">28mm 相当</b>（Hasselblad・4/3型）：72°</li><li><b style="color:#3b7df7">70mm 相当</b>（中望遠・1/1.3インチ）：35°</li><li><b style="color:#22c55e">168mm 相当</b>（望遠・1/1.5インチ）：15°</li></ul><p>望遠は近づかずに大きく写せるので、人や物から距離をとったまま撮れます。そのぶん、わずかな揺れも大きく写ります。</p><p class="caveat">錐は公式の画角を対角として4:3の枠で描いています。錐の長さは見やすさのための長さで、距離の意味はありません。カメラの並びは例です。</p>`, actions: [{ label: 'もどす', fn: () => mvOverlays(null) }], onClose: () => mvOverlays(null) }),
+    sense: () => ({ title: '検知範囲', html: `<p>魚眼センサーで全方向の障害物を見て、ぶつかる前に止まる・避けます。暗い夜は前向きLiDARが前を測ります（公式）。</p><table class="pd-spec"><tr><th>ビジョン</th><td>前 24・後 22・横 21・上 18・下 17 m<small>いずれも 0.5 m から・公式</small></td></tr><tr><th>LiDAR</th><td>夜間 0.5〜25 m・視野 60°<small>公式</small></td></tr><tr><th>下向き赤外線</th><td>0.3〜8 m<small>公式</small></td></tr></table><p class="caveat">図は測定範囲を約45分の1に縮めた概念図です（下向きのドームと赤外線の線はさらに縮めています）。スポーツモードではビジョンシステムが働かず、細い電線や枝は見分けにくい（取説）。</p>`, actions: [{ label: 'もどす', fn: () => mvOverlays(null) }], onClose: () => mvOverlays(null) }),
     size: () => ({ title: '大きさをくらべる', html: `<p>同じ縮尺で、<b>身長170cmの人</b>と、青い半透明の<b>550クラスのクアッド</b>（対角550mm・約2.4kg）を並べています。</p><p>Mavic 4 Proは展開時 328.7 × 390.5 mm（プロペラなし・公式）、離陸重量は約1063g。折りたためば 257.6 × 124.8 mm で、カメラバッグに入る大きさです。</p>`, actions: [{ label: 'もどす', fn: () => mvOverlays(null) }], onClose: () => mvOverlays(null) }),
   };
   renderNote(Object.assign({ kind: 'mavic-' + id }, N[id]()));
@@ -134,6 +130,7 @@ const mvEase = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
 const mvNorm = (a) => Math.atan2(Math.sin(a), Math.cos(a));
 function stepMavic(dt) {
   let dirty = false;
+  if (S.explode > 0.02 && mav.foldTo > 0) { mav.foldTo = 0; syncMvChips(); if ($('#noteCard').dataset.kind === 'mavic-fold') renderNote(null); }   /* 畳んだ姿勢のまま部品を散らさない */
   { const sup = mav.sizeOn || mav.fovOn || mav.senseOn || !!(mav.act && mav.act.id === 'gimbal'); if (sup !== mav._sup) { mav._sup = sup; S.labelsSuppressed = sup; } }
   // --- たたむ / 広げる ---
   if (mav.foldTo > mav.fold) {
@@ -149,14 +146,14 @@ function stepMavic(dt) {
     const f = mav.fold, fb = mvEase(f / 0.3), fr = mvEase(f / 0.6), ff = mvEase((f - 0.4) / 0.6);   /* 畳む: 羽根→後ろ→前 / 広げる: 前→後ろ→羽根 */
     D.motors.forEach((mo, i) => {
       const F = D.folds[i];
-      if (F.front) { const yawT = Math.atan2(-0.99, F.sx * 0.11); F.fg.rotation.set(0, mvNorm(yawT - F.yaw) * ff, 0); }
-      else { const yawT = Math.atan2(0.99, F.sx * 0.12); F.fg.rotation.set(0, mvNorm(yawT - F.yaw) * fr, -0.22 * fr); }
+      if (F.front) { const yawT = Math.atan2(-1, 0); F.fg.rotation.set(0, mvNorm(yawT - F.yaw) * ff, 0.14 * ff); }   /* 真後ろへ回し、胴の肩より上に起こして重ねる */
+      else { const yawT = Math.atan2(0.998, F.sx * 0.061); F.fg.rotation.set(0, mvNorm(yawT - F.yaw) * fr, 0); }   /* 真前へ回し、胴の脇に寄せる（実機は胴のくぼみに収まる。下へ倒すと脚が床に潜る） */
       for (const h of mo.hinges) h.g.rotation.y = h.s * fb * Math.PI / 2;
     });
     // 後方右アーム(M2)を開ききったら電源が入る / 畳み終えたら電源を切った状態に
     const rr = mvEase(f / 0.6);
-    if (mav.foldTo === 0 && !mav.powered && rr < 0.02 && !mav.act) setMvPower(true, '後方右アームを開いたので、電源が入りました（アーム展開による電源オン）');
-    if (mav.foldTo === 1 && f >= 1 && mav.powered) setMvPower(false, '畳み終えたので電源ボタンで電源を切りました（初期設定では畳んでも切れない）');
+    if (mav.foldTo === 0 && !mav.powered && rr < 0.02 && !mav.act) setMvPower(true, '後方右アームを開いて電源オン');
+    if (mav.foldTo === 1 && f >= 1 && mav.powered) { setMvPower(false, '電源ボタンで電源を切りました'); mvFrameBox([-0.09, -0.16, -0.18], [0.09, 0.05, 0.16], [0.62, 0.42, -0.66], 1.15); }   /* 畳み終えたら畳んだ大きさに寄せ直す */
     if (f === 0 && mav.foldTo === 0 && mav.pendingPower) { mav.pendingPower = false; setPower(0.5); }
     mav._last = f; dirty = true;
   }
@@ -206,5 +203,5 @@ function initMavic() {
   syncMvChips();
   focusOn([D.root], { pull: false, margin: 1.25 });   /* 550クラスより小さいので、最初の画を寄せる */
   const q = new URLSearchParams(location.search);
-  if (!SHARE_KEYS.some(k => q.has(k))) setTimeout(() => { if (!$('#noteCard').dataset.kind) { renderMvAbout(); mvFrameDrone(null, 1.3); } }, 900);
+  if (!SHARE_KEYS.some(k => q.has(k))) setTimeout(() => { if (!$('#noteCard').dataset.kind) { renderMvAbout(); mvFrameDrone(null, 1.05); } }, 900);
 }

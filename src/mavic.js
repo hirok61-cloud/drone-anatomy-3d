@@ -58,22 +58,22 @@ function buildMavic(M) {
   prof.lineTo(0.100, 0.030); prof.quadraticCurveTo(0.124, 0.028, 0.125, 0.008);
   prof.quadraticCurveTo(0.125, -0.022, 0.104, -0.030); prof.lineTo(-0.070, -0.034);
   prof.quadraticCurveTo(-0.112, -0.032, -0.118, -0.004);
-  const bodyGeo = new THREE.ExtrudeGeometry(prof, { depth: 0.080, bevelEnabled: true, bevelThickness: 0.012, bevelSize: 0.008, bevelSegments: 5, curveSegments: 18 });
-  bodyGeo.rotateY(-Math.PI / 2); bodyGeo.translate(0.040, 0, 0); bodyGeo.computeVertexNormals();
+  const bodyGeo = new THREE.ExtrudeGeometry(prof, { depth: 0.072, bevelEnabled: true, bevelThickness: 0.012, bevelSize: 0.008, bevelSegments: 5, curveSegments: 18 });
+  bodyGeo.rotateY(-Math.PI / 2); bodyGeo.translate(0.036, 0, 0); bodyGeo.computeVertexNormals();
   const bodyG = new THREE.Group();
   bodyG.add(mesh(bodyGeo, X.shell));
   bodyG.add(at(mesh(rboxGeo(0.060, 0.004, 0.120, 0.002), X.shellDark), 0, -0.035, 0.010));   // 底の板
-  { const b = plane(0.050, 0.009, X.brand); b.rotation.y = Math.PI / 2; at(b, 0.0525, 0.004, 0.035); bodyG.add(b); }
+  { const b = plane(0.050, 0.009, X.brand); b.rotation.y = Math.PI / 2; at(b, 0.0485, 0.004, 0.035); bodyG.add(b); }
   sg.add(bodyG); reg(bodyG, 'body', V3(0, 0, 0), { label: V3(-0.05, 0.0, 0.07) });
-  const rm = plane(0.034, 0.0065, X.regLabel); rm.rotation.y = -Math.PI / 2; at(rm, -0.0525, -0.010, 0.045); sg.add(rm); reg(rm, 'regMark', V3(-0.04, 0, 0));
+  const rm = plane(0.034, 0.0065, X.regLabel); rm.rotation.y = -Math.PI / 2; at(rm, -0.0485, -0.010, 0.045); sg.add(rm); reg(rm, 'regMark', V3(-0.04, 0, 0));
   const ports = new THREE.Group();
-  ports.add(at(mesh(rboxGeo(0.002, 0.008, 0.016, 0.0008), X.shellDark), -0.0532, -0.012, 0.090));
-  ports.add(at(mesh(rboxGeo(0.002, 0.004, 0.012, 0.0008), M.chip), -0.0532, 0.004, 0.090));
-  sg.add(ports); reg(ports, 'ports', V3(-0.05, 0, 0), { label: V3(-0.055, -0.004, 0.09) });
+  ports.add(at(mesh(rboxGeo(0.002, 0.008, 0.016, 0.0008), X.shellDark), -0.0492, -0.012, 0.090));
+  ports.add(at(mesh(rboxGeo(0.002, 0.004, 0.012, 0.0008), M.chip), -0.0492, 0.004, 0.090));
+  sg.add(ports); reg(ports, 'ports', V3(-0.05, 0, 0), { label: V3(-0.051, -0.004, 0.09) });
 
   // ---------- バッテリー (胴の上・後ろへ抜く) ----------
   const bat = new THREE.Group(); at(bat, 0, 0.030, 0.048);
-  const shell = mesh(rboxGeo(0.090, 0.024, 0.150, 0.008, 3), X.shellLight); at(shell, 0, 0.006, 0); bat.add(shell);
+  const shell = mesh(rboxGeo(0.086, 0.024, 0.150, 0.008, 3), X.shellLight); at(shell, 0, 0.006, 0); bat.add(shell);
   for (let k = 0; k < 7; k++) bat.add(at(mesh(rboxGeo(0.070, 0.0015, 0.004, 0.0007), X.shellDark), 0, 0.0185, 0.040 + k * 0.0055));   // 後ろの滑り止め
   const cells = mesh(merged(Array.from({ length: 4 }, (_, k) => new THREE.BoxGeometry(0.019, 0.016, 0.130).translate(-0.0315 + k * 0.021, 0.004, 0))), M.cell); bat.add(cells);
   const bled = new THREE.Group();
@@ -81,7 +81,7 @@ function buildMavic(M) {
   for (let k = 0; k < 4; k++) bled.add(at(mesh(new THREE.BoxGeometry(0.004, 0.0016, 0.001), k < 3 ? M.ledGreen : M.chip), -0.018 + k * 0.007, 0.006, 0.0755));
   bat.add(bled);
   const buckle = new THREE.Group();
-  for (const s of [-1, 1]) buckle.add(at(mesh(rboxGeo(0.004, 0.012, 0.022, 0.0015), X.shellDark), s * 0.0465, 0.004, -0.050));
+  for (const s of [-1, 1]) buckle.add(at(mesh(rboxGeo(0.004, 0.012, 0.022, 0.0015), X.shellDark), s * 0.0445, 0.004, -0.050));
   bat.add(buckle);
   sg.add(bat);
   reg(cells, 'cells', V3(0, 0, 0)); reg(bled, 'batteryLed', V3(0, 0, 0.02)); reg(buckle, 'batteryBuckle', V3(0, 0, 0));
@@ -114,7 +114,7 @@ function buildMavic(M) {
   });
 
   // ---------- インフィニティジンバルと3眼カメラ ----------
-  const gim = new THREE.Group(); at(gim, 0, -0.026, -0.102);
+  const gim = new THREE.Group(); at(gim, 0, -0.026, -0.116);   /* カメラの頭が機首より前に出る */
   gim.add(mesh(cylGeo(0.010, 0.011, 0.008, 28), X.shellDark));                 // パン(水平)の付け根
   const yoke = new THREE.Group(); gim.add(yoke);
   yoke.add(tubeBetween(V3(0, -0.004, 0), V3(0, -0.014, -0.006), 0.0045, X.shell, 16));
@@ -139,10 +139,10 @@ function buildMavic(M) {
   const fullGeo = (dir) => { const g = propGeometry(dir); g.scale(0.877, 0.8, 0.877); return g; };
   const PG = { bCCW: bladeGeo(1), bCW: bladeGeo(-1), fCCW: fullGeo(1), fCW: fullGeo(-1) };
   const ARMS = [   // 並びは M1前右 M2後右 M3後左 M4前左（550クラスと同じ）
-    { id: 'M1', front: true, sx: 1, hinge: V3(0.054, 0.012, -0.062), motor: V3(0.172, 0.016, -0.120), dir: 1 },
-    { id: 'M2', front: false, sx: 1, hinge: V3(0.046, -0.014, 0.084), motor: V3(0.160, -0.004, 0.126), dir: -1 },
-    { id: 'M3', front: false, sx: -1, hinge: V3(-0.046, -0.014, 0.084), motor: V3(-0.160, -0.004, 0.126), dir: 1 },
-    { id: 'M4', front: true, sx: -1, hinge: V3(-0.054, 0.012, -0.062), motor: V3(-0.172, 0.016, -0.120), dir: -1 },
+    { id: 'M1', front: true, sx: 1, hinge: V3(0.050, 0.012, -0.062), motor: V3(0.174, 0.016, -0.134), dir: 1 },
+    { id: 'M2', front: false, sx: 1, hinge: V3(0.044, -0.014, 0.084), motor: V3(0.162, -0.004, 0.140), dir: -1 },
+    { id: 'M3', front: false, sx: -1, hinge: V3(-0.044, -0.014, 0.084), motor: V3(-0.162, -0.004, 0.140), dir: 1 },
+    { id: 'M4', front: true, sx: -1, hinge: V3(-0.050, 0.012, -0.062), motor: V3(-0.174, 0.016, -0.134), dir: -1 },
   ];
   const folds = [];
   ARMS.forEach((A, k) => {
@@ -209,15 +209,15 @@ function buildMavic(M) {
 
   // ---------- 説明用の重ね絵 (画角・検知範囲。部品には数えない) ----------
   const fovG = new THREE.Group(); fovG.visible = false; head.add(fovG);
-  const frustum = (hdeg, len, mat) => { const a = Math.tan(THREE.MathUtils.degToRad(hdeg / 2)) * len, b = a * 9 / 16;
+  const frustum = (fovDeg, len, mat) => { const dg = Math.tan(THREE.MathUtils.degToRad(fovDeg / 2)) * len, a = dg * 0.8, b = dg * 0.6;   /* 公式のFOVを対角とみなし、4:3 の枠にする */
     const g = new THREE.ConeGeometry(Math.hypot(a, b), len, 4, 1, true); g.rotateY(Math.PI / 4); g.scale(a / Math.hypot(a, b) * Math.SQRT2, 1, b / Math.hypot(a, b) * Math.SQRT2); g.rotateX(Math.PI / 2); g.translate(0, 0, -len / 2 - 0.018);
     const m = new THREE.Mesh(g, mat); m.renderOrder = 7; return m; };
-  fovG.add(frustum(65.5, 0.95, X.fovMain), frustum(28.8, 1.15, X.fovMid), frustum(12.2, 1.35, X.fovTele)); noPart(fovG);
+  fovG.add(frustum(72, 0.95, X.fovMain), frustum(35, 1.15, X.fovMid), frustum(15, 1.35, X.fovTele)); noPart(fovG);
   const senseG = new THREE.Group(); senseG.visible = false; sg.add(senseG);
   { const S2 = 0.022;   // 実際の測定範囲(m)を 1/45 にした概念図
     const lobe = (dir, r) => { const m = new THREE.Mesh(new THREE.SphereGeometry(r, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2.4), X.sense); m.quaternion.setFromUnitVectors(UP, dir.clone().normalize()); m.renderOrder = 7; return m; };
     senseG.add(lobe(V3(0, 0, -1), 24 * S2), lobe(V3(0, 0, 1), 22 * S2), lobe(V3(1, 0, 0), 21 * S2), lobe(V3(-1, 0, 0), 21 * S2), lobe(V3(0, 1, 0), 18 * S2), lobe(V3(0, -1, 0), 17 * S2 * 0.25));
-    const beam = new THREE.Mesh(new THREE.ConeGeometry(0.07, 25 * S2, 32, 1, true), X.lidarBeam); beam.rotation.x = -Math.PI / 2; beam.position.set(0, 0.014, -0.122 - 25 * S2 / 2); beam.renderOrder = 8; senseG.add(beam);
+    const beam = new THREE.Mesh(new THREE.ConeGeometry(Math.tan(Math.PI / 6) * 25 * S2, 25 * S2, 4, 1, true), X.lidarBeam); beam.rotation.y = Math.PI / 4;   /* 視野は上下・左右とも60°（公式） */ beam.rotation.x = -Math.PI / 2; beam.position.set(0, 0.014, -0.125 - 25 * S2 / 2); beam.renderOrder = 8; senseG.add(beam);
     const irb = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.075, 24, 1, true), X.irBeam); irb.position.set(0, -0.037 - 0.0375, -0.010); irb.renderOrder = 8; senseG.add(irb);
     noPart(senseG); }
 
@@ -231,6 +231,6 @@ function buildMavic(M) {
   const yaw = rotationArc(-1, 0.22); yaw.position.set(0, -0.02, 0); yaw.visible = false; root.add(yaw); arrows.yaw = yaw;
   const cgMarker = new THREE.Group(); cgMarker.visible = false; root.add(cgMarker);
 
-  return { root, sg, parts, pick, wires, motors, legs, arrows, batPart, G, cgMarker, personGroup: null, folds, gimbalParts: { roll, tilt, head, yoke }, fovG, senseG,
+  return { root, sg, halfSpan: 0.31, focusMin: 0.26, parts, pick, wires, motors, legs, arrows, batPart, G, cgMarker, personGroup: null, folds, gimbalParts: { roll, tilt, head, yoke }, fovG, senseG,
     rotor: { R: 0.1334 * K, y0: 0 }, moveR: 0.26, moveY: 0.05, rpmScale: 1.1 };
 }

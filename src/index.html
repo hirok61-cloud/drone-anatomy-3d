@@ -16,11 +16,13 @@
 <div id="dock" class="glass" role="toolbar" aria-label="操作">
   <div id="ctx" class="ctx">
     <div class="ctx-row" data-tab="see">
-      <button id="inspToggle" class="pill-btn compact-only" data-i18n="ui.parts">部品一覧</button>
-      <div class="dock-group grow"><label for="explode"><span data-i18n="ui.explode">分解</span> <span id="explodeVal" class="mono">0%</span></label><input type="range" id="explode" min="0" max="100" value="0"></div>
       <div class="dock-group pd6b-only"><label>PD6B-CAT3</label><div class="chips" id="pdChips" role="group" aria-label="PD6B-CAT3の動き"><button data-pd="about">ⓘ この機体</button><button data-pd="fold" aria-pressed="false">たたむ</button><button data-pd="swap">電池交換</button><button data-pd="drop">荷物を置く</button><button data-pd="chute" aria-pressed="false">パラシュート</button><button data-pd="unit">測量用に付け替え</button><button data-pd="size" aria-pressed="false">大きさ</button></div></div>
       <div class="dock-group mavic-only"><label>Mavic 4 Pro</label><div class="chips" id="mvChips" role="group" aria-label="Mavic 4 Proの動き"><button data-mv="about">ⓘ この機体</button><button data-mv="fold" aria-pressed="false">たたむ</button><button data-mv="battery">電池交換</button><button data-mv="gimbal">ジンバル</button><button data-mv="fov" aria-pressed="false">3眼の画角</button><button data-mv="sense" aria-pressed="false">検知範囲</button><button data-mv="size" aria-pressed="false">大きさ</button></div></div>
+      <div class="see-main">
+      <button id="inspToggle" class="pill-btn compact-only" data-i18n="ui.parts">部品一覧</button>
+      <div class="dock-group grow"><label for="explode"><span data-i18n="ui.explode">分解</span> <span id="explodeVal" class="mono">0%</span></label><input type="range" id="explode" min="0" max="100" value="0"></div>
       <div class="dock-group"><label data-i18n="ui.look">見え方</label><div class="seg small" id="modeSeg" role="radiogroup"><button data-mode="normal" class="on"><span data-simple data-i18n="ui.normal">ふつう</span><span data-fullname>通常</span></button><button data-mode="xray"><span data-simple data-i18n="ui.xray">すけて見る</span><span data-fullname>X線</span></button><button data-mode="wire"><span data-simple data-i18n="ui.wire">線だけ</span><span data-fullname>線画</span></button><button data-mode="cut"><span data-simple data-i18n="ui.cut">切って見る</span><span data-fullname>断面</span></button><button data-mode="blueprint" data-unlock hidden>設計図</button></div></div>
+      </div>
     </div>
     <div class="ctx-row" data-tab="fly" hidden>
       <button id="powerBtn" class="pill-btn primary">▶ プロペラを回す</button>

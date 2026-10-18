@@ -4,7 +4,7 @@ const log = []; const A = (c, ...m) => { if (!c) log.push('FAIL ' + m.join(' '))
 const d = window.__d; d.step(1, 60);
 const row = document.querySelector('#partList .row'); row.click(); d.step(0.2, 60);
 await new Promise(r => setTimeout(r, 1700)); d.step(0.2, 60);
-A(document.getElementById('codexCount').textContent.trim() === '1/40', 'count', document.getElementById('codexCount').textContent);
+A(document.getElementById('codexCount').textContent.trim() === '見た 1/40', 'count', document.getElementById('codexCount').textContent);
 A(JSON.parse(localStorage.getItem('drone3d.codex')).length === 1, 'persist');
 A(document.querySelector('#detail .trivia'), 'trivia row');
 // 段階2: localStorage.setItem('drone3d.codex', JSON.stringify(LIST_ORDER)); location.reload(); の後
