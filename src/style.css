@@ -579,10 +579,10 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
   .tabs button { min-height: var(--tap); }
 }
 /* ===== 機種の切り替え / PD6B-CAT3 ===== */
-body.pd6b .q550-only, body:not(.pd6b) .pd6b-only { display: none !important; }
+body.alt .q550-only, body:not(.pd6b) .pd6b-only, body:not(.mavic4) .mavic-only { display: none !important; }
 .model-btn { gap: 6px; padding: 5px 12px; min-height: 32px; font-weight: 500; }
 .model-btn .mb-k { color: var(--ink3); font-size: 12px; } .model-btn b { font-weight: 700; } .model-btn .mb-c { color: var(--ink3); font-size: 11px; }
-body.pd6b .model-btn { box-shadow: inset 0 0 0 1.5px var(--accent); }
+body.alt .model-btn { box-shadow: inset 0 0 0 1.5px var(--accent); }
 #modelPop { left: 14px; right: auto; width: 360px; }
 #modelPop h3 { font-size: calc(15px * var(--fs, 1)); margin-bottom: 8px; }
 .model-list { display: flex; flex-direction: column; gap: 6px; }

@@ -3,7 +3,7 @@
 // バッジ・称号・ランキング・音は作らない（数字ひとつと控えめな光だけ）。
 const codex = { seen: new Set(), today: null, pending: null, done: false, t: 0, litKey: null, total: 40 };
 // 見た部品は機種ごとに数える（PD6B の部品で 550クラスの記録を上書きしない）
-const CODEX_KEY = IS_PD6B ? 'codex.pd6b' : 'codex', CODEX_DONE = IS_PD6B ? 'codexDone.pd6b' : 'codexDone';
+const CODEX_KEY = IS_ALT ? 'codex.' + MODEL : 'codex', CODEX_DONE = IS_ALT ? 'codexDone.' + MODEL : 'codexDone';
 
 function codexLoad() {
   try { const a = JSON.parse(store.get(CODEX_KEY) || '[]'); if (Array.isArray(a)) codex.seen = new Set(a.filter(k => PARTS[k])); } catch (e) { codex.seen = new Set(); }
@@ -65,7 +65,7 @@ function codexTriviaRow(key) { if (!TRIVIA[key]) return ''; const act = typeof T
 // 豆知識の内容を機体に演じさせる
 function triviaAct(key) {
   const a = TRIVIA_ACT && TRIVIA_ACT[key]; if (!a) return;
-  if (a.pd6b) { pd6bAction(a.pd6b); return; }
+  if (a.pd6b || a.alt) { altAction(a.pd6b || a.alt); return; }
   if (a.explode != null) { setTab('see'); setExplode(a.explode); }
   else if (a.mode) { setTab('see'); setMode(a.mode); if (a.mode === 'cut' && key !== 'motor') select(partsOf(key)[0], true, { quiet: true }); }
   else if (a.question) askQuestion(a.question);
@@ -102,7 +102,7 @@ async function codexPoster() {
   const rowY = triv ? 1104 : 1152;
   g.fillText('ドローンの構造', 44, rowY);
   const p = S.selected;
-  const name = p ? ((S.depth === 'simple' && SIMPLE_NAME[p.key]) || PARTS[p.key].name) : (IS_PD6B ? 'PD6B-CAT3（プロドローン）' : '550クラス クアッドコプター');
+  const name = p ? ((S.depth === 'simple' && SIMPLE_NAME[p.key]) || PARTS[p.key].name) : MODEL_FULL[MODEL];
   g.fillStyle = bp ? '#ffffff' : '#ef6a2d'; g.font = `700 34px ${F}`; g.textAlign = 'center'; g.fillText(name, 800, rowY);
   const n = new Date(), ds = `${n.getFullYear()}.${String(n.getMonth() + 1).padStart(2, '0')}.${String(n.getDate()).padStart(2, '0')}`;
   g.fillStyle = bp ? '#9db3d8' : (dark ? '#8791a3' : '#7b8290'); g.font = `500 26px ${F}`; g.textAlign = 'right';

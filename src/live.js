@@ -6,7 +6,7 @@ const hasSpeech = 'speechSynthesis' in window && typeof SpeechSynthesisUtterance
 // ---------- A. 生きている機体 ----------
 function aliveWanted() {
   if (!S.alive || alive.forcedOff) return false;
-  return S.tab === 'see' && !S.selected && S.explode < 0.02 && S.mode === 'normal' && !S.question && !theater.active && !whatif.active && !S.lesson && !S.scale && !S.use && !S.expert && !(typeof quiz !== 'undefined' && quiz.active) && !(typeof pd6bBusy === 'function' && pd6bBusy());
+  return S.tab === 'see' && !S.selected && S.explode < 0.02 && S.mode === 'normal' && !S.question && !theater.active && !whatif.active && !S.lesson && !S.scale && !S.use && !S.expert && !(typeof quiz !== 'undefined' && quiz.active) && !altBusy();
 }
 function stepAlive(dtReal) {
   const w = aliveWanted();

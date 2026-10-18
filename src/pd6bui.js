@@ -2,27 +2,6 @@
 // 固有の動き: たたむ（アームとプロペラ）・電池交換（ホットスワップ）・荷物を置く（ボックスリリース）・パラシュート・付け替え（腰下ユニット）・大きさ
 const pd6b = { variant: 'cargo', fold: 0, foldTo: 0, act: null, sizeOn: false, person: null, ghost: null, chuteK: 0, chuteTo: 0, pendingPower: false };
 
-// ---------- 機種の切り替え (どちらの機種でも使う) ----------
-function setModel(m) {
-  try { sessionStorage.setItem('drone3d.model', m); } catch (e) {}
-  const u = new URL(location.href);
-  if (m === 'pd6b') u.searchParams.set('model', 'pd6b'); else u.searchParams.delete('model');
-  for (const k of SHARE_KEYS) u.searchParams.delete(k);   /* 部品の名前が機種ごとに違うので、共有の状態は持ち越さない */
-  u.hash = '';
-  $('#loading').classList.remove('gone'); $('#loadMsg').textContent = m === 'pd6b' ? 'PD6B-CAT3 を組み立てています…' : '550クラスを組み立てています…';
-  setTimeout(() => { try { location.assign(u.toString()); } catch (e) { location.reload(); } }, 30);
-}
-function initModelUI() {
-  document.body.classList.toggle('pd6b', IS_PD6B);
-  $('#modelName').textContent = IS_PD6B ? 'PD6B-CAT3' : '550クラス';
-  for (const b of $$('#modelPop [data-model]')) { const on = b.dataset.model === MODEL; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }
-  const btn = $('#modelBtn'), pop = $('#modelPop');
-  btn.addEventListener('click', e => { e.stopPropagation(); pop.hidden = !pop.hidden; btn.setAttribute('aria-expanded', String(!pop.hidden)); $('#settings').hidden = true; $('#askPop').hidden = true; });
-  pop.addEventListener('click', e => { const b = e.target.closest('[data-model]'); if (!b) return; if (b.dataset.model === MODEL) { pop.hidden = true; return; } setModel(b.dataset.model); });
-  document.addEventListener('click', e => { if (!e.target.closest('#modelPop') && !e.target.closest('#modelBtn')) { pop.hidden = true; btn.setAttribute('aria-expanded', 'false'); } });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !pop.hidden) { pop.hidden = true; e.stopPropagation(); } }, true);
-}
-
 // ---------- 状態の問い合わせ (ui.js / live.js から呼ばれる) ----------
 function pd6bBusy() { return IS_PD6B && (pd6b.foldTo > 0 || pd6b.fold > 0.001 || !!pd6b.act || pd6b.chuteTo > 0 || pd6b.sizeOn); }   /* 大きさは床に立つ人と並べるので着地させる */
 function pd6bShadowExtra() { return (pd6b.sizeOn ? 0.45 : 0) + (pd6b.act && pd6b.act.id === 'drop' ? 0.1 : 0); }
@@ -49,7 +28,7 @@ function pd6bAction(id) {
   if (id === 'size') { if (pd6b.act) pd6bStop(); setSize(!pd6b.sizeOn); return; }
   if (id === 'chute') { if (!(pd6b.chuteTo > 0) && (pd6b.foldTo > 0 || pd6b.fold > 0.001)) { pd6b.foldTo = 0; showToast('アームを広げてから開きます'); } setChute(!(pd6b.chuteTo > 0)); return; }
   if (pd6b.act) pd6bStop();
-  stopOthers('pd6b');
+  stopOthers('alt');
   if (S.explode > 0.02) setExplode(0);
   if (S.mode === 'cut') setMode('normal');
   if (id === 'fold') {

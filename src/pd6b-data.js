@@ -1,12 +1,4 @@
-// ===== 機種: 550クラス(既定) / PD6B-CAT3 =====
-// 機種は URL の ?model=pd6b で選ぶ（Artifact の枠内などでURLを書き換えられないときは sessionStorage を使う）。
-// 切り替えはページを読み込み直す。部品・材質・カメラ・物理をまるごと作り直すほうが、実行中に差し替えるより確実なため。
-const MODEL = (() => {
-  try { const q = new URLSearchParams(location.search).get('model'); if (q) return q === 'pd6b' ? 'pd6b' : 'q550'; } catch (e) {}
-  try { if (sessionStorage.getItem('drone3d.model') === 'pd6b') return 'pd6b'; } catch (e) {}
-  return 'q550';
-})();
-const IS_PD6B = MODEL === 'pd6b';
+// ===== PD6B-CAT3 のデータ（機種の判定は model.js） =====
 // 実寸(m)で作った PD6B を、550クラスと同じ舞台(床・影・カメラ)に載せるための縮尺。スキッドの底(-0.53m)を床(-0.158)に合わせる
 const PD6B_K = 0.158 / 0.53;
 const PD6B_DATE = '2026年10月時点';
