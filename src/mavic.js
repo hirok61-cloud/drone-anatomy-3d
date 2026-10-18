@@ -14,6 +14,7 @@ function mavicMaterials(M) {
   });
   const propMat = (dir) => Object.assign(phy({ map: canvasTex(propCanvas(dir), { wrap: false }), roughness: 0.55, metalness: 0, clearcoat: 0.3, clearcoatRoughness: 0.4, side: THREE.DoubleSide }), { userData: { flatTint: true } });
   const regLabel = pd6bCanvas(512, 96, (g, w, h) => { g.fillStyle = '#f4f4f2'; g.fillRect(0, 0, w, h); g.fillStyle = '#17181b'; g.font = 'bold 60px "SF Mono", Menlo, monospace'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('JU 1234 5678', w / 2, h / 2 + 2); });
+  const hasselblad = pd6bCanvas(512, 72, (g, w, h) => { g.fillStyle = '#121418'; g.fillRect(0, 0, w, h); g.fillStyle = '#c9ccd2'; g.font = `500 46px ${sans}`; g.textAlign = 'center'; g.textBaseline = 'middle'; if ('letterSpacing' in g) g.letterSpacing = '9px'; g.fillText('HASSELBLAD', w / 2, h / 2 + 2); });
   const brand = pd6bCanvas(512, 96, (g, w, h) => { g.fillStyle = '#3c3f45'; g.fillRect(0, 0, w, h); g.fillStyle = '#c9ccd2'; g.font = `600 54px ${sans}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('MAVIC 4 PRO', w / 2, h / 2 + 2); });
   return {
     shell: phy({ color: 0x45484e, metalness: 0.15, roughness: 0.42, clearcoat: 0.45, clearcoatRoughness: 0.3 }),
@@ -22,6 +23,11 @@ function mavicMaterials(M) {
     glass: phy({ color: 0x07090d, roughness: 0.05, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.03, iridescence: 0.6, iridescenceIOR: 1.3 }),
     lensRing: phy({ color: 0x1d1f23, metalness: 0.8, roughness: 0.3 }),
     goldRing: phy({ color: 0xb08d57, metalness: 1, roughness: 0.3 }),
+    bezel: phy({ color: 0x121418, metalness: 0.2, roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.08 }),
+    lensBack: new THREE.MeshBasicMaterial({ color: 0x020305 }),
+    lensClear: phy({ color: 0x0b1020, metalness: 0, roughness: 0.04, clearcoat: 1, clearcoatRoughness: 0.03, iridescence: 0.5, iridescenceIOR: 1.35, transparent: true, opacity: 0.26, depthWrite: false, envMapIntensity: 0.6 }),
+    iris: phy({ color: 0x8d929c, metalness: 0.7, roughness: 0.32, side: THREE.DoubleSide }),
+    hasselblad: decal(hasselblad),
     propCCW: propMat(1), propCW: propMat(-1),
     regLabel: decal(regLabel), brand: decal(brand),
     fovMain: new THREE.MeshBasicMaterial({ color: 0xef6a2d, transparent: true, opacity: 0.16, depthWrite: false, side: THREE.DoubleSide }),
@@ -114,25 +120,39 @@ function buildMavic(M) {
   });
 
   // ---------- インフィニティジンバルと3眼カメラ ----------
-  const gim = new THREE.Group(); at(gim, 0, -0.026, -0.116);   /* カメラの頭が機首より前に出る */
-  gim.add(mesh(cylGeo(0.010, 0.011, 0.008, 28), X.shellDark));                 // パン(水平)の付け根
-  const yoke = new THREE.Group(); gim.add(yoke);
-  yoke.add(tubeBetween(V3(0, -0.004, 0), V3(0, -0.014, -0.006), 0.0045, X.shell, 16));
-  yoke.add(at(mesh(cylGeo(0.012, 0.012, 0.010, 32).rotateX(Math.PI / 2), X.shell), 0, -0.016, -0.010));   // ロールのモーター(軸は前後)
-  const roll = new THREE.Group(); at(roll, 0, -0.016, -0.016); yoke.add(roll);
-  roll.add(mesh(new THREE.TorusGeometry(0.024, 0.0032, 10, 48, Math.PI * 1.25).rotateZ(-Math.PI * 0.125 - Math.PI / 2), X.shell));   // ロール側の腕(弧)
-  for (const s of [-1, 1]) roll.add(at(mesh(cylGeo(0.006, 0.006, 0.006, 20).rotateZ(Math.PI / 2), X.shellDark), s * 0.026, 0, -0.004));   // チルト軸
-  const tilt = new THREE.Group(); at(tilt, 0, 0, -0.004); roll.add(tilt);
-  const head = new THREE.Group(); tilt.add(head);
-  head.add(mesh(rboxGeo(0.046, 0.036, 0.034, 0.011, 4), X.shellLight));
-  const lensAt = (r, x, y, mat) => { const g = new THREE.Group(); at(g, x, y, -0.017);
-    g.add(mesh(cylGeo(r + 0.0022, r + 0.0022, 0.004, 40).rotateX(Math.PI / 2), X.lensRing));
-    g.add(at(mesh(new THREE.TorusGeometry(r + 0.0012, 0.0006, 8, 40), mat || X.lensRing), 0, 0, -0.0021));
-    const gl = mesh(new THREE.SphereGeometry(r, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), M.lens); gl.scale.y = 0.3; gl.rotation.x = -Math.PI / 2; at(gl, 0, 0, -0.0018); g.add(gl);
+  // 形は公式写真から: 機首の下のパン軸 → 右側面へ回る腕 → 胴の横のチルト用モーター → 胴の中で前面ごと回るロール。
+  // 前面は上に大きなHasselbladのレンズ、下に2つ（向かって左＝機体の右が70mm・右が168mm。公式のセンサー図の並び）。
+  // チルトが外・ロールが内なので、ロールはいつもレンズの光軸まわり（＝ダッチアングル・縦撮り）。軸の順番は写真からの推定。
+  const gim = new THREE.Group(); at(gim, 0, -0.030, -0.112);
+  gim.add(mesh(cylGeo(0.011, 0.012, 0.007, 28), X.shellDark));                 // パンの付け根（機首の下）
+  const pan = new THREE.Group(); gim.add(pan);
+  const yoke = new THREE.Group(); pan.add(yoke);
+  yoke.add(tubeBetween(V3(0.003, -0.003, -0.004), V3(0.026, -0.006, -0.021), 0.0042, X.shell, 16));
+  yoke.add(tubeBetween(V3(0.026, -0.006, -0.021), V3(0.0305, -0.010, -0.035), 0.0042, X.shell, 16));
+  yoke.add(at(mesh(new THREE.SphereGeometry(0.0042, 16, 10), X.shell), 0.026, -0.006, -0.021));
+  yoke.add(at(mesh(cylGeo(0.0098, 0.0098, 0.0075, 32).rotateZ(Math.PI / 2), X.shell), 0.0285, -0.010, -0.037));   // チルトのモーター（軸は左右）
+  const tilt = new THREE.Group(); at(tilt, 0, -0.010, -0.037); pan.add(tilt);
+  tilt.add(mesh(lathe([[0.0005, -0.0215], [0.010, -0.021], [0.0175, -0.0185], [0.0222, -0.012], [0.0236, -0.004], [0.0236, 0.0125], [0.0228, 0.0158]], 56).rotateX(-Math.PI / 2), X.shellDark));   // 円筒の胴（後ろは丸い）
+  tilt.add(at(mesh(cylGeo(0.0072, 0.0072, 0.002, 28).rotateZ(Math.PI / 2), X.shellDark), -0.0238, 0, 0));   // 反対側のふた
+  const roll = new THREE.Group(); tilt.add(roll);
+  const head = new THREE.Group(); roll.add(head);
+  head.add(at(mesh(cylGeo(0.0229, 0.0229, 0.0052, 64).rotateX(Math.PI / 2), X.bezel), 0, 0, -0.0178));   // 前面（ロールで回る）
+  { const t = plane(0.020, 0.0027, X.hasselblad); t.rotation.y = Math.PI; at(t, 0, 0.0186, -0.02045); t.userData.noPick = true; head.add(t); }   // 写真では前面の上の縁に HASSELBLAD
+  head.add(at(mesh(rboxGeo(0.0205, 0.0178, 0.0024, 0.0042, 3), X.lensRing), 0, 0.0063, -0.0205));     // 主レンズの角窓
+  head.add(at(mesh(rboxGeo(0.0310, 0.0128, 0.0022, 0.0055, 3), X.lensRing), 0, -0.0093, -0.0205));    // 下の2眼の窓
+  const lensAt = (r, x, y, glowCol, ringMat, glassMat) => { const g = new THREE.Group(); at(g, x, y, -0.0222);
+    g.add(mesh(cylGeo(r + 0.0016, r + 0.0016, 0.0026, 40, true).rotateX(Math.PI / 2), X.lensRing));
+    g.add(at(mesh(new THREE.TorusGeometry(r + 0.0010, 0.0005, 8, 40), ringMat || X.lensRing), 0, 0, -0.0013));
+    g.add(at(mesh(new THREE.CircleGeometry(r + 0.0002, 32).rotateY(Math.PI), X.lensBack), 0, 0, 0.0010));   // 奥の暗がり
+    const gl = mesh(new THREE.SphereGeometry(r, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), glassMat || M.lens); gl.scale.y = 0.32; gl.rotation.x = -Math.PI / 2; at(gl, 0, 0, -0.0010); g.add(gl);
+    const glow = at(mesh(new THREE.TorusGeometry(r + 0.0019, 0.00055, 8, 48), new THREE.MeshBasicMaterial({ color: glowCol, toneMapped: false })), 0, 0, -0.0016); glow.visible = false; glow.renderOrder = 9; g.add(glow); g.userData.glow = glow;
     head.add(g); return g; };
-  const camMain = lensAt(0.0105, -0.0075, 0, X.goldRing), camMid = lensAt(0.0058, 0.0135, 0.0085), camTele = lensAt(0.0062, 0.0135, -0.0085);
-  reg(camMain, 'camMain', V3(0, 0, -0.04), { label: V3(0, 0, -0.006) }); reg(camMid, 'camMid', V3(0, 0.01, -0.05), { label: V3(0, 0.002, -0.006) }); reg(camTele, 'camTele', V3(0, -0.01, -0.05), { label: V3(0, -0.002, -0.006) });
-  sg.add(gim); reg(gim, 'gimbal', V3(0, -0.02, -0.09), { coarse: true, label: V3(0.03, -0.02, -0.02) });
+  const camMain = lensAt(0.0066, 0, 0.0063, 0xef6a2d, null, X.lensClear), camMid = lensAt(0.0043, 0.0074, -0.0093, 0x3b7df7), camTele = lensAt(0.0047, -0.0074, -0.0093, 0x22c55e);
+  // 絞り（Hasselbladのみ f/2.0〜f/11・公式）。半透明のガラス越しに、開口が狭まるのが見える
+  const iris = mesh(new THREE.RingGeometry(0.0062, 0.0067, 48).rotateY(Math.PI), X.iris); at(iris, 0, 0, 0.0002); iris.renderOrder = 2; camMain.add(iris); iris.userData.r = 0.0067;
+  for (const c of [camMain, camMid, camTele]) noPart(c.userData.glow);
+  reg(camMain, 'camMain', V3(0, 0.004, -0.04), { label: V3(0, 0, -0.004) }); reg(camMid, 'camMid', V3(0.006, -0.004, -0.05), { label: V3(0, 0, -0.004) }); reg(camTele, 'camTele', V3(-0.006, -0.004, -0.05), { label: V3(0, 0, -0.004) });
+  sg.add(gim); reg(gim, 'gimbal', V3(0, -0.02, -0.09), { coarse: true, label: V3(0.034, -0.012, -0.035) });
 
   // ---------- アーム ×4 (前は高く水平に畳む・後ろは低く斜め下へ畳む) ----------
   const bladeGeo = (dir) => { const g = propGeometry(dir, [0]); g.scale(0.877, 0.8, 0.877); return g; };
@@ -210,9 +230,11 @@ function buildMavic(M) {
   // ---------- 説明用の重ね絵 (画角・検知範囲。部品には数えない) ----------
   const fovG = new THREE.Group(); fovG.visible = false; head.add(fovG);
   const frustum = (fovDeg, len, mat) => { const dg = Math.tan(THREE.MathUtils.degToRad(fovDeg / 2)) * len, a = dg * 0.8, b = dg * 0.6;   /* 公式のFOVを対角とみなし、4:3 の枠にする */
-    const g = new THREE.ConeGeometry(Math.hypot(a, b), len, 4, 1, true); g.rotateY(Math.PI / 4); g.scale(a / Math.hypot(a, b) * Math.SQRT2, 1, b / Math.hypot(a, b) * Math.SQRT2); g.rotateX(Math.PI / 2); g.translate(0, 0, -len / 2 - 0.018);
+    const g = new THREE.ConeGeometry(Math.hypot(a, b), len, 4, 1, true); g.rotateY(Math.PI / 4); g.scale(a / Math.hypot(a, b) * Math.SQRT2, 1, b / Math.hypot(a, b) * Math.SQRT2); g.rotateX(Math.PI / 2); g.translate(0, 0, -len / 2 - 0.003);
     const m = new THREE.Mesh(g, mat); m.renderOrder = 7; return m; };
-  fovG.add(frustum(72, 0.95, X.fovMain), frustum(35, 1.15, X.fovMid), frustum(15, 1.35, X.fovTele)); noPart(fovG);
+  const cones = { main: frustum(72, 0.95, X.fovMain), mid: frustum(35, 1.15, X.fovMid), tele: frustum(15, 1.35, X.fovTele) };
+  cones.main.position.copy(camMain.position); cones.mid.position.copy(camMid.position); cones.tele.position.copy(camTele.position);
+  fovG.add(cones.main, cones.mid, cones.tele); fovG.userData.cones = cones; noPart(fovG);
   const senseG = new THREE.Group(); senseG.visible = false; sg.add(senseG);
   { const S2 = 0.022;   // 実際の測定範囲(m)を 1/45 にした概念図
     const lobe = (dir, r) => { const m = new THREE.Mesh(new THREE.SphereGeometry(r, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2.4), X.sense); m.quaternion.setFromUnitVectors(UP, dir.clone().normalize()); m.renderOrder = 7; return m; };
@@ -231,6 +253,6 @@ function buildMavic(M) {
   const yaw = rotationArc(-1, 0.22); yaw.position.set(0, -0.02, 0); yaw.visible = false; root.add(yaw); arrows.yaw = yaw;
   const cgMarker = new THREE.Group(); cgMarker.visible = false; root.add(cgMarker);
 
-  return { root, sg, halfSpan: 0.31, focusMin: 0.26, parts, pick, wires, motors, legs, arrows, batPart, G, cgMarker, personGroup: null, folds, gimbalParts: { roll, tilt, head, yoke }, fovG, senseG,
+  return { root, sg, halfSpan: 0.31, focusMin: 0.26, parts, pick, wires, motors, legs, arrows, batPart, G, cgMarker, personGroup: null, folds, gimbalParts: { pan, roll, tilt, head, yoke, iris, lens: { main: camMain, mid: camMid, tele: camTele } }, fovG, senseG,
     rotor: { R: 0.1334 * K, y0: 0 }, moveR: 0.26, moveY: 0.05, rpmScale: 1.1 };
 }

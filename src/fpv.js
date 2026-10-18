@@ -2,13 +2,13 @@
 // 目的は3つ。①ジンバルが機体の傾きを打ち消していることを見せる ②カメラの視野は狭く、真下と真横は映らないと分からせる
 // ③この映像は法令上の「目視」に含まれない（教則 3.1.2(2)2)b.）ことを、映像の中で言う。
 // 実装はカメラを増やさず、本体のカメラの姿勢を main camera に写す。GTAO・輪郭線・接地影がそのまま効く。
-const fpvTilt0 = () => THREE.MathUtils.degToRad(fpvTall() ? -14 : -12);   // 少し下向き。水平だと空しか映らない。縦長の画面は少しだけ伏せる(伏せすぎると地平線が隠れる)
+const fpvTilt0 = () => THREE.MathUtils.degToRad(IS_MAVIC ? -4 : fpvTall() ? -14 : -12);   /* Mavicは望遠で正面奥の人を捉えられるよう、ほぼ水平 */   // 少し下向き。水平だと空しか映らない。縦長の画面は少しだけ伏せる(伏せすぎると地平線が隠れる)
 const fpv = { on: false, stabilized: true, pan: 0, tilt: 0, drag: null, saved: null, t: 0 };
 const FPV_FOV = 45;              // 縦の画角。機体に積む記録用カメラのおよその値
 const FPV_PAN = THREE.MathUtils.degToRad(95);
 const FPV_TILT_UP = THREE.MathUtils.degToRad(22), FPV_TILT_DOWN = THREE.MathUtils.degToRad(-88);
 let _fpvCam = null;
-const fpvCamObj = () => { if (!_fpvCam) { const p = partsOf('camera')[0]; _fpvCam = p && p.obj; } return _fpvCam; };
+const fpvCamObj = () => { if (IS_MAVIC) return D.gimbalParts.head; if (!_fpvCam) { const p = partsOf('camera')[0]; _fpvCam = p && p.obj; } return _fpvCam; };
 const fpvTall = () => innerWidth / Math.max(1, innerHeight) < 1.05;   // 縦長の画面は横の画角が狭い
 
 // ジンバルは3軸。機体が傾いても、カメラだけは水平を保つ（止めると機体と一緒に傾く）。
@@ -16,6 +16,7 @@ const fpvTall = () => innerWidth / Math.max(1, innerHeight) < 1.05;   // 縦長�
 // パンを振った先の座標系で傾きを消すことになり、首を振った状態で水平が保てない。
 const _gq = new THREE.Quaternion(), _gq2 = new THREE.Quaternion(), _ge = new THREE.Euler(), _gv = new THREE.Vector3();
 function updateGimbal() {
+  if (IS_MAVIC) { if (fpv.on) mav.gim.tilt = clamp(fpv.tilt, MV_R(-90), MV_R(70)); mvGimbalApply(); return; }   /* Mavicは実機の3軸ジンバル(mavicui.js) */
   const c = fpvCamObj(); if (!c || !c.parent) return;
   fpv.pan = clamp(fpv.pan, -FPV_PAN, FPV_PAN); fpv.tilt = clamp(fpv.tilt, FPV_TILT_DOWN, FPV_TILT_UP);   // 可動域はここで一度だけ見る(共有リンクなど、ドラッグ以外から入ることもある)
   if (!fpv.stabilized) { c.rotation.set(clamp(fpv.tilt, -Math.PI / 2 + 0.01, Math.PI / 2 - 0.01), fpv.pan, 0, 'YXZ'); return; }   // 止めると機体の姿勢がそのまま乗る
@@ -106,7 +107,9 @@ function fpvStageTheme() {
   for (const m of fpvStage.rings) m.material.color.set(themeDark ? 0x8b939f : 0x69727f);
 }
 // 立ち位置と目印は画面の形で置き直す。縦長だと横の画角が26°ほどしかなく、外に置くと映らない
-function fpvPersonPos() { if (D.personGroup) D.personGroup.position.set(fpvTall() ? 0.05 : -1.1, -0.158, fpvTall() ? -9.0 : -5.4); }   /* 縦画面は左右の上すみを数値が占めるので、人は正面（中央の空き）に置く */
+const fpvPerson = () => D.personGroup || (IS_MAVIC ? mav.person : null);
+function fpvPersonPos() { const pg = fpvPerson(); if (pg && IS_MAVIC) { pg.position.set(0.12, -0.158, -12); return; }   /* Mavicは正面12m。28mmでは小さく、168mmでは画面いっぱいになる距離 */
+  if (pg) pg.position.set(fpvTall() ? 0.05 : -1.1, -0.158, fpvTall() ? -9.0 : -5.4); }   /* 縦画面は左右の上すみを数値が占めるので、人は正面（中央の空き）に置く */
 function fpvMarksPos() {
   const w = fpvTall() ? 11 : 20;
   fpvStage.marks.forEach((c, i) => { const a = THREE.MathUtils.degToRad([-w, w, -180 + w, 180 - w][i]); c.position.set(Math.sin(a) * 3, -0.158 + 0.13, -Math.cos(a) * 3); });
@@ -123,10 +126,10 @@ function fpvStageOn(on) {
   if (!(typeof weather === 'object' && weather.on)) farGroundOn(on && !sceneBusy);   /* 空もようが出しているときは触らない */
   if (on && !sceneBusy) {
     if (fpvStage.groundWas == null) { fpvStage.groundWas = ground.scale.x; groundScale(5.2); }
-    if (D.personGroup) { fpvStage.personWas = D.personGroup.visible; D.personGroup.visible = true; fpvPersonPos();   /* 縦長の画面は横の画角が狭い。近いと人だけが大写しになる */ if (D.personGroup.userData.face) D.personGroup.userData.face(0, 0); if (D.personGroup.userData.rest) D.personGroup.userData.rest(); }
+    const pg = fpvPerson(); if (pg) { fpvStage.personWas = pg.visible; pg.visible = true; fpvPersonPos();   /* 縦長の画面は横の画角が狭い。近いと人だけが大写しになる */ if (pg.userData.face) pg.userData.face(0, 0); if (pg.userData.rest) pg.userData.rest(); }
   } else {
     if (fpvStage.groundWas != null) { groundScale(fpvStage.groundWas); fpvStage.groundWas = null; }
-    if (D.personGroup && fpvStage.personWas != null) { D.personGroup.visible = fpvStage.personWas; D.personGroup.position.set(-0.50, -0.158, -0.48); fpvStage.personWas = null; }
+    const pg = fpvPerson(); if (pg && fpvStage.personWas != null) { pg.visible = fpvStage.personWas; if (IS_MAVIC) pg.position.set(0.40, -0.158, 0.30); else pg.position.set(-0.50, -0.158, -0.48); fpvStage.personWas = null; }
   }
   S.shadowDirty = S.csDirty = S.aoDirty = true;
 }
@@ -143,19 +146,20 @@ function fpvOn(on) {
     fpv.on = true; S.fpv = true; document.body.classList.add('fpv');
     S.camSpring = null; S.camInertia = null; controls.enabled = false; controls.autoRotate = false;
     S.labelsSuppressed = true; buildLabels();
-    camera.fov = FPV_FOV; resize();
+    if (IS_MAVIC) { mav.gim.roll = 0; camera.fov = mvVFov(mav.gim.zoom); } else camera.fov = FPV_FOV; resize();
     if (S.power === 0) setPower(0.5, true);
     syncBodyMode();
     fpvStageOn(true);
     $('#fpv').hidden = false; syncDockH();   /* 操作列を畳んだ高さをHUDに先に伝える(ResizeObserverは1コマ遅れる) */
     stepFpv(0);
-    if (!store.get('fpvSeen')) { store.set('fpvSeen', '1'); showToast('画面をドラッグするとジンバルの向きが変わります。床の輪は機体からの距離 3m・10m・20m です', 4600); }
+    if (IS_MAVIC && !store.get('fpvSeenMv')) { store.set('fpvSeenMv', '1'); showToast('上下のドラッグでチルト（−90°〜70°）。レンズ・ズーム・ロールは下のボタンで。左右は機体ごと向きを変えます', 5200); }
+    else if (!IS_MAVIC && !store.get('fpvSeen')) { store.set('fpvSeen', '1'); showToast('画面をドラッグするとジンバルの向きが変わります。床の輪は機体からの距離 3m・10m・20m です', 4600); }
   } else {
     fpv.on = false; S.fpv = false; document.body.classList.remove('fpv');
     fpv.drag = null; canvas.classList.remove('push');   /* 掴んだまま抜けても離した扱いにする */
     fpvStageOn(false);
     $('#fpv').hidden = true; syncDockH();
-    fpv.pan = 0; fpv.tilt = fpvTilt0(); updateGimbal();
+    fpv.pan = 0; fpv.tilt = fpvTilt0(); if (IS_MAVIC) { mav.gim.tilt = mav.gim.roll = 0; } updateGimbal();
     const s = fpv.saved || {};
     camera.fov = s.fov || 30; controls.enabled = true;
     S.labelsSuppressed = !!s.labels; buildLabels();
@@ -174,8 +178,11 @@ function stepFpv(dtReal) {
   updateGimbal();
   c.updateWorldMatrix(true, false);
   const q = c.getWorldQuaternion(new THREE.Quaternion());
-  const p = c.getWorldPosition(new THREE.Vector3());
-  p.addScaledVector(new THREE.Vector3(0, 0, -1).applyQuaternion(q), 0.045);   // レンズの前へ出す(筐体の中から写さない)
+  const eye = IS_MAVIC ? D.gimbalParts.lens[mvLensKey(mav.gim.zoom)] : c;   /* Mavicは選んでいるレンズの位置から写す */
+  if (eye !== c) eye.updateWorldMatrix(true, false);
+  const p = eye.getWorldPosition(new THREE.Vector3());
+  p.addScaledVector(new THREE.Vector3(0, 0, -1).applyQuaternion(q), IS_MAVIC ? 0.004 : 0.045);   // レンズの前へ出す(筐体の中から写さない)
+  if (IS_MAVIC) { const fv = mvVFov(mav.gim.zoom); if (Math.abs(camera.fov - fv) > 0.01) { camera.fov += (fv - camera.fov) * Math.min(1, dtReal / 0.12 + 0.02); if (Math.abs(camera.fov - fv) < 0.02) camera.fov = fv; camera.updateProjectionMatrix(); } }
   camera.position.copy(p); camera.quaternion.copy(q);
   controls.target.copy(p).addScaledVector(new THREE.Vector3(0, 0, -1).applyQuaternion(q), 2);
   fpv.t += dtReal;
@@ -193,7 +200,8 @@ function updateFpvHud() {
   set('#fpvGim', fpv.stabilized ? '水平を保つ' : '止めている');
   const g = $('#fpvGimBtn'); if (g) { g.classList.toggle('off', !fpv.stabilized); g.setAttribute('aria-pressed', String(fpv.stabilized)); g.setAttribute('aria-label', `ジンバル: ${fpv.stabilized ? '水平を保つ' : '止めている'}`); }
   const sb = $('#fpvStickBtn'); if (sb) { sb.classList.toggle('on', !!S.sticks); sb.setAttribute('aria-pressed', String(!!S.sticks)); }
-  const pan = $('#fpvPan'); if (pan) pan.textContent = `${(fpv.pan * 180 / Math.PI).toFixed(0)}° / ${(fpv.tilt * 180 / Math.PI).toFixed(0)}°`;
+  const pan = $('#fpvPan'); if (pan) pan.textContent = IS_MAVIC ? `${(mav.gim.tilt * 180 / Math.PI).toFixed(0)}° / ${(mav.gim.roll * 180 / Math.PI).toFixed(0)}°` : `${(fpv.pan * 180 / Math.PI).toFixed(0)}° / ${(fpv.tilt * 180 / Math.PI).toFixed(0)}°`;
+  if (IS_MAVIC) { mvFpvSync(); return; }
   const fv = $('#fpvFov'); if (fv) { const h = 2 * Math.atan(Math.tan(FPV_FOV * Math.PI / 360) * innerWidth / Math.max(1, innerHeight)) * 180 / Math.PI; fv.textContent = `画角 縦${FPV_FOV}° / 横${h.toFixed(0)}°（例）`; }
 }
 
@@ -204,8 +212,9 @@ function fpvDrag(e, phase) {
   if (!fpv.drag || fpv.drag.id !== e.pointerId) return false;
   if (phase === 'move') {
     const k = 0.0042 * (camera.fov / 45);
-    fpv.pan = clamp(fpv.pan - (e.clientX - fpv.drag.x) * k, -FPV_PAN, FPV_PAN);
-    fpv.tilt = clamp(fpv.tilt - (e.clientY - fpv.drag.y) * k, FPV_TILT_DOWN, FPV_TILT_UP);
+    if (IS_MAVIC) { fpv.drag.sx = (fpv.drag.sx || 0) + Math.abs(e.clientX - fpv.drag.x); if (fpv.drag.sx > 160 && !fpv.drag.told) { fpv.drag.told = true; showToast('このジンバルは左右に振れません（パン ±22°は揺れの打ち消し専用・公式）。左右はスティックで機体ごと向きを変えます', 4200); } }
+    else fpv.pan = clamp(fpv.pan - (e.clientX - fpv.drag.x) * k, -FPV_PAN, FPV_PAN);
+    fpv.tilt = IS_MAVIC ? clamp(fpv.tilt - (e.clientY - fpv.drag.y) * k, MV_R(-90), MV_R(70)) : clamp(fpv.tilt - (e.clientY - fpv.drag.y) * k, FPV_TILT_DOWN, FPV_TILT_UP);
     fpv.drag.x = e.clientX; fpv.drag.y = e.clientY; updateFpvHud(); return true;
   }
   fpv.drag = null; canvas.classList.remove('push'); return true;
@@ -218,19 +227,35 @@ function initFpv() {
     <div class="fpv-cross" aria-hidden="true"></div>
     <div class="fpv-head">
       <div class="fpv-tl"><span class="fpv-tag">機体のカメラ</span><b id="fpvAlt">—</b><span>対地高度</span><b id="fpvSpd">—</b><span>対地速度</span><b id="fpvHdg">—</b><span>機首の向き<span data-full>（離陸時0°）</span></span></div>
-      <div class="fpv-tr"><b id="fpvAtt">—</b><span>機体 ピッチ / ロール</span><button id="fpvCenter" class="fpv-mini" title="ジンバルを正面に戻す"><b id="fpvPan">—</b> ↺</button><span>ジンバル パン / チルト</span><span class="fpv-sub" id="fpvFov">—</span></div>
+      <div class="fpv-tr"><b id="fpvAtt">—</b><span>機体 ピッチ / ロール</span><button id="fpvCenter" class="fpv-mini" title="ジンバルを正面に戻す"><b id="fpvPan">—</b> ↺</button><span id="fpvPanLbl">ジンバル パン / チルト</span><span class="fpv-sub" id="fpvFov">—</span></div>
     </div>
     <div class="fpv-foot">
       <div class="fpv-row">
         <button id="fpvGimBtn" class="fpv-btn" aria-pressed="false">ジンバル <b id="fpvGim">水平を保つ</b></button>
         <button id="fpvStickBtn" class="fpv-btn" aria-pressed="false">スティックで飛ばす</button>
+      <div class="fpv-cam mavic-only" role="group" aria-label="カメラ">
+        <div class="fpv-seg" id="fpvLens"><button data-z="1" style="--c:#ef6a2d">28mm</button><button data-z="2.5" style="--c:#3b7df7">70mm</button><button data-z="6" style="--c:#22c55e">168mm</button></div>
+        <div class="fpv-seg"><button id="fpvZoomOut" aria-label="引く">−</button><b id="fpvZoom">1.0×</b><button id="fpvZoomIn" aria-label="寄る">＋</button></div>
+        <div class="fpv-seg"><button id="fpvRollL" aria-label="左へ傾ける">↺</button><button id="fpvRoll90">縦撮り</button><button id="fpvRollR" aria-label="右へ傾ける">↻</button></div>
+      </div>
         <button id="fpvOut" class="fpv-btn">外から見る</button>
       </div>
       <p class="fpv-note"><b>この映像は法令上の「目視」には含まれません</b>。双眼鏡・モニター（FPVを含む）や補助者による監視は「目視により常時監視」に当たりません。ただし残量確認などで一時的にモニターを見ることは目視飛行の範囲内とされています（教則${KYOSOKU.ver} 3.1.2）。<span data-full>映像に頼って飛ばすと目視外飛行にあたり、飛行の方法の承認（法132条の86第2項）が求められます。技能証明で飛ばすときは「目視内飛行の限定」の解除も確認します。床の輪は機体からの距離で、教則は〔一等〕の運航計画の例として、マルチローターの離陸地点を操縦者・補助者から3m以上、周囲の物件から30m以上離すことを挙げています（6.3。取扱説明書に推奨距離があればそちらに従います）。</span></p>
     </div>`;
   $('#fpvGimBtn').addEventListener('click', () => { fpv.stabilized = !fpv.stabilized; updateFpvHud(); showToast(fpv.stabilized ? 'ジンバル: 3つのモーターが機体の傾きを打ち消します' : 'ジンバル停止: カメラが機体と一緒に傾きます', 3200); });
   $('#fpvStickBtn').addEventListener('click', () => { setSticks(!S.sticks); updateFpvHud(); });
-  $('#fpvCenter').addEventListener('click', () => { fpv.pan = 0; fpv.tilt = fpvTilt0(); updateGimbal(); updateFpvHud(); });
+  $('#fpvCenter').addEventListener('click', () => { fpv.pan = 0; fpv.tilt = fpvTilt0(); if (IS_MAVIC) mav.gim.roll = 0; updateGimbal(); updateFpvHud(); });
+  // Mavic: レンズの持ち替え・ズーム・ロール（−40°〜400°）。ズームはレンズの区切り(2.5×・6×)で自動で持ち替わる
+  if (IS_MAVIC) {
+    for (const b of $$('#fpvLens [data-z]')) b.addEventListener('click', () => mvSetZoom(+b.dataset.z));
+    const steps = [1, 1.5, 2, 2.5, 3, 4, 6, 8, 12, 16, 24];
+    $('#fpvZoomIn').addEventListener('click', () => mvSetZoom(steps.find(z => z > mav.gim.zoom + 1e-6) || 24));
+    $('#fpvZoomOut').addEventListener('click', () => mvSetZoom([...steps].reverse().find(z => z < mav.gim.zoom - 1e-6) || 1));
+    const roll = (deg) => { mav.gim.roll = clamp(mav.gim.roll + MV_R(deg), MV_R(-40), MV_R(400)); updateFpvHud(); };
+    $('#fpvRollL').addEventListener('click', () => roll(-15)); $('#fpvRollR').addEventListener('click', () => roll(15));
+    $('#fpvRoll90').addEventListener('click', () => { const r = mav.gim.roll * 180 / Math.PI; mav.gim.roll = MV_R(Math.abs(r - 90) < 1 ? 0 : 90); updateFpvHud(); });
+    canvas.addEventListener('wheel', e => { if (!fpv.on) return; e.preventDefault(); mvSetZoom(mav.gim.zoom * Math.exp(-e.deltaY * 0.0022)); }, { passive: false });
+  }
   $('#fpvOut').addEventListener('click', () => { segSet($('#viewCol'), 'v', 'iso'); S.view = 'iso'; fpvOn(false); });
   window.__fpv = { fpv, fpvOn, updateGimbal, stepFpv, fpvStage, farGround, fpvTilt0, groundColor: () => groundMat.color.getHex() };
 }

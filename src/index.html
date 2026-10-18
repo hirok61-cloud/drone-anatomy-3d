@@ -17,7 +17,7 @@
   <div id="ctx" class="ctx">
     <div class="ctx-row" data-tab="see">
       <div class="dock-group pd6b-only"><label>PD6B-CAT3</label><div class="chips" id="pdChips" role="group" aria-label="PD6B-CAT3の動き"><button data-pd="about">ⓘ この機体</button><button data-pd="fold" aria-pressed="false">たたむ</button><button data-pd="swap">電池交換</button><button data-pd="drop">荷物を置く</button><button data-pd="chute" aria-pressed="false">パラシュート</button><button data-pd="unit">測量用に付け替え</button><button data-pd="size" aria-pressed="false">大きさ</button></div></div>
-      <div class="dock-group mavic-only"><label>Mavic 4 Pro</label><div class="chips" id="mvChips" role="group" aria-label="Mavic 4 Proの動き"><button data-mv="about">ⓘ この機体</button><button data-mv="fold" aria-pressed="false">たたむ</button><button data-mv="battery">電池交換</button><button data-mv="gimbal">ジンバル</button><button data-mv="fov" aria-pressed="false">3眼の画角</button><button data-mv="sense" aria-pressed="false">検知範囲</button><button data-mv="size" aria-pressed="false">大きさ</button></div></div>
+      <div class="dock-group mavic-only"><label>Mavic 4 Pro</label><div class="chips" id="mvChips" role="group" aria-label="Mavic 4 Proの動き"><button data-mv="about">ⓘ この機体</button><button data-mv="fold" aria-pressed="false">たたむ</button><button data-mv="battery">電池交換</button><button data-mv="gimbal">ジンバル</button><button data-mv="fov" aria-pressed="false">3眼カメラ</button><button data-mv="sense" aria-pressed="false">検知範囲</button><button data-mv="size" aria-pressed="false">大きさ</button></div></div>
       <div class="see-main">
       <button id="inspToggle" class="pill-btn compact-only" data-i18n="ui.parts">部品一覧</button>
       <div class="dock-group grow"><label for="explode"><span data-i18n="ui.explode">分解</span> <span id="explodeVal" class="mono">0%</span></label><input type="range" id="explode" min="0" max="100" value="0"></div>
@@ -142,7 +142,7 @@
 </div>
 
 <div id="viewCol" class="glass" aria-label="視点">
-  <button data-v="iso" class="on" title="斜め" data-i18n="views.iso">斜</button><button data-v="front" title="前" data-i18n="views.front">前</button><button data-v="top" title="上" data-i18n="views.top">上</button><button data-v="side" title="横" data-full data-i18n="views.side">横</button><button data-v="inside" title="モーター内部" data-full data-i18n="views.inside">内</button><button data-v="fpv" class="q550-only" title="機体のカメラから見る" aria-label="機体のカメラから見る">眼</button>
+  <button data-v="iso" class="on" title="斜め" data-i18n="views.iso">斜</button><button data-v="front" title="前" data-i18n="views.front">前</button><button data-v="top" title="上" data-i18n="views.top">上</button><button data-v="side" title="横" data-full data-i18n="views.side">横</button><button data-v="inside" title="モーター内部" data-full data-i18n="views.inside">内</button><button data-v="fpv" class="no-pd6b" title="機体のカメラから見る" aria-label="機体のカメラから見る">眼</button>
   <hr><button class="tgl on" data-t="labels" aria-pressed="true" title="ラベル"><i></i><span data-i18n="views.labels">名</span></button><button id="bigBtn" title="大きく読む" aria-label="大きく読む" aria-pressed="false" data-i18n="big">大</button><button class="tgl" data-t="sound" aria-pressed="false" title="音を出す" aria-label="音を出す"><i></i>音</button><button id="shareBtn" title="この画面のリンク" aria-label="この画面のリンクをコピー">🔗</button><button id="photoBtn" title="記念写真" aria-label="記念写真を撮る">📷</button><button id="fsBtn" title="全画面">⤢</button>
 </div>
 
