@@ -223,6 +223,7 @@ function stepMavic(dt) {
   let dirty = false;
   if (S.explode > 0.02 && mav.foldTo > 0) { mav.foldTo = 0; syncMvChips(); if ($('#noteCard').dataset.kind === 'mavic-fold') renderNote(null); }   /* 畳んだ姿勢のまま部品を散らさない */
   { const sup = mav.sizeOn || mav.fovOn || mav.senseOn || !!(mav.act && mav.act.id === 'gimbal'); if (sup !== mav._sup) { mav._sup = sup; S.labelsSuppressed = sup; } }
+  if (fpv.on && (mav.fovOn || mav.senseOn || mav.sizeOn)) mvOverlays(null, true);   /* 映像の中に重ね絵を残さない（錐の内側から見ることになる） */
   // --- たたむ / 広げる ---
   if (mav.foldTo > mav.fold) {
     const spinning = D.motors.some(mo => mo.rpm > 30) || body.py > 0.003;

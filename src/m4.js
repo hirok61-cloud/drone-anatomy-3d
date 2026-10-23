@@ -44,7 +44,7 @@ function m4Materials(M) {
     orange: std({ color: 0xf07a2a, roughness: 0.5 }),
     prop: propMat(), propDot: std({ color: 0xf2f2f2, roughness: 0.5 }),
     regLabel: decal(regLabel), brand: decalT(brand), djiLogo: decalT(djiLogo),
-    protector: phy({ color: 0x8e9196, roughness: 0.5, transparent: true, opacity: 0.78, depthWrite: false }),
+    protector: phy({ color: 0x8e9196, roughness: 0.55, clearcoat: 0.2 }),
     fov: { wide: 0xef6a2d, mid: 0x3b7df7, tele: 0x22c55e, ir: 0xe5484d },
     sense: new THREE.MeshBasicMaterial({ color: 0x14b8a6, transparent: true, opacity: 0.10, depthWrite: false, side: THREE.DoubleSide }),
     beam: new THREE.MeshBasicMaterial({ color: 0xff3b30, transparent: true, opacity: 0.85, toneMapped: false }),
@@ -252,8 +252,8 @@ function buildM4(M) {
   reg(gim, 'gimbal', V3(0, -0.02, -0.1), { coarse: true, label: P(40, -0.8, -119.6).sub(PANC) });
   // ジンバルプロテクター（畳んだときにかぶせる。部品には数えない）
   const protector = new THREE.Group(); protector.visible = false;
-  { const g = new THREE.ExtrudeGeometry(polyShape([[-0.034, 0.036], [0.034, 0.036], [0.044, 0.026], [0.044, -0.040], [0.034, -0.046], [-0.034, -0.046], [-0.044, -0.040], [-0.044, 0.026]]), { depth: 0.064, bevelEnabled: true, bevelThickness: 0.003, bevelSize: 0.003, bevelSegments: 3 });
-    g.translate(0, 0, -0.0665); protector.add(mesh(g, X.protector)); }
+  { const g = new THREE.ExtrudeGeometry(polyShape([[-0.030, 0.036], [0.030, 0.036], [0.040, 0.026], [0.040, -0.030], [0.030, -0.040], [-0.030, -0.040], [-0.040, -0.030], [-0.040, 0.026]]), { depth: 0.050, bevelEnabled: true, bevelThickness: 0.004, bevelSize: 0.003, bevelSegments: 3 });
+    g.translate(0, 0, -0.0265); protector.add(mesh(g, X.protector)); }   /* 頭（チルト軸の前22mm〜後ろ29mm）をすっぽり覆う */
   protector.position.copy(TILT); sg.add(noPart(protector));
 
   // ---------- アーム ×4（CAD）----------
@@ -371,9 +371,9 @@ function buildM4(M) {
   const frustum = (fovDeg, len, col, aspect = [0.8, 0.6]) => { const dg = Math.tan(THREE.MathUtils.degToRad(fovDeg / 2)) * len, a = dg * aspect[0], b = dg * aspect[1];   /* 公式のFOVを対角とみなす */
     const g = new THREE.ConeGeometry(Math.hypot(a, b), len, 4, 1, true); g.rotateY(Math.PI / 4); g.scale(a / Math.hypot(a, b) * Math.SQRT2, 1, b / Math.hypot(a, b) * Math.SQRT2); g.rotateX(Math.PI / 2); g.translate(0, 0, -len / 2 - 0.003);
     const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.17, depthWrite: false, side: THREE.DoubleSide })); m.renderOrder = 7; return m; };
-  const cones = { wideT: frustum(82, 0.9, X.fov.wide), wideE: frustum(84, 0.9, X.fov.wide), mid: frustum(35, 1.15, X.fov.mid), tele: frustum(15, 1.35, X.fov.tele), thermal: frustum(45, 1.05, X.fov.ir, [0.781, 0.625]) };
+  const cones = { wideT: frustum(82, 0.55, X.fov.wide), wideE: frustum(84, 0.55, X.fov.wide), mid: frustum(35, 0.75, X.fov.mid), tele: frustum(15, 0.95, X.fov.tele), thermal: frustum(45, 0.65, X.fov.ir, [0.781, 0.625]) };
   for (const k of Object.keys(cones)) { cones[k].position.copy(L[k].position); fovG.add(cones[k]); }
-  const nirBeam = new THREE.Mesh(new THREE.ConeGeometry(Math.tan(THREE.MathUtils.degToRad(2.85)) * 1.6, 1.6, 24, 1, true), X.nirBeam); nirBeam.rotation.x = -Math.PI / 2; nirBeam.position.copy(L.nir.position).add(V3(0, 0, -0.8)); nirBeam.visible = false; fovG.add(nirBeam);
+  const nirBeam = new THREE.Mesh(new THREE.ConeGeometry(Math.tan(THREE.MathUtils.degToRad(2.85)) * 1.1, 1.1, 24, 1, true), X.nirBeam); nirBeam.rotation.x = -Math.PI / 2; nirBeam.position.copy(L.nir.position).add(V3(0, 0, -0.55)); nirBeam.visible = false; fovG.add(nirBeam);
   fovG.userData.cones = cones; fovG.userData.nir = nirBeam; noPart(fovG);
   const senseG = new THREE.Group(); senseG.visible = false; sg.add(senseG);
   { const S2 = 1 / 45;   // 実際の測定範囲(m)を 1/45 にした概念図

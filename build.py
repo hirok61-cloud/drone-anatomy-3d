@@ -25,7 +25,7 @@ while True:
     if css[_a:_b].count(chr(10)) > 2:
         raise SystemExit('style.css: コメントが %d 行にまたがっています (行 %d) — 閉じ忘れの疑い' % (css[_a:_b].count(chr(10)) + 1, css[:_a].count(chr(10)) + 1))
     _i = _b + 2
-SOURCES = ['model.js', 'data.js', 'pd6b-data.js', 'mavic-data.js', 'materials.js', 'drone.js', 'pd6b.js', 'mavic.js', 'engine.js', 'showdrone.js', 'physics.js', 'airflow.js', 'theater.js', 'whatif.js', 'scale.js', 'codex.js', 'live.js', 'lesson.js', 'expert.js', 'reg.js', 'preflight.js', 'descent.js', 'fpv.js', 'weather.js', 'dshow.js', 'dsys.js', 'dshowui.js', 'audio.js', 'share.js', 'pd6bui.js', 'mavicui.js', 'modelui.js', 'ui.js', 'app.js']
+SOURCES = ['model.js', 'data.js', 'pd6b-data.js', 'mavic-data.js', 'm4-data.js', 'materials.js', 'drone.js', 'pd6b.js', 'mavic.js', 'm4.js', 'engine.js', 'showdrone.js', 'physics.js', 'airflow.js', 'theater.js', 'whatif.js', 'scale.js', 'codex.js', 'live.js', 'lesson.js', 'expert.js', 'reg.js', 'preflight.js', 'descent.js', 'fpv.js', 'weather.js', 'dshow.js', 'dsys.js', 'dshowui.js', 'audio.js', 'share.js', 'pd6bui.js', 'mavicui.js', 'm4ui.js', 'modelui.js', 'ui.js', 'app.js']
 js = '\n'.join((SRC / f).read_text(encoding='utf-8') for f in SOURCES if (SRC / f).exists())
 
 # ---- ドローンショーの「形」を束ねる ----

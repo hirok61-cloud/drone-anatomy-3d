@@ -87,7 +87,7 @@ function m4Overlays(id, quiet) {
     if (id === 'cams') { m4.gim.all = true; m4SyncLens(); }
     if (id === 'laser') m4LaserStart();
     renderM4Note(id);
-    if (id === 'cams') frameBox([-0.40, -0.45, -1.50], [0.40, 0.05, 0.25], [0.80, 0.95, 0.30], 1.05);
+    if (id === 'cams') frameBox([-0.32, -0.30, -1.05], [0.32, 0.10, 0.20], [0.72, 0.50, -0.85], 1.05);   /* 前斜め上から。錐がこちらへ広がり、機体は奥に見える */
     if (id === 'sense') frameBox([-0.75, -0.25, -0.62], [0.75, 0.55, 0.50], [0.70, 0.66, -0.75], 1.02);
     if (id === 'size') { if (m4.person.userData.face) m4.person.userData.face(camera.position.x, camera.position.z); pdFrame([D.root, m4.person, m4.ghost], { pull: true, margin: 1.15, dir: new THREE.Vector3(0.45, 0.32, -0.84).normalize() }); }
   } else if (!quiet && (was.cams || was.sense || was.size || was.laser)) {
@@ -198,7 +198,7 @@ function m4CamNote() {
 function m4CamClick(e) {
   const b = e.target.closest('[data-m4lens]'); if (!b) return;
   const k = b.dataset.m4lens, g = m4.gim;
-  if (k === 'all') g.all = true; else { g.all = false; g.ir = k === 'ir'; g.zoom = g.ir ? 1 : M4_LENS[k].z0; }
+  if (k === 'all') { g.all = true; g.ir = false; g.zoom = 1; } else { g.all = false; g.ir = k === 'ir'; g.zoom = g.ir ? 1 : M4_LENS[k].z0; }
   m4SyncLens(); renderM4Note('cams');
 }
 function m4CamView() { if (m4.gim.all) { m4.gim.zoom = 1; m4.gim.ir = false; } m4.gim.all = true; renderNote(null); m4Overlays(null, true); segSet($('#viewCol'), 'v', 'fpv'); fpvOn(true); }
@@ -235,19 +235,23 @@ function m4SyncLens() {
   S.aoDirty = true;
 }
 // 毎フレーム（本体の姿勢を当てた後）。電源が入っていれば機体の傾きを打ち消す。操作はチルトだけ、パンとロールは打ち消し専用（機械的な範囲で止まる）
-const _m4q = new THREE.Quaternion(), _m4e = new THREE.Euler(), _m4e2 = new THREE.Euler();
+// このジンバルは パン(Y) → ロール(Z) → チルト(X) の順につながる（公式3Dモデルの形）。望みの世界姿勢（機首の方位・水平・指定のチルト）を
+// 付け根の世界姿勢で割って局所の回転にし、それを同じ軸順（YZX）で3つの角度に分ける。オイラー角の足し引きでは軸順が違うと消し残る
+const _m4q = new THREE.Quaternion(), _m4q2 = new THREE.Quaternion(), _m4e = new THREE.Euler(), _m4e2 = new THREE.Euler();
 const m4Norm = (a) => Math.atan2(Math.sin(a), Math.cos(a));
 function m4GimbalApply() {
   const gp = D.gimbalParts; if (!gp) return;
   const mech = M4_TILT_MECH[m4.variant];
   let tl = m4.gim.tilt, rl = 0, pn = 0;
   if (m4.powered && !(fpv.on && !fpv.stabilized)) {
-    gp.pan.parent.updateWorldMatrix(true, false); gp.pan.parent.getWorldQuaternion(_m4q); _m4e.setFromQuaternion(_m4q, 'YXZ');
-    D.root.getWorldQuaternion(_m4q); _m4e2.setFromQuaternion(_m4q, 'YXZ');
-    tl -= _m4e.x; rl = clamp(_m4e.z, M4_R(-52), M4_R(52)); pn = m4.laserOn ? 0 : clamp(m4Norm(_m4e2.y - _m4e.y), M4_R(-65), M4_R(65));   /* 測距では機体ごと目標へ向ける */
+    gp.pan.parent.updateWorldMatrix(true, false); gp.pan.parent.getWorldQuaternion(_m4q);
+    (m4.laserOn ? gp.pan.parent : D.root).getWorldQuaternion(_m4q2); _m4e2.setFromQuaternion(_m4q2, 'YXZ');   /* 測距では機体ごと目標へ向けるので、胴の方位を基準にする */
+    _m4q2.setFromEuler(_m4e.set(m4.gim.tilt, _m4e2.y, 0, 'YXZ'));
+    _m4q.invert().multiply(_m4q2); _m4e.setFromQuaternion(_m4q, 'YZX');
+    tl = _m4e.x; rl = clamp(_m4e.z, M4_R(-52), M4_R(52)); pn = clamp(_m4e.y, M4_R(-65), M4_R(65));
   }
-  gp.tilt.rotation.x = clamp(tl, M4_R(mech[0]), M4_R(mech[1])); gp.roll.rotation.z = -rl; gp.pan.rotation.y = pn;
-  if (m4.fold > 0.02 || m4.foldTo > 0) gp.tilt.rotation.x = 0;
+  gp.tilt.rotation.x = clamp(tl, M4_R(mech[0]), M4_R(mech[1])); gp.roll.rotation.z = rl; gp.pan.rotation.y = pn;
+  if (m4.fold > 0.02 || m4.foldTo > 0) { gp.tilt.rotation.x = 0; gp.roll.rotation.z = 0; gp.pan.rotation.y = 0; }
 }
 // 手で持って傾ける（打ち消しを見せる）。胴を床から浮かせてから回す
 function m4Sway(lift, px, yaw, rz) { const sg = D.sg; if (sg.userData.y0 == null) sg.userData.y0 = sg.position.y; sg.position.y = sg.userData.y0 + lift; sg.rotation.set(px, yaw, rz, 'YXZ'); }
@@ -335,6 +339,7 @@ function stepM4(dt) {
   if (S.explode > 0.02 && m4.foldTo > 0) { m4.foldTo = 0; syncM4Chips(); if ($('#noteCard').dataset.kind === 'm4-fold') renderNote(null); }
   { const sup = m4.sizeOn || m4.camsOn || m4.senseOn || m4.laserOn || !!(m4.act && m4.act.id === 'gimbal'); if (sup !== m4._sup) { m4._sup = sup; S.labelsSuppressed = sup; } }
   if (!fpv.on && m4._irLook) m4ThermalLook();
+  if (fpv.on && (m4.camsOn || m4.senseOn || m4.sizeOn || m4.laserOn)) m4Overlays(null, true);   /* 映像の中に重ね絵を残さない（錐の内側から見ることになる） */
   // --- たたむ / 広げる ---
   if (m4.foldTo > m4.fold) {
     const spinning = D.motors.some(mo => mo.rpm > 30) || body.py > 0.003;
@@ -353,7 +358,7 @@ function stepM4(dt) {
       const F = D.folds[i];
       if (F.front) F.fg.rotation.set(0, F.swing.ang * ff, 0.075 * ff, 'YZX');   /* 水平に後ろへ。脚の先が少し上がる（折りたたみ時の高さからの推定） */
       else F.fg.quaternion.setFromAxisAngle(F.flip.axis, F.flip.sign * Math.PI * fr);
-      for (const h of mo.hinges) h.g.rotation.y = h.s * fb * Math.PI / 2 * (F.front ? -1 : 1);
+      for (const h of mo.hinges) h.g.rotation.y = h.s * fb * Math.PI / 2;   /* 羽根は根元で折れてアームに沿う */
     });
     D.protector.visible = f > 0.92;
     if (m4.foldTo === 1 && f >= 1) m4FrameFolded();
