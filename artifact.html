@@ -772,6 +772,10 @@ body.m4-ir #gl { filter: grayscale(1) contrast(1.35) brightness(.82); }
 .m4-read b { display: block; font-size: calc(16px * var(--fs, 1)); color: #e5484d; }
 .m4-read span { display: block; color: var(--ink2); }
 .m4-read:empty { display: none; }
+/* Matrice 4 はチップが10個あるので、横向きのスマホではチップの帯だけを横に送る（分解・見え方を押し出さない） */
+@media (min-width: 761px) and (max-height: 520px) { body.matrice4 #m4Chips { max-width: 46vw; overflow-x: auto; scrollbar-width: none; } body.matrice4 #m4Chips::-webkit-scrollbar { display: none; } }
+/* 映像の中の小さなボタンは、見た目はそのままで押せる範囲だけ上下に広げる */
+@media (pointer: coarse) { .fpv-seg button { position: relative; } .fpv-seg button::after { content: ''; position: absolute; inset: -4px -1px; } }
 
 </style>
 
@@ -786,7 +790,7 @@ body.m4-ir #gl { filter: grayscale(1) contrast(1.35) brightness(.82); }
   <div id="ctx" class="ctx">
     <div class="ctx-row" data-tab="see">
       <div class="dock-group pd6b-only"><label>PD6B-CAT3</label><div class="chips" id="pdChips" role="group" aria-label="PD6B-CAT3の動き"><button data-pd="about">ⓘ この機体</button><button data-pd="fold" aria-pressed="false">たたむ</button><button data-pd="swap">電池交換</button><button data-pd="drop">荷物を置く</button><button data-pd="chute" aria-pressed="false">パラシュート</button><button data-pd="unit">測量用に付け替え</button><button data-pd="size" aria-pressed="false">大きさ</button></div></div>
-      <div class="dock-group m4-only"><label>Matrice 4</label><div class="chips" id="m4Chips" role="group" aria-label="Matrice 4の動き"><button data-m4="about">ⓘ この機体</button><button data-m4="variant">4E にする</button><button data-m4="fold" aria-pressed="false">たたむ</button><button data-m4="battery">電池交換</button><button data-m4="gimbal">ジンバル</button><button data-m4="cams" aria-pressed="false">カメラ</button><button data-m4="laser" aria-pressed="false">測距</button><button data-m4="sense" aria-pressed="false">検知範囲</button><button data-m4="acc" aria-pressed="false">アクセサリー</button><button data-m4="size" aria-pressed="false">大きさ</button></div></div>
+      <div class="dock-group m4-only"><label>Matrice 4</label><div class="chips" id="m4Chips" role="group" aria-label="Matrice 4の動き"><button data-m4="about">ⓘ この機体</button><button data-m4="variant">4E にする</button><button data-m4="fold" aria-pressed="false">たたむ</button><button data-m4="battery" aria-pressed="false">電池交換</button><button data-m4="gimbal" aria-pressed="false">ジンバル</button><button data-m4="cams" aria-pressed="false">カメラ</button><button data-m4="laser" aria-pressed="false">測距</button><button data-m4="sense" aria-pressed="false">検知範囲</button><button data-m4="acc" aria-pressed="false">アクセサリー</button><button data-m4="size" aria-pressed="false">大きさ</button></div></div>
       <div class="dock-group mavic-only"><label>Mavic 4 Pro</label><div class="chips" id="mvChips" role="group" aria-label="Mavic 4 Proの動き"><button data-mv="about">ⓘ この機体</button><button data-mv="fold" aria-pressed="false">たたむ</button><button data-mv="battery">電池交換</button><button data-mv="gimbal">ジンバル</button><button data-mv="fov" aria-pressed="false">3眼カメラ</button><button data-mv="sense" aria-pressed="false">検知範囲</button><button data-mv="size" aria-pressed="false">大きさ</button></div></div>
       <div class="see-main">
       <button id="inspToggle" class="pill-btn compact-only" data-i18n="ui.parts">部品一覧</button>
@@ -892,7 +896,7 @@ body.m4-ir #gl { filter: grayscale(1) contrast(1.35) brightness(.82); }
     <button data-model="q550" role="radio" aria-checked="true"><b>550クラス クアッドコプター</b><span>空撮などに使う一般的な産業用（約2.4kg・プロペラ4枚）。とばす・つかう・もしも・専門まで全部の機能</span></button>
     <button data-model="pd6b" role="radio" aria-checked="false"><b>PD6B-CAT3（プロドローン）</b><span>第一種型式認証をめざす物流用の大型機（最大離陸重量約45kg・プロペラ6枚）。みる・とばすと、たたむ・電池交換などの固有の動き</span></button>
     <button data-model="mavic4" role="radio" aria-checked="false"><b>DJI Mavic 4 Pro</b><span>3つのカメラと360°回るジンバルを積んだ折りたたみ式の空撮機（約1063g・プロペラ4枚）。みる・とばすと、たたむ・ジンバル・画角などの固有の動き</span></button>
-    <button data-model="matrice4" role="radio" aria-checked="false"><b>DJI Matrice 4 シリーズ（4T／4E）</b><span>サーマル・望遠・レーザー距離計を積んだ折りたたみ式の産業用機（約1219g・プロペラ4枚）。みる・とばすと、4T⇄4E・たたむ・測距・アクセサリーなどの固有の動き</span></button>
+    <button data-model="matrice4" role="radio" aria-checked="false"><b>DJI Matrice 4 シリーズ（4T／4E）</b><span>望遠とレーザー距離計（4Tはサーマルも）を積んだ折りたたみ式の産業用機（離陸重量1219g・プロペラ4枚）。みる・とばすと、4T⇄4E・たたむ・測距・アクセサリーなどの固有の動き</span></button>
   </div>
   <p class="pop-foot">切り替えると読み込み直します。</p>
 </div>
@@ -2785,6 +2789,7 @@ const M4_SRC = {
   prop: { name: 'DJIストア「Matrice 4シリーズ プロペラ」', url: 'https://store.dji.com/jp/product/dji-matrice-4-series-propellers' },
   cad: { name: 'DJI 公式 Matrice 4シリーズ 3Dモデル（M4T_v2.stp・ダウンロードページ）', url: 'https://enterprise.dji.com/jp/matrice-4-series/downloads' },
   certList: { name: '国土交通省「型式認証を取得している無人航空機一覧」（令和8年6月19日現在）', url: 'https://www.mlit.go.jp/koku/content/002008366.pdf' },
+  soumuDrone: { name: '総務省 電波利用ポータル「ドローン等に用いられる無線設備について」', url: 'https://www.tele.soumu.go.jp/j/sys/others/drone/' },
   ridList: { name: '国土交通省「適合しているとして届出があったリモートID機器等の一覧」（令和8年7月8日更新）', url: 'https://www.mlit.go.jp/koku/content/001484158.pdf' },
 };
 // 「公式」=DJIの仕様・製品ページ・FAQ、「取説」=ユーザーマニュアル、「図」=取説の図からの読み取り、「CAD」=公式3Dモデルの実測、「推定」=それ以外の推定
@@ -2792,7 +2797,7 @@ const M4_PARTS = {
   body: {
     name: '機体本体（胴体）', en: 'Airframe body', group: 'frame', count: 1,
     role: 'バッテリー・電装・RTKモジュールを収める胴。前の下にジンバル、上面にアクセサリー用のE-PortとGNSSアンテナ、下面に下方ビジョンと3D赤外線センサーを持つ。4本のアームは胴の脇で折りたためる。',
-    structure: ['上面は前から E-Port → セルラードングル収納部 → GNSSアンテナ → ビーコンの順（取説の各部名称）', 'RTKモジュールを内蔵し、取り外せない（公式FAQ）', 'バッテリーは後ろから差し込む（取説の図）', '防水・防塵の保護等級はない（公式の仕様・FAQ）', '形は公式の3Dモデルから寸法を取った。内部の配置は例'],
+    structure: ['上面は前から E-Port → セルラードングル収納部 → GNSSアンテナ → ビーコンの順（取説の図）', 'RTKモジュールを内蔵し、取り外せない（公式FAQ）', 'バッテリーは後ろから差し込む（取説の図）', '防水・防塵の保護等級はない（公式の仕様・FAQ）', '形は公式の3Dモデルから寸法を取った。内部の配置は例'],
     spec: [['離陸重量', '1219 g（標準プロペラ・バッテリーとmicroSDを含む・公式）'], ['最大離陸重量', '1420 g（標準プロペラ・公式）'], ['最大ペイロード', '200 g（公式）'], ['展開時', '約 307.0 × 387.5 × 149.5 mm（プロペラを除く・公式）'], ['折りたたみ時', '約 260.6 × 113.7 × 138.4 mm（公式）'], ['対角ホイールベース', '438.8 mm（公式）'], ['動作環境温度', '−10〜40 ℃（公式）'], ['保護等級（IP）', 'なし（公式）']],
     check: ['外殻の割れ・変形', 'センサーの窓の汚れ・傷', '雨の中で飛ばさない（防水性能はない・公式FAQ）'],
     tip: '展開すると約17.8L、折りたたむと約4.1Lの箱に収まる（公式寸法からの計算）。体積はおよそ4分の1になる。',
@@ -2808,12 +2813,12 @@ const M4_PARTS = {
     role: '後ろの2つのモーターを支える腕。胴の下寄りから後ろ斜めへ伸びる。畳むときは下へ振り下ろして前へ回し、胴の下側の脇に、モーターを下に向けて収める。先にステータスインジケーターがある。',
     structure: ['畳んだ後アームはモーターが上下逆さになり、ジンバルの横の低い位置に来る（取説の図）', '回す軸の正確な向きは取説に書かれていない（この図の回し方は推定）'],
     check: ['展開しきっているか', 'ヒンジのガタ', 'ひび'],
-    tip: '「アームを展開する前にモーターを始動しない」（安全ガイドライン）。開ききっていないアームでは、プロペラが胴やジンバルに当たる。',
+    tip: '「アームを展開する前にモーターを始動しない」（安全ガイドライン）。機体が破損するおそれがあるため。',
   },
   landingGear: {
     name: 'ランディングギア（アンテナ内蔵）', en: 'Landing gear (antennas)', group: 'gear', count: 4,
-    role: '各モーターの下に伸びる脚。4本で着地を支え、中に映像伝送のアンテナを収めている（取説の各部名称）。',
-    structure: ['映像伝送は O4 Enterprise・アンテナ8本（2T4R・公式）', '8本それぞれがどの脚に入っているかは公開されていない'],
+    role: '各モーターの下に伸びる脚。4本で着地を支える。取説の部品名は「ランディングギア（アンテナ内蔵）」。',
+    structure: ['映像伝送は O4 Enterprise・アンテナ8本（2T4R・公式）', '8本それぞれがどの脚に入っているかは公式資料に記載がない'],
     spec: [['映像伝送', 'O4 Enterprise（公式）'], ['アンテナ', '8本・2T4R（公式）'], ['最大伝送距離（日本）', '12 km（障害物・電波干渉なし・公式）'], ['ライブビュー', '1080p / 30fps（公式）']],
     check: ['ひび・欠け（中のアンテナを守っている）'],
     tip: '公式の仕様には「日本国内では5.8GHz帯は使用不可」と注記がある。日本で使うのは2.4GHz帯。',
@@ -2822,7 +2827,7 @@ const M4_PARTS = {
     name: 'ブラシレスモーター', en: 'Brushless motor', group: 'prop', count: 4,
     role: 'プロペラを回すアウターローター式のモーター。対角の2基が同じ向きに回り、隣どうしは逆向きに回って回転の反動を打ち消す。',
     structure: ['外側の缶（ベル）ごと回るアウターローター', '図の歯と磁石の数は550クラスと同じ12N14Pで簡略化'],
-    spec: [['型番・出力', '非公表'], ['回転方向', '公式資料に記載なし（図の向きは一般的な例）']],
+    spec: [['型番・出力', '公式資料に記載なし'], ['回転方向', '公式資料に記載なし（図の向きは一般的な例）']],
     check: ['手で回して引っかかりがないか', '異音', '飛行後の温度'],
   },
   bell: { name: 'ベル（ローター）', en: 'Bell (rotor)', group: 'prop', count: 4, role: '磁石を内側に貼った回る缶。プロペラはこの上に取り付く。', check: ['打痕', '砂の噛み込み'] },
@@ -2853,10 +2858,10 @@ const M4_PARTS = {
     check: ['膨らみ・傷', 'バックルが左右とも固定されているか', '充電は 5〜40 ℃で（公式）'],
     tip: '99.5Whは、航空機の手荷物で目安になる100Whにわずかに届かない値。持ち込みの決まりは航空会社で確かめる。',
   },
-  cells: { name: 'セル', en: 'Cells', group: 'elec', count: 1, role: 'バッテリーの中身。リチウムイオンのセルを4直列（4S）にして14.76Vを作る（公式）。並列の構成は非公表。', check: ['（分解しない）外装の膨らみで異常に気づく'] },
-  batteryBuckle: { name: 'バッテリーバックル', en: 'Battery buckles', group: 'elec', count: 2, role: 'バッテリーの左右にあるつまみ。バッテリーを胴に固定し、押すと外れる（取説）。', check: ['左右とも戻っているか（片側だけだと飛行中に浮く）'] },
+  cells: { name: 'セル', en: 'Cells', group: 'elec', count: 1, role: 'バッテリーの中身。リチウムイオンのセルを4直列（4S）にして14.76Vを作る（公式）。並列の構成は公式資料に記載なし。', check: ['（分解しない）外装の膨らみで異常に気づく'] },
+  batteryBuckle: { name: 'バッテリーバックル', en: 'Battery buckles', group: 'elec', count: 2, role: 'バッテリーの左右にあるつまみ。バッテリーを胴に固定し、押すと外れる（取説）。', check: ['左右ともしっかり固定されているか（固定が甘いと接触が悪くなり危険・取説）', 'バックルをつかんで機体を持たない（緩むのを防ぐ・安全ガイドライン）'] },
   batteryLed: { name: '電源ボタンとバッテリー残量LED', en: 'Power button & battery LEDs', group: 'elec', count: 1, role: 'バッテリーの後ろの端面のボタンと4つのLED。1回押すと残量を表示し、1回押してから長押しすると電源が入る（取説）。', check: ['飛行前に残量を確認'] },
-  ports: { name: 'USB-C 補助ポート（E-Port Lite）と microSD スロット', en: 'E-Port Lite & microSD', group: 'elec', count: 1, role: 'USB-Cの補助ポートは、DJIのソフトや一部のPSDK機器をつなぐ口（公式）。写真・動画は microSD カードに記録する（内部ストレージはない・公式）。', structure: ['機体の後ろの下側（取説の各部名称）'], check: ['ふたの閉まり'] },
+  ports: { name: 'USB-C 補助ポート（E-Port Lite）と microSD スロット', en: 'E-Port Lite & microSD', group: 'elec', count: 1, role: 'USB-Cの補助ポートは、DJIのソフトや一部のPSDK機器をつなぐ口（公式）。写真・動画は microSD カードに記録する（内部ストレージはない・公式）。', structure: ['機体の後ろの下側（取説の図）'], check: ['ふたの閉まり'] },
   fc: {
     name: 'フライトコントローラー', en: 'Flight controller', group: 'elec', count: 1,
     role: '機体の頭脳。ジャイロ・加速度・GNSS・RTK・ビジョンの情報から姿勢と位置を計算し、4基のモーターの回転数を決める。',
@@ -2872,8 +2877,8 @@ const M4_PARTS = {
     check: ['離陸前に衛星とRTKをつかんでいるか', 'アクセサリーでアンテナをふさがない（安全ガイドライン）'],
   },
   beacon: { name: 'ビーコン', en: 'Beacon', group: 'nav', count: 1, role: '上面の後端の灯り。夜間に機体の位置を知らせる（取説）。DJI Pilot 2 で手動で点けたり消したりする。', structure: ['夜間飛行では、ビーコンと底部の補助ライトが有効になっているか確かめる（取説）'], check: ['点灯するか'] },
-  ePort: { name: 'E-Port（アクセサリーの差し込み口）', en: 'E-Port', group: 'elec', count: 1, role: '上面の前寄りにある拡張ポート。スピーカーやスポットライトなどの公式アクセサリーと、他社のPSDK機器をつなぐ（公式）。', structure: ['ホットスワップ非対応。アクセサリーは電源を入れる前に付ける（公式）', 'アクセサリーは重心を保つか、トップシェルのほぼ中央に（安全ガイドライン）'], check: ['カバーの閉まり（使わないとき）'] },
-  dongleBay: { name: 'セルラードングル収納部', en: 'Cellular dongle bay', group: 'nav', count: 1, role: '別売の DJI セルラードングル2（4G）を入れる場所。電波の届きにくい所で、4G回線でも映像伝送をつなぐ（公式）。', structure: ['上面、E-Port と GNSS アンテナの間（取説の各部名称）'], check: ['ふたの閉まり'] },
+  ePort: { name: 'E-Port（アクセサリーの差し込み口）', en: 'E-Port', group: 'elec', count: 1, role: '上面の前寄りにあるアクセサリー用の差し込み口。スピーカーやスポットライトなどの公式アクセサリーと、他社のPSDK機器をつなぐ（公式）。', structure: ['ホットスワップ非対応。アクセサリーは電源を入れる前に付ける（公式）', 'アクセサリーは重心を保つか、トップシェルのほぼ中央に（安全ガイドライン）'], check: ['カバーの閉まり（使わないとき）'] },
+  dongleBay: { name: 'セルラードングル収納部', en: 'Cellular dongle bay', group: 'nav', count: 1, role: '別売の DJI セルラードングル2（4G）を入れる場所。4G回線でも映像伝送をつなげるようにする（公式）。', structure: ['上面、E-Port と GNSS アンテナの間（取説の図）', '取説は「一部の国・地域でのみ」使えるとしている。日本で上空で携帯電話の回線を使うには、制度上の手続きが要る（総務省）'], check: ['ふたの閉まり'] },
   vision: {
     name: '全方向ビジョンシステム', en: 'Omnidirectional vision', group: 'nav', count: 4,
     role: '魚眼のカメラを2つずつ組にして、周りの障害物までの距離を測る。ぶつかる前に止まったり避けたりする。',
@@ -2884,7 +2889,7 @@ const M4_PARTS = {
   },
   visionDown: { name: '下方ビジョンシステム', en: 'Downward vision', group: 'nav', count: 2, role: '下面の前と後ろの魚眼カメラ。地面の模様を見て位置を保つ（取説）。', structure: ['位置の保持は高度 0.5〜30 m で最もよく働く（取説）'], spec: [['測定範囲', '0.3〜18.8 m・前後左右とも160°（公式）']], check: ['窓の汚れ', '模様のない床・水面は苦手'] },
   ir3d: { name: '3D 赤外線検知システム', en: '3D infrared sensing', group: 'nav', count: 1, role: '機体の下で赤外線を使って地面までの距離を測り、下方ビジョンを補う（公式）。', structure: ['機体の下面（取説の各部名称）', '測定範囲の数値は仕様に書かれていない', 'GNSSが弱く暗い所でこれだけが働くときは、高度が地表から3mまでに制限される（取説）'], check: ['窓の汚れ'] },
-  auxLight: { name: '補助ライト', en: 'Auxiliary light', group: 'nav', count: 1, role: '機体の下面の中央の白いライト。暗い所で下方ビジョンを助ける。高さ5m未満の暗い所で自動で点く（取説）。', check: ['点灯するか'] },
+  auxLight: { name: '補助ライト', en: 'Auxiliary light', group: 'nav', count: 1, role: '機体の下面の中央のライト。暗い所で下方ビジョンを助ける。高さ5m未満の暗い所で自動で点く（取説）。', check: ['点灯するか'] },
   led: {
     name: 'フロントLED', en: 'Front LEDs', group: 'nav', count: 2,
     role: '前アームのモーターの下の灯り。電源が入ってモーターが止まっている間は赤に点いて機首の向きを示し、モーターが回ると赤と緑に交互に点滅する（取説）。',
@@ -2895,9 +2900,9 @@ const M4_PARTS = {
   remoteId: { name: 'リモートID', en: 'Remote ID', group: 'nav', count: 1, role: '登録記号・位置・高度などを電波で発信する。Matrice 4T・4E は機体に内蔵（国土交通省の届出一覧）。', structure: ['この図の位置は例'], check: ['飛行前に作動状況を確かめる（法定の点検項目）'] },
   gimbal: {
     name: 'ジンバル', en: 'Gimbal', group: 'payload', count: 1,
-    role: '複数のカメラとレーザー距離計をまとめて載せた3軸のジンバル。機体の揺れを打ち消して、望遠でもぶれずに撮る。',
-    structure: ['3軸（チルト・ロール・パン・公式）', '操作できるのはチルトだけ。パンは操作できず、揺れの打ち消しに使う（公式）', '電源を入れる前にジンバルプロテクターを外す（取説）', '防振ゴム（ダンパー）4個で胴から浮かせている（メンテナンスマニュアル）'],
-    spec: [['操作できるチルト', '4T −90°〜70°／4E −90°〜35°（公式）'], ['機械的な範囲', 'チルト 4T −140°〜113°・4E −140°〜50°、ロール ±52°、パン ±65°（公式）'], ['最大制御速度', 'チルト 100°/秒（公式）'], ['角度ぶれ範囲', '±0.007°（公式）']],
+    role: '複数のカメラとレーザー距離計をまとめて載せた3軸のジンバル。機体の揺れを打ち消して、望遠でもぶれを抑えて撮る。',
+    structure: ['3軸（チルト・ロール・パン・公式）', '送信機で操作できるのはチルト。パンは手動では操作できず（公式。MSDKのプログラムからは制御可能）、揺れの打ち消しに使う', '電源を入れる前にジンバルプロテクターを外す（取説）', '防振ゴム（ダンパー）4個で胴から浮かせている（メンテナンスマニュアル）'],
+    spec: [['操作できるチルト', '4T −90°〜70°／4E −90°〜35°（公式）'], ['ソフトリミット', 'ロール ±47°・パン ±60°（公式）'], ['機械的な範囲', 'チルト 4T −140°〜113°・4E −140°〜50°、ロール ±52°、パン ±65°（公式）'], ['最大制御速度', 'チルト 100°/秒（公式）'], ['角度ぶれ範囲', '±0.007°（公式）']],
     check: ['ジンバルプロテクターを外したか', 'アームを開ききってから電源を入れる（取説）'],
   },
   camWideT: {
@@ -2909,11 +2914,11 @@ const M4_PARTS = {
   },
   camWideE: {
     variant: 'e', name: '広角カメラ（4E・メカシャッター）', en: 'Wide camera (4E)', group: 'payload', count: 1,
-    role: '測量向けの広角。4/3型の大きなセンサーとメカシャッターで、飛びながら撮っても像がゆがまない。',
+    role: '測量向けの広角。4/3型の大きなセンサーと、メカシャッター（2〜1/2000秒・公式）を持つ。メカシャッターは、飛びながら撮るときの像のゆがみを抑えられる（一般的な知識）。',
     structure: ['前面の右下の大きな四角い窓（取説の図）', '0.5秒間隔で撮影できる（公式）'],
     spec: [['センサー', '4/3型 CMOS・有効2000万画素（公式）'], ['焦点距離', '24 mm 相当（公式）'], ['絞り', 'f/2.8〜f/11（公式）'], ['画角（FOV）', '84°（公式）'], ['シャッター', 'メカ 2〜1/2000 秒・電子 2〜1/8000 秒（公式）'], ['写真形式', 'JPEG／DNG（RAW）（公式）']],
     check: ['レンズの汚れ'],
-    tip: '電子シャッターは上から順に読み出すので、速く動きながら撮ると像が斜めにゆがむ（ローリングシャッター）。測量でメカシャッターが重んじられるのはこのため。',
+    tip: '電子シャッターは上から順に読み出すので、速く動きながら撮ると像が斜めにゆがむ（ローリングシャッター）。測量でメカシャッターが重んじられるのはこのため（一般的な知識）。',
   },
   camMid: {
     name: '中望遠カメラ', en: 'Medium tele camera', group: 'payload', count: 1,
@@ -2928,15 +2933,15 @@ const M4_PARTS = {
     structure: ['4T・4E 共通（公式）', '4T は前面の左中段の四角い窓、4E は左の大きな丸い窓（取説の図）'],
     spec: [['センサー', '1/1.5インチ CMOS・有効4800万画素（公式）'], ['焦点距離', '168 mm 相当（公式）'], ['絞り', 'f/2.8（公式）'], ['画角（FOV）', '15°（公式）'], ['デジタルズーム', '16倍（ハイブリッド112倍・公式）']],
     check: ['レンズの汚れ'],
-    tip: '画角15°は広角（82°）のおよそ5分の1の幅。わずかな揺れも大きく写るので、ジンバルの働きがいちばん効くカメラ。',
+    tip: '同じ距離から写る幅は、広角のおよそ7分の1（焦点距離の比 168/24）。わずかな揺れも大きく写るので、ジンバルの働きがいちばん効くカメラ。',
   },
   thermal: {
     variant: 't', name: '赤外線サーマルカメラ（4Tのみ）', en: 'Thermal camera (4T)', group: 'payload', count: 1,
     role: '物が出している赤外線（熱）を写す。暗闇でも人や動物、過熱した設備を見つけられる。',
     structure: ['前面の左上の丸い窓（取説の図）', '非冷却の酸化バナジウム（VOx）マイクロボロメーター（公式）'],
     spec: [['解像度', '640 × 512（スーパー解像度で 1280 × 1024・公式）'], ['焦点距離', '53 mm 相当・f/1.0（公式）'], ['画角（DFOV）', '45°（公式）'], ['波長', '8〜14 μm（公式）'], ['温度分解能', '≤ 50 mK（公式）'], ['測温範囲', '−20〜150 ℃（高ゲイン）／0〜550 ℃（低ゲイン）（公式）']],
-    check: ['窓の汚れ・傷（ガラスではない特殊な窓）'],
-    tip: 'ふつうのガラスは8〜14μmの赤外線を通さない。だからサーマルカメラの窓はガラスではなく、ゲルマニウムなどの赤外線を通す素材で作られる（一般的な知識）。',
+    check: ['窓の汚れ・傷'],
+    tip: 'ふつうのガラスは8〜14μmの赤外線を通さない。だからサーマルカメラの窓やレンズには、ふつうのガラスではなく、ゲルマニウムなど赤外線を通す材料が使われる（一般的な知識）。',
   },
   nir: {
     variant: 't', name: 'NIR 補助ライト（4Tのみ）', en: 'NIR auxiliary light (4T)', group: 'payload', count: 1,
@@ -2956,13 +2961,13 @@ const M4_PARTS = {
   spotlight: {
     variant: 'spot', name: 'AL1 スポットライト（別売）', en: 'AL1 Spotlight', group: 'payload', count: 1,
     role: '上面のE-Portに付ける照明。夜の捜索などで地上を照らす。ジンバルの向きに合わせて照らす向きを変えられる（公式）。',
-    structure: ['E-Port に差し、手締めねじ2本で固定（AL1マニュアル）', '付けると左右の障害物回避が制限され、点けると障害物回避が働かない（公式）'],
+    structure: ['E-Port に差し、手締めねじ2本で固定（AL1マニュアル）', '付けると障害物回避が制限されて迂回が使えなくなり、点けると障害物回避が働かない（AL1/AS1マニュアル・公式FAQ）'],
     spec: [['重さ', '99 g（ブラケット込み・公式）'], ['最大電力', '32 W（公式）'], ['照度', '4.3 ルクス @ 100 m・17 ルクス @ 50 m（公式）'], ['照射角', '23°（公式）']],
     check: ['取り付け前に電源を切る', '付けたらコンパスを較正（AL1マニュアル）'],
   },
   speaker: {
     variant: 'spk', name: 'AS1 スピーカー（別売）', en: 'AS1 Speaker', group: 'payload', count: 1,
-    role: '上面のE-Port（スポットライトと一緒のときはその上）に付ける拡声器。避難の呼びかけや、録音・文字の読み上げを流す（公式）。',
+    role: '上面のE-Port（スポットライトと一緒のときはその上）に付ける拡声器。避難の呼びかけや、録音・文字の読み上げ（中国語と英語のみ）を流す（公式）。',
     structure: ['スポットライトと重ねて付けられる（公式FAQ・AL1/AS1マニュアル）'],
     spec: [['重さ', '92.5 g（ブラケット込み・公式）'], ['最大音量', '114 dB @ 1 m（公式）'], ['有効放送距離', '300 m（公式）']],
     check: ['取り付け前に電源を切る', '初めて付けたらコンパスを較正（AS1マニュアル）'],
@@ -2976,7 +2981,7 @@ const M4_PER_MOTOR = ['motor', 'prop', 'bell', 'stator', 'winding', 'magnet', 's
 const M4_SIMPLE = {
   prop:     { role: '回って空気を下に押します。工具なしで付け外しできます。', analogy: '扇風機の羽根を下に向けて、自分が浮くようなもの' },
   motor:    { role: 'プロペラを回す力の元。隣どうしが逆向きに回ります。', analogy: 'ミニ四駆のモーターを、もっと強く静かにしたもの' },
-  frontArm: { role: 'モーターを支える腕。たたむと大きな水筒くらいの大きさになります。', analogy: '折りたたみ傘の骨' },
+  frontArm: { role: 'モーターを支える腕。たためば、機体全体が約4分の1のかさになります。', analogy: '折りたたみ傘の骨' },
   battery:  { role: '電気のもと。後ろから差し込み、最大49分飛べます。', analogy: 'スマホの電池を、もっと大きく強くしたもの' },
   fc:       { role: '機体の頭脳。傾きと位置を測って、4つのモーターの速さを決めます。', analogy: '自転車に乗るときの「小脳」' },
   gimbal:   { role: 'いくつものカメラを載せた首。揺れを打ち消します。', analogy: '走りながらでもコップの水をこぼさない手首' },
@@ -2985,9 +2990,9 @@ const M4_SIMPLE = {
 };
 const M4_SIMPLE_NAME = { prop: 'プロペラ', motor: 'モーター', frontArm: 'アーム', battery: 'バッテリー', fc: '頭脳（FC）', gimbal: 'カメラとジンバル', laser: '距離計', vision: 'センサー' };
 const M4_TRIVIA = {
-  thermal: '4Tのサーマルカメラは、暗闇でも人の体温を写せる。救命救助・公共安全・森林保全に向くとされるのはこのため（公式）。',
-  laser: '狙った物までの距離を1800m先まで測れる（反射率20%の目標・公式）。救助の現場では、見つけた人の位置（緯度経度）をすぐに共有できる。',
-  camWideE: '4Eの広角はメカシャッター付き。測量・マッピング・土木建設に向くとされる（公式）。',
+  thermal: '4Tのサーマルカメラは、暗闇でも人の体温を写せる（一般的な知識）。公式は4Tを、電力・救命救助・公共安全・森林保全などに適するとしている。',
+  laser: '狙った物までの距離を1800m先まで測れる（反射率20%の目標・公式）。見つけた人のおおよその位置（緯度経度）も出るが、取説は「あくまで参考用」としている。',
+  camWideE: '4Eの広角はメカシャッター付き（公式）。4Eは測量・マッピング・土木建設・採掘などの空間計測向けとされる（公式）。',
   frontArm: '準備は「ジンバルプロテクターを外す → 前アーム → 後アーム → バッテリー → プロペラ」の順（取説）。',
   led: 'Mavic 4 Pro のフロントLEDは緑だが、Matrice 4 は赤で機首の向きを示す（それぞれの取説）。',
   battery: '99.5Whは航空機の手荷物の目安100Whにわずかに届かない。バッテリーだけで離陸重量の約3分の1（401g / 1219g）を占める。',
@@ -2998,8 +3003,8 @@ const M4_TRIVIA = {
 const M4_TRIVIA_ACT = { frontArm: { alt: 'fold' }, rearArm: { alt: 'fold' }, gimbal: { alt: 'gimbal' }, camWideT: { alt: 'cams' }, camWideE: { alt: 'cams' }, camMid: { alt: 'cams' }, camTele: { alt: 'cams' }, thermal: { alt: 'cams' }, laser: { alt: 'laser' }, vision: { alt: 'sense' }, battery: { alt: 'battery' }, spotlight: { alt: 'acc' }, speaker: { alt: 'acc' } };
 const M4_REG = {
   body: [
-    { text: '最大離陸重量は1420g（公式）で、25kg未満の区分。100g以上なので国の登録が必要。', ky: '3.1', src: 'reg' },
-    { text: 'Matrice 4T・4E は、令和8年6月19日現在の型式認証の一覧に載っていない。同じ一覧にある第二種の「DJI Matrice 4D型／4TD型」は、ドック運用向けの別の型式で、4T・4E には当てはまらない。', ky: '3.1', src: 'm4Cert' },
+    { text: '機体本体とバッテリーを合わせた重さが100g以上なので、国の登録が必要。最大離陸重量は1420g（公式）で、25kg未満の区分。', ky: '3.1', src: 'reg' },
+    { text: 'Matrice 4T・4E は、令和8年6月19日現在の型式認証の一覧に載っていない。同じ一覧にある第二種の「DJI Matrice 4D型／4TD型」は別の型式（AL1/AS1マニュアルでも「Matrice 4D シリーズ」として別に扱われている）で、4T・4E には当てはまらない。', ky: '3.1', src: 'm4Cert' },
   ],
   remoteId: [
     { text: 'Matrice 4T・4E はリモートIDを機体に内蔵していると届け出られている（国土交通省の一覧）。', ky: '3.1', src: 'm4Rid' },
@@ -3008,10 +3013,10 @@ const M4_REG = {
     { text: '撮影中にフロントLEDを自動で消す設定がある（取説）。夜間に飛ばすときは、機体の姿勢と方向がわかる灯火が求められるので、設定とビーコンを確かめる。', ky: '4.2', src: 'permit' },
   ],
   landingGear: [
-    { text: '映像伝送の 5.8GHz 帯は日本では使えない（公式の仕様の注記）。日本で使うのは技適のある 2.4GHz 帯。', ky: '3.2', src: 'soumu' },
+    { text: '映像伝送の 5.8GHz 帯は日本では使えない（公式の仕様の注記）。日本で使う 2.4GHz 帯は、技適を受けた機器なら免許のいらない小電力の無線局として使える（総務省）。', ky: '3.2', src: 'soumuDrone' },
   ],
   camTele: [
-    { text: '望遠で遠くから撮れても、撮った映像を公開するときは人の顔や表札、車のナンバーが写り込まないよう配慮することが求められる（総務省のガイドライン）。', ky: '3.2', src: 'soumuPriv' },
+    { text: '望遠で遠くから撮れるぶん、住宅などにカメラやズームを向けないこと、人の顔や表札などが写り込んだら削除やぼかしをすることが求められる（総務省のガイドライン）。', ky: '3.2', src: 'soumuPriv' },
   ],
 };
 const M4_KY_PART = { body: '4.1', frontArm: '4.1', rearArm: '4.1', landingGear: '4.5', motor: '4.4', bell: '4.4', stator: '4.4', winding: '4.4', magnet: '4.4', shaft: '4.6', motorBase: '4.1', prop: '4.4', esc: '4.4',
@@ -3028,7 +3033,7 @@ if (IS_M4) {
   { const keep = {}; for (const k of ['regMark', 'remoteId', 'led']) if (REG[k]) keep[k] = REG[k]; const reg = Object.assign(keep, M4_REG);
     reg.led = [...(REG.led || []), ...M4_REG.led]; reg.remoteId = [...(REG.remoteId || []), ...M4_REG.remoteId]; reg.body = [...M4_REG.body]; swap(REG, reg); }
   swap(KY_PART, M4_KY_PART);
-  REG_SOURCES.m4Cert = M4_SRC.certList; REG_SOURCES.m4Rid = M4_SRC.ridList;
+  REG_SOURCES.m4Cert = M4_SRC.certList; REG_SOURCES.m4Rid = M4_SRC.ridList; REG_SOURCES.soumuDrone = M4_SRC.soumuDrone;
   for (const L of Object.values(I18N)) if (L && L.parts) for (const k of Object.keys(L.parts)) delete L.parts[k];
   Object.assign(FIND_ALIAS, { body: '胴体 ボディ 本体', frontArm: 'アーム 腕 たたむ', rearArm: 'アーム 腕', landingGear: '脚 アンテナ', prop: '羽 はね ペラ', battery: '電池 バッテリ', gimbal: 'ジンバル 首',
     camWideT: 'カメラ 広角', camWideE: 'カメラ 広角 メカシャッター 測量', camMid: 'カメラ 望遠 70mm', camTele: 'カメラ 望遠 168mm', thermal: 'サーマル 赤外線 熱 温度', nir: '赤外線 ライト 夜', laser: 'レーザー 距離計 測距 RNG',
@@ -4628,7 +4633,7 @@ function m4Materials(M) {
     sense: new THREE.MeshBasicMaterial({ color: 0x14b8a6, transparent: true, opacity: 0.10, depthWrite: false, side: THREE.DoubleSide }),
     beam: new THREE.MeshBasicMaterial({ color: 0xff3b30, transparent: true, opacity: 0.85, toneMapped: false }),
     nirBeam: new THREE.MeshBasicMaterial({ color: 0xb06cf5, transparent: true, opacity: 0.16, depthWrite: false, side: THREE.DoubleSide }),
-    spotBeam: new THREE.MeshBasicMaterial({ color: 0xfff1c2, transparent: true, opacity: 0.16, depthWrite: false, side: THREE.DoubleSide }),
+    spotBeam: new THREE.MeshBasicMaterial({ color: 0xfff1c2, transparent: true, opacity: 0.16, depthWrite: false, side: THREE.FrontSide }),   /* 内側から（カメラの映像で）見えないよう表だけ */
   };
 }
 
@@ -4965,7 +4970,7 @@ function buildM4(M) {
     const dn = sector(18.8 * S2 * 0.3, 0, Math.PI * 2, D2R(180 - 80), D2R(80)); dn.position.copy(P(0, -26, 22)); senseG.add(dn);   // 下: 0.3〜18.8m・160°（図はさらに縮めた）
     noPart(senseG); }
   // レーザー距離計の光線（先の目標は m4ui.js が置く）
-  const laserBeam = new THREE.Mesh(new THREE.CylinderGeometry(0.0009, 0.0009, 1, 8, 1, true).rotateX(Math.PI / 2).translate(0, 0, -0.5), X.beam); laserBeam.visible = false; laserBeam.renderOrder = 9; L.laser.add(noPart(laserBeam));
+  const laserBeam = new THREE.Mesh(new THREE.CylinderGeometry(0.0022, 0.0022, 1, 10, 1, true).rotateX(Math.PI / 2).translate(0, 0, -0.5), X.beam); laserBeam.visible = false; laserBeam.renderOrder = 9; L.laser.add(noPart(laserBeam));
 
   // ---------- 矢印 ----------
   const arrows = { thrust: [], rot: [], move: null, yaw: null };
@@ -6621,7 +6626,8 @@ function codexToday() {
   const now = new Date();
   const s = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   let h = 0; for (let i = 0; i < s.length; i++) h += s.charCodeAt(i);
-  return LIST_ORDER[h % LIST_ORDER.length];
+  const keys = LIST_ORDER.filter(k => !PARTS[k] || !PARTS[k].variant || altHasVariant(PARTS[k].variant));   /* 付けていない部品（4E・アクセサリー・別の腰下ユニット）は選ばない */
+  return keys[h % keys.length];
 }
 
 function codexMark(key) {
@@ -8197,6 +8203,7 @@ function fpvOn(on) {
   if (on === fpv.on) return;
   if (on) {
     stopOthers('fpv');   /* 劇場・もしも・降ろし方・重さ・専門が裏で走っていると、舞台も電源も取り合いになる */
+    if (typeof altFpvEnter === 'function') altFpvEnter();   /* 機種の重ね絵（人・広げた地面・ラベルの抑え）は、下で今の状態を控える前に閉じる */
     if (S.explode > 0.02) setExplode(0); if (S.mode === 'cut') setMode('normal');
     fpv.pan = 0; fpv.tilt = fpvTilt0();
     fpv.saved = { pos: camera.position.clone(), tgt: controls.target.clone(), fov: camera.fov, labels: S.labelsSuppressed, power: S.power, rot: controls.autoRotate };
@@ -10739,7 +10746,7 @@ function initSound() {
 // ===== 共有リンク（いま見えている画面をURLにする） =====
 // 方針: 既定と違うものだけを短いキーで載せる。読み戻しの途中はトーストを出さず、最後に「どこを開いたか」を1回だけ伝える。
 // 授業モードの lesson / step は lesson.js が自分で書くのでここでは触らない（消さない）。
-const SHARE_KEYS = ['p', 'd', 't', 'm', 'e', 'v', 'c', 'u', 'f', 'x', 'w', 'mi', 'mass', 'price', 'iso', 'reg', 'lang'];
+const SHARE_KEYS = ['p', 'd', 't', 'm', 'e', 'v', 'c', 'u', 'f', 'x', 'w', 'mi', 'mass', 'price', 'iso', 'reg', 'lang', 'acc'];
 const share = { restoring: false };
 
 // 注視点(3) + 向き(3) + 引き(1)。引きは viewScale()×bandK() で割った相対値なので、受け取った端末の画面に合わせて戻る
@@ -10769,6 +10776,7 @@ function shareUrl() {
   if (S.view && S.view !== 'iso') q.set('v', S.view);
   if (!whatif.active && !theater.active) q.set('c', camParam());   /* 視点そのもの。画面の縦横比が違っても同じ画になるよう、引きは相対値で持つ */
   if (S.selected) q.set('p', S.selected.key);
+  if (IS_M4) { q.set('m4v', m4.variant); const acc = [m4.acc.spot && 'spot', m4.acc.spk && 'spk'].filter(Boolean); if (acc.length) q.set('acc', acc.join(',')); }   /* Matrice 4 は 4T/4E と付けたアクセサリーも載せる（部品が見える組み合わせで開くため） */
   if (S.isolated) q.set('iso', S.isolated);
   if (S.use) q.set('u', S.use);
   if (S.flight) q.set('f', S.flight);
@@ -11160,6 +11168,7 @@ function mavicBlockPower() {
 }
 function mavicOnTab(tab) {
   if (!IS_MAVIC) return;
+  if (tab !== 'fly') mav.pendingPower = false;   /* 「とばす」で押した電源を、ほかのタブで広げ終えたときに回さない */
   if (tab !== 'see') { const had = !!mav.act; mavicStop(); mvOverlays(null, true); if ($('#noteCard').dataset.kind === 'mavic-fold') renderNote(null); if (had) focusOn([D.root], { pull: true }); }   /* 寄った画のまま「とばす」へ行かない */
   if (tab === 'fly' && (mav.foldTo > 0 || mav.fold > 0.001)) { mav.foldTo = 0; syncMvChips(); showToast('アームを広げました'); frameBox([-0.32, -0.16, -0.26], [0.32, 0.03, 0.27], [0.62, 0.42, -0.66], 1.12); }   /* 畳んだ大きさに寄った画のまま広げない */
 }
@@ -11208,6 +11217,7 @@ function mvOverlays(id, quiet) {
   D.fovG.visible = mav.fovOn; D.senseG.visible = mav.senseOn; mvSyncLens();
   if (mav.person) mav.person.visible = mav.sizeOn; if (mav.ghost) mav.ghost.visible = mav.sizeOn;
   S.shadowDirty = S.csDirty = S.aoDirty = true; syncMvChips();
+  if (!id && !fpv.on) { const sup = !!(mav.act && mav.act.id === 'gimbal'); mav._sup = sup; S.labelsSuppressed = sup; }   /* ラベルの抑えをその場で戻す（次のコマを待つと「眼」が古い値を控える） */
   if (id) {
     if (S.explode > 0.02) setExplode(0); if (S.power > 0) setPower(0, true); if (mav.foldTo > 0 || mav.fold > 0.001) mav.foldTo = 0;
     if (id === 'fov') { mav.gim.all = true; mvSyncLens(); }
@@ -11360,7 +11370,6 @@ function stepMavic(dt) {
   let dirty = false;
   if (S.explode > 0.02 && mav.foldTo > 0) { mav.foldTo = 0; syncMvChips(); if ($('#noteCard').dataset.kind === 'mavic-fold') renderNote(null); }   /* 畳んだ姿勢のまま部品を散らさない */
   { const sup = mav.sizeOn || mav.fovOn || mav.senseOn || !!(mav.act && mav.act.id === 'gimbal'); if (sup !== mav._sup) { mav._sup = sup; S.labelsSuppressed = sup; } }
-  if (fpv.on && (mav.fovOn || mav.senseOn || mav.sizeOn)) mvOverlays(null, true);   /* 映像の中に重ね絵を残さない（錐の内側から見ることになる） */
   // --- たたむ / 広げる ---
   if (mav.foldTo > mav.fold) {
     const spinning = D.motors.some(mo => mo.rpm > 30) || body.py > 0.003;
@@ -11475,7 +11484,8 @@ function m4BlockPower() {
 }
 function m4OnTab(tab) {
   if (!IS_M4) return;
-  if (tab !== 'see') { const had = !!m4.act; m4Stop(); m4Overlays(null, true); if ($('#noteCard').dataset.kind === 'm4-fold' || $('#noteCard').dataset.kind === 'm4-acc') renderNote(null); if (had) focusOn([D.root], { pull: true }); }
+  if (tab !== 'fly') m4.pendingPower = false;   /* 「とばす」で押した電源を、ほかのタブで広げ終えたときに回さない */
+  if (tab !== 'see') { const had = !!m4.act || m4Wide(); m4Stop(); m4Overlays(null, true); if ($('#noteCard').dataset.kind === 'm4-fold' || $('#noteCard').dataset.kind === 'm4-acc') renderNote(null); if (had) focusOn([D.root], { pull: true }); }   /* 引いた画・浮いた機体のまま「とばす」へ行かない */
   if (tab === 'fly' && (m4.foldTo > 0 || m4.fold > 0.001)) { m4.foldTo = 0; syncM4Chips(); showToast('アームを開きました'); m4FrameWide(); }
 }
 const m4FrameWide = () => frameBox([-0.36, -0.17, -0.42], [0.36, 0.06, 0.40], [0.62, 0.42, -0.66], 1.12);
@@ -11485,7 +11495,9 @@ function m4Action(id) {
   if (!IS_M4) return;
   if (S.tab !== 'see') setTab('see');
   if (id === 'about') { if (m4.act) m4Stop(); m4Overlays(null, true); renderM4About(); m4FrameDrone(null, 1.05); return; }
-  if (id === 'variant') { m4SetVariant(m4.variant === 't' ? 'e' : 't', true); return; }
+  if (id === 'variant') { if (m4.act) m4Stop(); const keepCams = m4.camsOn; if (!keepCams) m4Overlays(null, true);
+    m4SetVariant(m4.variant === 't' ? 'e' : 't', !keepCams); if (keepCams) { m4.gim.all = true; m4SyncLens(); renderM4Note('cams'); showToast(`表示を Matrice 4${m4.variant === 't' ? 'T' : 'E'} に切り替えました`, 2400); } return; }
+  if (id === 'acc' && $('#noteCard').dataset.kind === 'm4-acc') { renderNote(null); return; }
   if (id === 'acc') { if (m4.act) m4Stop(); m4Overlays(null, true); if (S.power > 0) setPower(0, true); if (m4.foldTo > 0 || m4.fold > 0.001) m4.foldTo = 0; renderM4Note('acc'); syncM4Chips(); frameBox([-0.16, -0.08, -0.20], [0.16, 0.14, 0.12], [0.55, 0.62, -0.58], 1.15); return; }
   if (id === 'cams' || id === 'sense' || id === 'size' || id === 'laser') { if (m4.act) m4Stop(); const was = { cams: m4.camsOn, sense: m4.senseOn, size: m4.sizeOn, laser: m4.laserOn }[id]; m4Overlays(was ? null : id); return; }
   m4Overlays(null, true);
@@ -11527,12 +11539,14 @@ function m4Overlays(id, quiet) {
   if (m4.person) m4.person.visible = m4.sizeOn; if (m4.ghost) m4.ghost.visible = m4.sizeOn; if (m4.target) m4.target.visible = m4.laserOn;
   if (!m4.laserOn && was.laser) { m4Sway(0, 0, 0, 0); m4.gim.tilt = 0; m4.laser = null; if (m4._groundWas != null) { groundScale(m4._groundWas); m4._groundWas = null; } }
   S.shadowDirty = S.csDirty = S.aoDirty = true; syncM4Chips();
+  if (!id && !fpv.on) { const sup = !!(m4.act && m4.act.id === 'gimbal'); m4._sup = sup; S.labelsSuppressed = sup; }   /* ラベルの抑えをその場で戻す（次のコマを待つと「眼」が古い値を控える） */
   if (id) {
     if (S.explode > 0.02) setExplode(0); if (S.power > 0) setPower(0, true); if (m4.foldTo > 0 || m4.fold > 0.001) m4.foldTo = 0;
     if (id === 'cams') { m4.gim.all = true; m4SyncLens(); }
     if (id === 'laser') m4LaserStart();
     renderM4Note(id);
     if (id === 'cams') frameBox([-0.32, -0.30, -1.05], [0.32, 0.10, 0.20], [0.72, 0.50, -0.85], 1.05);   /* 前斜め上から。錐がこちらへ広がり、機体は奥に見える */
+    if (id === 'laser') m4FrameLaser();
     if (id === 'sense') frameBox([-0.75, -0.25, -0.62], [0.75, 0.55, 0.50], [0.70, 0.66, -0.75], 1.02);
     if (id === 'size') { if (m4.person.userData.face) m4.person.userData.face(camera.position.x, camera.position.z); pdFrame([D.root, m4.person, m4.ghost], { pull: true, margin: 1.15, dir: new THREE.Vector3(0.45, 0.32, -0.84).normalize() }); }
   } else if (!quiet && (was.cams || was.sense || was.size || was.laser)) {
@@ -11564,7 +11578,7 @@ function m4SetVariant(v, announce) {
   try { sessionStorage.setItem('drone3d.m4variant', v); } catch (e) {}
   m4FpvRebuild(); if (fpv.on) updateFpvHud();
   if (announce) {
-    showToast(v === 't' ? 'Matrice 4T：サーマルとNIR補助ライトのあるジンバルに付け替えました' : 'Matrice 4E：4/3型・メカシャッターの広角を持つジンバルに付け替えました', 3600);
+    showToast(v === 't' ? '表示を Matrice 4T に切り替えました（サーマルとNIR補助ライトのあるジンバル）' : '表示を Matrice 4E に切り替えました（4/3型・メカシャッターの広角のあるジンバル）', 3600);
     const g = gp.head; g.updateWorldMatrix(true, false); const c = new THREE.Vector3().setFromMatrixPosition(g.matrixWorld);
     frameBox([c.x - 0.06, c.y - 0.05, c.z - 0.04], [c.x + 0.06, c.y + 0.05, c.z + 0.05], [0.18, 0.10, -0.98], 1.15);
     renderM4Note('variant');
@@ -11592,7 +11606,7 @@ const m4FrameDrone = (dir, margin) => pdFrame([D.root], { pull: true, margin: (m
 const M4_SRC_LINK = (k) => { const s = M4_SRC[k]; return `<a href="${s.url}" target="_blank" rel="noopener">${s.name}</a>`; };
 function renderM4About() {
   const row = (k, v, src) => `<tr><th>${k}</th><td>${v}${src ? `<small>${src}</small>` : ''}</td></tr>`;
-  const html = `<p><b>複数のカメラとレーザー距離計を積んだ、折りたたみ式の産業用ドローン。</b>サーマルカメラを持つ <b>4T</b>（電力・救命救助・公共安全・森林保全向け）と、4/3型・メカシャッターの広角を持つ <b>4E</b>（測量・マッピング・土木建設・採掘向け）の2機種がある（公式）。機体は共通で、違いはジンバルのカメラ。</p>
+  const html = `<p><b>複数のカメラとレーザー距離計を積んだ、折りたたみ式の産業用ドローン。</b>サーマルカメラを持つ <b>4T</b>（電力・救命救助・公共安全・森林保全向け）と、4/3型・メカシャッターの広角を持つ <b>4E</b>（測量・マッピング・土木建設・採掘向け）の2機種がある（公式）。公式の仕様は重さ・寸法を2機種共通の値で示していて、見た目の違いはジンバルのカメラ（この図も機体を共通にしている）。4Eだけの機能に0.5秒間隔の撮影やスマート3Dキャプチャーがある（公式）。</p>
     <table class="pd-spec">
       ${row('離陸重量', '1219 g（最大離陸重量 1420 g）', '公式・標準プロペラ')}${row('展開時', '約 307.0 × 387.5 × 149.5 mm', '公式・プロペラを除く')}${row('折りたたみ時', '約 260.6 × 113.7 × 138.4 mm', '公式')}
       ${row('最大飛行時間', '49 分（ホバリング 42 分）', '公式・無風・標準プロペラ')}${row('最大水平速度', '21 m/s', '公式・無風・前進')}${row('最大風圧抵抗', '12 m/s', '公式・離着陸時')}
@@ -11600,7 +11614,7 @@ function renderM4About() {
       ${row('カメラ', '4T：広角・中望遠・望遠・サーマル・NIR補助ライト<br>4E：4/3型の広角・中望遠・望遠', '公式')}${row('レーザー距離計', '最大 1800 m', '公式・反射率20%')}${row('保護等級', 'なし（防水性能はない）', '公式')}
     </table>
     <h4>ほかの機種とのちがい</h4>
-    <ul class="pd-diff"><li><b>カメラ頭が四角い</b>：鼻先の下にぶら下がり、窓の数は4Tで6つ（サーマル・NIR補助ライト・レーザー距離計を含む）、4Eで4つ</li><li><b>天面の円筒</b>：RTK内蔵のGNSSアンテナ。後ろにビーコン、前にアクセサリー用のE-Port</li><li><b>4本脚で立つ</b>：脚にアンテナが入る。前後のモーターの高さの差は約9mm</li><li><b>たたみ方</b>：前アームは水平に後ろへ、後アームは下へ回して前へ（モーターが逆さになる）</li><li><b>アクセサリー</b>：スポットライトとスピーカーを重ねて付けられる</li></ul>
+    <ul class="pd-diff"><li><b>カメラ頭が四角い</b>：鼻先の下にぶら下がり、窓の数は4Tで6つ（サーマル・NIR補助ライト・レーザー距離計を含む）、4Eで4つ</li><li><b>天面の円筒</b>：RTK内蔵のGNSSアンテナ。後ろにビーコン、前にアクセサリー用のE-Port</li><li><b>4本脚で立つ</b>：脚にアンテナが入る（取説）。前のモーターが後ろより約9mm高い（公式3Dモデルの実測）</li><li><b>たたみ方</b>：前アームは水平に後ろへ、後アームは下へ回して前へ（モーターが逆さになる）</li><li><b>アクセサリー</b>：スポットライトとスピーカーを重ねて付けられる</li></ul>
     <p class="caveat">この3Dモデルは、DJI公式の3Dモデル（STEP）から寸法を測り、取扱説明書の図と公式写真で確かめて、教材用に組み直した再現です。CADの形そのものは使っていません。4Eの前面の窓の位置、ジンバルのヨークの形、内部の配置、モーターの回転方向は推定を含みます（解説の「推定」「例」）。</p>
     <details class="pd-src"><summary>出典（${M4_DATE}）</summary><ul>${['product', 'specs', 'faq', 'manual', 'maint', 'acc', 'prop', 'cad'].map(k => `<li>${M4_SRC_LINK(k)}</li>`).join('')}</ul></details>`;
   renderNote({ kind: 'm4-about', title: m4.variant === 't' ? 'DJI Matrice 4T' : 'DJI Matrice 4E', html, actions: [{ label: m4.variant === 't' ? '4E にしてみる' : '4T にしてみる', fn: () => m4Action('variant') }, { label: 'たたんでみる', fn: () => m4Action('fold') }, { label: 'カメラを見る', fn: () => { renderNote(null); m4Action('cams'); } }] });
@@ -11610,17 +11624,17 @@ function renderM4Note(id) {
   const N = {
     variant: () => ({ title: m4.variant === 't' ? 'Matrice 4T のジンバル' : 'Matrice 4E のジンバル', html: m4.variant === 't'
       ? `<p>前面に6つの窓（取説の図）。<b>サーマルカメラ</b>（640×512）と、望遠を夜でも使えるようにする<b>NIR補助ライト</b>があるのが4Tだけの装備。広角は1/1.3インチ・f/1.7。</p><p>ジンバルは上へ <b>70°</b> まで向けられる（4Eは35°・公式）。</p>`
-      : `<p>前面に4つの窓（取説の図）。広角が<b>4/3型・2000万画素でメカシャッター付き</b>になり、飛びながら撮ってもゆがみにくい。サーマルとNIR補助ライトはない。</p><p>ジンバルは上へ <b>35°</b> まで（4Tは70°・公式）。</p><p class="caveat">4Eの窓の位置は取説の図と公式写真から読んだ推定です。</p>`,
+      : `<p>前面に4つの窓（取説の図）。広角が<b>4/3型・2000万画素でメカシャッター付き</b>になる（公式）。メカシャッターは移動しながらの撮影で像がゆがみにくい（一般的な知識）。サーマルとNIR補助ライトはない。</p><p>ジンバルは上へ <b>35°</b> まで（4Tは70°・公式）。</p><p class="caveat">4Eの窓の位置は取説の図と公式写真から読んだ推定です。</p>`,
       actions: [{ label: m4.variant === 't' ? '4E にする' : '4T にする', primary: true, fn: () => m4Action('variant') }, { label: 'カメラを見る', fn: () => { renderNote(null); m4Action('cams'); } }] }),
     fold: () => ({ title: m4.foldTo > 0 ? 'アームをたたむ' : 'アームを広げる', html: m4.foldTo > 0
       ? `<p>電源を切り、羽根を寄せてから、<b>後アームを下へ振り下ろして前へ</b>回し、胴の下の脇に収めます（モーターが逆さ・脚が上）。続いて<b>前アームを水平に後ろへ</b>回して胴の上の脇に沿わせ、最後にカメラへ<b>ジンバルプロテクター</b>をかぶせます。たたむと約 260.6 × 113.7 × 138.4 mm（公式）。</p><p class="caveat">取説には展開の順番（前アーム → 後アーム）だけが書かれていて、たたむ順番は書かれていません。この図は展開の逆にしています。回す軸の向きは取説の図からの推定です。</p>`
       : `<p>取説の準備の順番どおりに、<b>①ジンバルプロテクターを外す → ②前アームを開く → ③後アームを開く</b>。このあとバッテリーを入れ、プロペラを付けます。</p><p><b>アームを開ききってから電源を入れます</b>。開かないまま電源を入れると、ジンバルがアームに当たってセルフチェックを終えられません（公式FAQ）。電源は、電源ボタンを1回押してから長押し（取説）。</p>`,
       actions: [{ label: m4.foldTo > 0 ? '広げる' : 'たたむ', primary: true, fn: () => m4Action('fold') }] }),
     battery: () => ({ title: 'バッテリーを入れ替える', html: `<p id="m4BatState" class="pd-state">電源を切っています…</p><p>電源を切り、左右のバックルを押して、バッテリーを<b>後ろへ</b>引き抜きます。差し込むときはカチッと音がするまで（取説）。<b>電源が入っているときは抜き差ししない</b>（取説）。</p><p>バッテリーは 401 g で、離陸重量 1219 g のおよそ3分の1（公式の値からの計算）。</p><p class="caveat">胴の中のバッテリーの形は、公式の3Dモデルの外形から起こした簡略形です。</p>`, actions: [{ label: 'もう一度', fn: () => m4Action('battery') }], onClose: () => { m4Stop(); focusOn([D.root], { pull: true }); } }),
-    gimbal: () => ({ title: 'ジンバル', html: `<p id="m4GimState" class="pd-state">上へ向けます…</p><p>カメラの頭は、上ぶたの下の付け根から<b>パン（縦軸）→ ロール（前後の軸）→ U字のヨーク → チルト（左右の円筒）</b>の順に吊られています。操作できるのは<b>チルトだけ</b>で、${m4.variant === 't' ? '4T' : '4E'}は <b>${tr[0]}°〜${tr[1]}°</b>（公式）。パンとロールは機体の揺れを打ち消すのに使います。</p><table class="pd-spec"><tr><th>操作できるチルト</th><td>4T −90°〜70°・4E −90°〜35°<small>公式</small></td></tr><tr><th>機械的な範囲</th><td>チルト 4T −140°〜113°・4E −140°〜50°、ロール ±52°、パン ±65°<small>公式</small></td></tr><tr><th>最大制御速度</th><td>チルト 100°/秒<small>公式</small></td></tr><tr><th>角度ぶれ範囲</th><td>±0.007°<small>公式</small></td></tr></table><p class="caveat">軸の並びは公式の3Dモデルの形から読んだものです。</p>`, actions: [{ label: 'もう一度', fn: () => m4Action('gimbal') }, { label: 'カメラから見る', fn: () => m4CamView() }], onClose: () => { m4Stop(); focusOn([D.root], { pull: true }); } }),
+    gimbal: () => ({ title: 'ジンバル', html: `<p id="m4GimState" class="pd-state">上へ向けます…</p><p>カメラの頭は、上ぶたの下の付け根から<b>パン（縦軸）→ ロール（前後の軸）→ U字のヨーク → チルト（左右の円筒）</b>の順に吊られています。送信機で操作できるのは<b>チルト</b>で、${m4.variant === 't' ? '4T' : '4E'}は <b>${tr[0]}°〜${tr[1]}°</b>（公式）。パンとロールは機体の揺れを打ち消すのに使います（パンは手動では操作できない・公式）。</p><table class="pd-spec"><tr><th>操作できるチルト</th><td>4T −90°〜70°・4E −90°〜35°<small>公式</small></td></tr><tr><th>ソフトリミット</th><td>ロール ±47°・パン ±60°<small>公式</small></td></tr><tr><th>機械的な範囲</th><td>チルト 4T −140°〜113°・4E −140°〜50°、ロール ±52°、パン ±65°<small>公式</small></td></tr><tr><th>最大制御速度</th><td>チルト 100°/秒<small>公式</small></td></tr><tr><th>角度ぶれ範囲</th><td>±0.007°<small>公式</small></td></tr></table><p class="caveat">軸の並びは公式の3Dモデルの形から読んだものです。公式の仕様には4Tのチルトのソフトリミットとして −90°〜35° も載っています（制御可能な範囲 −90°〜70° と同じ表に併記）。</p>`, actions: [{ label: 'もう一度', fn: () => m4Action('gimbal') }, { label: 'カメラから見る', fn: () => m4CamView() }], onClose: () => { m4Stop(); focusOn([D.root], { pull: true }); } }),
     cams: () => m4CamNote(),
-    laser: () => ({ title: 'レーザー距離計', html: `<div id="m4LaserRead" class="m4-read"></div><p>十字線の先にレーザーを当て、返ってくるまでの時間から距離を測ります。アプリで「RNG」を有効にすると、<b>直線距離・高度・緯度経度・水平距離</b>が出ます（取説）。見つけた人や火元の位置を、すぐに地図に落とせます。</p><table class="pd-spec"><tr><th>測定範囲</th><td>1800 m<small>反射率20%の目標・1 Hz・公式</small></td></tr><tr><th>精度</th><td>±(0.2 + 0.0015 × 距離) m<small>3 m より遠いとき・公式</small></td></tr><tr><th>ブラインドゾーン</th><td>1 m<small>英語の仕様・製品ページ。日本語の仕様は「3～1 m」と表記</small></td></tr></table><p class="caveat">図の距離は舞台の上の実寸です。誤差の幅は公式の式で計算しています。電源が入っている間はレーザーの窓を直接見ないこと（安全ガイドライン）。</p>`, actions: [{ label: '別の目標を測る', primary: true, fn: () => m4LaserStart(true) }, { label: 'もどす', fn: () => m4Overlays(null) }], onClose: () => m4Overlays(null) }),
-    sense: () => ({ title: '検知範囲', html: `<p>上の四隅の魚眼カメラ（前2・後2）を2つずつ組にして周りの障害物までの距離を測り、ぶつかる前に止まる・避けます。下は2つの魚眼と3D赤外線センサー（公式）。</p><table class="pd-spec"><tr><th>前方・後方</th><td>0.4〜22.5 m（デュアル）・水平90°×垂直135°<small>公式</small></td></tr><tr><th>側方</th><td>0.5〜32 m・水平90°×垂直90°<small>公式</small></td></tr><tr><th>下方</th><td>0.3〜18.8 m・160°<small>公式</small></td></tr><tr><th>上方</th><td>仕様に数値の記載なし</td></tr></table><p class="caveat">図はデュアルの測定範囲を約45分の1に縮めた概念図です（下向きはさらに縮めています）。公式の仕様には別に「測定範囲 0.4〜200 m」（前後）などの記載もあります。スポットライトを点けると障害物回避が働きません（公式）。</p>`, actions: [{ label: 'もどす', fn: () => m4Overlays(null) }], onClose: () => m4Overlays(null) }),
+    laser: () => ({ title: 'レーザー距離計', html: `<div id="m4LaserRead" class="m4-read"></div><p>十字線の先にレーザーを当てて距離を測ります（光が返ってくるまでの時間から求めるのが一般的な仕組み）。アプリで「RNG」を有効にすると、<b>直線距離・高度・緯度経度・水平距離</b>が出ます（取説）。見つけた人や火元の位置を地図に落とすのに使えますが、位置はGNSSやジンバルの姿勢の精度に左右され、取説は「あくまで参考用」としています。</p><table class="pd-spec"><tr><th>測定範囲</th><td>1800 m<small>反射率20%の目標・1 Hz・公式</small></td></tr><tr><th>精度</th><td>±(0.2 + 0.0015 × 距離) m<small>3 m より遠いとき・公式</small></td></tr><tr><th>ブラインドゾーン</th><td>1 m<small>英語の仕様・製品ページ。日本語の仕様は「3～1 m」と表記</small></td></tr></table><p class="caveat">図の距離は舞台の上の実寸です。誤差の幅は公式の式で計算しています。電源が入っている間はレーザーの窓を直接見ないこと（安全ガイドライン）。</p>`, actions: [{ label: '別の目標を測る', primary: true, fn: () => m4LaserStart(true) }, { label: 'もどす', fn: () => m4Overlays(null) }], onClose: () => m4Overlays(null) }),
+    sense: () => ({ title: '検知範囲', html: `<p>上の四隅の魚眼カメラ（前2・後2）を2つずつ組にして周りの障害物までの距離を測り、ぶつかる前に止まる・避けます。下は3D赤外線センサー（公式）と2つの魚眼（取説の図）。</p><table class="pd-spec"><tr><th>前方・後方</th><td>0.4〜22.5 m（デュアル）・水平90°×垂直135°<small>公式</small></td></tr><tr><th>側方</th><td>0.5〜32 m・水平90°×垂直90°<small>公式</small></td></tr><tr><th>下方</th><td>0.3〜18.8 m・160°<small>公式</small></td></tr><tr><th>上方</th><td>仕様に数値の記載なし</td></tr></table><p class="caveat">図はデュアルの測定範囲を約45分の1に縮めた概念図です（下向きはさらに縮めています）。公式の仕様には別に「測定範囲 0.4〜200 m」（前後）などの記載もあります。スポットライトを点けると障害物回避が働きません（公式）。</p>`, actions: [{ label: 'もどす', fn: () => m4Overlays(null) }], onClose: () => m4Overlays(null) }),
     size: () => ({ title: '大きさをくらべる', html: `<p>同じ縮尺で、<b>身長170cmの人</b>と、青い半透明の<b>550クラスのクアッド</b>（対角550mm・約2.4kg）を並べています。</p><p>Matrice 4 は展開時 約307.0 × 387.5 mm（プロペラを除く・公式）、離陸重量 1219 g。対角ホイールベースは 438.8 mm（公式）で、550クラスよりひと回り小さい。たためば約 260.6 × 113.7 mm。</p>`, actions: [{ label: 'もどす', fn: () => m4Overlays(null) }], onClose: () => m4Overlays(null) }),
     acc: () => m4AccNote(),
   };
@@ -11636,7 +11650,7 @@ function m4CamNote() {
   const body = g.all
     ? `<p>同じ場所から撮っても、写る範囲がこれだけ違います（画角・公式）。カメラを選ぶと、そのカメラだけを光らせます。</p><ul class="pd-diff"><li><b style="color:#ef6a2d">24mm 相当</b>（広角）：${m4V(M4_LENS.wide.fov)}°</li><li><b style="color:#3b7df7">70mm 相当</b>（中望遠）：35°</li><li><b style="color:#22c55e">168mm 相当</b>（望遠）：15°</li>${v === 't' ? '<li><b style="color:#e5484d">サーマル</b>（53mm 相当）：対角 45°</li>' : ''}</ul>`
     : `<table class="pd-spec"><tr><th>カメラ</th><td><b style="color:${L.col}">${L.name}</b>・${L.mm}mm 相当<small>${m4V(L.sensor)}・公式</small></td></tr><tr><th>画角</th><td>${k === 'ir' ? '対角 45°' : m4V(L.fov) + '°'}<small>公式</small></td></tr><tr><th>絞り</th><td>${m4V(L.ap)}<small>公式</small></td></tr><tr><th>ピント</th><td>${L.focus}<small>公式</small></td></tr></table>`
-      + `<p>${k === 'wide' ? (v === 't' ? '全体を見渡して、探す・状況をつかむカメラ。' : '測量向けの広角。メカシャッターで、飛びながら撮っても像がゆがみにくい（公式）。') : k === 'mid' ? '公式は「10 m先からでもネジや亀裂を識別」と紹介している。' : k === 'tele' ? '公式は「最大250メートル離れた標識の細部まで」と紹介している。デジタル16倍（ハイブリッド112倍）まで寄れる（公式）。' : '物が出す赤外線（熱）を写す。測温範囲は −20〜150 ℃（高ゲイン）／0〜550 ℃（低ゲイン）（公式）。夜は NIR補助ライト（照射角5.7°）が望遠を助ける（紫の細い光）。'}</p>`;
+      + `<p>${k === 'wide' ? (v === 't' ? '全体を見渡して、探す・状況をつかむカメラ。' : '測量向けの広角。メカシャッター（公式）は、飛びながら撮るときの像のゆがみを抑えられる（一般的な知識）。') : k === 'mid' ? '公式は「10 m先からでもネジや亀裂を識別」と紹介している。' : k === 'tele' ? '公式は「最大250メートル離れた標識の細部まで」と紹介している。デジタル16倍（ハイブリッド112倍）まで寄れる（公式）。' : '物が出す赤外線（熱）を写す。測温範囲は −20〜150 ℃（高ゲイン）／0〜550 ℃（低ゲイン）（公式）。夜は NIR補助ライト（照射角5.7°）が望遠を助ける（紫の細い光）。'}</p>`;
   return { title: v === 't' ? 'Matrice 4T のカメラ' : 'Matrice 4E のカメラ', html: `<div class="mv-segs" role="group" aria-label="カメラを選ぶ">${keys.map(btn).join('')}<button class="mv-seg${g.all ? ' on' : ''}" data-m4lens="all" aria-pressed="${g.all}">全部</button></div>${body}<p class="caveat">錐は公式の画角を対角として4:3の枠（サーマルは5:4）で描いています。錐の長さは見やすさのための長さで、距離の意味はありません。</p>`,
     actions: [{ label: 'カメラから見る', primary: true, fn: () => m4CamView() }, { label: 'もどす', fn: () => m4Overlays(null) }], onClose: () => m4Overlays(null) };
 }
@@ -11652,9 +11666,9 @@ function m4AccNote() {
   const fly = !a.spot && !a.spk ? [42, 49] : a.spot && a.spk ? (a.lit ? [28, 32] : [34, 40]) : a.spot ? (a.lit ? [31, 35] : [37, 43]) : [37, 43];
   return { title: 'アクセサリー（別売）', html: `<div class="mv-segs" role="group" aria-label="付けるアクセサリー">${b('spot', a.spot, 'AL1 スポットライト')}${b('spk', a.spk, 'AS1 スピーカー')}${a.spot ? b('lit', a.lit, a.lit ? '点灯中' : '点ける') : ''}</div>
     <p>上面の <b>E-Port</b> に差し、手締めねじ2本で止めます。両方付けるときは、スポットライトの上にスピーカーを重ねます（AL1/AS1マニュアル）。付ける前に電源を切り、付けたらコンパスを較正します。</p>
-    <table class="pd-spec"><tr><th>付けている物</th><td>${!a.spot && !a.spk ? 'なし' : [a.spot ? 'スポットライト 99 g' : '', a.spk ? 'スピーカー 92.5 g' : ''].filter(Boolean).join('・')}<small>ブラケット込み・公式</small></td></tr><tr><th>最大ホバリング / 飛行</th><td>${fly[0]} 分 / ${fly[1]} 分<small>AL1/AS1マニュアルの表${a.spot && a.lit ? '・点灯中' : ''}</small></td></tr></table>
-    ${a.spot ? `<p><b>スポットライト</b>：32 W・照射角23°・100 m先で4.3ルクス（公式）。付けると左右の障害物回避が制限され、<b>点けると障害物回避が働かない</b>（公式）。</p>` : ''}${a.spk ? `<p><b>スピーカー</b>：1 m で 114 dB・有効放送距離 300 m（公式）。避難の呼びかけや録音を流す。</p>` : ''}
-    <p class="caveat">形は公式の写真とマニュアルの寸法（スポットライト 幅164mm、スピーカー 73×70×52mm）からの簡略形です。</p>`,
+    <table class="pd-spec"><tr><th>付けている物</th><td>${!a.spot && !a.spk ? 'なし' : [a.spot ? 'スポットライト 99 g' : '', a.spk ? 'スピーカー 92.5 g' : ''].filter(Boolean).join('・')}<small>ブラケット込み・公式</small></td></tr><tr><th>最大ホバリング / 飛行</th><td>${fly[0]} 分 / ${fly[1]} 分<small>AL1/AS1マニュアルの表${a.spot && a.lit ? (a.spk ? '・両方オンの値' : '・点灯中') : ''}</small></td></tr></table>
+    ${a.spot ? `<p><b>スポットライト</b>：32 W・照射角23°・100 m先で4.3ルクス（公式）。付けると障害物回避が制限されて迂回が使えなくなり、<b>点けると障害物回避が働かない</b>（AL1/AS1マニュアル・公式FAQ）。</p>` : ''}${a.spk ? `<p><b>スピーカー</b>：1 m で 114 dB・有効放送距離 300 m（公式）。避難の呼びかけや録音を流す。</p>` : ''}
+    <p class="caveat">形は公式の写真と仕様の寸法（スポットライト 幅164mm、スピーカー 73×70×52mm）からの簡略形です。</p>`,
     actions: [{ label: '外す', fn: () => { m4SetAcc(false, false); renderM4Note('acc'); } }], onClose: () => {} };
 }
 function m4AccClick(e) {
@@ -11693,7 +11707,7 @@ function m4GimbalApply() {
     (m4.laserOn ? gp.pan.parent : D.root).getWorldQuaternion(_m4q2); _m4e2.setFromQuaternion(_m4q2, 'YXZ');   /* 測距では機体ごと目標へ向けるので、胴の方位を基準にする */
     _m4q2.setFromEuler(_m4e.set(m4.gim.tilt, _m4e2.y, 0, 'YXZ'));
     _m4q.invert().multiply(_m4q2); _m4e.setFromQuaternion(_m4q, 'YZX');
-    tl = _m4e.x; rl = clamp(_m4e.z, M4_R(-52), M4_R(52)); pn = clamp(_m4e.y, M4_R(-65), M4_R(65));
+    tl = _m4e.x; rl = clamp(_m4e.z, M4_R(-47), M4_R(47)); pn = clamp(_m4e.y, M4_R(-60), M4_R(60));   /* ソフトリミット（公式）。機械的にはロール±52°・パン±65° */
   }
   gp.tilt.rotation.x = clamp(tl, M4_R(mech[0]), M4_R(mech[1])); gp.roll.rotation.z = rl; gp.pan.rotation.y = pn;
   if (m4.fold > 0.02 || m4.foldTo > 0) { gp.tilt.rotation.x = 0; gp.roll.rotation.z = 0; gp.pan.rotation.y = 0; }
@@ -11702,29 +11716,43 @@ function m4GimbalApply() {
 function m4Sway(lift, px, yaw, rz) { const sg = D.sg; if (sg.userData.y0 == null) sg.userData.y0 = sg.position.y; sg.position.y = sg.userData.y0 + lift; sg.rotation.set(px, yaw, rz, 'YXZ'); }
 
 // ---------- レーザー距離計: 目標を置いて測る ----------
-const M4_TARGETS = [[0.9, -0.158, -4.6], [-1.6, -0.158, -6.4], [0.3, -0.158, -3.2]];
+// 目標（人）は機体の前 2〜3m。機体を 0.8m 浮かせて向きを変え、胸の高さにレーザーを当てる
+const M4_TARGETS = [[0.5, -0.158, -2.6], [-0.9, -0.158, -3.2], [0.15, -0.158, -2.0]];
+const _m4v1 = new THREE.Vector3(), _m4v2 = new THREE.Vector3();
 function m4LaserStart(next) {
   if (!m4.target) return;
   m4.laserIdx = next ? ((m4.laserIdx || 0) + 1) % M4_TARGETS.length : (m4.laserIdx || 0);
   const t = M4_TARGETS[m4.laserIdx]; m4.target.position.set(t[0], t[1], t[2]); m4.target.visible = true;
-  m4.laser = { t: 0, lift: 1.1, yaw: m4.laser ? m4.laser.yaw : 0 }; if (m4._groundWas == null) { m4._groundWas = ground.scale.x; groundScale(3.2); }
   if (m4.target.userData.face) m4.target.userData.face(0, 0);
-  frameBox([-1.9, -0.16, -7.0], [1.2, 1.25, 0.4], [0.92, 0.42, 0.10], 1.0);
+  const was = m4.laser;   /* 別の目標へは、浮いたまま向きだけ変える（床へ降ろしてから浮き直さない） */
+  m4.laser = { t: was ? 1.2 : 0, lt: was ? was.lt : 0, lift: 0.8, yaw: was ? was.yaw : 0, shown: 0 };
+  const el = $('#m4LaserRead'); if (el) el.innerHTML = '<span>目標へ向けています…</span>';
+  if (m4._groundWas == null) { m4._groundWas = ground.scale.x; groundScale(3.2); }
+  if (next) m4FrameLaser();   /* 初回はカードを開いてから m4Overlays が枠を決める */
+}
+// 機体（浮いた高さまで）と目標の人を両方収める。距離の上限（ふだんの3.2m）を緩めて渡す
+function m4FrameLaser() {
+  const t = m4.target.position, lift = m4.laser.lift, tall = innerWidth < innerHeight;
+  const min = [Math.min(-0.3, t.x - 0.35), -0.16, t.z - 0.3], max = [Math.max(0.3, t.x + 0.35), -0.158 + Math.max(1.75, lift + 0.25), 0.35];
+  const proxy = new THREE.Mesh(new THREE.BoxGeometry(max[0] - min[0], max[1] - min[1], max[2] - min[2]), new THREE.MeshBasicMaterial({ visible: false }));
+  proxy.position.set((min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2); scene.add(proxy);
+  pdFrame([proxy], { pull: true, min: 0.08, max: 12, margin: narrow() ? 0.95 : 1.06, dir: new THREE.Vector3(...(tall ? [0.42, 0.50, 0.76] : [0.92, 0.36, 0.16])).normalize() });   /* 縦長の画面は後ろ斜めから（奥行きに並べる）、横長は横から */
+  scene.remove(proxy); proxy.geometry.dispose();
 }
 function m4LaserStep(dt) {
   const L = m4.laser; if (!L || !m4.laserOn) return false;
-  L.t += dt; const e = Math.min(1, L.t / 1.6), ease = e * e * (3 - 2 * e);
-  // 目標の胸の高さへジンバルを向け、機体（root）の向きを目標へ回す
+  L.t += dt; L.lt += dt; const e = Math.min(1, L.lt / 1.6), ease = e * e * (3 - 2 * e);
+  // 目標の胸の高さへジンバルを向け、胴の向きを目標へ回す
   D.sg.updateWorldMatrix(true, false);
-  const head = D.gimbalParts.lens.laser; const tgt = m4.target.position.clone().add(new THREE.Vector3(0, 1.25, 0));
-  const pos = new THREE.Vector3(); head.getWorldPosition(pos);
+  const tgt = _m4v1.copy(m4.target.position); tgt.y += 1.25;
+  const pos = D.gimbalParts.lens.laser.getWorldPosition(_m4v2);
   const dx = tgt.x - pos.x, dz = tgt.z - pos.z, dy = tgt.y - pos.y, h = Math.hypot(dx, dz);
   const yawWant = Math.atan2(-dx, -dz); L.yaw = (L.yaw || 0) + m4Norm(yawWant - (L.yaw || 0)) * Math.min(1, dt / 0.25); m4Sway(L.lift * ease, 0, L.yaw, 0);
   m4.gim.tilt = clamp(Math.atan2(dy, h), M4_R(M4_TILT[m4.variant][0]), M4_R(M4_TILT[m4.variant][1]));
   const dist = Math.hypot(dx, dy, dz); D.laserBeam.scale.set(1, 1, Math.max(0.01, dist * Math.min(1, Math.max(0, (L.t - 1.4) / 0.4))));
   const el = $('#m4LaserRead');
   if (el && L.t > 1.8 && (!L.shown || Math.abs(L.shown - dist) > 0.005)) { L.shown = dist; const err = 0.2 + 0.0015 * dist;
-    el.innerHTML = `<b>直線距離 ${dist.toFixed(2)} m</b><span>水平距離 ${h.toFixed(2)} m ・ 高さの差 ${dy.toFixed(2)} m</span><span>誤差の目安 ±${err.toFixed(2)} m（公式の式）${dist < 1 ? '・1 m より近いと測れない' : ''}</span>`; }
+    el.innerHTML = `<b>直線距離 ${dist.toFixed(2)} m</b><span>水平距離 ${h.toFixed(2)} m ・ 高さの差 ${dy.toFixed(2)} m</span><span>${dist < 1 ? '1 m より近いと測れない（ブラインドゾーン・公式）' : dist <= 3 ? '1〜3 m の精度はシステム誤差 0.3 m 未満（公式）' : `誤差の目安 ±${err.toFixed(2)} m（公式の式）`}</span>`; }
   else if (el && L.t <= 1.8 && !el.textContent) el.innerHTML = '<span>機体を浮かせて目標へ向けています…</span>';
   return true;
 }
@@ -11733,7 +11761,7 @@ function m4LaserStep(dt) {
 const M4_GC = {
   st: m4.gim, tilt0: -4, get tiltMin() { return M4_R(M4_TILT[m4.variant][0]); }, get tiltMax() { return M4_R(M4_TILT[m4.variant][1]); }, seenKey: 'fpvSeenM4',
   get firstToast() { return `上下のドラッグでチルト（${M4_TILT[m4.variant][0]}°〜${M4_TILT[m4.variant][1]}°）。カメラとズームは下のボタンで。左右は機体ごと向きを変えます`; },
-  dragToast: 'このジンバルは左右に振れません（パンは揺れの打ち消し専用・公式）。左右はスティックで機体ごと向きを変えます',
+  dragToast: 'パン（左右）は送信機からは操作できません（公式）。左右はスティックで機体ごと向きを変えます',
   person: () => m4.person, personFpv: [0.12, -0.158, -12], personHome: [0.42, -0.158, 0.34],
   eye: () => m4Lens(m4LensKey()), vfov: () => m4VFov(),
   apply: () => m4GimbalApply(), sync: () => m4FpvSync(),
@@ -11743,7 +11771,7 @@ const M4_GC = {
 };
 function m4FpvHtml() {
   const t = m4.variant === 't';
-  return `<div class="fpv-seg" id="fpvLens"><button data-z="1" style="--c:#ef6a2d">24mm</button><button data-z="${(70 / 24).toFixed(3)}" style="--c:#3b7df7">70mm</button><button data-z="7" style="--c:#22c55e">168mm</button>${t ? '<button data-ir="1" style="--c:#e5484d">熱</button>' : ''}</div>
+  return `<div class="fpv-seg" id="fpvLens"><button data-z="1" style="--c:#ef6a2d">24mm</button><button data-z="${(70 / 24).toFixed(3)}" style="--c:#3b7df7">70mm</button><button data-z="7" style="--c:#22c55e">168mm</button>${t ? '<button data-ir="1" style="--c:#e5484d" aria-label="サーマル">熱</button>' : ''}</div>
         <div class="fpv-seg"><button id="fpvZoomOut" aria-label="引く">−</button><b id="fpvZoom">1.0×</b><button id="fpvZoomIn" aria-label="寄る">＋</button></div>`;
 }
 function m4FpvBind() {
@@ -11773,8 +11801,8 @@ function m4ThermalLook() {
   const on = fpv.on && m4.gim.ir; if (on === !!m4._irLook) return; m4._irLook = on;
   document.body.classList.toggle('m4-ir', on);
   const p = m4.person; if (p) p.traverse(o => { if (!o.isMesh || !o.material || !o.material.emissive) return;
-    if (on) { o.userData.irWas = [o.material.emissive.getHex(), o.material.emissiveIntensity]; o.material = o.material.clone(); o.material.emissive.set(0xffffff); o.material.emissiveIntensity = 0.9; }
-    else if (o.userData.irWas) { o.material.emissive.setHex(o.userData.irWas[0]); o.material.emissiveIntensity = o.userData.irWas[1]; } });
+    if (on) { if (!o.userData.irMat) { o.userData.irMat = o.material.clone(); o.userData.irMat.emissive.set(0xffffff); o.userData.irMat.emissiveIntensity = 0.9; } o.userData.baseMat = o.material; o.material = o.userData.irMat; }
+    else if (o.userData.baseMat) { o.material = o.userData.baseMat; o.userData.baseMat = null; } });
 }
 
 // ---------- 毎フレーム ----------
@@ -11784,7 +11812,6 @@ function stepM4(dt) {
   if (S.explode > 0.02 && m4.foldTo > 0) { m4.foldTo = 0; syncM4Chips(); if ($('#noteCard').dataset.kind === 'm4-fold') renderNote(null); }
   { const sup = m4.sizeOn || m4.camsOn || m4.senseOn || m4.laserOn || !!(m4.act && m4.act.id === 'gimbal'); if (sup !== m4._sup) { m4._sup = sup; S.labelsSuppressed = sup; } }
   if (!fpv.on && m4._irLook) m4ThermalLook();
-  if (fpv.on && (m4.camsOn || m4.senseOn || m4.sizeOn || m4.laserOn)) m4Overlays(null, true);   /* 映像の中に重ね絵を残さない（錐の内側から見ることになる） */
   // --- たたむ / 広げる ---
   if (m4.foldTo > m4.fold) {
     const spinning = D.motors.some(mo => mo.rpm > 30) || body.py > 0.003;
@@ -11822,12 +11849,13 @@ function stepM4(dt) {
         let back = 0; const B = 0.15;
         if (t > 0.8 && t < 2.0) back = m4Ease((t - 0.8) / 1.2) * B; else if (t >= 2.0 && t < 2.8) back = B; else if (t >= 2.8 && t < 4.0) back = B * (1 - m4Ease((t - 2.8) / 1.2));
         p.anim.pos.set(0, 0, back);
-        const st = $('#m4BatState'); if (st) st.textContent = t < 0.8 ? '電源を切りました' : t < 2.0 ? '左右のバックルを押して後ろへ引き抜きます' : t < 2.8 ? '充電済みのバッテリーに持ち替え' : t < 4.0 ? 'カチッと音がするまで差し込みます' : '電源ボタンを1回押してから長押しして起動しました';
+        const st = $('#m4BatState'), msg = t < 0.8 ? '電源を切りました' : t < 2.0 ? '左右のバックルを押して後ろへ引き抜きます' : t < 2.8 ? '充電済みのバッテリーに持ち替え' : t < 4.0 ? 'カチッと音がするまで差し込みます' : '電源ボタンを1回押してから長押しして起動しました'; if (st && st.textContent !== msg) st.textContent = msg;
         if (t > 4.2 && !m4.powered) setM4Power(true);
         if (t > 4.6) { p.anim = null; p.animReset = true; m4.act = null; syncM4Chips(); }
       }
     }
-    if (a.id === 'gimbal') {
+    if (a.id === 'gimbal' && (m4.fold > 0.02 || m4.foldTo > 0)) { a.t = 0; const st = $('#m4GimState'); if (st && st.textContent !== 'アームを開いています…') st.textContent = 'アームを開いています…'; }   /* アームが開くまで待つ（開く前はジンバルを動かさない） */
+    else if (a.id === 'gimbal') {
       // 速さは最大制御速度 100°/秒 を超えないように区切る
       const R = M4_R, E = m4Ease, up = M4_TILT[m4.variant][1], T = [Math.max(0.6, up / 70 * 1.0), 0.6, (up + 90) / 100 + 0.3, 0.5, 1.1, 0.5, 5.0];
       let k = 0, u = t; while (k < T.length && u > T[k]) { u -= T[k]; k++; } const f = k < T.length ? u / T[k] : 1;
@@ -11839,7 +11867,7 @@ function stepM4(dt) {
       else if (k === 4) { tilt = R(-90) * (1 - E(f)); msg = '正面へもどす'; }
       else if (k === 5) { msg = '手に持って傾けても…'; sway = [0.06 * E(f), 0, 0, 0]; }
       else if (k === 6) { const w = Math.sin(Math.PI * Math.min(1, f * 1.15)), s1 = Math.sin(f * Math.PI * 4), s2 = Math.sin(f * Math.PI * 3 + 1.1), s3 = Math.sin(f * Math.PI * 2 + 0.4);
-        sway = [0.06 * (1 - E((f - 0.85) / 0.15)), R(14) * s1 * w, R(12) * s3 * w, R(16) * s2 * w]; msg = 'カメラは水平と向きを保つ（パン・ロールで打ち消す。ロール±52°・パン±65°の範囲で）'; }
+        sway = [0.06 * (1 - E((f - 0.85) / 0.15)), R(14) * s1 * w, R(12) * s3 * w, R(16) * s2 * w]; msg = 'カメラは水平と向きを保つ（パン・ロールで打ち消す。ソフトリミットはロール±47°・パン±60°）'; }
       if (k === 5 && u < 0.05 && !a.framed) { a.framed = true; frameBox([-0.22, -0.17, -0.30], [0.22, 0.08, 0.24], [0.40, 0.12, -0.91], 1.1); }
       m4.gim.tilt = tilt; m4Sway(...sway);
       const st = $('#m4GimState'); if (st && msg && st.textContent !== msg) st.textContent = msg;
@@ -11856,13 +11884,16 @@ function initM4() {
   for (const b of $$('#m4Chips [data-m4]')) b.addEventListener('click', () => m4Action(b.dataset.m4));
   m4.person = buildPerson(); m4.person.position.set(0.42, -0.158, 0.34); m4.person.visible = false; scene.add(m4.person);
   m4.ghost = pd6bQuadGhost(); m4.ghost.position.set(-0.62, -0.158 + 0.156, -0.22); m4.ghost.visible = false; scene.add(m4.ghost);
-  m4.target = buildPerson(); m4.target.visible = false; scene.add(m4.target); if (m4.target.userData.face) m4.target.userData.face(0, 0);
-  let v = 't'; try { const q = new URLSearchParams(location.search).get('v'), s = sessionStorage.getItem('drone3d.m4variant'); v = q === 'e' || q === 't' ? q : s === 'e' ? 'e' : 't'; } catch (e) {}
-  m4SetVariant(v, false); m4SetAcc(false, false);
+  m4.target = buildPerson(); m4.target.visible = false; scene.add(m4.target);
+  // 4T/4E とアクセサリー: 共有リンク（m4v・acc・部品）が最優先。共有リンクで m4v が無ければ 4T。ふつうに開いたときはこのタブで最後に見た方
+  const q = new URLSearchParams(location.search), shared = SHARE_KEYS.some(k => q.has(k));
+  let v = q.get('m4v'); if (v !== 't' && v !== 'e') { v = 't'; if (!shared) { try { if (sessionStorage.getItem('drone3d.m4variant') === 'e') v = 'e'; } catch (e) {} } }
+  const pk = q.get('p') || q.get('iso'), pv = pk && PARTS[pk] && PARTS[pk].variant; if (pv === 't' || pv === 'e') v = pv;   /* 共有された部品が見える組み合わせにする */
+  const acc = (q.get('acc') || '').split(','), spot = acc.includes('spot') || pv === 'spot', spk = acc.includes('spk') || pv === 'spk';
+  m4SetVariant(v, false); m4SetAcc(spot, spk);
   syncM4Chips();
   focusOn([D.root], { pull: false, margin: 1.2 });
-  const q = new URLSearchParams(location.search);
-  if (!SHARE_KEYS.some(k => q.has(k))) setTimeout(() => { if (!$('#noteCard').dataset.kind) { renderM4About(); m4FrameDrone(null, 1.05); } }, 900);
+  if (!shared) setTimeout(() => { if (!$('#noteCard').dataset.kind) { renderM4About(); m4FrameDrone(null, 1.05); } }, 900);
 }
 
 // ===== 機種の切り替えと、機種ごとの動きへの振り分け =====
@@ -11871,7 +11902,7 @@ function setModel(m) {
   try { sessionStorage.setItem('drone3d.model', m); } catch (e) {}
   const u = new URL(location.href);
   if (m !== 'q550') u.searchParams.set('model', m); else u.searchParams.delete('model');
-  for (const k of SHARE_KEYS) u.searchParams.delete(k);   /* 部品の名前が機種ごとに違うので、共有の状態は持ち越さない */
+  for (const k of SHARE_KEYS) u.searchParams.delete(k); u.searchParams.delete('m4v');   /* 部品の名前が機種ごとに違うので、共有の状態は持ち越さない */
   u.hash = '';
   $('#loading').classList.remove('gone'); $('#loadMsg').textContent = `${MODEL_NAME[m] || '550クラス'} を組み立てています…`;
   setTimeout(() => { try { location.assign(u.toString()); } catch (e) { location.reload(); } }, 30);
@@ -11905,6 +11936,8 @@ function altVariant() { return IS_PD6B ? pd6b.variant : null; }
 // 部品が今の組み合わせに含まれるか（PD6Bは腰下ユニット、Matrice 4 は 4T/4E とアクセサリー）
 function altHasVariant(v) { return IS_PD6B ? pd6b.variant === v : IS_M4 ? m4HasVariant(v) : false; }
 function stepAlt(dt) { if (IS_PD6B) stepPd6b(dt); else if (IS_MAVIC) stepMavic(dt); else if (IS_M4) stepM4(dt); }
+// 「眼」に入る直前（fpv.js が今の状態を控える前）。機種の重ね絵と台本の動きを閉じる
+function altFpvEnter() { if (IS_MAVIC) { if (mav.act) mavicStop(); if (mav.fovOn || mav.senseOn || mav.sizeOn) mvOverlays(null, true); } else if (IS_M4) { if (m4.act) m4Stop(); if (m4Wide()) m4Overlays(null, true); } }
 function initAlt() { if (IS_PD6B) initPd6b(); else if (IS_MAVIC) initMavic(); else if (IS_M4) initM4(); }
 
 // ===== UI: タブ・扉・解説・ラベル・スティック・入力 =====

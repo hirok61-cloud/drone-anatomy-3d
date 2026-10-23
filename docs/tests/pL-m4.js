@@ -63,7 +63,7 @@ q('#fpvOut').click(); d.step(1.2, 30); A(!window.__fpv.fpv.on && !document.body.
 V.gim.ir = false; V.gim.zoom = 1;
 // レーザー距離計: 機体を浮かせて目標へ向け、距離を読む
 q('#m4Chips [data-m4=laser]').click(); d.step(2.6, 30); await new Promise(r => setTimeout(r, 50)); d.step(0.2, 30);
-{ const t = (q('#m4LaserRead') || {}).textContent || ''; A(/直線距離 [\d.]+ m/.test(t), 'laser reading', t.slice(0, 40)); A(d.D.laserBeam.visible && d.D.laserBeam.scale.z > 3, 'laser beam', d.D.laserBeam.scale.z); }
+{ const t = (q('#m4LaserRead') || {}).textContent || ''; A(/直線距離 [\d.]+ m/.test(t), 'laser reading', t.slice(0, 40)); A(d.D.laserBeam.visible && d.D.laserBeam.scale.z > 1.5, 'laser beam', d.D.laserBeam.scale.z); }
 q('#m4Chips [data-m4=laser]').click(); d.step(0.5, 30); A(!V.laserOn && d.D.sg.position.y === d.D.sg.userData.y0, 'laser off returns body');
 // アクセサリー: スポットライトとスピーカーを重ねて付ける・一覧に出る・外す
 q('#m4Chips [data-m4=acc]').click(); d.step(0.3, 30);

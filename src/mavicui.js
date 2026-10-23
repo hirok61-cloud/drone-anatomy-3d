@@ -23,6 +23,7 @@ function mavicBlockPower() {
 }
 function mavicOnTab(tab) {
   if (!IS_MAVIC) return;
+  if (tab !== 'fly') mav.pendingPower = false;   /* 「とばす」で押した電源を、ほかのタブで広げ終えたときに回さない */
   if (tab !== 'see') { const had = !!mav.act; mavicStop(); mvOverlays(null, true); if ($('#noteCard').dataset.kind === 'mavic-fold') renderNote(null); if (had) focusOn([D.root], { pull: true }); }   /* 寄った画のまま「とばす」へ行かない */
   if (tab === 'fly' && (mav.foldTo > 0 || mav.fold > 0.001)) { mav.foldTo = 0; syncMvChips(); showToast('アームを広げました'); frameBox([-0.32, -0.16, -0.26], [0.32, 0.03, 0.27], [0.62, 0.42, -0.66], 1.12); }   /* 畳んだ大きさに寄った画のまま広げない */
 }
@@ -71,6 +72,7 @@ function mvOverlays(id, quiet) {
   D.fovG.visible = mav.fovOn; D.senseG.visible = mav.senseOn; mvSyncLens();
   if (mav.person) mav.person.visible = mav.sizeOn; if (mav.ghost) mav.ghost.visible = mav.sizeOn;
   S.shadowDirty = S.csDirty = S.aoDirty = true; syncMvChips();
+  if (!id && !fpv.on) { const sup = !!(mav.act && mav.act.id === 'gimbal'); mav._sup = sup; S.labelsSuppressed = sup; }   /* ラベルの抑えをその場で戻す（次のコマを待つと「眼」が古い値を控える） */
   if (id) {
     if (S.explode > 0.02) setExplode(0); if (S.power > 0) setPower(0, true); if (mav.foldTo > 0 || mav.fold > 0.001) mav.foldTo = 0;
     if (id === 'fov') { mav.gim.all = true; mvSyncLens(); }
@@ -223,7 +225,6 @@ function stepMavic(dt) {
   let dirty = false;
   if (S.explode > 0.02 && mav.foldTo > 0) { mav.foldTo = 0; syncMvChips(); if ($('#noteCard').dataset.kind === 'mavic-fold') renderNote(null); }   /* 畳んだ姿勢のまま部品を散らさない */
   { const sup = mav.sizeOn || mav.fovOn || mav.senseOn || !!(mav.act && mav.act.id === 'gimbal'); if (sup !== mav._sup) { mav._sup = sup; S.labelsSuppressed = sup; } }
-  if (fpv.on && (mav.fovOn || mav.senseOn || mav.sizeOn)) mvOverlays(null, true);   /* 映像の中に重ね絵を残さない（錐の内側から見ることになる） */
   // --- たたむ / 広げる ---
   if (mav.foldTo > mav.fold) {
     const spinning = D.motors.some(mo => mo.rpm > 30) || body.py > 0.003;

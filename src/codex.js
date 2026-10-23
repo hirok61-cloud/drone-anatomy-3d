@@ -16,7 +16,8 @@ function codexToday() {
   const now = new Date();
   const s = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   let h = 0; for (let i = 0; i < s.length; i++) h += s.charCodeAt(i);
-  return LIST_ORDER[h % LIST_ORDER.length];
+  const keys = LIST_ORDER.filter(k => !PARTS[k] || !PARTS[k].variant || altHasVariant(PARTS[k].variant));   /* 付けていない部品（4E・アクセサリー・別の腰下ユニット）は選ばない */
+  return keys[h % keys.length];
 }
 
 function codexMark(key) {

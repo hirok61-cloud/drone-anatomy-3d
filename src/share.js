@@ -1,7 +1,7 @@
 // ===== 共有リンク（いま見えている画面をURLにする） =====
 // 方針: 既定と違うものだけを短いキーで載せる。読み戻しの途中はトーストを出さず、最後に「どこを開いたか」を1回だけ伝える。
 // 授業モードの lesson / step は lesson.js が自分で書くのでここでは触らない（消さない）。
-const SHARE_KEYS = ['p', 'd', 't', 'm', 'e', 'v', 'c', 'u', 'f', 'x', 'w', 'mi', 'mass', 'price', 'iso', 'reg', 'lang'];
+const SHARE_KEYS = ['p', 'd', 't', 'm', 'e', 'v', 'c', 'u', 'f', 'x', 'w', 'mi', 'mass', 'price', 'iso', 'reg', 'lang', 'acc'];
 const share = { restoring: false };
 
 // 注視点(3) + 向き(3) + 引き(1)。引きは viewScale()×bandK() で割った相対値なので、受け取った端末の画面に合わせて戻る
@@ -31,6 +31,7 @@ function shareUrl() {
   if (S.view && S.view !== 'iso') q.set('v', S.view);
   if (!whatif.active && !theater.active) q.set('c', camParam());   /* 視点そのもの。画面の縦横比が違っても同じ画になるよう、引きは相対値で持つ */
   if (S.selected) q.set('p', S.selected.key);
+  if (IS_M4) { q.set('m4v', m4.variant); const acc = [m4.acc.spot && 'spot', m4.acc.spk && 'spk'].filter(Boolean); if (acc.length) q.set('acc', acc.join(',')); }   /* Matrice 4 は 4T/4E と付けたアクセサリーも載せる（部品が見える組み合わせで開くため） */
   if (S.isolated) q.set('iso', S.isolated);
   if (S.use) q.set('u', S.use);
   if (S.flight) q.set('f', S.flight);

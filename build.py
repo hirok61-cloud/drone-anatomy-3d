@@ -8,7 +8,7 @@ import pathlib
 ROOT = pathlib.Path(__file__).parent
 SRC = ROOT / 'src'
 URL = 'https://drone-anatomy-3d.hiro-k61.workers.dev/'
-DESC = ('ドローン（550クラスのクアッドコプター／プロドローンPD6B-CAT3／DJI Mavic 4 Pro）を部品ごとに分解・透視・断面表示できる3D教材。'
+DESC = ('ドローン（550クラスのクアッドコプター／プロドローンPD6B-CAT3／DJI Mavic 4 Pro／DJI Matrice 4シリーズ）を部品ごとに分解・透視・断面表示できる3D教材。'
         '40種の部品それぞれに役割・構造・仕様例・点検ポイントの解説と、飛行の原理のアニメーションがついています。')
 
 tpl = (SRC / 'index.html').read_text(encoding='utf-8')

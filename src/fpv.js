@@ -142,6 +142,7 @@ function fpvOn(on) {
   if (on === fpv.on) return;
   if (on) {
     stopOthers('fpv');   /* 劇場・もしも・降ろし方・重さ・専門が裏で走っていると、舞台も電源も取り合いになる */
+    if (typeof altFpvEnter === 'function') altFpvEnter();   /* 機種の重ね絵（人・広げた地面・ラベルの抑え）は、下で今の状態を控える前に閉じる */
     if (S.explode > 0.02) setExplode(0); if (S.mode === 'cut') setMode('normal');
     fpv.pan = 0; fpv.tilt = fpvTilt0();
     fpv.saved = { pos: camera.position.clone(), tgt: controls.target.clone(), fov: camera.fov, labels: S.labelsSuppressed, power: S.power, rot: controls.autoRotate };

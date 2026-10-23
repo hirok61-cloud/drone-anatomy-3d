@@ -49,7 +49,7 @@ function m4Materials(M) {
     sense: new THREE.MeshBasicMaterial({ color: 0x14b8a6, transparent: true, opacity: 0.10, depthWrite: false, side: THREE.DoubleSide }),
     beam: new THREE.MeshBasicMaterial({ color: 0xff3b30, transparent: true, opacity: 0.85, toneMapped: false }),
     nirBeam: new THREE.MeshBasicMaterial({ color: 0xb06cf5, transparent: true, opacity: 0.16, depthWrite: false, side: THREE.DoubleSide }),
-    spotBeam: new THREE.MeshBasicMaterial({ color: 0xfff1c2, transparent: true, opacity: 0.16, depthWrite: false, side: THREE.DoubleSide }),
+    spotBeam: new THREE.MeshBasicMaterial({ color: 0xfff1c2, transparent: true, opacity: 0.16, depthWrite: false, side: THREE.FrontSide }),   /* 内側から（カメラの映像で）見えないよう表だけ */
   };
 }
 
@@ -386,7 +386,7 @@ function buildM4(M) {
     const dn = sector(18.8 * S2 * 0.3, 0, Math.PI * 2, D2R(180 - 80), D2R(80)); dn.position.copy(P(0, -26, 22)); senseG.add(dn);   // 下: 0.3〜18.8m・160°（図はさらに縮めた）
     noPart(senseG); }
   // レーザー距離計の光線（先の目標は m4ui.js が置く）
-  const laserBeam = new THREE.Mesh(new THREE.CylinderGeometry(0.0009, 0.0009, 1, 8, 1, true).rotateX(Math.PI / 2).translate(0, 0, -0.5), X.beam); laserBeam.visible = false; laserBeam.renderOrder = 9; L.laser.add(noPart(laserBeam));
+  const laserBeam = new THREE.Mesh(new THREE.CylinderGeometry(0.0022, 0.0022, 1, 10, 1, true).rotateX(Math.PI / 2).translate(0, 0, -0.5), X.beam); laserBeam.visible = false; laserBeam.renderOrder = 9; L.laser.add(noPart(laserBeam));
 
   // ---------- 矢印 ----------
   const arrows = { thrust: [], rot: [], move: null, yaw: null };
