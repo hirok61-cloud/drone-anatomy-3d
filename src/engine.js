@@ -412,8 +412,9 @@ function applyBand(bf) {
   const k = old / bf;
   // 帯の高さに比例して寄せると、横に広い機体(PD6B等)は横幅が画面からはみ出す。機体全体を見ていたときは、横幅が収まる距離より寄らない
   const fitK = (d0) => { if (!D.halfSpan || k >= 1) return k; const dmin = D.halfSpan * 1.32 / (Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * Math.max(0.3, camera.aspect)); return d0 >= dmin * 0.98 ? Math.max(k, dmin / d0) : k; };
-  if (S.camSpring) { const sp = S.camSpring; sp.p1.sub(sp.q1).multiplyScalar(fitK(sp.p1.distanceTo(sp.q1))).add(sp.q1); controls.maxDistance = Math.max(controls.maxDistance, sp.p1.distanceTo(sp.q1) * 1.02); return; }
-  const t = controls.target.clone(), p = camera.position.clone().sub(t).multiplyScalar(fitK(camera.position.distanceTo(t))).add(t);
+  const capK = (d0) => Math.min(fitK(d0), camera.far * 0.75 / Math.max(1e-6, d0));   /* 帯が狭まって引くときも、描画できる距離(camera.far)の内側に留める（越えると機体が描かれず真っ黒になる） */
+  if (S.camSpring) { const sp = S.camSpring; sp.p1.sub(sp.q1).multiplyScalar(capK(sp.p1.distanceTo(sp.q1))).add(sp.q1); controls.maxDistance = Math.max(controls.maxDistance, sp.p1.distanceTo(sp.q1) * 1.02); return; }
+  const t = controls.target.clone(), p = camera.position.clone().sub(t).multiplyScalar(capK(camera.position.distanceTo(t))).add(t);
   flyTo(p, t, 380, false);
 }
 function viewScale() { const a = W / H; return a < 1 ? Math.min(2.0, Math.pow(1 / a, 0.9)) : 1; }

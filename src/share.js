@@ -31,6 +31,7 @@ function shareUrl() {
   if (S.view && S.view !== 'iso') q.set('v', S.view);
   if (!whatif.active && !theater.active) q.set('c', camParam());   /* 視点そのもの。画面の縦横比が違っても同じ画になるよう、引きは相対値で持つ */
   if (S.selected) q.set('p', S.selected.key);
+  if (!IS_M4) { q.delete('m4v'); q.delete('m4acc'); }   /* 他機種の URL に残っていても共有には載せない */
   if (IS_M4) { q.set('m4v', m4.variant); q.delete('m4acc'); const acc = [m4.acc.spot && 'spot', m4.acc.spk && 'spk'].filter(Boolean); if (acc.length) q.set('m4acc', acc.join(',')); }   /* Matrice 4 は 4T/4E と付けたアクセサリーも載せる（部品が見える組み合わせで開くため） */
   if (S.isolated) q.set('iso', S.isolated);
   if (S.use) q.set('u', S.use);

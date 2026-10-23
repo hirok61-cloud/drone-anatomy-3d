@@ -92,7 +92,7 @@ function m4Overlays(id, quiet) {
     if (id === 'laser') m4LaserStart();
     renderM4Note(id);
     if (id === 'cams') frameBox([-0.32, -0.30, -1.05], [0.32, 0.10, 0.20], [0.72, 0.50, -0.85], 1.05);   /* 前斜め上から。錐がこちらへ広がり、機体は奥に見える */
-    if (id === 'laser') m4FrameLaser();
+    if (id === 'laser') { m4FrameLaser(); if (narrow()) setTimeout(() => { if (m4.laserOn) m4FrameLaser(); }, 450); }   /* スマホはカードが出て帯が決まってから、もう一度枠を決め直す */
     if (id === 'sense') frameBox([-0.75, -0.25, -0.62], [0.75, 0.55, 0.50], [0.70, 0.66, -0.75], 1.02);
     if (id === 'size') { if (m4.person.userData.face) m4.person.userData.face(camera.position.x, camera.position.z); pdFrame([D.root, m4.person, m4.ghost], { pull: true, margin: 1.15, dir: new THREE.Vector3(0.45, 0.32, -0.84).normalize() }); }
   } else if (!quiet && (was.cams || was.sense || was.size || was.laser)) {
