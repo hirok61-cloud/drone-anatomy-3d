@@ -108,7 +108,7 @@ function setM4Power(on, msg) {
   }
   if (msg) showToast(msg, 3200);
 }
-// 4T ⇄ 4E: ジンバルの前面だけを付け替える（機体は共通・公式）
+// 4T ⇄ 4E: 表示するジンバルの前面だけを切り替える（公式の仕様は重さ・寸法が2機種共通。この図も機体は共通）
 function m4SetVariant(v, announce) {
   m4.variant = v; const gp = D.gimbalParts, L = gp.lens, F = M4_FACE[v];
   gp.faceT.visible = v === 't'; gp.faceE.visible = v === 'e';
@@ -152,7 +152,7 @@ const m4FrameDrone = (dir, margin) => pdFrame([D.root], { pull: true, margin: (m
 const M4_SRC_LINK = (k) => { const s = M4_SRC[k]; return `<a href="${s.url}" target="_blank" rel="noopener">${s.name}</a>`; };
 function renderM4About() {
   const row = (k, v, src) => `<tr><th>${k}</th><td>${v}${src ? `<small>${src}</small>` : ''}</td></tr>`;
-  const html = `<p><b>複数のカメラとレーザー距離計を積んだ、折りたたみ式の産業用ドローン。</b>サーマルカメラを持つ <b>4T</b>（電力・救命救助・公共安全・森林保全向け）と、4/3型・メカシャッターの広角を持つ <b>4E</b>（測量・マッピング・土木建設・採掘向け）の2機種がある（公式）。公式の仕様は重さ・寸法を2機種共通の値で示していて、見た目の違いはジンバルのカメラ（この図も機体を共通にしている）。4Eだけの機能に0.5秒間隔の撮影やスマート3Dキャプチャーがある（公式）。</p>
+  const html = `<p><b>複数のカメラとレーザー距離計を積んだ、折りたたみ式の産業用ドローン。</b>サーマルカメラを持つ <b>4T</b>（電力・救命救助・公共安全・森林保全向け）と、4/3型・メカシャッターの広角を持つ <b>4E</b>（測量・マッピング・土木建設・採掘向け）の2機種がある（公式）。公式の仕様は重さ・寸法を2機種共通の値で示していて、見た目の違いはジンバルのカメラ（この図も機体を共通にしている）。4Eだけの機能に0.5秒間隔の撮影や、現時点では4Eだけのスマート3Dキャプチャーがある（公式）。</p>
     <table class="pd-spec">
       ${row('離陸重量', '1219 g（最大離陸重量 1420 g）', '公式・標準プロペラ')}${row('展開時', '約 307.0 × 387.5 × 149.5 mm', '公式・プロペラを除く')}${row('折りたたみ時', '約 260.6 × 113.7 × 138.4 mm', '公式')}
       ${row('最大飛行時間', '49 分（ホバリング 42 分）', '公式・無風・標準プロペラ')}${row('最大水平速度', '21 m/s', '公式・無風・前進')}${row('最大風圧抵抗', '12 m/s', '公式・離着陸時')}
@@ -169,7 +169,7 @@ function renderM4Note(id) {
   const tr = M4_TILT[m4.variant];
   const N = {
     variant: () => ({ title: m4.variant === 't' ? 'Matrice 4T のジンバル' : 'Matrice 4E のジンバル', html: m4.variant === 't'
-      ? `<p>前面に6つの窓（取説の図）。<b>サーマルカメラ</b>（640×512）と、望遠を夜でも使えるようにする<b>NIR補助ライト</b>があるのが4Tだけの装備。広角は1/1.3インチ・f/1.7。</p><p>ジンバルは上へ <b>70°</b> まで向けられる（4Eは35°・公式）。</p>`
+      ? `<p>前面に6つの窓（取説の図）。<b>サーマルカメラ</b>（640×512）と、夜の望遠撮影を助ける<b>NIR補助ライト</b>があるのが4Tだけの装備。広角は1/1.3インチ・f/1.7。</p><p>ジンバルは上へ <b>70°</b> まで向けられる（4Eは35°・公式）。</p>`
       : `<p>前面に4つの窓（取説の図）。広角が<b>4/3型・2000万画素でメカシャッター付き</b>になる（公式）。メカシャッターは移動しながらの撮影で像がゆがみにくい（一般的な知識）。サーマルとNIR補助ライトはない。</p><p>ジンバルは上へ <b>35°</b> まで（4Tは70°・公式）。</p><p class="caveat">4Eの窓の位置は取説の図と公式写真から読んだ推定です。</p>`,
       actions: [{ label: m4.variant === 't' ? '4E にする' : '4T にする', primary: true, fn: () => m4Action('variant') }, { label: 'カメラを見る', fn: () => { renderNote(null); m4Action('cams'); } }] }),
     fold: () => ({ title: m4.foldTo > 0 ? 'アームをたたむ' : 'アームを広げる', html: m4.foldTo > 0
@@ -179,7 +179,7 @@ function renderM4Note(id) {
     battery: () => ({ title: 'バッテリーを入れ替える', html: `<p id="m4BatState" class="pd-state">電源を切っています…</p><p>電源を切り、左右のバックルを押して、バッテリーを<b>後ろへ</b>引き抜きます。差し込むときはカチッと音がするまで（取説）。<b>電源が入っているときは抜き差ししない</b>（取説）。</p><p>バッテリーは 401 g で、離陸重量 1219 g のおよそ3分の1（公式の値からの計算）。</p><p class="caveat">胴の中のバッテリーの形は、公式の3Dモデルの外形から起こした簡略形です。</p>`, actions: [{ label: 'もう一度', fn: () => m4Action('battery') }], onClose: () => { m4Stop(); focusOn([D.root], { pull: true }); } }),
     gimbal: () => ({ title: 'ジンバル', html: `<p id="m4GimState" class="pd-state">上へ向けます…</p><p>カメラの頭は、上ぶたの下の付け根から<b>パン（縦軸）→ ロール（前後の軸）→ U字のヨーク → チルト（左右の円筒）</b>の順に吊られています。送信機で操作できるのは<b>チルト</b>で、${m4.variant === 't' ? '4T' : '4E'}は <b>${tr[0]}°〜${tr[1]}°</b>（公式）。パンとロールは機体の揺れを打ち消すのに使います（パンは手動では操作できない・公式）。</p><table class="pd-spec"><tr><th>操作できるチルト</th><td>4T −90°〜70°・4E −90°〜35°<small>公式</small></td></tr><tr><th>ソフトリミット</th><td>ロール ±47°・パン ±60°<small>公式</small></td></tr><tr><th>機械的な範囲</th><td>チルト 4T −140°〜113°・4E −140°〜50°、ロール ±52°、パン ±65°<small>公式</small></td></tr><tr><th>最大制御速度</th><td>チルト 100°/秒<small>公式</small></td></tr><tr><th>角度ぶれ範囲</th><td>±0.007°<small>公式</small></td></tr></table><p class="caveat">軸の並びは公式の3Dモデルの形から読んだものです。公式の仕様には4Tのチルトのソフトリミットとして −90°〜35° も載っています（制御可能な範囲 −90°〜70° と同じ表に併記）。</p>`, actions: [{ label: 'もう一度', fn: () => m4Action('gimbal') }, { label: 'カメラから見る', fn: () => m4CamView() }], onClose: () => { m4Stop(); focusOn([D.root], { pull: true }); } }),
     cams: () => m4CamNote(),
-    laser: () => ({ title: 'レーザー距離計', html: `<div id="m4LaserRead" class="m4-read"></div><p>十字線の先にレーザーを当てて距離を測ります（光が返ってくるまでの時間から求めるのが一般的な仕組み）。アプリで「RNG」を有効にすると、<b>直線距離・高度・緯度経度・水平距離</b>が出ます（取説）。見つけた人や火元の位置を地図に落とすのに使えますが、位置はGNSSやジンバルの姿勢の精度に左右され、取説は「あくまで参考用」としています。</p><table class="pd-spec"><tr><th>測定範囲</th><td>1800 m<small>反射率20%の目標・1 Hz・公式</small></td></tr><tr><th>精度</th><td>±(0.2 + 0.0015 × 距離) m<small>3 m より遠いとき・公式</small></td></tr><tr><th>ブラインドゾーン</th><td>1 m<small>英語の仕様・製品ページ。日本語の仕様は「3～1 m」と表記</small></td></tr></table><p class="caveat">図の距離は舞台の上の実寸です。誤差の幅は公式の式で計算しています。電源が入っている間はレーザーの窓を直接見ないこと（安全ガイドライン）。</p>`, actions: [{ label: '別の目標を測る', primary: true, fn: () => m4LaserStart(true) }, { label: 'もどす', fn: () => m4Overlays(null) }], onClose: () => m4Overlays(null) }),
+    laser: () => ({ title: 'レーザー距離計', html: `<div id="m4LaserRead" class="m4-read"></div><p>十字線の先にレーザーを当てて距離を測ります（光が返ってくるまでの時間から求めるのが一般的な仕組み）。アプリで「RNG」を有効にすると、<b>直線距離・高度・緯度経度・水平距離</b>が出ます（取説）。見つけた人や火元の位置を地図に落とすのに使えますが、位置はGNSSやジンバルの姿勢の精度に左右され、取説は「あくまで参考用」としています。</p><table class="pd-spec"><tr><th>測定範囲</th><td>1800 m<small>反射率20%の目標・1 Hz・公式</small></td></tr><tr><th>精度</th><td>1〜3 m：システム誤差 0.3 m 未満・ランダム誤差 0.1 m 未満<br>それより遠く：±(0.2 + 0.0015 × 距離) m<small>公式</small></td></tr><tr><th>ブラインドゾーン</th><td>1 m<small>英語の仕様・製品ページ。日本語の仕様は「3～1 m」と表記</small></td></tr></table><p class="caveat">図の距離は舞台の上の実寸です。精度は、1〜3 m では公式の値（システム誤差 0.3 m 未満・ランダム誤差 0.1 m 未満）、3 m より遠いときは公式の式で示しています。1 m より近くは測れない前提（英語の仕様と製品ページのブラインドゾーン 1 m）です。電源が入っている間はレーザーの窓を直接見ないこと（安全ガイドライン）。</p>`, actions: [{ label: '別の目標を測る', primary: true, fn: () => m4LaserStart(true) }, { label: 'もどす', fn: () => m4Overlays(null) }], onClose: () => m4Overlays(null) }),
     sense: () => ({ title: '検知範囲', html: `<p>上の四隅の魚眼カメラ（前2・後2）を2つずつ組にして周りの障害物までの距離を測り、ぶつかる前に止まる・避けます。下は3D赤外線センサー（公式）と2つの魚眼（取説の図）。</p><table class="pd-spec"><tr><th>前方・後方</th><td>0.4〜22.5 m（デュアル）・水平90°×垂直135°<small>公式</small></td></tr><tr><th>側方</th><td>0.5〜32 m・水平90°×垂直90°<small>公式</small></td></tr><tr><th>下方</th><td>0.3〜18.8 m・160°<small>公式</small></td></tr><tr><th>上方</th><td>仕様に数値の記載なし</td></tr></table><p class="caveat">図はデュアルの測定範囲を約45分の1に縮めた概念図です（下向きはさらに縮めています）。公式の仕様には別に「測定範囲 0.4〜200 m」（前後）などの記載もあります。スポットライトを点けると障害物回避が働きません（公式）。</p>`, actions: [{ label: 'もどす', fn: () => m4Overlays(null) }], onClose: () => m4Overlays(null) }),
     size: () => ({ title: '大きさをくらべる', html: `<p>同じ縮尺で、<b>身長170cmの人</b>と、青い半透明の<b>550クラスのクアッド</b>（対角550mm・約2.4kg）を並べています。</p><p>Matrice 4 は展開時 約307.0 × 387.5 mm（プロペラを除く・公式）、離陸重量 1219 g。対角ホイールベースは 438.8 mm（公式）で、550クラスよりひと回り小さい。たためば約 260.6 × 113.7 mm。</p>`, actions: [{ label: 'もどす', fn: () => m4Overlays(null) }], onClose: () => m4Overlays(null) }),
     acc: () => m4AccNote(),
@@ -196,7 +196,7 @@ function m4CamNote() {
   const body = g.all
     ? `<p>同じ場所から撮っても、写る範囲がこれだけ違います（画角・公式）。カメラを選ぶと、そのカメラだけを光らせます。</p><ul class="pd-diff"><li><b style="color:#ef6a2d">24mm 相当</b>（広角）：${m4V(M4_LENS.wide.fov)}°</li><li><b style="color:#3b7df7">70mm 相当</b>（中望遠）：35°</li><li><b style="color:#22c55e">168mm 相当</b>（望遠）：15°</li>${v === 't' ? '<li><b style="color:#e5484d">サーマル</b>（53mm 相当）：対角 45°</li>' : ''}</ul>`
     : `<table class="pd-spec"><tr><th>カメラ</th><td><b style="color:${L.col}">${L.name}</b>・${L.mm}mm 相当<small>${m4V(L.sensor)}・公式</small></td></tr><tr><th>画角</th><td>${k === 'ir' ? '対角 45°' : m4V(L.fov) + '°'}<small>公式</small></td></tr><tr><th>絞り</th><td>${m4V(L.ap)}<small>公式</small></td></tr><tr><th>ピント</th><td>${L.focus}<small>公式</small></td></tr></table>`
-      + `<p>${k === 'wide' ? (v === 't' ? '全体を見渡して、探す・状況をつかむカメラ。' : '測量向けの広角。メカシャッター（公式）は、飛びながら撮るときの像のゆがみを抑えられる（一般的な知識）。') : k === 'mid' ? '公式は「10 m先からでもネジや亀裂を識別」と紹介している。' : k === 'tele' ? '公式は「最大250メートル離れた標識の細部まで」と紹介している。デジタル16倍（ハイブリッド112倍）まで寄れる（公式）。' : '物が出す赤外線（熱）を写す。測温範囲は −20〜150 ℃（高ゲイン）／0〜550 ℃（低ゲイン）（公式）。夜は NIR補助ライト（照射角5.7°）が望遠を助ける（紫の細い光）。'}</p>`;
+      + `<p>${k === 'wide' ? (v === 't' ? '全体を見渡して、探す・状況をつかむカメラ。' : '測量向けの広角。メカシャッター（公式）は、飛びながら撮るときの像のゆがみを抑えられる（一般的な知識）。') : k === 'mid' ? '公式は「10 m先からでもネジや亀裂を識別」と紹介している。' : k === 'tele' ? '公式は「最大250メートル離れた標識の細部まで」と紹介している。デジタル16倍（ハイブリッド112倍）まで寄れる（公式）。' + (v === 't' ? '4Tでは、紫の細い光の NIR補助ライト（照射角5.7°）が夜の望遠撮影を助ける（公式）。' : '') : '物が出す赤外線（熱）を写す。測温範囲は −20〜150 ℃（高ゲイン）／0〜550 ℃（低ゲイン）（公式）。'}</p>`;
   return { title: v === 't' ? 'Matrice 4T のカメラ' : 'Matrice 4E のカメラ', html: `<div class="mv-segs" role="group" aria-label="カメラを選ぶ">${keys.map(btn).join('')}<button class="mv-seg${g.all ? ' on' : ''}" data-m4lens="all" aria-pressed="${g.all}">全部</button></div>${body}<p class="caveat">錐は公式の画角を対角として4:3の枠（サーマルは5:4）で描いています。錐の長さは見やすさのための長さで、距離の意味はありません。</p>`,
     actions: [{ label: 'カメラから見る', primary: true, fn: () => m4CamView() }, { label: 'もどす', fn: () => m4Overlays(null) }], onClose: () => m4Overlays(null) };
 }
@@ -213,7 +213,7 @@ function m4AccNote() {
   return { title: 'アクセサリー（別売）', html: `<div class="mv-segs" role="group" aria-label="付けるアクセサリー">${b('spot', a.spot, 'AL1 スポットライト')}${b('spk', a.spk, 'AS1 スピーカー')}${a.spot ? b('lit', a.lit, a.lit ? '点灯中' : '点ける') : ''}</div>
     <p>上面の <b>E-Port</b> に差し、手締めねじ2本で止めます。両方付けるときは、スポットライトの上にスピーカーを重ねます（AL1/AS1マニュアル）。付ける前に電源を切り、付けたらコンパスを較正します。</p>
     <table class="pd-spec"><tr><th>付けている物</th><td>${!a.spot && !a.spk ? 'なし' : [a.spot ? 'スポットライト 99 g' : '', a.spk ? 'スピーカー 92.5 g' : ''].filter(Boolean).join('・')}<small>ブラケット込み・公式</small></td></tr><tr><th>最大ホバリング / 飛行</th><td>${fly[0]} 分 / ${fly[1]} 分<small>AL1/AS1マニュアルの表${a.spot && a.lit ? (a.spk ? '・両方オンの値' : '・点灯中') : ''}</small></td></tr></table>
-    ${a.spot ? `<p><b>スポットライト</b>：32 W・照射角23°・100 m先で4.3ルクス（公式）。付けると障害物回避が制限されて迂回が使えなくなり、<b>点けると障害物回避が働かない</b>（AL1/AS1マニュアル・公式FAQ）。</p>` : ''}${a.spk ? `<p><b>スピーカー</b>：1 m で 114 dB・有効放送距離 300 m（公式）。避難の呼びかけや録音を流す。</p>` : ''}
+    ${a.spot ? `<p><b>スポットライト</b>：32 W・照射角23°・100 m先で4.3ルクス（公式）。付けると障害物回避が制限されて迂回が使えなくなり、<b>点けると障害物回避が働かない</b>（AL1/AS1マニュアル・公式FAQ）。</p>` : ''}${a.spk ? `<p><b>スピーカー</b>：1 m で 114 dB・有効放送距離 300 m（公式）。避難の呼びかけや録音を流す。人の近くや市街地では使わない（大音量で事故や傷害のおそれ・公式FAQ）。</p>` : ''}
     <p class="caveat">形は公式の写真と仕様の寸法（スポットライト 幅164mm、スピーカー 73×70×52mm）からの簡略形です。</p>`,
     actions: [{ label: '外す', fn: () => { m4SetAcc(false, false); renderM4Note('acc'); } }], onClose: () => {} };
 }
@@ -236,10 +236,10 @@ function m4SyncLens() {
   const show = { wideT: v === 't', wideE: v === 'e', mid: true, tele: true, thermal: v === 't' };
   const cur = m4V(M4_LENS[k].lens);
   for (const key of Object.keys(cones)) { cones[key].visible = show[key] && (all || key === cur); const g = gp.lens[key]; if (g && g.userData.glow) g.userData.glow.visible = m4.camsOn && !all && key === cur; }
-  D.fovG.userData.nir.visible = v === 't' && (all || k === 'tele' || k === 'ir');
+  D.fovG.userData.nir.visible = v === 't' && (all || k === 'tele');   /* 近赤外のNIRはサーマル（8〜14μm）には写らないので、サーマルを選んだときは出さない */
   S.aoDirty = true;
 }
-// 毎フレーム（本体の姿勢を当てた後）。電源が入っていれば機体の傾きを打ち消す。操作はチルトだけ、パンとロールは打ち消し専用（機械的な範囲で止まる）
+// 毎フレーム（本体の姿勢を当てた後）。電源が入っていれば機体の傾きを打ち消す。送信機で操作するのはチルト、パンとロールは打ち消しに使う（ソフトリミットで止まる）
 // このジンバルは パン(Y) → ロール(Z) → チルト(X) の順につながる（公式3Dモデルの形）。望みの世界姿勢（機首の方位・水平・指定のチルト）を
 // 付け根の世界姿勢で割って局所の回転にし、それを同じ軸順（YZX）で3つの角度に分ける。オイラー角の足し引きでは軸順が違うと消し残る
 const _m4q = new THREE.Quaternion(), _m4q2 = new THREE.Quaternion(), _m4e = new THREE.Euler(), _m4e2 = new THREE.Euler();
@@ -298,7 +298,7 @@ function m4LaserStep(dt) {
   const dist = Math.hypot(dx, dy, dz); D.laserBeam.scale.set(1, 1, Math.max(0.01, dist * Math.min(1, Math.max(0, (L.t - 1.4) / 0.4))));
   const el = $('#m4LaserRead');
   if (el && L.t > 1.8 && (!L.shown || Math.abs(L.shown - dist) > 0.005)) { L.shown = dist; const err = 0.2 + 0.0015 * dist;
-    el.innerHTML = `<b>直線距離 ${dist.toFixed(2)} m</b><span>水平距離 ${h.toFixed(2)} m ・ 高さの差 ${dy.toFixed(2)} m</span><span>${dist < 1 ? '1 m より近いと測れない（ブラインドゾーン・公式）' : dist <= 3 ? '1〜3 m の精度はシステム誤差 0.3 m 未満（公式）' : `誤差の目安 ±${err.toFixed(2)} m（公式の式）`}</span>`; }
+    el.innerHTML = `<b>直線距離 ${dist.toFixed(2)} m</b><span>水平距離 ${h.toFixed(2)} m ・ 高さの差 ${dy.toFixed(2)} m</span><span>${dist < 1 ? '1 m より近いと測れない（ブラインドゾーン・公式）' : dist <= 3 ? '1〜3 m の精度はシステム誤差 0.3 m 未満・ランダム誤差 0.1 m 未満（公式）' : `誤差の目安 ±${err.toFixed(2)} m（公式の式）`}</span>`; }
   else if (el && L.t <= 1.8 && !el.textContent) el.innerHTML = '<span>機体を浮かせて目標へ向けています…</span>';
   return true;
 }
