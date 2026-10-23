@@ -190,6 +190,29 @@ function mvFpvSync() {
   for (const b of $$('#fpvLens [data-z]')) { const on = mvLensKey(+b.dataset.z) === k; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); }
   const r90 = $('#fpvRoll90'); if (r90) { const on = Math.abs(g.roll - MV_R(90)) < 0.02; r90.classList.toggle('on', on); r90.setAttribute('aria-pressed', String(on)); }
 }
+// 機体のカメラの映像（fpv.js）から使う窓口。レンズの持ち替え・ズーム・ロール（−40°〜400°）。ズームはレンズの区切り(2.5×・6×)で自動で持ち替わる
+const MV_GC = {
+  st: mav.gim, tilt0: -4, tiltMin: MV_R(-90), tiltMax: MV_R(70), seenKey: 'fpvSeenMv',
+  firstToast: '上下のドラッグでチルト（−90°〜70°）。レンズ・ズーム・ロールは下のボタンで。左右は機体ごと向きを変えます',
+  dragToast: 'このジンバルは左右に振れません（パン ±22°は揺れの打ち消し専用・公式）。左右はスティックで機体ごと向きを変えます',
+  person: () => mav.person, personFpv: [0.12, -0.158, -12], personHome: [0.40, -0.158, 0.30],   /* 正面12m。28mmでは小さく、168mmでは画面いっぱいになる距離 */
+  eye: () => D.gimbalParts.lens[mvLensKey(mav.gim.zoom)], vfov: () => mvVFov(mav.gim.zoom),
+  apply: () => mvGimbalApply(), sync: () => mvFpvSync(),
+  hud: () => `${(mav.gim.tilt * 180 / Math.PI).toFixed(0)}° / ${(mav.gim.roll * 180 / Math.PI).toFixed(0)}°`,
+  camHtml: `<div class="fpv-seg" id="fpvLens"><button data-z="1" style="--c:#ef6a2d">28mm</button><button data-z="2.5" style="--c:#3b7df7">70mm</button><button data-z="6" style="--c:#22c55e">168mm</button></div>
+        <div class="fpv-seg"><button id="fpvZoomOut" aria-label="引く">−</button><b id="fpvZoom">1.0×</b><button id="fpvZoomIn" aria-label="寄る">＋</button></div>
+        <div class="fpv-seg"><button id="fpvRollL" aria-label="左へ傾ける">↺</button><button id="fpvRoll90">縦撮り</button><button id="fpvRollR" aria-label="右へ傾ける">↻</button></div>`,
+  bind() {
+    for (const b of $$('#fpvLens [data-z]')) b.addEventListener('click', () => mvSetZoom(+b.dataset.z));
+    const steps = [1, 1.5, 2, 2.5, 3, 4, 6, 8, 12, 16, 24];
+    $('#fpvZoomIn').addEventListener('click', () => mvSetZoom(steps.find(z => z > mav.gim.zoom + 1e-6) || 24));
+    $('#fpvZoomOut').addEventListener('click', () => mvSetZoom([...steps].reverse().find(z => z < mav.gim.zoom - 1e-6) || 1));
+    const roll = (deg) => { mav.gim.roll = clamp(mav.gim.roll + MV_R(deg), MV_R(-40), MV_R(400)); updateFpvHud(); };
+    $('#fpvRollL').addEventListener('click', () => roll(-15)); $('#fpvRollR').addEventListener('click', () => roll(15));
+    $('#fpvRoll90').addEventListener('click', () => { const r = mav.gim.roll * 180 / Math.PI; mav.gim.roll = MV_R(Math.abs(r - 90) < 1 ? 0 : 90); updateFpvHud(); });
+    canvas.addEventListener('wheel', e => { if (!fpv.on) return; e.preventDefault(); mvSetZoom(mav.gim.zoom * Math.exp(-e.deltaY * 0.0022)); }, { passive: false });
+  },
+};
 // 手で持って傾ける（ジンバルの打ち消しを見せる）。胴を床から浮かせてから回す
 function mvSway(lift, px, yaw, rz) { const sg = D.sg; if (sg.userData.y0 == null) sg.userData.y0 = sg.position.y; sg.position.y = sg.userData.y0 + lift; sg.rotation.set(px, yaw, rz, 'YXZ'); }
 

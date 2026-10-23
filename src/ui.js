@@ -177,7 +177,7 @@ function findClear() { const inp = $('#partFind'); if (inp) { inp.value = ''; ap
 
 // ---------- 部品一覧 / 解説 ----------
 // 付け替え式の部品(PD6Bの腰下ユニット)は、いま付いている方だけを一覧に出す
-const listKeys = () => LIST_ORDER.filter(k => PARTS[k] && (!PARTS[k].variant || PARTS[k].variant === altVariant()));
+const listKeys = () => LIST_ORDER.filter(k => PARTS[k] && (!PARTS[k].variant || altHasVariant(PARTS[k].variant)));
 function buildList() {
   const list = $('#partList'); const prevFind = $('#partFind') ? $('#partFind').value : ''; let html = '';
   if (S.depth === 'simple') { for (const k of SIMPLE_KEYS.filter(k => listKeys().includes(k))) html += `<div class="row" data-key="${k}" tabindex="0" role="button"><span class="nm">${partName(k)}</span><span class="cnt"></span><span></span></div>`; $('#partCount').textContent = `${SIMPLE_KEYS.filter(k => listKeys().includes(k)).length} 部品`; }

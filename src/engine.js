@@ -47,7 +47,7 @@ controls.addEventListener('change', () => { S.aoDirty = true; });
 
 mark('gl');
 const M = makeMaterials(renderer.capabilities.getMaxAnisotropy()); mark('mat');
-const D = IS_PD6B ? buildPD6B(M) : IS_MAVIC ? buildMavic(M) : buildDrone(M); mark('geo');
+const D = IS_PD6B ? buildPD6B(M) : IS_MAVIC ? buildMavic(M) : IS_M4 ? buildM4(M) : buildDrone(M); mark('geo');
 scene.add(D.root);
 if (D.personGroup) scene.add(D.personGroup);
 
