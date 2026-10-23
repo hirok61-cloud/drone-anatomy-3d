@@ -16,7 +16,7 @@ function codexToday() {
   const now = new Date();
   const s = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   let h = 0; for (let i = 0; i < s.length; i++) h += s.charCodeAt(i);
-  const keys = LIST_ORDER.filter(k => !PARTS[k] || !PARTS[k].variant || altHasVariant(PARTS[k].variant));   /* 付けていない部品（4E・アクセサリー・別の腰下ユニット）は選ばない */
+  const keys = LIST_ORDER.filter(k => !PARTS[k] || !PARTS[k].variant || (!IS_M4 && altHasVariant(PARTS[k].variant)));   /* 付けていない部品は選ばない。Matrice 4 は起動時に 4T/4E が決まる前に選ぶので、両方にある部品だけから */
   return keys[h % keys.length];
 }
 

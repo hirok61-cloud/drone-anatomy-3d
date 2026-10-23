@@ -769,4 +769,4 @@ body.m4-ir #gl { filter: grayscale(1) contrast(1.35) brightness(.82); }
 /* Matrice 4 はチップが10個あるので、横向きのスマホではチップの帯だけを横に送る（分解・見え方を押し出さない） */
 @media (min-width: 761px) and (max-height: 520px) { body.matrice4 #m4Chips { max-width: 46vw; overflow-x: auto; scrollbar-width: none; } body.matrice4 #m4Chips::-webkit-scrollbar { display: none; } }
 /* 映像の中の小さなボタンは、見た目はそのままで押せる範囲だけ上下に広げる */
-@media (pointer: coarse) { .fpv-seg button { position: relative; } .fpv-seg button::after { content: ''; position: absolute; inset: -4px -1px; } }
+@media (pointer: coarse) { .fpv-seg button { position: relative; } .fpv-seg button::after { content: ''; position: absolute; inset: -4px -5px; } }

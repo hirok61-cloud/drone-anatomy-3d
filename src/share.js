@@ -1,7 +1,7 @@
 // ===== 共有リンク（いま見えている画面をURLにする） =====
 // 方針: 既定と違うものだけを短いキーで載せる。読み戻しの途中はトーストを出さず、最後に「どこを開いたか」を1回だけ伝える。
 // 授業モードの lesson / step は lesson.js が自分で書くのでここでは触らない（消さない）。
-const SHARE_KEYS = ['p', 'd', 't', 'm', 'e', 'v', 'c', 'u', 'f', 'x', 'w', 'mi', 'mass', 'price', 'iso', 'reg', 'lang', 'acc'];
+const SHARE_KEYS = ['p', 'd', 't', 'm', 'e', 'v', 'c', 'u', 'f', 'x', 'w', 'mi', 'mass', 'price', 'iso', 'reg', 'lang'];
 const share = { restoring: false };
 
 // 注視点(3) + 向き(3) + 引き(1)。引きは viewScale()×bandK() で割った相対値なので、受け取った端末の画面に合わせて戻る
@@ -31,7 +31,7 @@ function shareUrl() {
   if (S.view && S.view !== 'iso') q.set('v', S.view);
   if (!whatif.active && !theater.active) q.set('c', camParam());   /* 視点そのもの。画面の縦横比が違っても同じ画になるよう、引きは相対値で持つ */
   if (S.selected) q.set('p', S.selected.key);
-  if (IS_M4) { q.set('m4v', m4.variant); const acc = [m4.acc.spot && 'spot', m4.acc.spk && 'spk'].filter(Boolean); if (acc.length) q.set('acc', acc.join(',')); }   /* Matrice 4 は 4T/4E と付けたアクセサリーも載せる（部品が見える組み合わせで開くため） */
+  if (IS_M4) { q.set('m4v', m4.variant); q.delete('m4acc'); const acc = [m4.acc.spot && 'spot', m4.acc.spk && 'spk'].filter(Boolean); if (acc.length) q.set('m4acc', acc.join(',')); }   /* Matrice 4 は 4T/4E と付けたアクセサリーも載せる（部品が見える組み合わせで開くため） */
   if (S.isolated) q.set('iso', S.isolated);
   if (S.use) q.set('u', S.use);
   if (S.flight) q.set('f', S.flight);
@@ -90,7 +90,7 @@ function gotoState(o, opts = {}) {
     if (o.flight) { setTab('fly'); setFlight(o.flight); }
     if (o.expert) { setTab('expert'); expertStart(o.expert); }
     if (o.iso) { S.isolated = o.iso; applyVisibility(); }
-    if (o.part && partsOf(o.part).length) { select(partsOf(o.part)[0], true); if (o.focus) focusOn(partsOf(o.part).map(x => x.obj), { pull: true }); }
+    if (o.part && partsOf(o.part).length) { if (typeof altShowPart === 'function') altShowPart(o.part); select(partsOf(o.part)[0], true); if (o.focus) focusOn(partsOf(o.part).map(x => x.obj), { pull: true }); }
     if (o.view) { S.view = o.view; segSet($('#viewCol'), 'v', o.view); if (!o.cam) setView(o.view); }
     if (o.cam) applyCam(o.cam);   /* 視点は最後に。部品を選んでもカメラは動かないので、共有した人が見ていた画がそのまま出る */
     if (o.whatif || o.mishap) { const w = o.whatif, mi = o.mishap; setTimeout(() => { if (w) startWhatifUI(w); else startTheaterUI(mi); }, opts.sceneDelay != null ? opts.sceneDelay : 700); }   /* 場面は絵が出てから始める */

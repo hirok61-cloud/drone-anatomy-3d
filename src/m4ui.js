@@ -113,7 +113,7 @@ function m4SetVariant(v, announce) {
   m4.variant = v; const gp = D.gimbalParts, L = gp.lens, F = M4_FACE[v];
   gp.faceT.visible = v === 't'; gp.faceE.visible = v === 'e';
   const move = (key, xy, dz = 0) => { const g = L[key]; g.position.set(xy[0] / 1000, xy[1] / 1000, g.position.z - (g.userData.dz || 0) + dz); g.userData.dz = dz; if (g.userData.part) g.userData.part.home.copy(g.position); const c = D.fovG.userData.cones[key]; if (c) c.position.copy(g.position); };
-  move('mid', F.mid); move('tele', F.tele, v === 'e' ? -0.0045 : 0); move('laser', F.laser);
+  move('mid', F.mid, 0.002); move('tele', F.tele, v === 'e' ? -0.0045 : -0.0035); move('laser', F.laser, 0.002);   /* 前面からの出入り（4T は CAD）。4E は望遠の鏡筒の先 */
   const lk = L.laser.userData.looks; lk.t.visible = v === 't'; lk.e.visible = v === 'e';
   for (const p of D.parts) if (PARTS[p.key] && (PARTS[p.key].variant === 't' || PARTS[p.key].variant === 'e')) p.hidden = PARTS[p.key].variant !== v;
   if (v === 'e' && m4.gim.ir) m4.gim.ir = false;
@@ -133,7 +133,7 @@ function m4SetVariant(v, announce) {
 // アクセサリー: E-Port に スポットライト → スピーカー の順で重ねられる（AL1/AS1マニュアル）
 function m4SetAcc(spot, spk) {
   m4.acc.spot = !!spot; m4.acc.spk = !!spk; if (!spot) m4.acc.lit = false;
-  const sp = D.acc.spk; sp.position.copy(m4P(0, (spot ? 82 : 73.6) + 25, spot ? -60 : -52)); if (sp.userData.part) sp.userData.part.home.copy(sp.position);
+  const sp = D.acc.spk; sp.position.copy(m4P(0, (spot ? 86.4 : 73.6) + 25, spot ? -60 : -52));   /* 重ねるときはスポットライトの左右の台に載る */ if (sp.userData.part) sp.userData.part.home.copy(sp.position);
   for (const p of D.parts) if (p.key === 'spotlight' || p.key === 'speaker') p.hidden = !m4HasVariant(PARTS[p.key].variant);
   for (const lp of D.acc.spot.userData.lamps) lp.children.forEach(c => { if (c.isMesh && c.geometry.type === 'ConeGeometry') c.visible = m4.acc.lit; });
   if (S.selected && (S.selected.key === 'spotlight' || S.selected.key === 'speaker') && S.selected.hidden) select(null);
@@ -173,7 +173,7 @@ function renderM4Note(id) {
       : `<p>前面に4つの窓（取説の図）。広角が<b>4/3型・2000万画素でメカシャッター付き</b>になる（公式）。メカシャッターは移動しながらの撮影で像がゆがみにくい（一般的な知識）。サーマルとNIR補助ライトはない。</p><p>ジンバルは上へ <b>35°</b> まで（4Tは70°・公式）。</p><p class="caveat">4Eの窓の位置は取説の図と公式写真から読んだ推定です。</p>`,
       actions: [{ label: m4.variant === 't' ? '4E にする' : '4T にする', primary: true, fn: () => m4Action('variant') }, { label: 'カメラを見る', fn: () => { renderNote(null); m4Action('cams'); } }] }),
     fold: () => ({ title: m4.foldTo > 0 ? 'アームをたたむ' : 'アームを広げる', html: m4.foldTo > 0
-      ? `<p>電源を切り、羽根を寄せてから、<b>後アームを下へ振り下ろして前へ</b>回し、胴の下の脇に収めます（モーターが逆さ・脚が上）。続いて<b>前アームを水平に後ろへ</b>回して胴の上の脇に沿わせ、最後にカメラへ<b>ジンバルプロテクター</b>をかぶせます。たたむと約 260.6 × 113.7 × 138.4 mm（公式）。</p><p class="caveat">取説には展開の順番（前アーム → 後アーム）だけが書かれていて、たたむ順番は書かれていません。この図は展開の逆にしています。回す軸の向きは取説の図からの推定です。</p>`
+      ? `<p>電源を切り、羽根を寄せてから、<b>後アームを下へ振り下ろして前へ</b>回し、胴の下の脇に収めます（モーターが逆さ・脚が上）。続いて<b>前アームを水平に後ろへ</b>回して胴の上の脇に沿わせ、最後にカメラへ<b>ジンバルプロテクター</b>をかぶせます。たたむと約 260.6 × 113.7 × 138.4 mm（公式）。</p><p class="caveat">取説には展開の順番（前アーム → 後アーム）だけが書かれていて、たたむ順番は書かれていません。この図は展開の逆にしています。回す軸の向きは取説の図からの推定です。この図の畳んだ大きさは約 267 × 126 × 142 mm で、実機より幅が1cmほど大きくなります。</p>`
       : `<p>取説の準備の順番どおりに、<b>①ジンバルプロテクターを外す → ②前アームを開く → ③後アームを開く</b>。このあとバッテリーを入れ、プロペラを付けます。</p><p><b>アームを開ききってから電源を入れます</b>。開かないまま電源を入れると、ジンバルがアームに当たってセルフチェックを終えられません（公式FAQ）。電源は、電源ボタンを1回押してから長押し（取説）。</p>`,
       actions: [{ label: m4.foldTo > 0 ? '広げる' : 'たたむ', primary: true, fn: () => m4Action('fold') }] }),
     battery: () => ({ title: 'バッテリーを入れ替える', html: `<p id="m4BatState" class="pd-state">電源を切っています…</p><p>電源を切り、左右のバックルを押して、バッテリーを<b>後ろへ</b>引き抜きます。差し込むときはカチッと音がするまで（取説）。<b>電源が入っているときは抜き差ししない</b>（取説）。</p><p>バッテリーは 401 g で、離陸重量 1219 g のおよそ3分の1（公式の値からの計算）。</p><p class="caveat">胴の中のバッテリーの形は、公式の3Dモデルの外形から起こした簡略形です。</p>`, actions: [{ label: 'もう一度', fn: () => m4Action('battery') }], onClose: () => { m4Stop(); focusOn([D.root], { pull: true }); } }),
@@ -282,7 +282,7 @@ function m4FrameLaser() {
   const min = [Math.min(-0.3, t.x - 0.35), -0.16, t.z - 0.3], max = [Math.max(0.3, t.x + 0.35), -0.158 + Math.max(1.75, lift + 0.25), 0.35];
   const proxy = new THREE.Mesh(new THREE.BoxGeometry(max[0] - min[0], max[1] - min[1], max[2] - min[2]), new THREE.MeshBasicMaterial({ visible: false }));
   proxy.position.set((min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2); scene.add(proxy);
-  pdFrame([proxy], { pull: true, min: 0.08, max: 12, margin: narrow() ? 0.95 : 1.06, dir: new THREE.Vector3(...(tall ? [0.42, 0.50, 0.76] : [0.92, 0.36, 0.16])).normalize() });   /* 縦長の画面は後ろ斜めから（奥行きに並べる）、横長は横から */
+  pdFrame([proxy], { pull: true, min: 0.08, max: Math.min(12, camera.far * 0.6 / (viewScale() * bandK())), margin: narrow() ? 0.95 : 1.06, dir: new THREE.Vector3(...(tall ? [0.16, 0.92, 0.36] : [0.92, 0.36, 0.16])).normalize() });   /* 縦長の画面は真上寄りから（奥行きを画面の縦に並べる）、横長は横から。引きは描画できる距離の6割まで */
   scene.remove(proxy); proxy.geometry.dispose();
 }
 function m4LaserStep(dt) {
@@ -355,6 +355,7 @@ function m4ThermalLook() {
 const m4Ease = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
 function stepM4(dt) {
   let dirty = false;
+  if (m4.laserOn && (S.explode > 0.02 || S.mode === 'cut')) m4Overlays(null);   /* 浮いた機体と人を残したまま分解・断面にしない */
   if (S.explode > 0.02 && m4.foldTo > 0) { m4.foldTo = 0; syncM4Chips(); if ($('#noteCard').dataset.kind === 'm4-fold') renderNote(null); }
   { const sup = m4.sizeOn || m4.camsOn || m4.senseOn || m4.laserOn || !!(m4.act && m4.act.id === 'gimbal'); if (sup !== m4._sup) { m4._sup = sup; S.labelsSuppressed = sup; } }
   if (!fpv.on && m4._irLook) m4ThermalLook();
@@ -376,7 +377,7 @@ function stepM4(dt) {
       const F = D.folds[i];
       if (F.front) F.fg.rotation.set(0, F.swing.ang * ff, 0.075 * ff, 'YZX');   /* 水平に後ろへ。脚の先が少し上がる（折りたたみ時の高さからの推定） */
       else F.fg.quaternion.setFromAxisAngle(F.flip.axis, F.flip.sign * Math.PI * fr);
-      for (const h of mo.hinges) h.g.rotation.y = h.s * fb * Math.PI / 2;   /* 羽根は根元で折れてアームに沿う */
+      for (const h of mo.hinges) { h.g.rotation.y = h.s * fb * (Math.PI / 2 + 0.16); h.g.position.x = h.s * 0.011 * (1 - 0.7 * fb); h.g.position.y = (h.s > 0 ? 0.0016 : 0) * fb; }   /* 羽根は根元で折れてアームに沿う。2枚を寄せて重ね、アームの線にそろえる */
     });
     D.protector.visible = f > 0.92;
     if (m4.foldTo === 1 && f >= 1) m4FrameFolded();
@@ -435,7 +436,7 @@ function initM4() {
   const q = new URLSearchParams(location.search), shared = SHARE_KEYS.some(k => q.has(k));
   let v = q.get('m4v'); if (v !== 't' && v !== 'e') { v = 't'; if (!shared) { try { if (sessionStorage.getItem('drone3d.m4variant') === 'e') v = 'e'; } catch (e) {} } }
   const pk = q.get('p') || q.get('iso'), pv = pk && PARTS[pk] && PARTS[pk].variant; if (pv === 't' || pv === 'e') v = pv;   /* 共有された部品が見える組み合わせにする */
-  const acc = (q.get('acc') || '').split(','), spot = acc.includes('spot') || pv === 'spot', spk = acc.includes('spk') || pv === 'spk';
+  const acc = (q.get('m4acc') || '').split(','), spot = acc.includes('spot') || pv === 'spot', spk = acc.includes('spk') || pv === 'spk';
   m4SetVariant(v, false); m4SetAcc(spot, spk);
   syncM4Chips();
   focusOn([D.root], { pull: false, margin: 1.2 });

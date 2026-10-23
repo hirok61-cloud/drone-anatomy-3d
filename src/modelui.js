@@ -4,7 +4,7 @@ function setModel(m) {
   try { sessionStorage.setItem('drone3d.model', m); } catch (e) {}
   const u = new URL(location.href);
   if (m !== 'q550') u.searchParams.set('model', m); else u.searchParams.delete('model');
-  for (const k of SHARE_KEYS) u.searchParams.delete(k); u.searchParams.delete('m4v');   /* 部品の名前が機種ごとに違うので、共有の状態は持ち越さない */
+  for (const k of SHARE_KEYS) u.searchParams.delete(k); u.searchParams.delete('m4v'); u.searchParams.delete('m4acc');   /* 部品の名前が機種ごとに違うので、共有の状態は持ち越さない */
   u.hash = '';
   $('#loading').classList.remove('gone'); $('#loadMsg').textContent = `${MODEL_NAME[m] || '550クラス'} を組み立てています…`;
   setTimeout(() => { try { location.assign(u.toString()); } catch (e) { location.reload(); } }, 30);
@@ -39,5 +39,13 @@ function altVariant() { return IS_PD6B ? pd6b.variant : null; }
 function altHasVariant(v) { return IS_PD6B ? pd6b.variant === v : IS_M4 ? m4HasVariant(v) : false; }
 function stepAlt(dt) { if (IS_PD6B) stepPd6b(dt); else if (IS_MAVIC) stepMavic(dt); else if (IS_M4) stepM4(dt); }
 // 「眼」に入る直前（fpv.js が今の状態を控える前）。機種の重ね絵と台本の動きを閉じる
-function altFpvEnter() { if (IS_MAVIC) { if (mav.act) mavicStop(); if (mav.fovOn || mav.senseOn || mav.sizeOn) mvOverlays(null, true); } else if (IS_M4) { if (m4.act) m4Stop(); if (m4Wide()) m4Overlays(null, true); } }
+function altFpvEnter() {
+  if (IS_MAVIC) { if (mav.act) mavicStop(); if (mav.fovOn || mav.senseOn || mav.sizeOn) mvOverlays(null, true); mav._sup = false; S.labelsSuppressed = false; }
+  else if (IS_M4) { if (m4.act) m4Stop(); if (m4Wide()) m4Overlays(null, true); m4._sup = false; S.labelsSuppressed = false; }   /* ジンバルの台本が抑えたラベルも戻す（眼が控える値を正しくする） */
+}
+function altFpvExit() { if (IS_MAVIC) mav.pendingPower = false; else if (IS_M4) m4.pendingPower = false; else if (IS_PD6B) pd6b.pendingPower = false; }   /* 眼に入るときに保留した電源を、出たあとで回さない */
+// 部品を選ぶ前に、その部品が見える組み合わせにする（Matrice 4 の 4T/4E・アクセサリー、PD6B の腰下ユニット）
+function altShowPart(k) { const v = PARTS[k] && PARTS[k].variant; if (!v) return;
+  if (IS_M4) { if ((v === 't' || v === 'e') && m4.variant !== v) m4SetVariant(v, false); else if ((v === 'spot' && !m4.acc.spot) || (v === 'spk' && !m4.acc.spk)) m4SetAcc(m4.acc.spot || v === 'spot', m4.acc.spk || v === 'spk'); }
+  else if (IS_PD6B && pd6b.variant !== v) pd6bSetVariant(v); }
 function initAlt() { if (IS_PD6B) initPd6b(); else if (IS_MAVIC) initMavic(); else if (IS_M4) initM4(); }

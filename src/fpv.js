@@ -160,7 +160,7 @@ function fpvOn(on) {
   } else {
     fpv.on = false; S.fpv = false; document.body.classList.remove('fpv');
     fpv.drag = null; canvas.classList.remove('push');   /* 掴んだまま抜けても離した扱いにする */
-    fpvStageOn(false);
+    fpvStageOn(false); if (typeof altFpvExit === 'function') altFpvExit();
     $('#fpv').hidden = true; syncDockH();
     fpv.pan = 0; fpv.tilt = fpvTilt0(); if (fpvGC()) { fpvGC().st.tilt = fpvGC().st.roll = 0; } updateGimbal();
     const s = fpv.saved || {};
@@ -168,7 +168,7 @@ function fpvOn(on) {
     S.labelsSuppressed = !!s.labels; buildLabels();
     if (s.power === 0 && S.power > 0 && !theater.active && !whatif.active && !descent.active) setPower(0, true);
     resize();
-    if (s.pos) flyTo(s.pos, s.tgt, 700, false); else camHome();
+    if (s.pos && s.pos.distanceTo(s.tgt) <= camMax() * 1.2) flyTo(s.pos, s.tgt, 700, false); else camHome();   /* 測距などで遠く引いた画に入っていたときは、機体の画へ戻す */
   }
   for (const b of $$('#viewCol button[data-v]')) b.classList.toggle('on', fpv.on ? b.dataset.v === 'fpv' : b.classList.contains('on') && b.dataset.v !== 'fpv');
 }
