@@ -27,6 +27,16 @@ while True:
     _i = _b + 2
 SOURCES = ['model.js', 'data.js', 'pd6b-data.js', 'mavic-data.js', 'm4-data.js', 'materials.js', 'drone.js', 'pd6b.js', 'mavic.js', 'm4.js', 'engine.js', 'showdrone.js', 'physics.js', 'airflow.js', 'theater.js', 'whatif.js', 'scale.js', 'codex.js', 'live.js', 'lesson.js', 'expert.js', 'reg.js', 'preflight.js', 'descent.js', 'fpv.js', 'weather.js', 'dshow.js', 'dsys.js', 'dshowui.js', 'audio.js', 'share.js', 'pd6bui.js', 'mavicui.js', 'm4ui.js', 'modelui.js', 'ui.js', 'app.js']
 js = '\n'.join((SRC / f).read_text(encoding='utf-8') for f in SOURCES if (SRC / f).exists())
+# 行の途中に足した // コメントが、同じ行の後ろの文を飲み込んでいないか検査する（3回やった失敗）
+import re as _re
+for _f in SOURCES:
+    for _i, _l in enumerate((SRC / _f).read_text(encoding='utf-8').split('\n'), 1):
+        _s = _re.sub(r"'(?:\\.|[^'\\])*'|\"(?:\\.|[^\"\\])*\"|`(?:\\.|[^`\\])*`", "''", _l)
+        _j = _s.find('//')
+        if _j < 0 or (_j > 0 and _s[_j - 1] in ':\\'):
+            continue
+        if _re.search(r"(\);\s*\S|\bconst \w+ = |\.add\(.*\);|= new THREE)", _s[_j:]):
+            raise SystemExit(f'{_f}:{_i}: // コメントの後ろに文が続いています（コメントに飲み込まれて実行されません）')
 
 # ---- ドローンショーの「形」を束ねる ----
 # src/shapes/*.json（形の定義）と words.tsv（言葉→絵文字の表）を定数にして、エンジン(dshapes.js)の前に置く。

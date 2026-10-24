@@ -113,7 +113,7 @@ function m4SetVariant(v, announce) {
   m4.variant = v; const gp = D.gimbalParts, L = gp.lens, F = M4_FACE[v];
   gp.faceT.visible = v === 't'; gp.faceE.visible = v === 'e';
   const move = (key, xy, dz = 0) => { const g = L[key]; g.position.set(xy[0] / 1000, xy[1] / 1000, g.position.z - (g.userData.dz || 0) + dz); g.userData.dz = dz; if (g.userData.part) g.userData.part.home.copy(g.position); const c = D.fovG.userData.cones[key]; if (c) c.position.copy(g.position); };
-  move('mid', F.mid, 0.002); move('tele', F.tele, v === 'e' ? -0.0045 : -0.0035); move('laser', F.laser, 0.002);   /* 前面からの出入り（4T は CAD）。4E は望遠の鏡筒の先 */
+  move('mid', F.mid); move('tele', F.tele, v === 'e' ? -0.002 : -0.0035); move('laser', F.laser);   /* 前面からの出入り（4T は CAD）。4E は望遠の鏡筒の先 */
   const lk = L.laser.userData.looks; lk.t.visible = v === 't'; lk.e.visible = v === 'e';
   for (const p of D.parts) if (PARTS[p.key] && (PARTS[p.key].variant === 't' || PARTS[p.key].variant === 'e')) p.hidden = PARTS[p.key].variant !== v;
   if (v === 'e' && m4.gim.ir) m4.gim.ir = false;
@@ -375,7 +375,7 @@ function stepM4(dt) {
     const f = m4.fold, fb = m4Ease(f / 0.2), fr = m4Ease((f - 0.18) / 0.36), ff = m4Ease((f - 0.52) / 0.36);
     D.motors.forEach((mo, i) => {
       const F = D.folds[i];
-      if (F.front) F.fg.rotation.set(0, F.swing.ang * ff, 0.075 * ff, 'YZX');   /* 水平に後ろへ。脚の先が少し上がる（折りたたみ時の高さからの推定） */
+      if (F.front) F.fg.rotation.set(0, F.swing.ang * ff, 0.10 * ff, 'YZX');   /* 水平に後ろへ。脚の先が少し上がる（折りたたみ時の高さからの推定） */
       else F.fg.quaternion.setFromAxisAngle(F.flip.axis, F.flip.sign * Math.PI * fr);
       for (const h of mo.hinges) { h.g.rotation.y = h.s * fb * (Math.PI / 2 + 0.16); h.g.position.x = h.s * 0.011 * (1 - 0.7 * fb); h.g.position.y = (h.s > 0 ? 0.0016 : 0) * fb; }   /* 羽根は根元で折れてアームに沿う。2枚を寄せて重ね、アームの線にそろえる */
     });

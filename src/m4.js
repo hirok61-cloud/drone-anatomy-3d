@@ -77,16 +77,16 @@ function buildM4(M) {
   // 上ぶた: 平らな天面の帽子形。前端は丸い「眉」になり、カメラの上にかぶさる。前寄りは下へ伸びてジンバルの左右の頬になる
   const LID = [
     [-132.5, 9, 57.5, 53, 2.2, 2.2], [-130, 21, 61, 51, 2.5, 2.4], [-128, 29.5, 62.8, 46, 2.9, 3.2], [-121, 35.5, 64.6, 42, 3.3, 4.5],
-    [-112, 39, 66.2, 40, 3.6, 6], [-98, 41, 68, 39, 3.4, 7], [-84, 42.2, 69.8, 39, 3.2, 7], [-70, 43, 72, 40, 3, 7],
+    [-112, 39, 66.2, 40, 3.6, 6], [-98, 41, 68, 39, 3.4, 7], [-84, 42.2, 69.8, 36, 3.2, 7], [-70, 43, 72, 40, 3, 7],
     [-56, 44, 73.2, 44, 3, 7], [-40, 44.1, 73, 45, 3, 7], [-20, 42.6, 71.8, 45.5, 3, 7], [0, 40.6, 70.6, 46.5, 3, 7],
     [20, 38.4, 70, 47.5, 3, 7], [40, 36.6, 69.6, 49, 3, 7], [58, 37.3, 69, 50, 3, 7], [70, 38, 66.5, 49, 2.7, 6],
     [79, 36, 63.5, 46, 2.7, 4.5], [86, 29, 60.5, 45, 2.7, 3.4], [90, 19, 57.5, 47, 2.5, 2.6], [92.5, 6, 54, 50, 2.2, 2.2],
   ];
   // 下胴: 上ぶたの下に収まり、後ろからバッテリーが入る。底は放熱板
   const LOW = [
-    [-62, 26, 46, 14, 4, 3], [-52, 31, 47, 10, 4, 3], [-40, 33.5, 47, 5, 4, 3], [-28, 33.5, 47, -6, 4, 3.2], [-18, 33.2, 47, -19, 4, 3.4], [-8, 32.8, 47, -22, 4, 3.6],
+    [-62, 40, 46, 14, 4, 3], [-52, 44, 47, 8, 4, 3], [-44, 44, 47, 6, 4, 3], [-36, 42, 47, 2, 4, 3], [-28, 37, 47, -6, 4, 3.2], [-18, 34, 47, -19, 4, 3.4], [-8, 32.8, 47, -22, 4, 3.6],
     [10, 31.5, 48, -22, 4, 3.6], [30, 30, 49, -23, 4, 3.6], [50, 29.5, 50, -24.5, 4, 3.6], [66, 29, 50, -25, 4, 3.6],
-    [80, 29, 47, -23, 4, 3.4], [90, 28, 44, -18.5, 3.6, 3], [96, 24, 41, -12, 3, 2.6], [100, 14, 35, -2, 2.4, 2.4],
+    [80, 29, 47, -23, 4, 3.4], [90, 28, 44, -18.5, 3.6, 3], [95, 23, 41, -12, 3, 2.6], [97.5, 12, 35, -4, 2.4, 2.4],   /* 後端は電池の後ろの面と面一（CAD z≈97〜98） */
   ];
   const toM = (S) => S.map(([z, w, t, b, nt, nb]) => [(z - M4_O[2]) / 1000, w / 1000, (t - M4_O[1]) / 1000, (b - M4_O[1]) / 1000, nt, nb]);
   const SL = toM(LID), SW = toM(LOW);
@@ -108,16 +108,19 @@ function buildM4(M) {
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals(); return g;
   }
   const lidTop = (zmm) => secAt(SL, (zmm - M4_O[2]) / 1000)[2] * 1000 + M4_O[1];   // その z の上ぶたの天面（CAD の mm）
+  const lowSide = (zmm, ymm) => { const [, w, top, bot, nt, nb] = secAt(SW, (zmm - M4_O[2]) / 1000), y = (ymm - M4_O[1]) / 1000, mid = (top + bot) / 2, up = y >= mid, n = up ? nt : nb;   // その z・高さでの下胴の側面の x（CAD の mm）
+    const sv = Math.min(1, Math.abs((y - mid) / ((up ? top : bot) - mid))) ** (n / 2), cv = Math.sqrt(Math.max(0, 1 - sv * sv)); return w * cv ** (2 / n) * 1000; };
 
   const bodyG = new THREE.Group();
   bodyG.add(mesh(loftGeo(SL), X.lid));
   bodyG.add(mesh(loftGeo(SW), X.shell));
   // 底の放熱板（縦の溝）と下胴の側面の通気スリット
   const sink = new THREE.Group();
-  sink.add(box(50, 3.4, 128, 1.2, X.sink, 0, -23.8, 26));
-  for (let k = 0; k < 13; k++) sink.add(box(1.4, 1.2, 120, 0.4, X.dark, -18 + k * 3, -25.6, 26));
+  sink.add(box(50, 3.4, 115, 1.2, X.sink, 0, -23.8, 32.5));
+  for (let k = 0; k < 13; k++) sink.add(box(1.4, 1.2, 108, 0.4, X.dark, -18 + k * 3, -25.6, 32.5));
   bodyG.add(sink);
-  for (const s of [-1, 1]) for (const z of [27, 39, 49]) { const v = box(1.6, 11, 8.5, 1, X.dark, s * 30.4, -3.5, z); v.rotation.x = -0.32; bodyG.add(v); }   // 下胴の側面の通気口（前傾した平行四辺形・CAD）
+  { const ventMat = new THREE.MeshPhysicalMaterial({ color: 0x8a8d91, roughness: 0.7 }), vg = rboxGeo(mm(1.2), mm(11), mm(8.5), mm(0.6)).applyMatrix4(new THREE.Matrix4().makeShear(0, 0, 0, -0.32, 0, 0));   // 下胴の側面の通気口（前傾した平行四辺形のくぼみ・CAD）
+    for (const s of [-1, 1]) for (const z of [27, 39, 49]) { const zz = z; const v = mesh(vg, ventMat); v.position.copy(P(s * (lowSide(zz, -3.5) - 0.3), -3.5, zz)); bodyG.add(v); } }
   // 上ぶたの前寄り: 左右の小さなオレンジの目印（用途は公表されていない・公式写真）
   for (const s of [-1, 1]) { const o = box(1, 4, 12, 0.5, X.orange, s * 36.9, 47.5, 40); bodyG.add(o); }   // 上ぶたと下胴の継ぎ目の目印（位置は写真からの推定）
   // 後面の下: 六角メッシュの吸気口
@@ -139,20 +142,21 @@ function buildM4(M) {
   for (const s of [-1, 1]) { const pz = 50.5, pn = box(12.5, 1.6, 33, 2.5, X.shell, s * 30, lidTop(pz) - 2.6, pz); pn.rotation.z = s * -0.32; bodyG.add(pn);   // GNSS の左右の排気口: 台形の枠に斜め45°の羽根（CAD）
     for (let k = 0; k < 9; k++) { const sl = at(mesh(new THREE.BoxGeometry(mm(1.4), mm(1.4), mm(11)), X.dark), 0, mm(0.6), mm(-13 + k * 3.25)); sl.rotation.y = s * Math.PI / 4; pn.add(sl); } }
   const beacon = new THREE.Group(); at(beacon, 0, 0, 0);
-  beacon.add(atP(mesh(cylGeo(mm(7.4), mm(7.8), mm(1.4), 24), X.dark), 0, 64.4, 75)); { const dm = mesh(new THREE.SphereGeometry(mm(6.5), 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), M.ledCover); dm.scale.y = 0.45; atP(dm, 0, 64.9, 75); beacon.add(dm); }
-  beacon.add(atP(mesh(cylGeo(mm(2.4), mm(2.4), mm(1.2), 16), new THREE.MeshStandardMaterial({ color: 0xffd36a, emissive: 0x6a4a00, roughness: 0.4 })), 0, 65.3, 75));   // 透明のドームの中に黄色いLED（公式写真）
+  beacon.add(atP(mesh(cylGeo(mm(7.4), mm(7.8), mm(1.4), 24), X.dark), 0, 65.4, 75)); { const dm = mesh(new THREE.SphereGeometry(mm(6.5), 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), M.ledCover); dm.scale.y = 0.45; atP(dm, 0, 65.9, 75); beacon.add(dm); }
+  beacon.add(atP(mesh(cylGeo(mm(2.4), mm(2.4), mm(1.2), 16), new THREE.MeshStandardMaterial({ color: 0xffd36a, emissive: 0x6a4a00, roughness: 0.4 })), 0, 66.3, 75));
+  beacon.children.forEach(c => { c.rotation.x = 0.32; });   /* 上ぶたの後ろの斜面（約18°）に沿って後ろへ倒す */   // 透明のドームの中に黄色いLED（公式写真）
 
   sg.add(beacon); reg(beacon, 'beacon', V3(0, 0.05, 0.03));
 
   // ---------- 後面: バッテリー（後ろから差し込む）・ポート ----------
   const bat = new THREE.Group();
-  const cellsBox = mesh(rboxGeo(mm(50), mm(42), mm(128), mm(4)), M.cell); atP(cellsBox, 0, 22, 22); bat.add(cellsBox);
+  const cellsBox = mesh(rboxGeo(mm(50), mm(38), mm(106), mm(4)), M.cell); atP(cellsBox, 0, 20, 33); bat.add(cellsBox);
   const shell = new THREE.Group(); bat.add(shell);
-  shell.add(box(48, 44, 10, 12, X.shell, 0, 21, 94.5));   // 後端（胴と同じ色で面一・上の後ろ角が丸い・CAD）
-  shell.add(box(44, 40, 2, 10, X.shell, 0, 21, 99.4));
+  shell.add(box(48, 44, 10, 12, X.shell, 0, 21, 92.5));   // 後端（胴と同じ色で面一・上の後ろ角が丸い・CAD）
+  shell.add(box(44, 40, 2, 10, X.shell, 0, 21, 97.4));
   const bled = new THREE.Group();   // 電源ボタン（左寄り）と残量LED 4つ（右・CAD）
-  bled.add(box(12, 8, 2.2, 2.6, M.plasticGray, -9, 31, 100.6));
-  for (let k = 0; k < 4; k++) bled.add(atP(mesh(rboxGeo(mm(1.6), mm(4), mm(1), mm(0.6)), k < 3 ? M.ledGreen : M.chip), 3 + k * 3.2, 32, 100.7));
+  bled.add(box(12, 8, 2.2, 2.6, M.plasticGray, -9, 31, 99.0));
+  for (let k = 0; k < 4; k++) bled.add(atP(mesh(rboxGeo(mm(1.6), mm(4), mm(1), mm(0.6)), k < 3 ? M.ledGreen : M.chip), 3 + k * 3.2, 32, 99.1));
   bat.add(bled);
   const buckle = new THREE.Group();
   for (const s of [-1, 1]) { const b = box(5, 10, 18, 2, X.dark, s * 27.8, 31, 80); for (let k = 0; k < 4; k++) b.add(at(mesh(new THREE.BoxGeometry(mm(1), mm(8), mm(1)), X.gimbalDark), s * mm(2.6), 0, mm(-6 + k * 4))); buckle.add(b); }
@@ -166,7 +170,7 @@ function buildM4(M) {
 
   // ---------- 内部の電装（位置は例）----------
   const fc = box(56, 6, 60, 2, M.aluBrushDark, 0, 61, -60); sg.add(fc); reg(fc, 'fc', V3(0, 0.12, -0.04), { label: V3(0, 0.004, 0) });
-  const esc = atP(mesh(rboxGeo(mm(50), mm(5), mm(48), mm(2)), [M.pcbEdge, M.pcbEdge, M.pcbPDB, M.pcbEdge, M.pcbEdge, M.pcbEdge]), 0, -10, -18); sg.add(esc); reg(esc, 'esc', V3(0, -0.08, 0));
+  const esc = atP(mesh(rboxGeo(mm(50), mm(5), mm(48), mm(2)), [M.pcbEdge, M.pcbEdge, M.pcbPDB, M.pcbEdge, M.pcbEdge, M.pcbEdge]), 0, -10, 6); sg.add(esc); reg(esc, 'esc', V3(0, -0.08, 0));
   const rid = box(16, 4, 12, 1, M.plasticGray, 18, 62, 20); sg.add(rid); reg(rid, 'remoteId', V3(0.05, 0.08, 0));
 
   // ---------- センサー: 上の四隅の魚眼（前2・後2）と下面（下方ビジョン2・3D赤外線・補助ライト）----------
@@ -176,14 +180,14 @@ function buildM4(M) {
     v.add(at(mesh(new THREE.TorusGeometry(mm(6.6), mm(0.7), 8, 32).rotateX(Math.PI / 2), X.lensRing), 0, 0.0008, 0));
     const dome = mesh(new THREE.SphereGeometry(mm(5), 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), X.glass); dome.scale.y = 0.6; at(dome, 0, 0.0007, 0); v.add(dome);
     sg.add(v); reg(v, key, dir.clone().normalize().multiplyScalar(0.05), { label: label ? V3(0, 0.006, 0) : null }); return v; };
-  fish(34.5, 54.5, -125, V3(0.70, 0.10, -0.70), 'vision', true); fish(-34.5, 54.5, -125, V3(-0.70, 0.10, -0.70), 'vision');
-  fish(34.5, 55, 82.5, V3(0.70, 0.10, 0.70), 'vision'); fish(-34.5, 55, 82.5, V3(-0.70, 0.10, 0.70), 'vision');
+  fish(32, 55, -123, V3(0.70, 0.10, -0.70), 'vision', true); fish(-32, 55, -123, V3(-0.70, 0.10, -0.70), 'vision');
+  fish(32, 55, 80, V3(0.70, 0.10, 0.70), 'vision'); fish(-32, 55, 80, V3(-0.70, 0.10, 0.70), 'vision');
   fish(0, -25.3, -16, V3(0, -1, 0), 'visionDown', true); fish(0, -25.3, 61, V3(0, -1, 0.08), 'visionDown');
   const ir = new THREE.Group(); ir.add(box(23, 1.6, 11, 4, X.dark, 0, -25.6, 4)); for (const s of [-1, 1]) ir.add(box(9.4, 1, 8, 2.6, X.glass, s * 5.2, -26.1, 4));
   sg.add(ir); reg(ir, 'ir3d', V3(0, -0.05, 0), { label: P(0, -27, 4) });
   const aux = new THREE.Group(); aux.add(atP(mesh(cylGeo(mm(7.4), mm(7.4), mm(1.4), 24), X.dark), 0, -25.5, 36)); aux.add(atP(mesh(cylGeo(mm(4.6), mm(4.6), mm(1), 20), M.ledWhite), 0, -26.3, 36));
   sg.add(aux); reg(aux, 'auxLight', V3(0, -0.05, 0.02));
-  const rm = plane(mm(30), mm(5.8), X.regLabel); rm.rotation.y = -Math.PI / 2; atP(rm, -32.6, 18, 10); sg.add(rm); reg(rm, 'regMark', V3(-0.04, 0, 0));
+  const rm = plane(mm(30), mm(5.8), X.regLabel); rm.rotation.y = -Math.PI / 2; atP(rm, -(lowSide(5, 18) + 0.3), 18, 5); sg.add(rm); reg(rm, 'regMark', V3(-0.04, 0, 0));
 
   // ---------- ジンバル: 上ぶたの下の付け根 → パン（縦軸）→ ロール（前後の軸・頭の後ろ）→ U字のヨーク → チルト（左右の円筒）→ 頭 ----------
   const TILT = P(0, -0.8, -119.6), PANC = P(0, 26, -64), ROLLC = P(0, -0.8, -68);
@@ -216,11 +220,11 @@ function buildM4(M) {
   const FZ = mm(-139.5 + 119.6);   // 前面の位置（チルト軸から）。後面は +29mm
   { head.add(at(mesh(rboxGeo(mm(64), mm(62.9), mm(44), mm(15), 4), X.gimbal), 0, mm(-1.85), mm(7.1)));
     const w = mm(26.5), h0 = mm(27.1), h1 = mm(-30.8), c = mm(8);
-    const oct = polyShape([[-w + c, h0], [w - c, h0], [w, h0 - c], [w, h1 + c], [w - c, h1], [-w + c, h1], [-w, h1 + c], [-w, h0 - c]]);
+    const c2 = mm(11), oct = polyShape([[-w + c, h0], [w - c, h0], [w, h0 - c], [w, h1 + c2], [w - c2, h1], [-w + c2, h1], [-w, h1 + c2], [-w, h0 - c]]);
     const g = new THREE.ExtrudeGeometry(oct, { depth: mm(6), bevelEnabled: true, bevelThickness: mm(2.5), bevelSize: mm(2.5), bevelSegments: 4, curveSegments: 4 });
     head.add(at(mesh(g, X.gimbal), 0, 0, FZ + mm(2.5)));
-    for (let k = 0; k < 8; k++) { head.add(at(mesh(new THREE.BoxGeometry(mm(1.2), mm(3.4), mm(22)), X.gimbalDark), mm(-12.6 + k * 3.6), mm(31.2), FZ + mm(20)));   // 上と下の放熱フィン（前後に走る）
-      head.add(at(mesh(new THREE.BoxGeometry(mm(1.2), mm(3), mm(22)), X.gimbalDark), mm(-12.6 + k * 3.6), mm(-34.8), FZ + mm(20))); }
+    for (let k = 0; k < 8; k++) { head.add(at(mesh(new THREE.BoxGeometry(mm(1.2), mm(2), mm(22)), X.gimbal), mm(-12.6 + k * 3.6), mm(30.5), FZ + mm(20)));   // 上と下の放熱フィン（前後に走る）
+      head.add(at(mesh(new THREE.BoxGeometry(mm(1.2), mm(2), mm(22)), X.gimbal), mm(-12.6 + k * 3.6), mm(-34.2), FZ + mm(20))); }
     for (let k = 0; k < 9; k++) head.add(at(mesh(new THREE.BoxGeometry(mm(1.4), mm(28), mm(3)), X.gimbalDark), mm(-14.4 + k * 3.6), mm(-2), mm(30.2)));   // 背面の縦のフィン
   }
   // 前面の窓。4T と 4E で枠の組み方が違うので、前面の板ごと2枚作って切り替える
@@ -240,19 +244,18 @@ function buildM4(M) {
   // 4E（取説の図と写真・推定）: 右上（機体の右）に丸い望遠の鏡筒、左上に中望遠、下に縦長のレーザーと大きな四角い広角
   faceE.add(at(mesh(cylGeo(mm(12.5), mm(12.5), mm(5), 48).rotateX(Math.PI / 2), X.gimbal), mm(13.5), mm(14.5), FF - mm(2)));
   frame(faceE, 20, 17, 4, -12.5, 18.5); frame(faceE, 10.5, 24, 3, 16.5, -9.5); frame(faceE, 28, 26, 4, -6.5, -8.5);
-  for (let k = 0; k < 4; k++) faceE.add(at(mesh(new THREE.BoxGeometry(mm(1.2), mm(3), mm(4)), X.gimbalDark), mm(-22 + k * 3.6), mm(31.8), FZ + mm(4)));
   // レンズ（部品）。共通の3つは機種で位置を動かす（m4SetVariant）
   const L = {};
   const addLens = (key, part, r, glass, col, variantLook) => { const g = new THREE.Group(); g.add(variantLook || lens(mm(r), glass)); const glow = glowRing(mm(r + 2.2), col); g.add(glow); g.userData.glow = glow; head.add(g); L[key] = g; g.userData.partKey = part; return g; };
   addLens('thermal', 'thermal', 6.6, X.irGlass, X.fov.ir); addLens('wideT', 'camWideT', 5.2, null, X.fov.wide); addLens('wideE', 'camWideE', 6.2, null, X.fov.wide);
   addLens('mid', 'camMid', 5.4, null, X.fov.mid); addLens('tele', 'camTele', 8.2, null, X.fov.tele);
-  { const g = new THREE.Group(); const w1 = at(mesh(rboxGeo(mm(25), mm(7.6), mm(1.2), mm(2.4)), X.milky), 0, 0, mm(-0.4)); const w2 = at(mesh(rboxGeo(mm(8.4), mm(21.6), mm(1.2), mm(2.4)), X.milky), 0, 0, mm(-0.4)); w2.visible = false; g.add(w1, w2); g.userData.looks = { t: w1, e: w2 };
+  { const g = new THREE.Group(); const w1 = at(mesh(rboxGeo(mm(25), mm(7.6), mm(1.2), mm(2.4)), X.milky), 0, 0, mm(-0.9)); const w2 = at(mesh(rboxGeo(mm(8.4), mm(21.6), mm(1.2), mm(2.4)), X.milky), 0, 0, mm(-0.9)); w2.visible = false; g.add(w1, w2); g.userData.looks = { t: w1, e: w2 };
     const glow = glowRing(mm(9), 0xff3b30); g.add(glow); g.userData.glow = glow; head.add(g); L.laser = g; }
-  { const g = new THREE.Group(); g.add(at(mesh(cylGeo(mm(5.2), mm(5.2), mm(1.2), 32).rotateX(Math.PI / 2), X.milky), 0, 0, mm(-0.4))); head.add(g); L.nir = g; }
+  { const g = new THREE.Group(); g.add(at(mesh(cylGeo(mm(5.2), mm(5.2), mm(1.2), 32).rotateX(Math.PI / 2), X.milky), 0, 0, mm(-0.9))); head.add(g); L.nir = g; }
   const lensPos = (g, xy, dz = 0) => { g.position.set(mm(xy[0]), mm(xy[1]), FF - mm(0.6) + dz); g.userData.dz = dz; };
-  L.wideT.add(at(mesh(cylGeo(mm(11), mm(11), mm(10), 44).rotateX(Math.PI / 2), X.rim), 0, 0, mm(5.4)));   // 4T の広角の丸い鏡筒
-  lensPos(L.thermal, M4_FACE.t.thermal); lensPos(L.wideT, M4_FACE.t.wide, mm(-10)); lensPos(L.nir, M4_FACE.t.nir, mm(2)); lensPos(L.wideE, M4_FACE.e.wide); L.wideE.visible = false;
-  lensPos(L.mid, M4_FACE.t.mid, mm(2)); lensPos(L.tele, M4_FACE.t.tele, mm(-3.5)); lensPos(L.laser, M4_FACE.t.laser, mm(2));
+  L.wideT.add(at(mesh(cylGeo(mm(11), mm(11), mm(10), 44).rotateX(Math.PI / 2), X.rim), 0, 0, mm(0.4)));   // 4T の広角の丸い鏡筒
+  lensPos(L.thermal, M4_FACE.t.thermal); lensPos(L.wideT, M4_FACE.t.wide, mm(-5)); lensPos(L.nir, M4_FACE.t.nir); lensPos(L.wideE, M4_FACE.e.wide); L.wideE.visible = false;
+  lensPos(L.mid, M4_FACE.t.mid); lensPos(L.tele, M4_FACE.t.tele, mm(-3.5)); lensPos(L.laser, M4_FACE.t.laser);
   reg(L.thermal, 'thermal', V3(0.006, 0.004, -0.05), { label: V3(0, 0, -0.004) }); reg(L.wideT, 'camWideT', V3(-0.006, 0, -0.05), { label: V3(0, 0, -0.004) }); reg(L.wideE, 'camWideE', V3(-0.006, 0, -0.05), { label: V3(0, 0, -0.004) });
   reg(L.mid, 'camMid', V3(-0.006, 0.004, -0.05), { label: V3(0, 0, -0.004) }); reg(L.tele, 'camTele', V3(0.006, 0, -0.05), { label: V3(0, 0, -0.004) });
   reg(L.laser, 'laser', V3(0.004, -0.006, -0.05), { label: V3(0, 0, -0.004) }); reg(L.nir, 'nir', V3(-0.004, -0.006, -0.05));
@@ -287,7 +290,7 @@ function buildM4(M) {
     { const L0 = Math.hypot(len, d.y), g = new THREE.CylinderGeometry(mm(5.6), mm(6.6), L0 - mm(14), 28, 1).rotateZ(-Math.PI / 2).scale(1, 0.9, 1.12).translate((L0 - mm(14)) / 2 + mm(4), 0, 0).rotateZ(rise); arm.add(mesh(g, X.arm)); }
     arm.add(at(mesh(rboxGeo(mm(A.front ? 24 : 24), mm(A.front ? 20 : 20), mm(A.front ? 16 : 22), mm(6)), X.shell), mm(A.front ? 12 : 8), 0, 0));   // 付け根のヒンジ（胴の脇の膨らみ）
     const podR = A.front ? 15 : 14.5;
-    const pod = mesh(lathe([[0, mm(-11)], [mm(13), mm(-11)], [mm(14), mm(-10)], [mm(14), mm(-0.6)], [mm(13.4), 0], [0, 0]], 40), X.arm);   // モーターと同じ太さの円筒が下へ続き、脚につながる（CAD） at(pod, len, d.y, 0); arm.add(pod);
+    const pod = mesh(lathe([[0, mm(-11)], [mm(13), mm(-11)], [mm(14), mm(-10)], [mm(14), mm(-0.6)], [mm(13.4), 0], [0, 0]], 40), X.arm); at(pod, len, d.y, 0); arm.add(pod);   // モーターと同じ太さの円筒が下へ続き、脚につながる（CAD）
     fg.add(arm); reg(arm, A.front ? 'frontArm' : 'rearArm', V3(0.05, 0, 0), { label: (A.front && k === 0) || (!A.front && k === 1) ? V3(len * 0.55, d.y * 0.55 + 0.009, 0) : null });
     const wg = new THREE.Group(); at(wg, len, d.y, 0); wg.rotation.y = -yaw; fg.add(wg);   // 機体の向きにそろえた入れ物（LED・脚）
     // モーター（黒いベル Ø約27mm・CAD）
