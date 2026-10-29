@@ -442,6 +442,10 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
 #noteCard.mini #noteBody details, #noteCard.mini #noteBody .ds-hint { display: none; }
 #noteCard.mini #dshowBody { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 #noteCard.mini { max-height: none; }
+/* 機種の動きのカード（縦向きのスマホ）を畳んだとき: 最初の要素（いまの状態の行・選ぶボタンの列・最初の段落の2行）だけを残す */
+#noteCard.altc.mini #noteBody > :not(:first-child) { display: none; }
+#noteCard.altc.mini #noteBody > p:first-child:not(.pd-state) { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 0; }
+#noteCard.altc.mini #noteBody > .pd-state:first-child { margin-bottom: 0; }
 #noteMini { font-size: 15px; line-height: 1; }
 /* 好きな文字を描く */
 .ds-text { display: flex; gap: 6px; margin: 8px 0 2px; }

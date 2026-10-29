@@ -465,6 +465,10 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
 #noteCard.mini #noteBody details, #noteCard.mini #noteBody .ds-hint { display: none; }
 #noteCard.mini #dshowBody { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 #noteCard.mini { max-height: none; }
+/* 機種の動きのカード（縦向きのスマホ）を畳んだとき: 最初の要素（いまの状態の行・選ぶボタンの列・最初の段落の2行）だけを残す */
+#noteCard.altc.mini #noteBody > :not(:first-child) { display: none; }
+#noteCard.altc.mini #noteBody > p:first-child:not(.pd-state) { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 0; }
+#noteCard.altc.mini #noteBody > .pd-state:first-child { margin-bottom: 0; }
 #noteMini { font-size: 15px; line-height: 1; }
 /* 好きな文字を描く */
 .ds-text { display: flex; gap: 6px; margin: 8px 0 2px; }
@@ -12859,7 +12863,10 @@ function renderNoteActions(list) {
   for (const a of (list || [])) { const btn = document.createElement('button'); btn.textContent = a.label; if (a.primary) btn.classList.add('primary'); btn.onclick = a.fn; acts.appendChild(btn); }
   acts.hidden = !(list && list.length);
 }
-// 説明を畳む（いまはショーだけ）。スマホでは説明カードが画面の半分を占めて、夜空がほとんど残らない
+// 説明を畳む（ショーと、縦向きのスマホでの機種ごとの動きのカード）。スマホでは説明カードが画面の半分を占めて、夜空や機体がほとんど残らない
+// 機種のカードは、縦向きのスマホでは要点（いまの状態・最初の段落の2行）とボタンだけで出す。⌄で全文を開くと、次のカードからも開いて出す
+const ALT_NOTE_RE = /^(mn5|mavic|m4|pd6b)-/;
+const altNoteCompact = (kind) => typeof IS_ALT !== 'undefined' && IS_ALT && ALT_NOTE_RE.test(kind || '') && matchMedia('(max-width: 760px) and (min-height: 481px)').matches;
 function setNoteMini(on) {
   const card = $('#noteCard'), b = $('#noteMini');
   card.classList.toggle('mini', !!on);
@@ -12868,16 +12875,17 @@ function setNoteMini(on) {
 }
 function renderNote(o) {
   const card = $('#noteCard'); $('#noteBody').onclick = null;   /* 前のカードが張った委譲を残さない */
-  if (!o) { card.hidden = true; card.dataset.kind = ''; card.classList.remove('mini'); $('#noteMini').hidden = true; return; }   /* kind を残すと、次に同じ種類を開くとき「閉じられたまま」と誤判定される */
+  if (!o) { card.hidden = true; card.dataset.kind = ''; card.classList.remove('mini', 'altc'); $('#noteMini').hidden = true; return; }   /* kind を残すと、次に同じ種類を開くとき「閉じられたまま」と誤判定される */
   $('#noteTitle').textContent = o.title || ''; const b = $('#noteBadge'); if (o.badge) { b.textContent = o.badge; b.hidden = false; } else b.hidden = true;
   $('#noteBody').innerHTML = o.html || ''; renderNoteActions(o.actions);
   card.hidden = false; if (card.dataset.kind !== (o.kind || '')) card.scrollTop = 0;   /* 同じ種類のカードを描き直すときは読んでいた位置を保つ */
   card.dataset.kind = o.kind || '';
-  { const mb = $('#noteMini'); mb.hidden = !o.mini; if (o.mini) setNoteMini(o.miniOn); else card.classList.remove('mini'); }
+  { const alt = !o.mini && altNoteCompact(o.kind); card.classList.toggle('altc', alt); if (alt) o = Object.assign({}, o, { mini: true, miniOn: store.get('altNoteOpen') !== '1' });
+    const mb = $('#noteMini'); mb.hidden = !o.mini; if (o.mini) setNoteMini(o.miniOn); else card.classList.remove('mini'); }
   if (o.onClose) card._onClose = o.onClose; else card._onClose = null;
 }
 $('#noteClose').addEventListener('click', () => { const c = $('#noteCard'); if (c._onClose) c._onClose(); c.hidden = true; });
-$('#noteMini').addEventListener('click', () => setNoteMini(!$('#noteCard').classList.contains('mini')));
+$('#noteMini').addEventListener('click', () => { const c = $('#noteCard'), on = !c.classList.contains('mini'); setNoteMini(on); if (c.classList.contains('altc')) store.set('altNoteOpen', on ? '0' : '1'); });
 
 // ---------- タブ ----------
 // 「同時に1つ」の対象（質問・飛行デモ・用途・重さ・シアター・もしも・クイズ）を、keep 以外すべて止める
