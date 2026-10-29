@@ -430,7 +430,7 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
 .fpv-seg button:hover { background: rgba(234,242,255,.12); }
 .fpv-seg button.on { background: var(--c, rgba(239,106,45,.9)); color: #fff; box-shadow: none; }
 .fpv-seg b { min-width: 44px; text-align: center; font-size: 13px; font-variant-numeric: tabular-nums; }
-@media (max-height: 480px) { :is(body.mavic4, body.matrice4) .fpv-row { gap: 5px; } :is(body.mavic4, body.matrice4) .fpv-btn { padding: 4px 9px; font-size: 11px; } :is(body.mavic4, body.matrice4) .fpv-seg button { min-width: 30px; padding: 0 7px; font-size: 11px; } :is(body.mavic4, body.matrice4) .fpv-seg b { min-width: 36px; font-size: 12px; } }   /* 横向きのスマホは1行に収める */
+@media (max-height: 480px) { :is(body.mavic4, body.matrice4, body.mini5) .fpv-row { gap: 5px; } :is(body.mavic4, body.matrice4, body.mini5) .fpv-btn { padding: 4px 9px; font-size: 11px; } :is(body.mavic4, body.matrice4, body.mini5) .fpv-seg button { min-width: 30px; padding: 0 7px; font-size: 11px; } :is(body.mavic4, body.matrice4, body.mini5) .fpv-seg b { min-width: 36px; font-size: 12px; } }   /* 横向きのスマホは1行に収める */
 .fpv-note { margin: 0; font-family: var(--font); font-size: calc(11.5px * var(--fs, 1)); line-height: 1.5; color: rgba(234,242,255,.9); background: rgba(12,16,24,.66); border-left: 2px solid rgba(239,106,45,.9); padding: 5px 10px; border-radius: 0 6px 6px 0; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 #noteCard[data-kind=descent], #noteCard[data-kind=weather], #noteCard[data-kind=dshow] { display: flex; flex-direction: column; max-height: min(56vh, calc(100vh - var(--dock-h) - 122px - var(--sat))); overflow: hidden; }   /* 「横へ逃がす」が折り返しの外に出ると、渦から逃がせない */
 #noteCard[data-kind=descent] #noteBody, #noteCard[data-kind=weather] #noteBody, #noteCard[data-kind=dshow] #noteBody { flex: 1; min-height: 0; overflow-y: auto; }
@@ -592,7 +592,7 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
   .tabs button { min-height: var(--tap); }
 }
 /* ===== 機種の切り替え / PD6B-CAT3 ===== */
-body.alt .q550-only, body:not(.pd6b) .pd6b-only, body:not(.mavic4) .mavic-only, body:not(.matrice4) .m4-only, body.pd6b .no-pd6b { display: none !important; }
+body.alt .q550-only, body:not(.pd6b) .pd6b-only, body:not(.mavic4) .mavic-only, body:not(.matrice4) .m4-only, body:not(.mini5) .mn5-only, body.pd6b .no-pd6b { display: none !important; }
 .model-btn { gap: 6px; padding: 5px 12px; min-height: 32px; font-weight: 500; }
 .model-btn .mb-k { color: var(--ink3); font-size: 12px; } .model-btn b { font-weight: 700; } .model-btn .mb-c { color: var(--ink3); font-size: 11px; }
 body.alt .model-btn { box-shadow: inset 0 0 0 1.5px var(--accent); }
@@ -791,6 +791,7 @@ body.m4-ir #gl { filter: grayscale(1) contrast(1.35) brightness(.82); }
     <div class="ctx-row" data-tab="see">
       <div class="dock-group pd6b-only"><label>PD6B-CAT3</label><div class="chips" id="pdChips" role="group" aria-label="PD6B-CAT3の動き"><button data-pd="about">ⓘ この機体</button><button data-pd="fold" aria-pressed="false">たたむ</button><button data-pd="swap">電池交換</button><button data-pd="drop">荷物を置く</button><button data-pd="chute" aria-pressed="false">パラシュート</button><button data-pd="unit">測量用に付け替え</button><button data-pd="size" aria-pressed="false">大きさ</button></div></div>
       <div class="dock-group m4-only"><label>Matrice 4</label><div class="chips" id="m4Chips" role="group" aria-label="Matrice 4の動き"><button data-m4="about">ⓘ この機体</button><button data-m4="variant">4E にする</button><button data-m4="fold" aria-pressed="false">たたむ</button><button data-m4="battery" aria-pressed="false">電池交換</button><button data-m4="gimbal" aria-pressed="false">ジンバル</button><button data-m4="cams" aria-pressed="false">カメラ</button><button data-m4="laser" aria-pressed="false">測距</button><button data-m4="sense" aria-pressed="false">検知範囲</button><button data-m4="acc" aria-pressed="false">アクセサリー</button><button data-m4="size" aria-pressed="false">大きさ</button></div></div>
+      <div class="dock-group mn5-only"><label>Mini 5 Pro</label><div class="chips" id="mn5Chips" role="group" aria-label="Mini 5 Proの動き"><button data-mn5="about">ⓘ この機体</button><button data-mn5="fold" aria-pressed="false">たたむ</button><button data-mn5="battery" aria-pressed="false">電池交換</button><button data-mn5="gimbal" aria-pressed="false">ジンバル</button><button data-mn5="fov" aria-pressed="false">画角</button><button data-mn5="sense" aria-pressed="false">検知範囲</button><button data-mn5="size" aria-pressed="false">大きさ</button></div></div>
       <div class="dock-group mavic-only"><label>Mavic 4 Pro</label><div class="chips" id="mvChips" role="group" aria-label="Mavic 4 Proの動き"><button data-mv="about">ⓘ この機体</button><button data-mv="fold" aria-pressed="false">たたむ</button><button data-mv="battery">電池交換</button><button data-mv="gimbal">ジンバル</button><button data-mv="fov" aria-pressed="false">3眼カメラ</button><button data-mv="sense" aria-pressed="false">検知範囲</button><button data-mv="size" aria-pressed="false">大きさ</button></div></div>
       <div class="see-main">
       <button id="inspToggle" class="pill-btn compact-only" data-i18n="ui.parts">部品一覧</button>
@@ -897,6 +898,7 @@ body.m4-ir #gl { filter: grayscale(1) contrast(1.35) brightness(.82); }
     <button data-model="pd6b" role="radio" aria-checked="false"><b>PD6B-CAT3（プロドローン）</b><span>第一種型式認証をめざす物流用の大型機（最大離陸重量約45kg・プロペラ6枚）。みる・とばすと、たたむ・電池交換などの固有の動き</span></button>
     <button data-model="mavic4" role="radio" aria-checked="false"><b>DJI Mavic 4 Pro</b><span>3つのカメラと360°回るジンバルを積んだ折りたたみ式の空撮機（約1063g・プロペラ4枚）。みる・とばすと、たたむ・ジンバル・画角などの固有の動き</span></button>
     <button data-model="matrice4" role="radio" aria-checked="false"><b>DJI Matrice 4 シリーズ（4T／4E）</b><span>望遠とレーザー距離計（4Tはサーマルも）を積んだ折りたたみ式の産業用機（離陸重量1219g・プロペラ4枚）。みる・とばすと、4T⇄4E・たたむ・測距・アクセサリーなどの固有の動き</span></button>
+    <button data-model="mini5" role="radio" aria-checked="false"><b>DJI Mini 5 Pro</b><span>1インチカメラと縦にも回るジンバルを積んだ、手のひらサイズの折りたたみ機（249.9g・プロペラ4枚）。みる・とばすと、たたむ・電池交換・ジンバル・画角などの固有の動き</span></button>
   </div>
   <p class="pop-foot">切り替えると読み込み直します。</p>
 </div>
@@ -1017,18 +1019,18 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { CopyShader } from 'three/addons/shaders/CopyShader.js';
 import { HorizontalBlurShader } from 'three/addons/shaders/HorizontalBlurShader.js';
 import { VerticalBlurShader } from 'three/addons/shaders/VerticalBlurShader.js';
-// ===== 機種: 550クラス(既定) / PD6B-CAT3 / DJI Mavic 4 Pro / DJI Matrice 4 シリーズ =====
+// ===== 機種: 550クラス(既定) / PD6B-CAT3 / DJI Mavic 4 Pro / DJI Matrice 4 シリーズ / DJI Mini 5 Pro =====
 // 機種は URL の ?model= で選ぶ（Artifact の枠内などでURLを書き換えられないときは sessionStorage を使う）。
 // 切り替えはページを読み込み直す。部品・材質・カメラ・物理をまるごと作り直すほうが、実行中に差し替えるより確実なため。
-const MODELS = ['q550', 'pd6b', 'mavic4', 'matrice4'];
+const MODELS = ['q550', 'pd6b', 'mavic4', 'matrice4', 'mini5'];
 const MODEL = (() => {
   try { const q = new URLSearchParams(location.search).get('model'); if (q) return MODELS.includes(q) ? q : 'q550'; } catch (e) {}
   try { const s = sessionStorage.getItem('drone3d.model'); if (MODELS.includes(s)) return s; } catch (e) {}
   return 'q550';
 })();
-const IS_PD6B = MODEL === 'pd6b', IS_MAVIC = MODEL === 'mavic4', IS_M4 = MODEL === 'matrice4', IS_ALT = MODEL !== 'q550';
-const MODEL_NAME = { q550: '550クラス', pd6b: 'PD6B-CAT3', mavic4: 'Mavic 4 Pro', matrice4: 'Matrice 4' };
-const MODEL_FULL = { q550: '550クラス クアッドコプター', pd6b: 'PD6B-CAT3（プロドローン）', mavic4: 'DJI Mavic 4 Pro', matrice4: 'DJI Matrice 4 シリーズ' };
+const IS_PD6B = MODEL === 'pd6b', IS_MAVIC = MODEL === 'mavic4', IS_M4 = MODEL === 'matrice4', IS_MINI5 = MODEL === 'mini5', IS_ALT = MODEL !== 'q550';
+const MODEL_NAME = { q550: '550クラス', pd6b: 'PD6B-CAT3', mavic4: 'Mavic 4 Pro', matrice4: 'Matrice 4', mini5: 'Mini 5 Pro' };
+const MODEL_FULL = { q550: '550クラス クアッドコプター', pd6b: 'PD6B-CAT3（プロドローン）', mavic4: 'DJI Mavic 4 Pro', matrice4: 'DJI Matrice 4 シリーズ', mini5: 'DJI Mini 5 Pro' };
 
 // ===== 部品データ（解説・仕様例・点検ポイント） =====
 // 数値は「550クラス産業用クアッドコプターの典型例」。実機に合わせて差し替え可。
@@ -3040,6 +3042,182 @@ if (IS_M4) {
     vision: 'センサー 魚眼 障害物', visionDown: 'センサー 下', ir3d: '赤外線 距離', led: 'ライト 灯火 LED', fc: '頭脳 FC', gnss: 'GPS RTK 衛星', spotlight: 'ライト 照明 アクセサリー', speaker: 'スピーカー 拡声 アクセサリー' });
 }
 
+// ===== DJI Mini 5 Pro のデータ（機種の判定は model.js） =====
+// 実寸(m)で作り、縮尺は1。公式の3Dモデル・寸法図は公開されていないので、形は公式の製品写真・取扱説明書の図から読んだ値（docs/reference/2026-10-29-mini5pro-shape.md）。
+const MN5_K = 1;
+const MN5_DATE = '2026年10月時点';
+const MN5_SRC = {
+  product: { name: 'DJI 公式 Mini 5 Pro 製品ページ', url: 'https://www.dji.com/jp/mini-5-pro' },
+  specs: { name: 'DJI 公式 Mini 5 Pro 仕様', url: 'https://www.dji.com/jp/mini-5-pro/specs' },
+  faq: { name: 'DJI 公式 Mini 5 Pro よくある質問', url: 'https://www.dji.com/jp/mini-5-pro/faq' },
+  manual: { name: 'DJI Mini 5 Pro ユーザーマニュアル v1.0（2025年9月）', url: 'https://dl.djicdn.com/downloads/DJI_Mini_5_Pro/UM/20251210/DJI_Mini_5_Pro_User_Manual_ja.pdf' },
+  safety: { name: 'DJI Mini 5 Pro 安全ガイドライン（DJI RC-N3付属）', url: 'https://dl.djicdn.com/downloads/DJI_Mini_5_Pro/SG/2025/DJI_Mini_5_Pro_Safety_Guidelines_DJI_RC-N3_30lang.pdf' },
+  store: { name: 'DJIストア「DJI Mini 5 Pro」', url: 'https://store.dji.com/jp/product/dji-mini-5-pro' },
+  prop: { name: 'DJIストア「DJI Mini 5 Pro プロペラ」', url: 'https://store.dji.com/jp/product/dji-mini-5-pro-propellers' },
+  ridList: { name: '国土交通省「適合しているとして届出があったリモートID機器等の一覧」', url: 'https://www.mlit.go.jp/koku/content/001484158.pdf' },
+  certList: { name: '国土交通省「型式認証を取得している無人航空機一覧」（令和8年6月19日現在）', url: 'https://www.mlit.go.jp/koku/content/002008366.pdf' },
+};
+// 「公式」=DJIの仕様・製品ページ・FAQ、「取説」=ユーザーマニュアル、「図」=取説の図からの読み取り、「写真」=公式写真からの読み取り、「推定」=それ以外
+const MN5_PARTS = {
+  body: {
+    name: '機体本体（胴体）', en: 'Airframe body', group: 'frame', count: 1,
+    role: '電装とバッテリーを収める胴。真上から見ると前が広く、真ん中がくびれ、後ろがまた少し広い形（写真）。前の下にジンバル、前面と肩に魚眼のビジョンセンサー、前面に前向きLiDAR、後ろの上面に電源ボタンと残量LEDがある。',
+    structure: ['前の肩が最も高く、上面は後ろへくさび形に下がる（写真）', '後ろの下半分にバッテリーが入る（取説の図）', '防水ではない（公式FAQ）', '形と寸法は公式写真と取説の図から読んだ推定。内部の配置は例'],
+    spec: [['離陸重量', '249.9 g（±4 g・公式。Plus バッテリーでは249 gを超える・DJIストア）'], ['折りたたみ時', '157 × 95 × 68 mm（プロペラなし・公式）'], ['展開時', '304 × 380 × 91 mm（プロペラあり・公式）'], ['最大傾斜角度', '38°（公式）'], ['動作環境温度', '−10〜40 ℃（公式）']],
+    check: ['外殻の割れ・変形', 'センサーの窓の汚れ・傷', '通気口をふさがない'],
+    tip: '置いたときは前脚の先と電池の底の後ろ角で立ち、機首が少し上を向く（写真からの推定で約15°）。',
+  },
+  frontArm: {
+    name: '前アーム', en: 'Front arm', group: 'frame', count: 2,
+    role: '前の2つのモーターを支える腕。胴の前部の側面からほぼ水平に外へ伸び、先に脚（ランディングギア）が付く。畳むときは下へ振り下ろして後ろへ回し、胴の下の段で裏返しに収める（取説の図）。',
+    structure: ['展開は後アーム → 前アームの順（取説の図）', '畳むとモーターが下・脚が上を向く（写真）', '左前アームの前側の面に「MINI 5 PRO」の文字（写真）'],
+    check: ['展開しきっているか', 'ヒンジのガタ', 'ひび'],
+  },
+  rearArm: {
+    name: '後アーム', en: 'Rear arm', group: 'frame', count: 2,
+    role: '後ろの2つのモーターを支える腕。胴の後部の側面から斜め後ろへ伸び、後ろのモーターは前より高い位置で回る（写真からの推定で約15mm）。ほぼ垂直の軸で前へ回し、胴の上の段に沿わせて畳む。',
+    structure: ['後方右アームを展開すると、初期設定で電源が入る（取説）', '後方右アームを折りたたむと、自動で電源オフのカウントダウンが始まる（取説）', '先のポッドの下に機体ステータスインジケーター（取説の図）', '後アームに脚はない（取説の図・写真）'],
+    check: ['展開しきっているか', 'ヒンジのガタ', 'ひび'],
+    tip: '開くと電源が入り、畳むと電源が切れる。準備と片付けがアームの開け閉めだけで済む。',
+  },
+  landingGear: {
+    name: 'ランディングギア（アンテナ内蔵）', en: 'Landing gear (antennas)', group: 'gear', count: 2,
+    role: '前アームの先から下へ伸びる板状の脚。中にアンテナを収めている（取説の部品名「ランディングギア（アンテナ内蔵）」）。',
+    structure: ['前脚にアンテナが入る（取説）。映像伝送は O4+・アンテナ4本（2T4R・公式）', '先はL字の足（写真）'],
+    spec: [['映像伝送', 'O4+（公式）'], ['最大伝送距離（日本）', '10 km（障害物・電波干渉なし・公式）'], ['ライブビュー', '1080p / 30fps・60fps（公式）']],
+    check: ['ひび・欠け（中のアンテナを守っている）'],
+    tip: '安全ガイドラインの日本語の仕様欄には「日本国内では、2.4GHz 帯のみ使用可能」とある。',
+  },
+  motor: {
+    name: 'ブラシレスモーター', en: 'Brushless motor', group: 'prop', count: 4,
+    role: 'プロペラを回すアウターローター式のモーター。対角の2基が同じ向きに回り、隣どうしは逆向きに回って回転の反動を打ち消す。',
+    structure: ['外側の缶（ベル）ごと回るアウターローター', '図の歯と磁石の数は550クラスと同じ12N14Pで簡略化'],
+    spec: [['型番・出力', '公式資料に記載なし'], ['回転方向', '公式資料に記載なし（図の向きは一般的な例）']],
+    check: ['手で回して引っかかりがないか', '異音', '飛行後の温度'],
+  },
+  bell: { name: 'ベル（ローター）', en: 'Bell (rotor)', group: 'prop', count: 4, role: '磁石を内側に貼った回る缶。プロペラはこの上に取り付く。', check: ['打痕', '砂の噛み込み'] },
+  stator: { name: 'ステーター（固定子）', en: 'Stator', group: 'prop', count: 4, role: '回らない鉄心。巻線に電流を流して磁界を作る。', check: ['（分解しない）異音で気づく'] },
+  winding: { name: '巻線', en: 'Windings', group: 'prop', count: 4, role: 'ステーターの歯に巻いた銅線。ESCが順番に電流を流して回転磁界を作る。', check: ['焦げ臭さ'] },
+  magnet: { name: '永久磁石', en: 'Magnets', group: 'prop', count: 4, role: 'ベルの内側に並ぶN極とS極の磁石。', check: ['（分解しない）'] },
+  shaft: { name: 'シャフトとベアリング', en: 'Shaft & bearings', group: 'prop', count: 4, role: 'ベルの回転を支える軸と軸受け。', check: ['ガタ・ゴリ感'] },
+  motorBase: { name: 'モーターベース', en: 'Motor base', group: 'prop', count: 4, role: 'ステーターを支え、アームに固定する土台。', check: ['固定のゆるみ'] },
+  prop: {
+    name: 'クイックリリースプロペラ', en: 'Quick-release propeller', group: 'prop', count: 4,
+    role: '工具なしで付け外しできる2枚羽根のプロペラ。モーターの穴に脚を合わせて押し込み、ひねって固定する（取説の図）。羽根は根元で折れる。',
+    structure: ['プロペラとモーターのカラーマークを合わせて取り付ける（取説）', 'A（オレンジの印）が右前と左後、B（グレー）が左前と右後（取説の図）', '畳むときは両手で2枚の中央を持ち、同時に内側へ押す（取説）'],
+    spec: [['直径 × ピッチ', '6.0 × 2.8 インチ（DJIストア。直径は換算で約15.2 cm）'], ['重さ', '約 2.8 g / 枚（DJIストア）']],
+    check: ['欠け・ひび・変形', 'カラーマークの組み合わせ', 'ロックがかかっているか'],
+  },
+  esc: { name: 'ESC（電子速度制御器）', en: 'ESC', group: 'elec', count: 1, role: 'バッテリーの直流を、モーターを回す三相の電流に変えて回転数を調整する。', structure: ['胴の中の基板（この図の位置は例）'], check: ['電源を入れたときの音'] },
+  battery: {
+    name: 'インテリジェントフライトバッテリー', en: 'Intelligent Flight Battery', group: 'elec', count: 1,
+    role: '機体の電気のもと。胴の後ろの下半分に後ろから差し込み、左右のバックルで固定する（取説の図）。標準と、容量の大きい Plus の2種類がある。',
+    structure: ['リチウムイオン（LiNiMnCoO2・公式）', 'カチッと音がするまで差し込む（取説）', 'Plus を付けると機体の重量は249 gを超える（DJIストア）'],
+    spec: [['標準', '2788 mAh・7 V・19.52 Wh・約71.2 g・最大36分（公式）'], ['Plus', '4680 mAh・7.16 V・33.51 Wh・約117 g・最大52分（公式）'], ['充電（機体経由・65W）', '標準 約69分／Plus 約94分（公式）']],
+    check: ['膨らみ・傷', 'バックルが左右とも固定されているか', '充電は 5〜40 ℃で（公式）'],
+    tip: 'Plus は重さが標準の約1.6倍で、飛べる時間は36分から52分に延びる。代わりに機体は249 gを超える。',
+  },
+  cells: { name: 'セル', en: 'Cells', group: 'elec', count: 1, role: 'バッテリーの中身のリチウムイオンセル。セルの数と組み方は公式資料に記載なし（公称 7 V なので2直列と考えられる・推定）。', check: ['（分解しない）外装の膨らみで異常に気づく'] },
+  batteryBuckle: { name: 'バッテリーバックル', en: 'Battery buckles', group: 'elec', count: 2, role: 'バッテリーの左右の側面にあるつまみ。両側を押しながら後ろへ引くと外れる（取説の図）。', check: ['左右ともしっかり固定されているか'] },
+  batteryLed: { name: '電源ボタンとバッテリー残量LED', en: 'Power button & battery LEDs', group: 'elec', count: 1, role: '機体の後ろの上面のボタンと4つのLED（取説の図）。1回押すと残量を表示し、押してから長押しすると電源が入る・切れる（取説）。', check: ['飛行前に残量を確認'] },
+  ports: { name: 'USB-C ポートと microSD スロット', en: 'USB-C & microSD', group: 'elec', count: 1, role: '機体の後ろの面の充電・データ転送の口と、記録用カードの差し込み口（取説の図）。本体内にも42 GBのストレージがある（公式）。', check: ['ふたの閉まり', 'USB-C使用中はアームを開いても電源が入らない（取説）'] },
+  fc: {
+    name: 'フライトコントローラー', en: 'Flight controller', group: 'elec', count: 1,
+    role: '機体の頭脳。ジャイロ・加速度・GNSS・ビジョンの情報から姿勢と位置を計算し、4基のモーターの回転数を決める。',
+    structure: ['胴の中（この図の位置は例）'],
+    spec: [['ホバリング精度', '垂直 ±0.1 m・水平 ±0.3 m（ビジョン）／±0.5 m（衛星）（公式）'], ['最大水平速度', '18 m/s（標準・Sモード・無風・公式）']],
+    check: ['起動時の自己診断（ステータスインジケーター）', 'コンパスの較正'],
+  },
+  gnss: { name: 'GNSS', en: 'GNSS', group: 'nav', count: 1, role: '衛星の電波から位置を求める。GPS・Galileo・BeiDou を使い、L1とL5の2つの周波数を受ける（公式）。', structure: ['胴の中（外からは見えない・写真。この図の位置は例）'], spec: [['衛星', 'GPS + Galileo + BeiDou（公式）']], check: ['離陸前に衛星をつかんでいるか'] },
+  lidar: {
+    name: '前向きLiDAR', en: 'Forward LiDAR', group: 'nav', count: 1,
+    role: 'レーザーを当てて前方の物までの距離を測る。暗い夜でも前の障害物を測れる（公式）。',
+    structure: ['前面の左右の魚眼の内側の黒い窓2つ（取説の図・写真）', 'クラス1レーザー製品の安全基準を満たす（取説）', '明るい光の下では正常に働かない（公式FAQ）'],
+    spec: [['夜間の測定範囲', '0.5〜25 m（反射率10%超・公式）'], ['視野', '上下・左右とも 60°（公式）']],
+    check: ['窓の汚れ・傷'],
+  },
+  vision: {
+    name: '全方向ビジョンシステム', en: 'Omnidirectional vision', group: 'nav', count: 4,
+    role: '魚眼のカメラで、前後左右と上の障害物までの距離を測る（公式）。ぶつかる前に止まったり避けたりする。',
+    structure: ['前面の左右と、肩の左右（斜め上・横向き）の魚眼（取説の図・写真）', '公式は「前方と後方に魚眼レンズを搭載し、前後左右、上方を検知」', 'スポーツモードでは障害物回避が働かない（取説）'],
+    spec: [['前方・後方', '0.5〜18 m（公式）'], ['側方', '0.5〜12 m（公式）'], ['上方', '0.5〜18 m（公式）'], ['視野（前後左右）', '水平90°・垂直72°（公式）']],
+    check: ['窓の汚れ', '1ルクス以下の暗さや模様のない面は苦手（公式）'],
+  },
+  visionDown: { name: '下方ビジョンシステム', en: 'Downward vision', group: 'nav', count: 2, role: '底面の2つのカメラ。地面の模様を見て位置を保つ（取説）。', structure: ['位置の保持は高度 0.5〜30 m で最もよく働く（取説）'], spec: [['測定範囲', '0.3〜14 m・前後106°×左右90°（公式）']], check: ['窓の汚れ'] },
+  ir3d: { name: '3D 赤外線検知システム', en: '3D infrared sensing', group: 'nav', count: 1, role: '機体の下で赤外線を使って地面までの距離を測る（公式）。', structure: ['底面の2つに仕切られた横長の窓（取説の図・写真）', 'クラス1レーザー製品の安全基準を満たす（取説）'], spec: [['測定範囲', '0.3〜8 m（反射率10%超・公式）']], check: ['窓の汚れ'] },
+  auxLight: { name: '補助ライト', en: 'Auxiliary light', group: 'nav', count: 1, role: '底面のライト。暗い所で下方ビジョンを助ける。高さ5 m未満の暗い所で初期設定で自動で点く（取説）。', check: ['点灯するか'] },
+  statusLed: { name: '機体ステータスインジケーター', en: 'Status indicators', group: 'nav', count: 2, role: '後アームの先のポッドの下の灯り（取説の図）。緑のゆっくり点滅＝GNSS有効、緑の2回点滅＝ビジョン有効、黄のすばやい点滅＝送信機の信号喪失、赤の点灯＝重大なエラー、など。モーターが回ると緑に点滅する（取説）。', check: ['離陸前に色を見る', '補助ライトを使うときはアームのLEDを遮らない（取説）'] },
+  remoteId: { name: 'リモートID', en: 'Remote ID', group: 'nav', count: 1, role: '登録記号・位置・高度などを電波で発信する。Mini 5 Pro は機体に内蔵（国土交通省の届出一覧）。', structure: ['この図の位置は例'], check: ['飛行前に作動状況を確かめる（法定の点検項目）'] },
+  gimbal: {
+    name: 'ジンバル', en: 'Gimbal', group: 'payload', count: 1,
+    role: 'カメラの揺れを打ち消す3軸のジンバル。ロールを大きく回せるので、機体を傾けずに縦向きの写真・動画が撮れる。上へ55°まで向けられる（公式）。',
+    structure: ['3軸（チルト・ロール・パン・公式）', '機首の下に吊り下げ（取説の図）', '下の縦の円筒・U字のヨーク・左右の円筒・頭の中の順につながる（写真からの推定）', '電源を入れる前にストレージカバーを外す（取説）'],
+    spec: [['操作できる範囲', 'チルト −90°〜55°・ロール −180°〜45°（公式）'], ['機械的な範囲', 'チルト −135°〜80°・ロール −230°〜95°・パン ±25°（公式）'], ['最大制御速度', 'チルト 100°/秒（公式）'], ['角度ぶれ範囲', '±0.005°（公式）']],
+    check: ['ストレージカバーを外したか', '電源が入っている間に手で動かさない'],
+    tip: '公式の「225°の柔軟なジンバル回転」は、操作できるロールの幅（−180°〜45°）と一致する（公式の値からの計算）。',
+  },
+  camMain: {
+    name: 'カメラ', en: 'Camera', group: 'payload', count: 1,
+    role: '1インチの大きなセンサーを持つ1台のカメラ。暗い所でも細部まで描写できる（公式）。48mmの中望遠モードは、同じカメラで2倍に寄せて撮る（公式）。',
+    structure: ['レンズの横に「E24／F1.8」、下に「1-INCH」の文字（写真）', 'カメラは1台（公式の仕様に載るカメラは1つ）'],
+    spec: [['センサー', '1インチ CMOS・有効5000万画素（公式）'], ['焦点距離', '24 mm 相当（公式）'], ['絞り', 'f/1.8（公式）'], ['画角（FOV）', '84°（公式）'], ['フォーカス', '0.5 m〜∞（公式）'], ['動画', '最大 4K / 120fps（スローモーション・公式）']],
+    check: ['レンズの汚れ'],
+  },
+  regMark: { name: '登録記号', en: 'Registration mark', group: 'safety', count: 1, role: '国に登録した機体の番号。100g以上の機体は登録が必要で、25kg未満は文字の高さ3mm以上で表示する。', structure: ['この図の番号と位置は例'], check: ['はがれ・かすれ'] },
+};
+const MN5_LIST_ORDER = ['body', 'frontArm', 'rearArm', 'landingGear', 'motor', 'bell', 'stator', 'winding', 'magnet', 'shaft', 'motorBase', 'prop', 'esc', 'battery', 'cells', 'batteryBuckle', 'batteryLed', 'ports', 'fc',
+  'gnss', 'lidar', 'vision', 'visionDown', 'ir3d', 'auxLight', 'statusLed', 'remoteId', 'gimbal', 'camMain', 'regMark'];
+const MN5_SUB = { bell: 'motor', stator: 'motor', winding: 'motor', magnet: 'motor', shaft: 'motor', motorBase: 'motor', cells: 'battery', batteryBuckle: 'battery', camMain: 'gimbal' };
+const MN5_PER_MOTOR = ['motor', 'prop', 'bell', 'stator', 'winding', 'magnet', 'shaft', 'motorBase'];
+const MN5_SIMPLE = {
+  prop:     { role: '回って空気を下に押します。工具なしで付け外しできます。', analogy: '扇風機の羽根を下に向けて、自分が浮くようなもの' },
+  motor:    { role: 'プロペラを回す力の元。隣どうしが逆向きに回ります。', analogy: 'ミニ四駆のモーターを、もっと強く静かにしたもの' },
+  frontArm: { role: 'モーターを支える腕。たたむと手のひらに乗る大きさになります。', analogy: '折りたたみ傘の骨' },
+  battery:  { role: '電気のもと。後ろから差し込み、最大36分飛べます。', analogy: 'スマホの電池を、もっと強くしたもの' },
+  fc:       { role: '機体の頭脳。傾きと位置を測って、4つのモーターの速さを決めます。', analogy: '自転車に乗るときの「小脳」' },
+  gimbal:   { role: 'カメラの揺れを打ち消す首。カメラを縦にも回せます。', analogy: '走りながらでもコップの水をこぼさない手首' },
+  camMain:  { role: '大きなセンサーのカメラ。暗い所でもきれいに撮れます。', analogy: '空飛ぶ高級コンパクトカメラ' },
+  vision:   { role: '周りを見て、ぶつかる前に止まる目です。', analogy: '車の自動ブレーキのカメラ' },
+};
+const MN5_SIMPLE_NAME = { prop: 'プロペラ', motor: 'モーター', frontArm: 'アーム', battery: 'バッテリー', fc: '頭脳（FC）', gimbal: 'ジンバル', camMain: 'カメラ', vision: 'センサー' };
+const MN5_TRIVIA = {
+  body: '公式の離陸重量は 249.9 g（±4 g）。日本の登録は「機体本体とバッテリーの重さの合計」が100 g以上なら必要なので、この機体も登録の対象になる。',
+  rearArm: '後方右のアームを開くと電源が入り、畳むと電源オフのカウントダウンが始まる（取説）。',
+  gimbal: 'ロールを −180°〜45° の範囲で回せる。範囲は公式。機体を傾けずに縦向きの映像が撮れる（縦向きにする角度は資料に無く、この図は −90° としている）。',
+  camMain: '48mm 中望遠モードは別のカメラではなく、1インチのカメラで2倍に寄せて撮る（公式）。',
+  lidar: '前向きLiDARは、1ルクス未満の暗さでも前の障害物を検知できる（公式FAQ）。',
+  battery: 'Plus バッテリーにすると最大飛行時間は52分。そのかわり機体は249 gを超える（公式・DJIストア）。',
+  landingGear: '脚の中にアンテナが入っている（取説）。前脚と電池の底で立つので、置くと機首が少し上を向く（写真からの推定）。',
+  statusLed: 'ステータスインジケーターは後ろの2本のアームの先にある（取説の図）。',
+};
+const MN5_TRIVIA_ACT = { rearArm: { alt: 'fold' }, frontArm: { alt: 'fold' }, gimbal: { alt: 'gimbal' }, camMain: { alt: 'fov' }, vision: { alt: 'sense' }, lidar: { alt: 'sense' }, battery: { alt: 'battery' } };
+const MN5_REG = {
+  body: [
+    { text: '機体本体とバッテリーを合わせた重さが100g以上なので、国の登録が必要（公式の離陸重量は249.9 g）。海外で「250g未満」として扱われる区分は、日本の登録の基準とは別のもの。', ky: '3.1', src: 'reg' },
+    { text: 'Mini 5 Pro は、令和8年6月19日現在の型式認証の一覧に載っていない。', ky: '3.1', src: 'mn5Cert' },
+  ],
+  remoteId: [{ text: 'Mini 5 Pro はリモートIDを機体に内蔵していると届け出られている（国土交通省の一覧・2025/9/13）。', ky: '3.1', src: 'mn5Rid' }],
+  landingGear: [{ text: '映像伝送（O4+）は、日本国内では2.4GHz帯のみ使用可能（安全ガイドラインの日本語の仕様欄）。技適を受けた機器なら免許のいらない小電力の無線局として使える（総務省）。', ky: '3.2', src: 'soumuDrone' }],
+  camMain: [{ text: '撮影するときは住宅などにカメラやズームを向けないこと、人の顔や表札などが写り込んだら削除やぼかしをすることが求められる（総務省のガイドライン）。', ky: '3.2', src: 'soumuPriv' }],
+};
+const MN5_KY_PART = { body: '4.1', frontArm: '4.1', rearArm: '4.1', landingGear: '4.5', motor: '4.4', bell: '4.4', stator: '4.4', winding: '4.4', magnet: '4.4', shaft: '4.6', motorBase: '4.1', prop: '4.4', esc: '4.4',
+  battery: '4.4', cells: '4.4', batteryBuckle: '4.6', batteryLed: '4.4', ports: '4.4', fc: '4.4', gnss: '4.5', lidar: '4.5', vision: '4.5', visionDown: '4.5', ir3d: '4.5', auxLight: '4.5', statusLed: '4.4', remoteId: '3.1', gimbal: '4.4', camMain: '4.4', regMark: '3.1' };
+
+if (IS_MINI5) {
+  const swap = (obj, next) => { for (const k of Object.keys(obj)) delete obj[k]; Object.assign(obj, next); };
+  swap(PARTS, MN5_PARTS);
+  GROUPS.splice(GROUPS.findIndex(g => g.id === 'payload'), 0, { id: 'safety', name: '登録・表示', color: '#e5484d' });
+  swap(SIMPLE, MN5_SIMPLE); SIMPLE_KEYS.splice(0, SIMPLE_KEYS.length, ...Object.keys(MN5_SIMPLE));
+  swap(SIMPLE_NAME, MN5_SIMPLE_NAME);
+  swap(TRIVIA, MN5_TRIVIA); swap(TRIVIA_ACT, MN5_TRIVIA_ACT);
+  { const keep = {}; for (const k of ['regMark', 'remoteId']) if (REG[k]) keep[k] = REG[k]; const reg = Object.assign(keep, MN5_REG); reg.remoteId = [...(REG.remoteId || []), ...MN5_REG.remoteId]; swap(REG, reg); }
+  swap(KY_PART, MN5_KY_PART);
+  REG_SOURCES.mn5Cert = MN5_SRC.certList; REG_SOURCES.mn5Rid = MN5_SRC.ridList;
+  if (!REG_SOURCES.soumuDrone) REG_SOURCES.soumuDrone = { name: '総務省 電波利用ポータル「ドローン等に用いられる無線設備について」', url: 'https://www.tele.soumu.go.jp/j/sys/others/drone/' };
+  for (const L of Object.values(I18N)) if (L && L.parts) for (const k of Object.keys(L.parts)) delete L.parts[k];
+  Object.assign(FIND_ALIAS, { body: '胴体 ボディ 本体', frontArm: 'アーム 腕 たたむ', rearArm: 'アーム 腕 電源', landingGear: '脚 アンテナ', prop: '羽 はね ペラ', battery: '電池 バッテリ Plus プラス', gimbal: 'ジンバル 首 縦撮り', camMain: 'カメラ 1インチ', vision: 'センサー 魚眼 障害物', lidar: 'ライダー レーザー 障害物', ir3d: '赤外線 距離', statusLed: 'ライト LED', fc: '頭脳 FC' });
+}
+
 // ===== 手続き生成テクスチャと材質 (v2: 製品レンダリング品質) =====
 function makeCanvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
 function mulberry(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -3930,7 +4108,7 @@ function pd6bMaterials(M) {
   const propCanvas = (dir) => pd6bCanvas(512, 1024, (g, w, h) => {
     g.fillStyle = '#121316'; g.fillRect(0, 0, w, h);
     g.strokeStyle = 'rgba(255,255,255,0.045)'; g.lineWidth = 5; for (let x = -h; x < w + h; x += 22) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x + h * 0.35, h); g.stroke(); }
-    g.fillStyle = dir > 0 ? '#14b8a6' : '#3b7df7'; g.fillRect(0, h * 0.965, w, h * 0.035);
+    g.fillStyle = dir > 0 ? '#14b8a6' : '#3b7df7'; g.fillRect(0, 0, w, h * 0.035);   /* キャンバスの上端＝羽根の先 */
     g.save(); g.translate(w * 0.30, h * 0.30); g.rotate(Math.PI / 2); g.fillStyle = '#8d9097'; g.font = `bold 34px ${sans}`; g.fillText(`30"  ${dir > 0 ? 'CCW' : 'CW'}`, 0, 0); g.restore();
   });
   const propMat = (dir) => Object.assign(phy({ map: canvasTex(propCanvas(dir), { wrap: false }), roughness: 0.32, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.08, specularIntensity: 0.7, side: THREE.DoubleSide }), { userData: { flatTint: true } });
@@ -4263,7 +4441,7 @@ function mavicMaterials(M) {
   const propCanvas = (dir) => pd6bCanvas(256, 1024, (g, w, h) => {
     g.fillStyle = '#18191c'; g.fillRect(0, 0, w, h);   /* 黒い羽根の先がオレンジ（公式写真） */
     g.fillStyle = 'rgba(255,255,255,0.04)'; for (let y = 0; y < h; y += 6) g.fillRect(0, y, w, 1);
-    g.fillStyle = '#f0821e'; g.fillRect(0, h * 0.962, w, h * 0.038);
+    g.fillStyle = '#f0821e'; g.fillRect(0, 0, w, h * 0.038);   /* キャンバスの上端＝羽根の先（CanvasTexture は上下が反転して v=1 が上端） */
     g.fillStyle = dir > 0 ? '#9aa0a8' : '#18191c'; g.beginPath(); g.arc(w * 0.5, h * 0.12, w * 0.10, 0, Math.PI * 2); g.fill();   /* 根元の印（取付の組み合わせ・図の例） */
   });
   const propMat = (dir) => Object.assign(phy({ map: canvasTex(propCanvas(dir), { wrap: false }), roughness: 0.55, metalness: 0, clearcoat: 0.3, clearcoatRoughness: 0.4, side: THREE.DoubleSide }), { userData: { flatTint: true } });
@@ -4603,7 +4781,7 @@ function m4Materials(M) {
   const propCanvas = (mark) => pd6bCanvas(256, 1024, (g, w, h) => {
     g.fillStyle = '#1a1a1a'; g.fillRect(0, 0, w, h);   /* 黒い羽根の先の約2割がオレンジ（公式写真） */
     g.fillStyle = 'rgba(255,255,255,0.04)'; for (let y = 0; y < h; y += 6) g.fillRect(0, y, w, 1);
-    g.fillStyle = '#e06e2c'; g.fillRect(0, h * 0.905, w, h * 0.095);
+    g.fillStyle = '#e06e2c'; g.fillRect(0, 0, w, h * 0.095);   /* キャンバスの上端＝羽根の先（CanvasTexture は上下が反転して v=1 が上端） */
   });
   const propMat = () => Object.assign(phy({ map: canvasTex(propCanvas(), { wrap: false }), roughness: 0.55, metalness: 0, clearcoat: 0.3, clearcoatRoughness: 0.4, side: THREE.DoubleSide }), { userData: { flatTint: true } });
   const regLabel = pd6bCanvas(512, 96, (g, w, h) => { g.fillStyle = '#f4f4f2'; g.fillRect(0, 0, w, h); g.fillStyle = '#17181b'; g.font = 'bold 60px "SF Mono", Menlo, monospace'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('JU 1234 5678', w / 2, h / 2 + 2); });
@@ -5001,6 +5179,321 @@ function buildM4(M) {
     rotor: { R: mm(R_PROP) * K, y0: mm(25.5) }, moveR: 0.27, moveY: 0.05, rpmScale: 1.05 };
 }
 
+// ===== DJI Mini 5 Pro の手続き生成 =====
+// 寸法は実寸・等倍。公式値: 折りたたみ 157×95×68mm、展開 304×380×91mm（プロペラあり）、プロペラ 6.0インチ。
+// 公式の3Dモデル・寸法図は公開されていないので、形は公式の製品写真と取説の図から読んだ値（docs/reference/2026-10-29-mini5pro-shape.md、平面±3%・高さ±5mm程度）。
+// 座標は仕様書の mm（原点＝胴の中心、x=右・y=上・z=後ろ、機首=−Z）を mn5P() で m に直す。前脚の先 y=−63 が床に来るよう入れ物ごと下げる。
+const mn5P = (x, y, z) => V3(x / 1000, y / 1000, z / 1000);
+function mn5Materials(M) {
+  const phy = (o) => new THREE.MeshPhysicalMaterial(o), std = (o) => new THREE.MeshStandardMaterial(o);
+  const decal = (c) => std({ map: canvasTex(c, { wrap: false }), roughness: 0.5, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+  const decalT = (c) => std({ map: canvasTex(c, { wrap: false }), roughness: 0.6, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  const sans = '-apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif';
+  const propCanvas = () => pd6bCanvas(256, 1024, (g, w, h) => {
+    g.fillStyle = '#2e2e2e'; g.fillRect(0, 0, w, h);   /* 濃いグレーの羽根、先端約8mmがオレンジ（写真） */
+    g.fillStyle = 'rgba(255,255,255,0.04)'; for (let y = 0; y < h; y += 6) g.fillRect(0, y, w, 1);
+    g.fillStyle = '#e0843a'; g.fillRect(0, 0, w, h * 0.105);   /* キャンバスの上端＝羽根の先（CanvasTexture は上下が反転して v=1 が上端） */
+  });
+  const propMat = () => Object.assign(phy({ map: canvasTex(propCanvas(), { wrap: false }), roughness: 0.55, metalness: 0, clearcoat: 0.3, clearcoatRoughness: 0.4, side: THREE.DoubleSide }), { userData: { flatTint: true } });
+  const txt = (w, h, lines, font, col = '#c8c8c8', bg = null) => pd6bCanvas(w, h, (g, W, H) => { if (bg) { g.fillStyle = bg; g.fillRect(0, 0, W, H); } g.fillStyle = col; g.font = font; g.textAlign = 'center'; g.textBaseline = 'middle'; lines.forEach((l, i) => g.fillText(l, W / 2, H * (i + 0.5) / lines.length + 2)); });
+  return {
+    shell: phy({ color: 0x8a8a8a, metalness: 0.04, roughness: 0.66, clearcoat: 0.12, clearcoatRoughness: 0.6 }),   /* 本体の灰・細かいシボのマット（写真） */
+    shellLight: phy({ color: 0x969696, metalness: 0.04, roughness: 0.62 }),
+    dark: phy({ color: 0x242424, metalness: 0.1, roughness: 0.6 }),
+    gimbal: phy({ color: 0x1e1e1e, metalness: 0.2, roughness: 0.4, clearcoat: 0.4, clearcoatRoughness: 0.3 }),   /* カメラ頭は黒の半つや */
+    gimbalMatte: phy({ color: 0x2a2a2a, metalness: 0.1, roughness: 0.7 }),
+    bell: phy({ color: 0x161616, metalness: 0.35, roughness: 0.38, clearcoat: 0.4, clearcoatRoughness: 0.3 }),
+    glass: phy({ color: 0x07090d, roughness: 0.05, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.03, iridescence: 0.6, iridescenceIOR: 1.3 }),
+    lensGlass: phy({ color: 0x0f1a15, roughness: 0.04, metalness: 0.1, clearcoat: 1, clearcoatRoughness: 0.02, iridescence: 0.7, iridescenceIOR: 1.4 }),   /* 緑がかった反射（写真） */
+    window: phy({ color: 0x0a0b0d, metalness: 0.3, roughness: 0.16, clearcoat: 1, clearcoatRoughness: 0.06 }),
+    lensRing: phy({ color: 0x1d1f23, metalness: 0.8, roughness: 0.3 }),
+    lensBack: new THREE.MeshBasicMaterial({ color: 0x020305 }),
+    orange: std({ color: 0xe0843a, roughness: 0.5 }),
+    prop: propMat(),
+    regLabel: decal(txt(512, 96, ['JU 1234 5678'], 'bold 60px "SF Mono", Menlo, monospace', '#17181b', '#f4f4f2')),
+    brand: decalT(txt(512, 72, ['MINI 5 PRO'], `600 52px ${sans}`, '#c8c8c8')),
+    djiLogo: decalT(txt(256, 112, ['dji'], `italic 700 92px ${sans}`, '#bdbdbd')),
+    camText: decalT(txt(128, 128, ['E24', 'F1.8'], `700 46px ${sans}`, '#e6e6e6')),
+    inchText: decalT(txt(256, 64, ['1-INCH'], `600 44px ${sans}`, '#e6e6e6')),
+    plate: decalT(txt(256, 128, ['81dB', 'CE  Lwa'], `500 40px ${sans}`, '#a8a8a8')),
+    protector: phy({ color: 0x4a4f57, roughness: 0.25, clearcoat: 0.5, transparent: true, opacity: 0.6, depthWrite: false }),
+    fov: new THREE.MeshBasicMaterial({ color: 0xef6a2d, transparent: true, opacity: 0.17, depthWrite: false, side: THREE.DoubleSide }),
+    fov48: new THREE.MeshBasicMaterial({ color: 0x3b7df7, transparent: true, opacity: 0.2, depthWrite: false, side: THREE.DoubleSide }),
+    sense: new THREE.MeshBasicMaterial({ color: 0x14b8a6, transparent: true, opacity: 0.10, depthWrite: false, side: THREE.DoubleSide }),
+    lidarBeam: new THREE.MeshBasicMaterial({ color: 0xef6a2d, transparent: true, opacity: 0.22, depthWrite: false, side: THREE.DoubleSide }),
+    irBeam: new THREE.MeshBasicMaterial({ color: 0xa06cf5, transparent: true, opacity: 0.22, depthWrite: false, side: THREE.DoubleSide }),
+  };
+}
+
+function buildMini5(M) {
+  const K = MN5_K, P = mn5P, mm = (v) => v / 1000, LEG_Y = -0.063;
+  const root = new THREE.Group(); root.name = 'drone';
+  const sg = new THREE.Group(); sg.name = 'mini5'; sg.scale.setScalar(K); sg.position.y = -0.158 - LEG_Y * K; root.add(sg);
+  const parts = [], pick = [], wires = [], motors = [], legs = [];
+  const G = motorGeometries(), X = mn5Materials(M);
+  const idxCount = {};
+  function reg(obj, key, explode, opts = {}) {
+    const idx = (idxCount[key] = (idxCount[key] || 0) + 1) - 1;
+    const p = { key, idx, obj, home: obj.position.clone(), homeQuat: obj.quaternion.clone(), explode: explode.clone(), meshes: [], coarse: !!opts.coarse, label: opts.label || null, hidden: false, anim: null };
+    obj.userData.part = p;
+    obj.traverse(m => { if (m.isMesh && !m.userData.noPart) { p.meshes.push(m); if (!m.userData.fine) m.userData.fine = p; if (opts.coarse) m.userData.coarse = p; if (!m.userData.noPick) pick.push(m); } });
+    parts.push(p); return p;
+  }
+  const noPart = (o) => { o.traverse(c => { c.userData.noPart = true; c.userData.noPick = true; c.userData.noAO = true; c.castShadow = false; }); return o; };
+  const plane = (w, h, mat) => mesh(new THREE.PlaneGeometry(w, h), mat, { cast: false });
+  const atP = (o, x, y, z) => { o.position.copy(P(x, y, z)); return o; };
+  const box = (w, h, d, r, mat, x, y, z) => atP(mesh(rboxGeo(mm(w), mm(h), mm(d), mm(r)), mat), x, y, z);
+
+  // ---------- 胴（断面 [z, 半幅, 上端, 下端, 上の丸み, 下の丸み]・mm。写真から読んだ値）----------
+  // 前は広い「頭」（ジンバルの上にひさし。前端は左右の目の台と、間の放熱フィンのかたまりで別に作る）、真ん中がくびれ、後ろの肩でまた広がる。上面は前の肩が最も高く後ろへ下がる。
+  // 下面は前の頭の下がジンバルの入る空き、真ん中が平らな底、後ろの下半分は電池（別部品）が底になる
+  const BODY = [
+    [-66, 37, 27.6, 13, 3.4, 3], [-62, 38, 28, 13, 3.4, 3.2], [-57, 38, 27.4, 12, 3.4, 3.2], [-53, 38, 27, -2, 3.4, 3.4],
+    [-50, 37.8, 26.6, -26, 3.4, 3.6], [-44, 37, 26.2, -29, 3.4, 3.8], [-36, 35, 25.5, -29, 3.4, 3.8], [-25, 30.5, 24.6, -29, 3.4, 3.8], [-14, 27.5, 23.6, -29, 3.4, 3.8],
+    [0, 27, 22, -29, 3.4, 3.8], [8, 27, 21.4, -27, 3.4, 3.6], [13, 27, 21, -10, 3.4, 3], [39, 27, 18.6, -10, 3.4, 3], [45, 33, 18, -10, 3.4, 3], [50, 37, 16.8, -10, 3.4, 3],
+    [55, 38.5, 16, -10, 3.4, 3], [62, 33, 14.6, -10, 3.2, 3], [66, 29, 13.6, -10, 3, 2.8], [71, 19, 11.6, -9, 2.6, 2.6], [74.5, 7, 9, -6, 2.3, 2.3],
+  ];
+  const S0 = BODY.map(([z, w, t, b, nt, nb]) => [z / 1000, w / 1000, t / 1000, b / 1000, nt, nb]);
+  const crs = (S, u) => { const n = S.length - 1, i = Math.min(n - 1, Math.max(0, Math.floor(u))), t = u - i;
+    const p0 = S[Math.max(0, i - 1)], p1 = S[i], p2 = S[i + 1], p3 = S[Math.min(n, i + 2)];
+    return p1.map((_, k) => 0.5 * ((2 * p1[k]) + (-p0[k] + p2[k]) * t + (2 * p0[k] - 5 * p1[k] + 4 * p2[k] - p3[k]) * t * t + (-p0[k] + 3 * p1[k] - 3 * p2[k] + p3[k]) * t * t * t)); };
+  const secAt = (S, z) => { for (let i = 0; i < S.length - 1; i++) if (z <= S[i + 1][0]) { const t = (z - S[i][0]) / (S[i + 1][0] - S[i][0]); return crs(S, i + clamp(t, 0, 1)); } return S[S.length - 1].slice(); };
+  const ring = (sec, a) => { const [, w, top, bot, nt, nb] = sec, c = Math.cos(a), s = Math.sin(a), mid = (top + bot) / 2;
+    const n = s >= 0 ? nt : nb, x = w * Math.sign(c) * Math.abs(c) ** (2 / n), y = s >= 0 ? mid + (top - mid) * Math.abs(s) ** (2 / n) : mid - (mid - bot) * Math.abs(s) ** (2 / n); return [x, y]; };
+  function loftGeo(S, sub = 6, around = 72) {
+    const rings = [], N = (S.length - 1) * sub;
+    for (let k = 0; k <= N; k++) rings.push(crs(S, k / sub));
+    const pos = [], idx = [];
+    for (const r of rings) for (let j = 0; j < around; j++) { const [x, y] = ring(r, j / around * Math.PI * 2); pos.push(x, y, r[0]); }
+    const R = rings.length;
+    for (let k = 0; k < R - 1; k++) for (let j = 0; j < around; j++) { const a = k * around + j, b = k * around + (j + 1) % around, c = a + around, d = b + around; idx.push(a, b, c, b, d, c); }
+    const cap = (k, flip) => { const r = rings[k], ci = pos.length / 3; pos.push(0, (r[2] + r[3]) / 2, r[0] + (flip ? 0.0006 : -0.0006)); for (let j = 0; j < around; j++) { const a = k * around + j, b = k * around + (j + 1) % around; if (flip) idx.push(ci, a, b); else idx.push(ci, b, a); } };
+    cap(0, false); cap(R - 1, true);
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals(); return g;
+  }
+  const topAt = (zmm) => secAt(S0, zmm / 1000)[2] * 1000;   // その z の上面の高さ（mm）
+
+  const bodyG = new THREE.Group();
+  bodyG.add(mesh(loftGeo(S0), X.shell));
+  // 上面の浅い2本の稜線（写真）
+  for (const s of [-1, 1]) { const g = new THREE.Group(); for (let z = -62; z <= 58; z += 6) g.add(atP(mesh(new THREE.BoxGeometry(mm(1.2), mm(0.8), mm(6.4)), X.shellLight), s * 22, topAt(z) - 0.9, z)); bodyG.add(g); }
+  // 前面の上の左右: 目の台（丸いふくらみ。外に魚眼、内に LiDAR の窓・写真）。間は谷になり、その奥に放熱フィンが見える
+  for (const s of [-1, 1]) bodyG.add(box(27, 19, 24, 7.5, X.shell, s * 24.5, 20, -66));
+  // 目の台の間の谷: 胴より前へ出た黒い縦の放熱フィンのかたまり（写真）。下はカメラの頭が上を向いても当たらない高さ
+  { const fin = new THREE.Group(); fin.add(box(22, 14, 16, 2, X.gimbalMatte, 0, 19, -72)); for (let k = 0; k < 8; k++) fin.add(box(1.2, 13, 16, 0.3, X.dark, -9.1 + k * 2.6, 19.5, -72.6)); bodyG.add(fin);
+    fin.add(box(27, 12, 3, 1.5, X.gimbalMatte, 0, 4, -56)); for (let k = 0; k < 10; k++) fin.add(box(1.1, 11, 3.2, 0.3, X.dark, -11.7 + k * 2.6, 4, -57.6)); }   // 頭の後ろ（ひさしの下）にも続く
+  // 下ヒレ: 前アーム付け根のソケットの真下で、胴の頬の下端が三角にとがる（写真。畳んだ姿はここで机に触れる。名称は取説に無い）
+  for (const s of [-1, 1]) { const sh = polyShape([[mm(-9), 0], [mm(9), 0], [mm(2), mm(-18)], [mm(-1), mm(-18)]]); const g = new THREE.ExtrudeGeometry(sh, { depth: mm(6), bevelEnabled: true, bevelThickness: mm(1), bevelSize: mm(1), bevelSegments: 2 });
+    g.translate(0, 0, -mm(3)); g.rotateY(-Math.PI / 2); const m = mesh(g, X.shell); atP(m, s * 27, -21, -32); bodyG.add(m); }
+  // 上面の後ろ: 黒い斜めの通気口2つ・dji ロゴ（写真）
+  for (const s of [-1, 1]) { const v = box(7, 1.6, 26, 2.5, X.dark, s * 25, topAt(51) - 1.2, 51); v.rotation.z = s * -0.18; bodyG.add(v); for (let k = 0; k < 3; k++) { const l = box(6, 1.2, 1.4, 0.4, X.gimbalMatte, s * 25, topAt(42 + k * 8) - 0.8, 42 + k * 8); l.rotation.x = -0.5; bodyG.add(l); } }
+  { const t = plane(mm(12), mm(5.2), X.djiLogo); t.rotation.x = -Math.PI / 2 + 0.06; atP(t, 0, topAt(45) + 0.3, 45); t.userData.noPick = true; bodyG.add(t); }
+  // 底面: 前のスリット・銘板（写真）
+  bodyG.add(box(20, 1, 2, 0.5, X.dark, 0, -29.3, -55));
+  { const t = plane(mm(30), mm(15), X.plate); t.rotation.x = Math.PI / 2; atP(t, 0, -29.4, -2); t.userData.noPick = true; bodyG.add(t); }
+  sg.add(bodyG); reg(bodyG, 'body', V3(0, 0, 0), { label: P(-30, 26, -10) });
+  const rm = plane(mm(26), mm(5), X.regLabel); rm.rotation.y = -Math.PI / 2; atP(rm, -27.4, 6, 0); sg.add(rm); reg(rm, 'regMark', V3(-0.04, 0, 0));
+  // 後ろの上面: 電源ボタンと残量LED4つ（取説の図・写真）
+  const bled = new THREE.Group();
+  bled.add(box(14, 1.6, 7, 2.5, X.shellLight, 0, topAt(62) + 0.2, 62));
+  bled.userData.lamps = [];   // 残量LED（電源ボタンを1回押すと残量を示す・取説。図では4つとも点けて示す）
+  for (let k = 0; k < 4; k++) { const l = atP(mesh(cylGeo(mm(0.8), mm(0.8), mm(0.8), 10), M.chip), -5.4 + k * 3.6, topAt(55) + 0.3, 55); bled.add(l); bled.userData.lamps.push(l); }
+  sg.add(bled);
+  // 後ろの面: USB-C と microSD（取説の図・写真）
+  const ports = new THREE.Group(); ports.add(box(18, 7, 1, 2.5, X.dark, 0, -2.5, 73)); ports.add(box(8, 2.8, 1, 1.2, M.chip, -4.2, -2.5, 73.3)); ports.add(box(6.5, 1.4, 1, 0.5, M.chip, 4.8, -2.5, 73.3));
+  sg.add(ports); reg(ports, 'ports', V3(0, 0.01, 0.04), { label: P(0, -2.5, 74) });
+
+  // ---------- バッテリー（胴の後ろの下半分・後ろから差し込む）----------
+  const bat = new THREE.Group();
+  const shell = new THREE.Group(); bat.add(shell);
+  shell.add(box(54, 19.6, 63, 5, X.shell, 0, -19.2, 43.5));
+  shell.add(box(46, 14, 34, 3, X.shell, 0, -18, -2));   // 胴の中へ入る前の部分（外からは見えない。単体の写真で全長約94mm）
+  shell.add(box(1.6, 0.6, 52, 0.3, X.dark, 0, -29.1, 44));   // 底の中央の溝（写真では底が左右2枚に分かれて見える）
+  for (const s of [-1, 1]) shell.add(box(6, 2.4, 6, 1.5, X.dark, s * 22, -29.4, 71));   // 底の後ろ角の小さな足（接地点・写真）
+  const cells = mesh(rboxGeo(mm(44), mm(13), mm(84), mm(3)), M.cell); atP(cells, 0, -18.5, 30); bat.add(cells);
+  const buckle = new THREE.Group();
+  for (const s of [-1, 1]) { const b = box(1.8, 13, 8, 0.8, X.dark, s * 27.3, -21, 64); for (let k = 0; k < 4; k++) b.add(at(mesh(new THREE.BoxGeometry(mm(0.6), mm(10), mm(0.8)), X.gimbalMatte), s * mm(0.9), 0, mm(-2.7 + k * 1.8))); buckle.add(b); }
+  bat.add(buckle);
+  sg.add(bat);
+  reg(cells, 'cells', V3(0, 0, 0)); reg(buckle, 'batteryBuckle', V3(0, 0, 0)); reg(bled, 'batteryLed', V3(0, 0.03, 0.02));
+  const batPart = reg(bat, 'battery', V3(0, -0.04, 0.09), { coarse: true, label: P(20, -20, 60) }); batPart.shell = shell;
+  // 電池を抜いたときに見える差し込み口（部品には数えない）
+  const bay = new THREE.Group();   // 電池を抜いたあとに見える所
+  bay.add(box(50, 1, 60, 3, X.dark, 0, -10.6, 44)); bay.add(box(47, 15, 1.2, 3, X.lensBack, 0, -18, 12.4));   // 胴の下面の受けと、前の壁の差し込み穴
+  bay.visible = false; sg.add(noPart(bay));
+
+  // ---------- 内部の電装（位置は例）----------
+  const fc = box(40, 4, 46, 1.5, M.aluBrushDark, 0, 14, -32); sg.add(fc); reg(fc, 'fc', V3(0, 0.07, -0.03), { label: V3(0, 0.003, 0) });
+  const esc = atP(mesh(rboxGeo(mm(40), mm(3.5), mm(36), mm(1.5)), [M.pcbEdge, M.pcbEdge, M.pcbPDB, M.pcbEdge, M.pcbEdge, M.pcbEdge]), 0, 4, -6); sg.add(esc); reg(esc, 'esc', V3(0, 0.05, 0));
+  const gnss = box(18, 3, 18, 1, M.gpsBody, 0, 15, 22); sg.add(gnss); reg(gnss, 'gnss', V3(0, 0.08, 0), { label: V3(0, 0.002, 0) });
+  const rid = box(10, 3, 8, 1, M.plasticGray, 12, 10, 30); sg.add(rid); reg(rid, 'remoteId', V3(0.04, 0.05, 0));
+
+  // ---------- センサー ----------
+  const fish = (x, y, z, dir, key, label, r = 4.5) => {
+    const v = new THREE.Group(); atP(v, x, y, z); v.quaternion.setFromUnitVectors(UP, dir.clone().normalize());
+    v.add(at(mesh(cylGeo(mm(r + 1.5), mm(r + 1.9), mm(2.2), 28), X.dark), 0, -0.0006, 0));
+    v.add(at(mesh(new THREE.TorusGeometry(mm(r + 0.6), mm(0.5), 8, 32).rotateX(Math.PI / 2), X.lensRing), 0, 0.0005, 0));
+    const dome = mesh(new THREE.SphereGeometry(mm(r), 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), X.glass); dome.scale.y = 0.62; at(dome, 0, 0.0005, 0); v.add(dome);
+    sg.add(v); reg(v, key, dir.clone().normalize().multiplyScalar(0.04), { label: label ? V3(0, 0.005, 0) : null }); return v; };
+  fish(31.5, 20.5, -76.6, V3(0.55, 0.1, -0.83), 'vision', true); fish(-31.5, 20.5, -76.6, V3(-0.55, 0.1, -0.83), 'vision');   // 前面の左右（前向き・やや外・上）
+  fish(31, topAt(-31) - 1.5, -31, V3(0.55, 0.83, 0.05), 'vision', false, 4); fish(-31, topAt(-31) - 1.5, -31, V3(-0.55, 0.83, 0.05), 'vision', false, 4);   // 肩の左右（斜め上・横向き）
+  const lidar = new THREE.Group();   // 前向きLiDAR: 魚眼の内側の黒い長円の窓2つ（取説の図・写真）
+  for (const s of [-1, 1]) { const w = mesh(new THREE.CylinderGeometry(mm(1), mm(1), mm(1.4), 24).rotateX(Math.PI / 2).scale(4, 3, 1), X.glass); atP(w, s * 17.5, 20, -78.4); lidar.add(w); }
+  sg.add(lidar); reg(lidar, 'lidar', V3(0, 0, -0.03), { label: P(17.5, 20, -79) });
+  fish(20, -29.6, -45, V3(0, -1, 0), 'visionDown', true, 3.5); fish(-20, -29.6, -45, V3(0, -1, 0), 'visionDown', false, 3.5);
+  const ir = new THREE.Group(); ir.add(box(19, 1, 6, 3, X.dark, 0, -29.5, -42)); for (const s of [-1, 1]) ir.add(box(8, 0.8, 4.6, 2, X.glass, s * 4.6, -29.9, -42));
+  sg.add(ir); reg(ir, 'ir3d', V3(0, -0.04, 0), { label: P(0, -30, -42) });
+  const aux = new THREE.Group(); aux.add(atP(mesh(cylGeo(mm(4.5), mm(4.5), mm(1), 24), X.shellLight), 0, -29.5, -30)); aux.add(atP(mesh(cylGeo(mm(3), mm(3), mm(0.8), 20), M.ledWhite), 0, -30.1, -30));
+  sg.add(aux); reg(aux, 'auxLight', V3(0, -0.04, 0.01));
+
+  // ---------- ジンバル: 胴の下の支え → 下の縦の円筒（パン）→ U字のヨーク → 左右の円筒（チルト）→ 頭の中（ロール）→ カメラの頭 ----------
+  // 軸の役割は形からの推定（仕様書 8.2）。頭は 35×30×26mm の黒い角丸の箱、前面に 19×16mm のレンズ枠
+  const PANC = P(0, -29.5, -68), TILT = P(0, -8, -70);
+  const mount = new THREE.Group();
+  for (const s of [-1, 1]) { const a = box(4, 3, 24, 1.2, X.gimbal, s * 11, -30.5, -58); a.rotation.y = s * -0.35; mount.add(a); mount.add(atP(mesh(cylGeo(mm(2.2), mm(2.2), mm(3), 14), M.rubber), s * 18, -30, -48)); }
+  mount.add(box(20, 2.5, 8, 1.2, X.gimbal, 0, -31.5, -66));
+  sg.add(mount);
+  const gim = new THREE.Group(); gim.position.copy(PANC); sg.add(gim);
+  const pan = new THREE.Group(); gim.add(pan);
+  pan.add(mesh(cylGeo(mm(8.5), mm(8.5), mm(7), 36), X.gimbal));   // パン（縦軸）のモーター。下端 y −33
+  const yoke = new THREE.Group(); pan.add(yoke);
+  { const ty = TILT.y - PANC.y, tz = TILT.z - PANC.z;
+    yoke.add(at(mesh(rboxGeo(mm(58), mm(4.5), mm(14), mm(2.2)), X.gimbal), 0, mm(2.25), tz + mm(4)));   // ヨークの底（頭の下をくぐる）。頭を傾けても縦にしても角が当たらない高さ
+    for (const s of [-1, 1]) yoke.add(at(mesh(rboxGeo(mm(5), ty - mm(4.5), mm(8), mm(2.5)), X.gimbal), s * mm(31.5), mm(4.5) + (ty - mm(4.5)) / 2, tz)); }
+  const tilt = new THREE.Group(); tilt.position.copy(TILT).sub(PANC); pan.add(tilt);
+  for (const s of [-1, 1]) { tilt.add(at(mesh(cylGeo(mm(7.5), mm(7.5), mm(6), 36).rotateZ(Math.PI / 2), X.gimbal), s * mm(31.5), 0, 0));   // 左右の円筒（チルト）
+    tilt.add(at(mesh(cylGeo(mm(5), mm(5), mm(0.6), 28).rotateZ(Math.PI / 2), X.gimbalMatte), s * mm(34.7), 0, 0));
+    tilt.add(at(mesh(rboxGeo(mm(8), mm(12), mm(10), mm(3)), X.gimbal), s * mm(24), mm(3), mm(6))); }   // 頭と円筒の間の耳（頭の後ろ半分の横。頭を縦にしても当たらない）
+  const roll = new THREE.Group(); at(roll, 0, mm(3), 0); tilt.add(roll);   // ロールの軸は頭の中心（y −5・チルト軸より3mm上）を前後に通す
+  const head = new THREE.Group(); roll.add(head);
+  const FZ = mm(-13);   // 前面（チルト軸から）
+  head.add(mesh(rboxGeo(mm(31), mm(30), mm(26), mm(7), 4), X.gimbal));
+  head.add(at(mesh(rboxGeo(mm(19), mm(16), mm(1.2), mm(4), 3), X.gimbalMatte), 0, 0, FZ - mm(0.2)));   // レンズ枠（内側へ段差で凹む）
+  head.add(at(mesh(rboxGeo(mm(16.5), mm(13.5), mm(0.8), mm(3), 3), X.window), 0, 0, FZ - mm(0.5)));
+  for (const sx of [-1, 1]) for (let k = 0; k < 5; k++) head.add(at(mesh(new THREE.BoxGeometry(mm(1.2), mm(16), mm(1)), X.gimbalMatte), sx * mm(15.6), 0, mm(1 + k * 2.4)));   // 側面の後ろ半分の放熱リブ（写真）
+  { const t = plane(mm(5), mm(5), X.camText); t.rotation.y = Math.PI; at(t, mm(12.4), mm(1), FZ - mm(0.15)); t.userData.noPick = true; head.add(t); }   // 「E24／F1.8」（レンズ枠の左＝機体の右）
+  { const t = plane(mm(10), mm(2.5), X.inchText); t.rotation.y = Math.PI; at(t, 0, mm(-10.6), FZ - mm(0.15)); t.userData.noPick = true; head.add(t); }   // 「1-INCH」
+  const lens = new THREE.Group(); at(lens, 0, 0, FZ - mm(0.9)); head.add(lens);
+  lens.add(mesh(cylGeo(mm(7.4), mm(7.4), mm(1.6), 40, true).rotateX(Math.PI / 2), X.lensRing));
+  lens.add(at(mesh(new THREE.CircleGeometry(mm(6.2), 32).rotateY(Math.PI), X.lensBack), 0, 0, mm(0.8)));
+  { const gl = mesh(new THREE.SphereGeometry(mm(6), 32, 12, 0, Math.PI * 2, 0, Math.PI / 2), X.lensGlass); gl.scale.y = 0.3; gl.rotation.x = -Math.PI / 2; at(gl, 0, 0, mm(-0.4)); lens.add(gl); }
+  const glow = at(mesh(new THREE.TorusGeometry(mm(8.6), mm(0.5), 8, 48), new THREE.MeshBasicMaterial({ color: 0xef6a2d, toneMapped: false })), 0, 0, mm(-1)); glow.visible = false; glow.renderOrder = 9; lens.add(noPart(glow)); lens.userData.glow = glow;
+  reg(lens, 'camMain', V3(0, 0, -0.03), { label: V3(0, 0, -0.003) });
+  reg(gim, 'gimbal', V3(0, -0.02, -0.06), { coarse: true, label: P(34, -8, -70).sub(PANC) });
+  // ストレージカバー（畳んだときにかぶせる。部品には数えない）
+  const protector = new THREE.Group(); protector.visible = false;
+  protector.add(mesh(rboxGeo(mm(74), mm(40), mm(34), mm(8)), X.protector)); protector.position.copy(P(0, -12, -70)); sg.add(noPart(protector));
+
+  // ---------- アーム ×4（写真・取説の図）----------
+  // 前アームは胴の前部の側面の低めからほぼ水平に外へ（21°前向き）、先に板状の脚。後アームは後部の側面の中ほどから斜め後ろへ（34°後ろ向き）、
+  // 後ろのモーターは前より約15mm高い（推定）。後アームに脚は無く、ポッドの下にステータスLED
+  const R_PROP = 76.2, pScale = R_PROP / 1000 / 0.152;
+  const PG = { bCCW: propGeometry(1, [0]).scale(pScale, 0.7, pScale), bCW: propGeometry(-1, [0]).scale(pScale, 0.7, pScale), fCCW: propGeometry(1).scale(pScale, 0.7, pScale), fCW: propGeometry(-1).scale(pScale, 0.7, pScale) };
+  // 並びは M1前右 M2後右 M3後左 M4前左。A（オレンジの印）= 右前・左後（取説の図）。回転方向は公式に記載がないので一般的な例
+  const ARMS = [
+    { id: 'M1', front: true, sx: 1, hinge: [37.5, -22, -22], motor: [116, -20, -59.6], dir: 1, mark: 'A' },
+    { id: 'M2', front: false, sx: 1, hinge: [36, 0, 54], motor: [88.5, 3, 90.3], dir: -1, mark: 'B' },
+    { id: 'M3', front: false, sx: -1, hinge: [-36, 0, 54], motor: [-88.5, 3, 90.3], dir: 1, mark: 'A' },
+    { id: 'M4', front: true, sx: -1, hinge: [-37.5, -22, -22], motor: [-116, -20, -59.6], dir: -1, mark: 'B' },
+  ];
+  const folds = [];
+  ARMS.forEach((A, k) => {
+    const h = P(...A.hinge), m = P(...A.motor), d = V3().subVectors(m, h), len = Math.hypot(d.x, d.z), yaw = Math.atan2(-d.z, d.x), rise = Math.atan2(d.y, len);
+    const ag = new THREE.Group(); ag.position.copy(h); ag.rotation.y = yaw; sg.add(ag);
+    const fg = new THREE.Group(); ag.add(fg);
+    const arm = new THREE.Group();
+    { const L0 = Math.hypot(len, d.y), g = new THREE.CylinderGeometry(mm(5.2), mm(6), L0 - mm(10), 24, 1).rotateZ(-Math.PI / 2).scale(1, 0.92, 1.05).translate((L0 - mm(10)) / 2 + mm(2), 0, 0).rotateZ(rise); arm.add(mesh(g, X.shell)); }
+    arm.add(at(mesh(cylGeo(mm(7), mm(7), mm(12), 28), X.shell), mm(1), 0, 0));   // 付け根の縦の筒（頬に埋まる。折りたたみのヒンジ）
+    const pod = mesh(lathe([[0, mm(A.front ? -7 : -13)], [mm(9), mm(A.front ? -7 : -13)], [mm(10), mm(A.front ? -6 : -12)], [mm(10), mm(-0.5)], [mm(9.5), 0], [0, 0]], 36), X.shell); at(pod, len, d.y, 0); arm.add(pod);
+    fg.add(arm); reg(arm, A.front ? 'frontArm' : 'rearArm', V3(0.035, 0, 0), { label: (A.front && k === 0) || (!A.front && k === 1) ? V3(len * 0.5, d.y * 0.5 + 0.007, 0) : null });
+    const wg = new THREE.Group(); at(wg, len, d.y, 0); wg.rotation.y = -yaw; fg.add(wg);   // 機体の向きにそろえた入れ物
+    // モーター（黒いベル Ø約18mm・高さ約8mm）
+    const mg = new THREE.Group(); mg.name = 'motor'; at(mg, len, d.y, 0); fg.add(mg);
+    const core = new THREE.Group(); core.scale.set(0.52, 0.29, 0.52); mg.add(core);
+    const base = new THREE.Group(); base.add(mesh(cylGeo(0.0105, 0.0105, 0.004).translate(0, 0.002, 0), M.aluDark)); base.add(mesh(hardLathe([[0.0046, 0.004], [0.0052, 0.004], [0.0052, 0.022], [0.0046, 0.022], [0.0046, 0.004]], 32), M.aluDark)); core.add(base); reg(base, 'motorBase', V3(0, 0, 0));
+    const stator = at(mesh(G.teeth, M.lamination), 0, 0.013, 0); stator.castShadow = false; core.add(stator); reg(stator, 'stator', V3(0, 0.03, 0));
+    const coils = at(mesh(G.coils, M.copper), 0, 0.013, 0); coils.castShadow = false; core.add(coils); reg(coils, 'winding', V3(0, 0.03, 0));
+    const mags = at(mesh(G.magnets, M.magnet), 0, 0.013, 0); mags.castShadow = false; core.add(mags); reg(mags, 'magnet', V3(0, 0.07, 0));
+    const bell = new THREE.Group(); bell.add(at(mesh(G.bellWall, X.bell), 0, 0.005, 0)); bell.add(at(mesh(G.bellTop, X.bell), 0, 0.0295, 0)); bell.add(at(mesh(cylGeo(0.0118, 0.0118, 0.0012, 36), X.bell), 0, 0.0306, 0)); core.add(bell); reg(bell, 'bell', V3(0, 0.07, 0));
+    const shaft = new THREE.Group(); shaft.add(at(mesh(cylGeo(0.002, 0.002, 0.036, 16), M.steel), 0, 0.016, 0)); shaft.add(at(mesh(G.bearing, M.steel), 0, 0.005, 0)); core.add(shaft); reg(shaft, 'shaft', V3(0, 0.07, 0));
+    // プロペラ（クイックリリース・羽根は根元で折れる）。回転面はベル上面の約2mm上
+    const PY = mm(10);
+    const propG = new THREE.Group(); propG.name = 'prop'; at(propG, 0, PY, 0); mg.add(propG);
+    const hubCap = mesh(rboxGeo(mm(26), mm(3), mm(8), mm(3.5)), X.gimbal); at(hubCap, 0, mm(-1.4), 0); propG.add(hubCap);   // 黒い長円のクリップ（写真）
+    for (const s of [-1, 1]) propG.add(at(mesh(new THREE.ConeGeometry(mm(1.6), mm(3.2), 3).rotateZ(-s * Math.PI / 2), A.mark === 'A' ? X.orange : X.shellLight), s * mm(9), mm(0.2), 0));   // クリップの矢印（A=オレンジ・B=灰）
+    const blades = [], hinges = [];
+    for (const s of [1, -1]) {
+      const hg = new THREE.Group(); at(hg, s * 0.011 * pScale * 1.6, 0, 0);
+      const bl = mesh(A.dir > 0 ? PG.bCCW : PG.bCW, X.prop); if (s < 0) bl.rotation.y = Math.PI; bl.position.x = (s > 0 ? -0.011 : 0.011) * pScale * 1.6;
+      hg.add(bl); propG.add(hg); blades.push(bl); hinges.push({ g: hg, s });
+    }
+    const ghosts = [0, 1].map(() => { const gm = X.prop.clone(); gm.transparent = true; gm.opacity = 0.35; gm.depthWrite = false;
+      const gh = new THREE.Mesh(A.dir > 0 ? PG.fCCW : PG.fCW, gm); gh.visible = false; gh.userData.noPart = true; gh.userData.noPick = true; propG.add(gh); return gh; });
+    reg(propG, 'prop', V3(0.03, 0.06, 0), { label: k === 3 ? V3(0.05, 0.003, 0) : null });
+    const disc = new THREE.Mesh(new THREE.CircleGeometry(mm(R_PROP), 64), (A.dir > 0 ? M.propDiscCCW : M.propDiscCW).clone()); disc.rotation.x = -Math.PI / 2; disc.userData.noAO = true; at(disc, 0, PY, 0);
+    disc.renderOrder = 5; disc.userData.noPart = true; disc.userData.noPick = true; mg.add(disc);
+    const mp = reg(mg, 'motor', V3(0.03, 0.04, 0), { coarse: true, label: k === 0 ? V3(0, 0.012, 0) : null });
+    if (A.front) {   // 前脚（アンテナ内蔵）: ポッドの外へ張り出してから板が真下へ下りる Γ字。下端は面取りだけ（写真・取説の図）
+      const lg = new THREE.Group(); wg.add(lg);
+      const top = mm(-6), tipY = LEG_Y - m.y + mm(0.5), H = top - tipY;
+      const sh = polyShape([[mm(-7), 0], [mm(7), 0], [mm(6), -H + mm(3)], [mm(3), -H], [mm(-6), -H]]);
+      const lgeo = new THREE.ExtrudeGeometry(sh, { depth: mm(6), bevelEnabled: true, bevelThickness: mm(1), bevelSize: mm(1), bevelSegments: 2, curveSegments: 4 });
+      lgeo.translate(0, 0, -mm(3)); lgeo.rotateY(-Math.PI / 2);   // 形は z(前後)×y、厚みは x
+      const st = new THREE.Group(); at(st, A.sx * mm(9), top, mm(1.5)); lg.add(st); st.add(mesh(lgeo, X.shell));
+      lg.add(at(mesh(rboxGeo(mm(12), mm(7), mm(14), mm(2)), X.shell), A.sx * mm(4), top + mm(2), mm(1.5)));   // ポッドから脚の上端への張り出し
+      reg(lg, 'landingGear', V3(0, -0.02, 0), { label: k === 0 ? V3(0, -0.03, 0) : null }); legs.push({ group: lg, sx: A.sx, pivots: [] });
+    } else {   // 機体ステータスインジケーター: 後ろポッドの下の外・下向きの窓（取説の図）
+      const st = new THREE.Group(); at(st, A.sx * mm(8), mm(-11.6), mm(4)); st.rotation.z = A.sx * 0.8; wg.add(st);
+      st.add(mesh(rboxGeo(mm(8), mm(1.6), mm(6), mm(1.2)), M.ledCover)); const lamp = at(mesh(new THREE.BoxGeometry(mm(6.4), mm(0.8), mm(4.6)), M.ledGreen), 0, mm(0.3), 0); st.add(lamp);
+      const sp = reg(st, 'statusLed', V3(A.sx * 0.015, -0.02, 0.01), { label: k === 1 ? V3(0, -0.004, 0) : null }); sp.lamp = lamp;
+    }
+    if (k === 3) {   // 左前アームの前側の面に「MINI 5 PRO」（写真。付け根から先へ読む）
+      const t = plane(mm(26), mm(3.8), X.brand); const mid = len * 0.6; at(t, mid, Math.sin(rise) * mid, mm(5.95)); t.rotation.z = rise; t.userData.noPick = true; arm.add(t);
+    }
+    const ua = new THREE.Group(); ua.position.set(0, PY, 0); ua.scale.setScalar(1 / K); mg.add(ua);
+    const mo = { group: mg, prop: propG, propMesh: blades[0], blades, hinges, ghosts, disc, bell, mags, shaft, adapter: hubCap, dir: A.dir, arm: ag, id: A.id, u: V3(m.x, 0, m.z), part: mp, arrowAnchor: ua, front: A.front, sx: A.sx, fold: fg, yaw };
+    // たたみ方（取説の図・写真）: 前アームは「今の向き＋畳んだ向き」の二等分の水平軸で180°（モーターが下・脚が上）。後アームはほぼ垂直な軸で前へ約145°
+    let flip = null;
+    if (A.front) { const d0 = V3(d.x, 0, d.z).normalize(), dT = V3(A.sx * 0.012, 0, 1).normalize(), ax = d0.clone().add(dT).normalize().applyAxisAngle(UP, -yaw);
+      const test = V3(1, 0, 0).applyAxisAngle(ax, Math.PI / 2); flip = { axis: ax, sign: test.y < 0 ? 1 : -1 }; }
+    motors.push(mo); folds.push({ fg, front: A.front, sx: A.sx, yaw, len, rise, flip });
+  });
+
+  // ---------- 説明用の重ね絵（画角・検知範囲。部品には数えない）----------
+  const fovG = new THREE.Group(); fovG.visible = false; head.add(fovG);
+  const frustum = (fovDeg, len, mat) => { const dg = Math.tan(THREE.MathUtils.degToRad(fovDeg / 2)) * len, a = dg * 0.8, b = dg * 0.6;   /* 公式のFOVを対角とみなし 4:3 の枠に */
+    const g = new THREE.ConeGeometry(Math.hypot(a, b), len, 4, 1, true); g.rotateY(Math.PI / 4); g.scale(a / Math.hypot(a, b) * Math.SQRT2, 1, b / Math.hypot(a, b) * Math.SQRT2); g.rotateX(Math.PI / 2); g.translate(0, 0, -len / 2 - 0.003);
+    const mm2 = new THREE.Mesh(g, mat); mm2.renderOrder = 7; mm2.position.copy(lens.position); return mm2; };
+  const cones = { wide: frustum(84, 0.55, X.fov), tele: frustum(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(42)) / 2) * 180 / Math.PI, 0.75, X.fov48) };   /* 48mm（2倍）の画角は 84° からの計算 */
+  fovG.add(cones.wide, cones.tele); fovG.userData.cones = cones; noPart(fovG);
+  const senseG = new THREE.Group(); senseG.visible = false; sg.add(senseG);
+  { const S2 = 1 / 45, D2R = THREE.MathUtils.degToRad;   // 実際の測定範囲(m)を 1/45 にした概念図
+    const sector = (r, phi0, dphi, th0, dth) => { const m = new THREE.Mesh(new THREE.SphereGeometry(r, 36, 18, phi0, dphi, th0, dth), X.sense); m.renderOrder = 7; return m; };
+    const fr = sector(18 * S2, D2R(270 - 45), D2R(90), D2R(90 - 36), D2R(72)); fr.position.copy(P(0, 20, -74)); senseG.add(fr);   // 前 0.5〜18m・水平90°×垂直72°（公式）
+    const bk = sector(18 * S2, D2R(90 - 45), D2R(90), D2R(90 - 36), D2R(72)); bk.position.copy(P(0, 15, 75)); senseG.add(bk);
+    const rt = sector(12 * S2, D2R(180 - 45), D2R(90), D2R(90 - 36), D2R(72)); rt.position.copy(P(38, 18, -10)); senseG.add(rt);   // 横 0.5〜12m
+    const lt = sector(12 * S2, D2R(-45), D2R(90), D2R(90 - 36), D2R(72)); lt.position.copy(P(-38, 18, -10)); senseG.add(lt);
+    const up = sector(18 * S2, 0, Math.PI * 2, 0, D2R(40)); up.position.copy(P(0, 26, -10)); senseG.add(up);   // 上 0.5〜18m（前後72°×左右90° を円錐で近似）
+    const dn = sector(14 * S2 * 0.3, 0, Math.PI * 2, D2R(180 - 50), D2R(50)); dn.position.copy(P(0, -30, -30)); senseG.add(dn);   // 下 0.3〜14m（図はさらに縮めた）
+    const beam = new THREE.Mesh(new THREE.ConeGeometry(Math.tan(Math.PI / 6) * Math.SQRT2 * 25 * S2, 25 * S2, 4, 1, true), X.lidarBeam); beam.rotation.y = Math.PI / 4; beam.rotation.x = -Math.PI / 2; beam.position.copy(P(0, 20.5, -78 - 25 * S2 * 1000 / 2)); beam.renderOrder = 8; senseG.add(beam);   // LiDAR 0.5〜25m・60°×60°
+    const irb = new THREE.Mesh(new THREE.ConeGeometry(Math.tan(Math.PI / 6) * Math.SQRT2 * 0.06, 0.06, 4, 1, true), X.irBeam); irb.rotation.y = Math.PI / 4; irb.position.copy(P(0, -30 - 30, -42)); irb.renderOrder = 8; senseG.add(irb);   // 下向き赤外線 0.3〜8m・60°×60°（図はさらに縮めた）
+    noPart(senseG); }
+
+  // ---------- 矢印 ----------
+  const arrows = { thrust: [], rot: [], move: null, yaw: null };
+  motors.forEach(mo => {
+    const th = arrowMesh(0xffffff, 0.045, 0.0028); th.position.set(0, 0.008, 0); th.visible = false; mo.arrowAnchor.add(th); arrows.thrust.push(th);
+    const rot = rotationArc(mo.dir, 0.035); rot.position.set(0, 0.008, 0); rot.visible = false; mo.arrowAnchor.add(rot); arrows.rot.push(rot);
+  });
+  const move = arrowMesh(0xef6a2d, 0.11, 0.004); move.visible = false; root.add(move); arrows.move = move;
+  const yawA = rotationArc(-1, 0.17); yawA.position.set(0, -0.02, 0); yawA.visible = false; root.add(yawA); arrows.yaw = yawA;
+  const cgMarker = new THREE.Group(); cgMarker.visible = false; root.add(cgMarker);
+
+  return { root, sg, halfSpan: 0.20, focusMin: 0.18, parts, pick, wires, motors, legs, arrows, batPart, G, cgMarker, personGroup: null, folds,
+    gimbalParts: { pan, roll, tilt, head, yoke, lens: { main: lens } }, fovG, senseG, protector, bay,
+    rotor: { R: mm(R_PROP) * K, y0: mm(10) }, moveR: 0.19, moveY: 0.04, rpmScale: 1.6 };
+}
+
 // ===== 描画エンジン: レンダラー・照明・ポスト処理・状態・共通ユーティリティ =====
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -5050,7 +5543,7 @@ controls.addEventListener('change', () => { S.aoDirty = true; });
 
 mark('gl');
 const M = makeMaterials(renderer.capabilities.getMaxAnisotropy()); mark('mat');
-const D = IS_PD6B ? buildPD6B(M) : IS_MAVIC ? buildMavic(M) : IS_M4 ? buildM4(M) : buildDrone(M); mark('geo');
+const D = IS_PD6B ? buildPD6B(M) : IS_MAVIC ? buildMavic(M) : IS_M4 ? buildM4(M) : IS_MINI5 ? buildMini5(M) : buildDrone(M); mark('geo');
 scene.add(D.root);
 if (D.personGroup) scene.add(D.personGroup);
 
@@ -8085,7 +8578,7 @@ const FPV_PAN = THREE.MathUtils.degToRad(95);
 const FPV_TILT_UP = THREE.MathUtils.degToRad(22), FPV_TILT_DOWN = THREE.MathUtils.degToRad(-88);
 let _fpvCam = null;
 // 実機のジンバルとレンズを持つ機種（Mavic・Matrice 4）は、その機種の窓口(GC)を通す。550クラスは null
-const fpvGC = () => IS_MAVIC ? MV_GC : IS_M4 ? M4_GC : null;
+const fpvGC = () => IS_MAVIC ? MV_GC : IS_M4 ? M4_GC : IS_MINI5 ? MN5_GC : null;
 const fpvCamObj = () => { if (fpvGC()) return D.gimbalParts.head; if (!_fpvCam) { const p = partsOf('camera')[0]; _fpvCam = p && p.obj; } return _fpvCam; };
 const fpvTall = () => innerWidth / Math.max(1, innerHeight) < 1.05;   // 縦長の画面は横の画角が狭い
 
@@ -11931,6 +12424,341 @@ function initM4() {
   if (!shared) setTimeout(() => { if (!$('#noteCard').dataset.kind) { renderM4About(); m4FrameDrone(null, 1.05); } }, 900);
 }
 
+// ===== DJI Mini 5 Pro の固有の動き =====
+// たたむ（後方右アームで電源オン／オフのカウントダウン）・電池交換・ジンバル（上向き55°・縦向き撮影・ロール225°・傾きの打ち消し）・画角（24mm／48mm）・検知範囲・大きさ
+// ジンバルの数値は公式の仕様: 操作可能範囲 チルト −90°〜55°・ロール −180°〜45°、最大制御速度（チルト）100°/秒、
+// 機械的可動範囲 チルト −135°〜80°・ロール −230°〜95°・パン −25°〜25°。
+const MN5_R = THREE.MathUtils.degToRad;
+const mn5 = { gim: { tilt: 0, roll: 0, zoom: 1 }, fold: 0, foldTo: 0, act: null, powered: true, fovOn: false, senseOn: false, sizeOn: false, person: null, ghost: null, pendingPower: false, _sup: false, _last: -1,
+  rest: { th: 0, dy: 0, w: 1 }, pose: { lift: 0, px: 0, yaw: 0, rz: 0 }, _poseKey: '' };
+
+// ---------- 状態の問い合わせ ----------
+function mn5Busy() { return IS_MINI5 && (mn5.foldTo > 0 || mn5.fold > 0.001 || !!mn5.act || mn5.sizeOn || mn5.fovOn || mn5.senseOn); }
+function mn5Wide() { return mn5.sizeOn || mn5.fovOn || mn5.senseOn; }
+function mn5ShadowExtra() { return mn5.sizeOn ? 1.1 : 0; }
+function mn5HasVariant() { return false; }
+const mn5FrameWide = () => frameBox([-0.20, -0.16, -0.20], [0.20, 0.0, 0.20], [0.62, 0.42, -0.66], 1.12);
+function mn5BlockPower() {
+  if (!IS_MINI5) return false;
+  if (mn5.act) { mn5Stop(); return false; }
+  if (mn5.fold > 0.001 || mn5.foldTo > 0) { mn5.foldTo = 0; mn5.pendingPower = true; syncMn5Chips(); if ($('#noteCard').dataset.kind === 'mn5-fold') renderNote(null); showToast('アームを開いてから回します'); mn5FrameWide(); return true; }
+  if (!mn5.powered) setMn5Power(true, '電源ボタンを押してから長押しして電源を入れました');
+  return false;
+}
+function mn5OnTab(tab) {
+  if (!IS_MINI5) return;
+  if (tab !== 'fly') mn5.pendingPower = false;   /* 「とばす」で押した電源を、ほかのタブで広げ終えたときに回さない */
+  if (tab !== 'see') { const had = !!mn5.act || mn5Wide(); mn5Stop(); mn5Overlays(null, true); if ($('#noteCard').dataset.kind === 'mn5-fold') renderNote(null); if (had) focusOn([D.root], { pull: true }); }
+  if (tab === 'fly' && (mn5.foldTo > 0 || mn5.fold > 0.001)) { mn5.foldTo = 0; syncMn5Chips(); showToast('アームを開きました'); mn5FrameWide(); }
+}
+
+// ---------- 動きの入口 ----------
+function mn5Action(id) {
+  if (!IS_MINI5) return;
+  if (S.tab !== 'see') setTab('see');
+  if (id === 'about') { if (mn5.act) mn5Stop(); mn5Overlays(null, true); renderMn5About(); mn5FrameDrone(null, 1.05); return; }
+  if (id === 'fov' || id === 'sense' || id === 'size') { if (mn5.act) mn5Stop(); const was = { fov: mn5.fovOn, sense: mn5.senseOn, size: mn5.sizeOn }[id]; mn5Overlays(was ? null : id); return; }
+  mn5Overlays(null, true);
+  if (mn5.act) mn5Stop();
+  stopOthers('alt');
+  if (S.explode > 0.02) setExplode(0);
+  if (S.mode === 'cut') setMode('normal');
+  if (id === 'fold') {
+    mn5.foldTo = mn5.foldTo > 0 ? 0 : 1; mn5.pendingPower = false;
+    if (mn5.foldTo > 0 && S.power > 0) setPower(0, true);
+    renderMn5Note('fold'); syncMn5Chips(); mn5FrameWide(); return;   /* 広げた大きさで枠を決める */
+  }
+  if (S.power > 0) setPower(0, true);
+  if (id === 'battery') {
+    if (mn5.foldTo > 0 || mn5.fold > 0.001) mn5.foldTo = 0;
+    mn5.act = { id, t: 0, p: D.batPart }; renderMn5Note('battery'); syncMn5Chips(); frameBox([-0.08, -0.15, -0.06], [0.08, -0.05, 0.20], [-0.62, 0.40, 0.68], 1.15); return;
+  }
+  if (id === 'gimbal') {
+    if (mn5.foldTo > 0 || mn5.fold > 0.001) mn5.foldTo = 0;
+    mn5.act = { id, t: 0 }; mn5.gim.tilt = mn5.gim.roll = 0; renderMn5Note('gimbal'); syncMn5Chips();
+    const g = D.gimbalParts.head; g.updateWorldMatrix(true, false); const c = new THREE.Vector3().setFromMatrixPosition(g.matrixWorld);
+    frameBox([c.x - 0.045, c.y - 0.035, c.z - 0.03], [c.x + 0.045, c.y + 0.045, c.z + 0.05], [0.42, 0.16, -0.89], 1.1); return;   /* 斜め前から: 左右の円筒（チルト）と頭の回り方が見える */
+  }
+}
+function mn5Stop() {
+  if (!IS_MINI5 || !mn5.act) return;
+  const a = mn5.act; mn5.act = null;
+  if (a.id === 'battery' && a.p) { a.p.anim = null; a.p.animReset = true; D.bay.visible = false; mn5.pose.lift = 0; if (!mn5.powered) setMn5Power(true); }
+  if (a.id === 'gimbal') { mn5.gim.tilt = 0; mn5.gim.roll = 0; Object.assign(mn5.pose, { lift: 0, px: 0, yaw: 0, rz: 0 }); }
+  syncBodyMode(); syncMn5Chips();
+  if ($('#noteCard').dataset.kind === 'mn5-' + a.id) renderNote(null);
+  if (a.id === 'gimbal' || a.id === 'battery') focusOn([D.root], { pull: true });
+}
+// 画角・検知範囲・大きさは「重ね絵」。同時には1つだけ
+function mn5Overlays(id, quiet) {
+  const was = { fov: mn5.fovOn, sense: mn5.senseOn, size: mn5.sizeOn };
+  mn5.fovOn = id === 'fov'; mn5.senseOn = id === 'sense'; mn5.sizeOn = id === 'size';
+  D.fovG.visible = mn5.fovOn; D.senseG.visible = mn5.senseOn;
+  if (mn5.person) mn5.person.visible = mn5.sizeOn; if (mn5.ghost) mn5.ghost.visible = mn5.sizeOn;
+  S.shadowDirty = S.csDirty = S.aoDirty = true; syncMn5Chips();
+  if (!id && !fpv.on) { const sup = !!(mn5.act && mn5.act.id === 'gimbal'); mn5._sup = sup; S.labelsSuppressed = sup; }   /* ラベルの抑えをその場で戻す（次のコマを待つと「眼」が古い値を控える） */
+  if (id) {
+    if (S.explode > 0.02) setExplode(0); if (S.power > 0) setPower(0, true); if (mn5.foldTo > 0 || mn5.fold > 0.001) mn5.foldTo = 0;
+    renderMn5Note(id);
+    if (id === 'fov') frameBox([-0.30, -0.30, -0.85], [0.30, 0.10, 0.15], [0.72, 0.50, -0.85], 1.05);   /* 前斜め上から。錐がこちらへ広がり、機体は奥に見える */
+    if (id === 'sense') frameBox([-0.42, -0.22, -0.48], [0.42, 0.42, 0.48], [0.70, 0.66, -0.75], 1.02);
+    if (id === 'size') { if (mn5.person.userData.face) mn5.person.userData.face(camera.position.x, camera.position.z); pdFrame([D.root, mn5.person, mn5.ghost], { pull: true, margin: 1.15, dir: new THREE.Vector3(0.45, 0.32, -0.84).normalize() }); }
+  } else if (!quiet && (was.fov || was.sense || was.size)) {
+    const k = $('#noteCard').dataset.kind; if (['mn5-fov', 'mn5-sense', 'mn5-size'].includes(k)) renderNote(null);
+    focusOn([D.root], { pull: true });
+  } else if (quiet) { const k = $('#noteCard').dataset.kind; if (['mn5-fov', 'mn5-sense', 'mn5-size'].includes(k)) renderNote(null); }
+}
+function setMn5Power(on, msg) {
+  mn5.powered = !!on;
+  const swap = (m, want) => { const was = m.userData.origMat || m.material; m.userData.origMat = want; if (m.material === was) m.material = want; };
+  for (const p of D.parts) {
+    if (p.key === 'statusLed' && p.lamp) swap(p.lamp, on ? M.ledGreen : M.chip);
+    if (p.key === 'batteryLed' && p.obj.userData.lamps) for (const l of p.obj.userData.lamps) swap(l, on ? M.ledGreen : M.chip);
+  }
+  if (msg) showToast(msg, 3200);
+}
+function syncMn5Chips() {
+  const set = (id, on, label) => { const b = $(`#mn5Chips [data-mn5="${id}"]`); if (!b) return; b.classList.toggle('on', !!on); if (b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', String(!!on)); if (label) b.textContent = label; };
+  set('fold', mn5.foldTo > 0, mn5.foldTo > 0 ? 'ひろげる' : 'たたむ');
+  set('battery', mn5.act && mn5.act.id === 'battery'); set('gimbal', mn5.act && mn5.act.id === 'gimbal');
+  set('fov', mn5.fovOn); set('sense', mn5.senseOn); set('size', mn5.sizeOn);
+}
+const mn5FrameDrone = (dir, margin) => pdFrame([D.root], { pull: true, margin: (margin || 1.25) * (narrow() ? 0.8 : 1), dir: dir ? new THREE.Vector3(...dir).normalize() : undefined });
+
+// ---------- 説明カード ----------
+const MN5_SRC_LINK = (k) => { const s = MN5_SRC[k]; return `<a href="${s.url}" target="_blank" rel="noopener">${s.name}</a>`; };
+function renderMn5About() {
+  const row = (k, v, src) => `<tr><th>${k}</th><td>${v}${src ? `<small>${src}</small>` : ''}</td></tr>`;
+  const html = `<p><b>1インチのカメラを積んだ、手のひらに載る折りたたみ式の空撮用ドローン。</b>離陸重量は249.9 g。ジンバルは上へ55°、ロールで縦向きの撮影まで回り、前向きのLiDARで夜でも前を測る（公式）。</p>
+    <table class="pd-spec">
+      ${row('離陸重量', '249.9 g', '公式・約249.9 g ± 4 g')}${row('展開時', '304 × 380 × 91 mm', '公式・長さ×幅×高さ・プロペラあり')}${row('折りたたみ時', '157 × 95 × 68 mm', '公式・プロペラなし')}
+      ${row('最大飛行時間', '36 分（Plusは52 分）', '公式・無風で定速飛行')}${row('最大速度', '水平 18 m/s（Plusは19 m/s）', '公式・スポーツモード')}${row('最大風圧抵抗', '12 m/s', '公式')}
+      ${row('カメラ', '1インチ CMOS・5000万画素・24mm相当 f/1.8・FOV 84°', '公式')}${row('バッテリー', '2788 mAh・7 V・19.52 Wh・約71.2 g', '公式・標準')}
+      ${row('映像伝送', 'O4+・最大 10 km（日本）', '公式・障害物と干渉なし')}${row('検知', '全方向デュアルビジョン＋前向きLiDAR＋下向き3D赤外線', '公式')}${row('プロペラ', '6.0 × 2.8 インチ・約2.8 g', 'DJIストア')}
+    </table>
+    <h4>550クラスとのちがい</h4>
+    <ul class="pd-diff"><li><b>249.9 g</b>：公式の離陸重量は249.9 g（±4 g）。それでも日本では100 g以上なので登録が必要（「登録」の解説）</li><li><b>折りたたみ</b>：前アームは下へ回って裏返り、胴の下の段に。後アームは前へ回って上の段に。<b>後方右アームを開くと電源が入る</b></li><li><b>前だけに脚</b>：前アームの脚にアンテナが入り、後ろは電池の底で立ち、置くと機首が上がる（写真からの推定）</li><li><b>大きなカメラの頭</b>：1インチのセンサーを3軸ジンバルで吊り、ロールで縦向きの撮影にも回る。「眼」ボタンでカメラの映像を見られる</li><li><b>部品が一体</b>：フレーム・ESC・受信機が胴の中にまとまり、配線や基板は外から見えない</li></ul>
+    <p class="caveat">この3Dモデルは、公式の仕様・取扱説明書と写真から起こした教材用の再現です。公式の3Dデータや寸法図は公開されていないため、形は公式の真上・正面・斜めの製品写真と取説の図から寸法を読み取って起こしました。高さ方向の寸法・ジンバルの軸の役割・内部の配置は推定を含みます（解説の「推定」「例」）。</p>
+    <details class="pd-src"><summary>出典（${MN5_DATE}）</summary><ul>${['product', 'specs', 'faq', 'manual', 'safety', 'store', 'prop'].map(k => `<li>${MN5_SRC_LINK(k)}</li>`).join('')}</ul></details>`;
+  renderNote({ kind: 'mn5-about', title: 'DJI Mini 5 Pro', html, actions: [{ label: 'たたんでみる', fn: () => mn5Action('fold') }, { label: 'ジンバルを動かす', fn: () => { renderNote(null); mn5Action('gimbal'); } }] });
+}
+function renderMn5Note(id) {
+  const N = {
+    fold: () => ({ title: mn5.foldTo > 0 ? 'アームをたたむ' : 'アームを広げる', html: mn5.foldTo > 0
+      ? `<p>羽根を寄せ、<b>前アームを下へ回して後ろへ</b>（裏返ってモーターが下・脚が上になり、胴の下の段に沿う）。続いて<b>後アームを前へ</b>回し、胴の上の段に沿わせます。最後にジンバルにストレージカバーをかぶせます。折りたたむと 157 × 95 × 68 mm（公式）。</p><p><b>後方右アームを折りたたむと、電源オフのカウントダウンが始まります</b>（取説）。カウントダウン中に機体のボタンを押すと取り消せます。</p><p class="caveat">たたむ順番は取説に文章では書かれておらず、展開の図の逆順としています。回り方は取説の図と製品写真から起こした推定です。</p>`
+      : `<p>ストレージカバーを外し、<b>後アームを外へ</b>回して開きます。<b>後方右アームを開くと、電源ボタンを押さなくても電源が入ります</b>（初期設定・取説）。続いて前アームを下から前へ回して開きます。</p><p class="caveat">USB-Cポートを使っている間は、アームを開いても電源は入りません（取説）。順番は取説とクイックスタートガイドの図から。</p>`,
+      actions: [{ label: mn5.foldTo > 0 ? '広げる' : 'たたむ', primary: true, fn: () => mn5Action('fold') }] }),
+    battery: () => ({ title: 'バッテリーを入れ替える', html: `<p id="mn5BatState" class="pd-state">電源を切っています…</p><p>電源ボタンを押してから長押しして電源を切り、機体を手に持って、<b>左右のバッテリーバックルを押しながら後ろへ</b>引き抜きます。入れるときは後ろから差し込み、カチッと音がするまで押し込みます（取説）。電源が入ったまま抜き差ししないこと（取説）。</p>
+      <table class="pd-spec"><tr><th>標準</th><td>2788 mAh・約71.2 g・最大36分<small>公式</small></td></tr><tr><th>Plus</th><td>4680 mAh・約117 g・最大52分<small>公式。付けると機体は249 gを超える（DJIストア）</small></td></tr></table>
+      <p class="caveat">胴の下に見える暗い受けと端子の形は図の例です。標準とPlusで外形が違うかは確認できなかったため、この図では同じ形で描いています。</p>`, actions: [{ label: 'もう一度', fn: () => mn5Action('battery') }], onClose: () => { mn5Stop(); focusOn([D.root], { pull: true }); } }),
+    gimbal: () => ({ title: '3軸ジンバル', html: `<p id="mn5GimState" class="pd-state">上へ向けます…</p><p>カメラの頭は、下の縦の円筒（パン）から上へ回るU字の腕に、左右の円筒（チルト）で吊られています。頭はさらに光軸のまわりに回り（ロール）、<b>機体を傾けずに縦向きの撮影</b>ができます。上は55°まで向けられます（公式）。</p><table class="pd-spec"><tr><th>操作できる範囲</th><td>チルト −90°〜55°・ロール −180°〜45°<small>公式。ロールの幅は225°</small></td></tr><tr><th>最大制御速度</th><td>チルト 100°/秒<small>公式</small></td></tr><tr><th>角度ぶれ範囲</th><td>±0.005°<small>公式</small></td></tr></table><p class="caveat">機械的にはチルト −135°〜80°・ロール −230°〜95°・パン −25°〜25°（公式）。パンは操作できません（揺れの打ち消しに使うと考えられます）。どの円筒がどの軸か・ロールの回る向き・縦向きにするロールの角度は資料に無く、形からの推定です（この図は −90° で縦向きにしています）。</p>`, actions: [{ label: 'もう一度', fn: () => mn5Action('gimbal') }, { label: 'カメラから見る', fn: () => mn5CamView() }], onClose: () => { mn5Stop(); focusOn([D.root], { pull: true }); } }),
+    fov: () => ({ title: 'カメラの画角', html: `<p>カメラは1台。<b>24mm相当・FOV 84°</b>（オレンジ）で広く写し、<b>48mm中望遠モード</b>（青）では2倍に寄って、従来のDJI Mini Proシリーズのデジタルズームより高い解像度で撮れます（公式）。</p><table class="pd-spec"><tr><th>センサー</th><td>1インチ CMOS・有効5000万画素<small>公式</small></td></tr><tr><th>レンズ</th><td>24mm相当・f/1.8・ピント 0.5 m〜∞<small>公式</small></td></tr><tr><th>デジタルズーム</th><td>4K 1〜3倍・FHD 1〜4倍・12MP写真 1〜3倍<small>公式</small></td></tr></table><p class="caveat">錐は公式のFOVを対角として4:3の枠で描いています。48mmの錐の角度は84°からの計算です。錐の長さは見やすさのための長さで、距離の意味はありません。</p>`,
+      actions: [{ label: 'カメラから見る', primary: true, fn: () => mn5CamView() }, { label: 'もどす', fn: () => mn5Overlays(null) }], onClose: () => mn5Overlays(null) }),
+    sense: () => ({ title: '検知範囲', html: `<p>前後の魚眼レンズで前後・左右・上を、底のデュアルビジョンと3D赤外線センサーで下を見て、全方向の障害物を検知します。前向きのLiDARは暗い夜でも前を測ります（公式）。</p><table class="pd-spec"><tr><th>ビジョン</th><td>前 0.5〜18・後 0.5〜18・横 0.5〜12・上 0.5〜18・下 0.3〜14 m<small>公式</small></td></tr><tr><th>LiDAR</th><td>夜間 0.5〜25 m・上下60°×左右60°<small>公式・反射率10%超</small></td></tr><tr><th>下向き赤外線</th><td>0.3〜8 m・前後60°×左右60°<small>公式</small></td></tr></table><p class="caveat">図は測定範囲を約45分の1に縮めた概念図です（下向きのドームと赤外線はさらに縮めています）。スポーツモードでは障害物回避が働きません（取説）。周りが1ルクス以下の暗さではビジョンは働かず、LiDARは明るい光の下では正常に働きません（公式）。</p>`, actions: [{ label: 'もどす', fn: () => mn5Overlays(null) }], onClose: () => mn5Overlays(null) }),
+    size: () => ({ title: '大きさをくらべる', html: `<p>同じ縮尺で、<b>身長170cmの人</b>と、青い半透明の<b>550クラスのクアッド</b>（対角550mm・約2.4kg）を並べています。</p><p>Mini 5 Proは展開時 304 × 380 mm（プロペラあり・公式）、離陸重量249.9 g。折りたためば 157 × 95 × 68 mm で、手のひらに載る大きさです。550クラスのおよそ10分の1の重さです。</p>`, actions: [{ label: 'もどす', fn: () => mn5Overlays(null) }], onClose: () => mn5Overlays(null) }),
+  };
+  renderNote(Object.assign({ kind: 'mn5-' + id }, N[id]()));
+}
+// 「カメラから見る」: 機体のカメラの映像に入る
+function mn5CamView() { mn5.gim.zoom = 1; renderNote(null); mn5Overlays(null, true); segSet($('#viewCol'), 'v', 'fpv'); fpvOn(true); }
+
+// ---------- ジンバル ----------
+// 縦の画角(度)。公式のFOV 84°を4:3の対角とみなし、倍率でデジタルに寄せる（48mm中望遠モード＝2倍）
+function mn5VFov(z) { return 2 * Math.atan(Math.tan(MN5_R(42)) * 0.6 / z) * 180 / Math.PI; }
+function mn5SetZoom(z) { mn5.gim.zoom = clamp(z, 1, 3); if (fpv.on) updateFpvHud(); }
+// 毎フレーム（本体の姿勢を当てた後）。電源が入っていれば機体の傾きを打ち消す。軸は パン(Y) → チルト(X) → ロール(Z) の順につながる（形からの推定）。
+// 望みの世界姿勢（機首の方位・指定のチルト・指定のロール）を付け根の世界姿勢で割って局所の回転にし、同じ軸の順で3つの角度に分ける
+const _mn5q = new THREE.Quaternion(), _mn5q2 = new THREE.Quaternion(), _mn5e = new THREE.Euler(), _mn5e2 = new THREE.Euler(), _mn5v = new THREE.Vector3(), _mn5ax = new THREE.Vector3();
+const mn5Norm = (a) => Math.atan2(Math.sin(a), Math.cos(a));
+function mn5GimbalApply() {
+  const gp = D.gimbalParts; if (!gp) return;
+  let tl = mn5.gim.tilt, rl = -mn5.gim.roll, pn = 0;
+  if (mn5.powered && !(fpv.on && !fpv.stabilized)) {
+    gp.pan.parent.updateWorldMatrix(true, false); gp.pan.parent.getWorldQuaternion(_mn5q);
+    D.root.getWorldQuaternion(_mn5q2); _mn5e2.setFromQuaternion(_mn5q2, 'YXZ');
+    _mn5q2.setFromEuler(_mn5e.set(mn5.gim.tilt, _mn5e2.y, -mn5.gim.roll, 'YXZ'));
+    _mn5q.invert().multiply(_mn5q2);
+    // オイラー角の分解はチルト ±90°（真下）が特異点になるので使わない。パンは光軸の水平成分の向きから取り（真下に近いほど 0 へ寄せる）、
+    // パンを外した残りからチルト、さらにチルトを外した残りからロールを取る
+    const f = _mn5v.set(0, 0, 1).applyQuaternion(_mn5q), h = Math.hypot(f.x, f.z);
+    let p = h < 1e-6 ? 0 : Math.atan2(f.x, f.z); if (Math.abs(p) > Math.PI / 2) p = mn5Norm(p - Math.PI);
+    pn = clamp(p * Math.min(1, h / 0.1), MN5_R(-25), MN5_R(25));
+    _mn5q.premultiply(_mn5q2.setFromAxisAngle(_mn5ax.set(0, 1, 0), -pn));
+    const z = _mn5v.set(0, 0, 1).applyQuaternion(_mn5q); tl = Math.atan2(-z.y, z.z);
+    const x = _mn5v.set(1, 0, 0).applyQuaternion(_mn5q).applyAxisAngle(_mn5ax.set(1, 0, 0), -tl);
+    rl = -mn5.gim.roll + mn5Norm(Math.atan2(x.y, x.x) + mn5.gim.roll);   /* ロールは ±180° を越えるので、望みの角度の近くへ巻き直す */
+  }
+  gp.tilt.rotation.x = clamp(tl, MN5_R(-135), MN5_R(80)); gp.roll.rotation.z = clamp(rl, MN5_R(-95), MN5_R(230)); gp.pan.rotation.y = pn;
+  if (mn5.fold > 0.02 || mn5.foldTo > 0) { gp.tilt.rotation.x = 0; gp.roll.rotation.z = 0; gp.pan.rotation.y = 0; }
+}
+function mn5FpvSync() {
+  const g = mn5.gim, set = (id, v) => { const el = $(id); if (el && el.textContent !== v) el.textContent = v; };
+  set('#fpvPanLbl', 'ジンバル チルト / ロール');
+  set('#fpvFov', `${Math.abs(g.zoom - 2) < 0.01 ? '48mm中望遠モード' : '24mm相当'}・縦${mn5VFov(g.zoom).toFixed(0)}°`);
+  set('#fpvZoom', `${g.zoom.toFixed(1)}×`);
+  for (const b of $$('#fpvLens [data-z]')) { const on = Math.abs(+b.dataset.z - g.zoom) < 0.01; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); }
+  const r90 = $('#fpvRoll90'); if (r90) { const on = Math.abs(g.roll + MN5_R(90)) < 0.02; r90.classList.toggle('on', on); r90.setAttribute('aria-pressed', String(on)); }
+}
+// 機体のカメラの映像（fpv.js）から使う窓口。ズーム（4Kで1〜3倍）・48mm中望遠モード・ロール（−180°〜45°）
+const MN5_GC = {
+  st: mn5.gim, tilt0: -4, tiltMin: MN5_R(-90), tiltMax: MN5_R(55), seenKey: 'fpvSeenMn5',
+  firstToast: '上下のドラッグでチルト（−90°〜55°）。ズーム・縦向き・ロールは下のボタンで。左右は機体ごと向きを変えます',
+  dragToast: 'このジンバルは左右に振れません（パンは操作できない。機械的な範囲は ±25°・公式）。左右はスティックで機体ごと向きを変えます',
+  person: () => mn5.person, personFpv: [0.12, -0.158, -6], personHome: [0.30, -0.158, 0.22],   /* 正面6m。24mmで全身、48mmで上半身が大きく写る距離 */
+  eye: () => D.gimbalParts.lens.main, vfov: () => mn5VFov(mn5.gim.zoom),
+  apply: () => mn5GimbalApply(), sync: () => mn5FpvSync(),
+  hud: () => `${(mn5.gim.tilt * 180 / Math.PI).toFixed(0)}° / ${(mn5.gim.roll * 180 / Math.PI).toFixed(0)}°`,
+  camHtml: `<div class="fpv-seg" id="fpvLens"><button data-z="1" style="--c:#ef6a2d">24mm</button><button data-z="2" style="--c:#3b7df7">48mm</button></div>
+        <div class="fpv-seg"><button id="fpvZoomOut" aria-label="引く">−</button><b id="fpvZoom">1.0×</b><button id="fpvZoomIn" aria-label="寄る">＋</button></div>
+        <div class="fpv-seg"><button id="fpvRollL" aria-label="左へ傾ける">↺</button><button id="fpvRoll90">縦向き</button><button id="fpvRollR" aria-label="右へ傾ける">↻</button></div>`,
+  bind() {
+    for (const b of $$('#fpvLens [data-z]')) b.addEventListener('click', () => mn5SetZoom(+b.dataset.z));
+    const steps = [1, 1.5, 2, 2.5, 3];
+    $('#fpvZoomIn').addEventListener('click', () => mn5SetZoom(steps.find(z => z > mn5.gim.zoom + 1e-6) || 3));
+    $('#fpvZoomOut').addEventListener('click', () => mn5SetZoom([...steps].reverse().find(z => z < mn5.gim.zoom - 1e-6) || 1));
+    const roll = (deg) => { mn5.gim.roll = clamp(mn5.gim.roll + MN5_R(deg), MN5_R(-180), MN5_R(45)); updateFpvHud(); };
+    $('#fpvRollL').addEventListener('click', () => roll(-15)); $('#fpvRollR').addEventListener('click', () => roll(15));
+    $('#fpvRoll90').addEventListener('click', () => { const r = mn5.gim.roll * 180 / Math.PI; mn5.gim.roll = MN5_R(Math.abs(r + 90) < 1 ? 0 : -90); updateFpvHud(); });
+    if (!mn5._wheel) { mn5._wheel = true; canvas.addEventListener('wheel', e => { if (!fpv.on || !IS_MINI5) return; e.preventDefault(); mn5SetZoom(mn5.gim.zoom * Math.exp(-e.deltaY * 0.0022)); }, { passive: false }); }
+  },
+};
+
+// ---------- 機体の置き方 ----------
+// 着地すると前脚の先と電池の底の後ろの足で立ち、機首が上がる（約15°・写真から）。浮くと水平に戻る。
+// 置いた角度は起動時に形から求める（前脚のいちばん低い点と電池の足のいちばん低い点が同じ高さになる角度）
+function mn5RestInit() {
+  const sg = D.sg; sg.userData.y0 = sg.position.y;
+  const lowOf = (objs) => { let low = Infinity; for (const o of objs) low = Math.min(low, altLowest(o, 1)); return low; };
+  const legs = D.legs.map(L => L.group), bat = [D.batPart.obj];
+  const diff = (th) => { sg.rotation.set(th, 0, 0); sg.updateMatrixWorld(true); return lowOf(legs) - lowOf(bat); };
+  let a = 0, b = MN5_R(30); for (let i = 0; i < 30; i++) { const m = (a + b) / 2; if (diff(m) < 0) a = m; else b = m; }
+  const th = (a + b) / 2; sg.rotation.set(th, 0, 0); sg.updateMatrixWorld(true);
+  mn5.rest.th = th; mn5.rest.dy = ALT_FLOOR - Math.min(lowOf(legs), lowOf(bat));
+  sg.rotation.set(0, 0, 0); sg.position.y = sg.userData.y0; mn5._poseKey = '';
+}
+// 胴の姿勢を毎フレーム決める: 置いた傾き（w）＋手で持って傾ける（ジンバル・電池交換）＋畳んだ姿の高さ。変わったときだけ床までの距離を測る
+// 床に近づきうる部品（胴・脚・モーターと羽根・電池・カメラの頭・カバー）だけの頂点で、いちばん低い高さを測る。胴全体を毎フレーム走査しない
+const _mn5lv = new THREE.Vector3();
+function mn5Lowest() {
+  const sg = D.sg; sg.updateMatrixWorld(true); let low = Infinity;
+  const scan = (o, stride) => o.traverseVisible(c => { if (!c.isMesh || (c.userData.noPart && c.parent !== D.protector)) return; const pos = c.geometry.attributes.position; if (!pos) return;
+    for (let k = 0; k < pos.count; k += stride) { _mn5lv.fromBufferAttribute(pos, k).applyMatrix4(c.matrixWorld); if (_mn5lv.y < low) low = _mn5lv.y; } });
+  const bodyP = D.parts.find(p => p.key === 'body'); if (bodyP) scan(bodyP.obj, 2);
+  for (const L of D.legs) scan(L.group, 1);
+  for (const mo of D.motors) { scan(mo.prop, 2); for (const c of mo.group.children) if (c !== mo.prop && !c.userData.noPart) scan(c, 6); }
+  scan(D.batPart.obj, 2); scan(D.gimbalParts.head, 2); if (D.protector.visible) scan(D.protector, 1);
+  return low;
+}
+function mn5ApplyPose(dt) {
+  const sg = D.sg, R = mn5.rest, P = mn5.pose;
+  const want = (mn5.fold > 0.0005 || mn5.foldTo > 0 || !!mn5.act || body.py > 0.003 || S.explode > 0.02 || mn5.senseOn) ? 0 : 1;   /* 検知範囲の図は水平で見せる */
+  R.w += (want - R.w) * (1 - Math.exp(-dt / (body.py > 0.003 ? 0.25 : 0.35))); if (Math.abs(R.w - want) < 0.002) R.w = want;
+  const ex = S.explode > 0.02, key = `${R.w.toFixed(4)},${P.lift.toFixed(4)},${P.px.toFixed(4)},${P.yaw.toFixed(4)},${P.rz.toFixed(4)},${mn5.fold.toFixed(4)},${ex}`;
+  if (key === mn5._poseKey) return false; mn5._poseKey = key;
+  sg.rotation.set(P.px + R.th * R.w, P.yaw, P.rz, 'YXZ');
+  sg.position.y = sg.userData.y0 + R.dy * R.w + P.lift;
+  if (mn5.fold > 0.0005 && !ex) sg.position.y += ALT_FLOOR - mn5Lowest();   /* 前アームを振り下ろすあいだ床を突き抜けない。畳んだ姿はいちばん低い所で床に置く（分解中は散らした部品で測らない） */
+  else if (P.lift > 0 || P.px || P.rz) { const low = mn5Lowest(); if (low < ALT_FLOOR - 0.0005) sg.position.y += ALT_FLOOR - low; }
+  return true;
+}
+
+// ---------- 毎フレーム ----------
+const mn5Ease = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
+function stepMn5(dt) {
+  let dirty = false;
+  if (S.explode > 0.02 && mn5.foldTo > 0) { mn5.foldTo = 0; syncMn5Chips(); if ($('#noteCard').dataset.kind === 'mn5-fold') renderNote(null); }   /* 畳んだ姿勢のまま部品を散らさない */
+  { const sup = mn5.sizeOn || mn5.fovOn || mn5.senseOn || !!(mn5.act && mn5.act.id === 'gimbal'); if (sup !== mn5._sup) { mn5._sup = sup; S.labelsSuppressed = sup; } }
+  // --- たたむ / 広げる ---
+  if (mn5.foldTo > mn5.fold) {
+    const spinning = D.motors.some(mo => mo.rpm > 30) || body.py > 0.003;
+    if (!spinning) {
+      let aligned = true;
+      for (const mo of D.motors) { const tgt = Math.PI / 2 + Math.round((mo.angle - Math.PI / 2) / (Math.PI * 2)) * Math.PI * 2; const d = tgt - mo.angle; if (Math.abs(d) > 0.005) { aligned = false; mo.angle += d * (1 - Math.exp(-dt / 0.12)); } else mo.angle = tgt; mo.prop.rotation.y = mo.angle; }
+      if (aligned || mn5.fold > 0) mn5.fold = Math.min(mn5.foldTo, mn5.fold + dt / 2.8);
+      dirty = true;
+    }
+  } else if (mn5.foldTo < mn5.fold) { mn5.fold = Math.max(mn5.foldTo, mn5.fold - dt / 2.8); dirty = true; }
+  if (mn5.fold !== mn5._last) {
+    // 畳む: 羽根 → 前アーム（下の段）→ 後左 → 後右（ここで電源オフのカウントダウン）→ カバー。広げる: カバー → 後右（電源オン）→ 後左 → 前 → 羽根（取説の展開図の順）
+    const f = mn5.fold, fb = mn5Ease(f / 0.22), ff = mn5Ease((f - 0.2) / 0.36), frL = mn5Ease((f - 0.52) / 0.3), frR = mn5Ease((f - 0.62) / 0.3);
+    D.motors.forEach((mo, i) => {
+      const F = D.folds[i];
+      if (F.front) F.fg.quaternion.setFromAxisAngle(F.flip.axis, F.flip.sign * Math.PI * ff);   /* 下へ振り下ろして後ろへ。畳むと上下が逆さになる */
+      else { const fr = F.sx > 0 ? frR : frL, yawT = Math.atan2(1, F.sx * 0.03); F.fg.rotation.set(0, mn5Norm(yawT - F.yaw) * fr, 0); }   /* ほぼ垂直な軸で前へ回して胴の上の段に沿わせる */
+      for (const h of mo.hinges) h.g.rotation.y = h.s * fb * Math.PI / 2;
+    });
+    D.protector.visible = f > 0.95;
+    // 後方右アーム(M2)を開ききったら電源が入る / 畳み終えたら電源オフのカウントダウンが終わった状態に
+    if (mn5.foldTo === 0 && !mn5.powered && frR < 0.02 && mn5._last > 0) setMn5Power(true, '後方右アームを開いて電源オン');
+    if (mn5.foldTo === 1 && frR > 0.98 && mn5.powered && !mn5._countdown) { mn5._countdown = true; showToast('後方右アームを畳んだので、電源オフのカウントダウン', 2800); }
+    if (mn5.foldTo === 1 && f >= 1 && mn5.powered) { setMn5Power(false); mn5._countdown = false; frameBox([-0.06, -0.16, -0.10], [0.06, -0.08, 0.10], [0.62, 0.42, -0.66], 1.2); }   /* 畳み終えたら畳んだ大きさに寄せ直す */
+    if (mn5.foldTo === 0) mn5._countdown = false;
+    if (f === 0 && mn5.foldTo === 0 && mn5.pendingPower) { mn5.pendingPower = false; setPower(0.5); }
+    mn5._last = f; dirty = true;
+  }
+  // --- 動き ---
+  const a = mn5.act;
+  if (a) {
+    a.t += dt; const t = a.t; dirty = true;
+    if (a.id === 'battery' && a.p) {
+      if (mn5.fold > 0.001) { a.t = 0; }   /* アームが開くまで待つ */
+      else {
+        const p = a.p; if (!p.anim) p.anim = { pos: new THREE.Vector3(), quat: new THREE.Quaternion() };
+        if (t > 0.3 && mn5.powered) setMn5Power(false);
+        mn5.pose.lift = 0.05 * mn5Ease(t / 0.8) * (1 - mn5Ease((t - 4.4) / 0.6));   /* 手に持って浮かせる（電池が後ろの足なので、置いたままでは抜けない） */
+        let back = 0; const B = 0.105;
+        if (t > 0.9 && t < 2.1) back = mn5Ease((t - 0.9) / 1.2) * B; else if (t >= 2.1 && t < 2.9) back = B; else if (t >= 2.9 && t < 4.1) back = B * (1 - mn5Ease((t - 2.9) / 1.2));
+        p.anim.pos.set(0, -back * 0.1, back); D.bay.visible = back > 0.008;   /* 後ろへ（わずかに下へ）引き抜く。抜いている間は胴の下の受けが見える */
+        const st = $('#mn5BatState'), msg = t < 0.9 ? '電源を切り、機体を手に持ちます' : t < 2.1 ? '左右のバックルを押しながら後ろへ引き抜きます' : t < 2.9 ? '充電済みのバッテリーに持ち替え' : t < 4.1 ? 'カチッと音がするまで差し込みます' : '電源ボタンを押してから長押しして起動しました'; if (st && st.textContent !== msg) st.textContent = msg;
+        if (t > 4.2 && !mn5.powered) setMn5Power(true);
+        if (t > 5.0) { p.anim = null; p.animReset = true; mn5.pose.lift = 0; mn5.act = null; D.bay.visible = false; syncMn5Chips(); }
+      }
+    }
+    if (a.id === 'gimbal' && (mn5.fold > 0.02 || mn5.foldTo > 0)) { a.t = 0; const st = $('#mn5GimState'); if (st && st.textContent !== 'アームを開いています…') st.textContent = 'アームを開いています…'; }   /* アームが開くまで待つ */
+    else if (a.id === 'gimbal') {
+      // チルトは最大制御速度 100°/秒 を超えないように区切る（例: 55°→−90° の145°は1.8秒）。ロールの速さは公式に無いので同じくらいに
+      const R = MN5_R, E = mn5Ease, T = [0.8, 0.5, 1.8, 0.4, 1.1, 1.1, 1.0, 1.1, 0.5, 2.4, 0.5, 0.9, 0.5, 5.0];
+      let k = 0, u = t; while (k < T.length && u > T[k]) { u -= T[k]; k++; } const f = k < T.length ? u / T[k] : 1;
+      let tilt = 0, roll = 0, msg = '';
+      const P = mn5.pose; P.lift = 0; P.px = P.yaw = P.rz = 0;
+      if (k === 0) { tilt = R(55) * E(f); msg = '上へ 55°（操作できる上限・見上げる構図）'; }
+      else if (k === 1) { tilt = R(55); msg = '上へ 55°（操作できる上限・見上げる構図）'; }
+      else if (k === 2) { tilt = R(55) + R(-145) * E(f); msg = '真下へ −90°（真上からの俯瞰）'; }
+      else if (k === 3) { tilt = R(-90); msg = '真下へ −90°（真上からの俯瞰）'; }
+      else if (k === 4) { tilt = R(-90) * (1 - E(f)); msg = '正面へもどす'; }
+      else if (k === 5) { roll = R(-90) * E(f); msg = 'ロール −90°：縦向きの撮影（機体は水平のまま）'; }
+      else if (k === 6) { roll = R(-90); msg = 'ロール −90°：縦向きの撮影（機体は水平のまま）'; }
+      else if (k === 7) { roll = R(-90) + R(-90) * E(f); msg = 'ロール −180°：上下が逆さまの映像（操作できる下限）'; }
+      else if (k === 8) { roll = R(-180); msg = 'ロール −180°：上下が逆さまの映像（操作できる下限）'; }
+      else if (k === 9) { roll = R(-180) + R(225) * E(f); msg = '反対側は 45° まで。合わせて225°回る（公式）'; }
+      else if (k === 10) { roll = R(45); msg = '反対側は 45° まで。合わせて225°回る（公式）'; }
+      else if (k === 11) { roll = R(45) * (1 - E(f)); msg = '水平にもどす'; }
+      else if (k === 12) { msg = '手に持って傾けても…'; P.lift = 0.05 * E(f); }
+      else if (k === 13) { const w = Math.sin(Math.PI * Math.min(1, f * 1.15)), s1 = Math.sin(f * Math.PI * 4), s2 = Math.sin(f * Math.PI * 3 + 1.1), s3 = Math.sin(f * Math.PI * 2 + 0.4);
+        P.lift = 0.05 * (1 - E((f - 0.85) / 0.15)); P.px = R(16) * s1 * w; P.yaw = R(10) * s3 * w; P.rz = R(18) * s2 * w; msg = 'カメラは水平と向きを保つ（チルト・ロール・パンの3軸で打ち消す）'; }
+      if (k === 12 && u < 0.05 && !a.framed) { a.framed = true; frameBox([-0.12, -0.16, -0.14], [0.12, -0.02, 0.10], [0.40, 0.14, -0.90], 1.12); }   /* 胴ごと傾くので引いて見せる */
+      mn5.gim.tilt = tilt; mn5.gim.roll = roll;
+      const st = $('#mn5GimState'); if (st && msg && st.textContent !== msg) st.textContent = msg;
+      if (k >= T.length) { mn5.gim.tilt = mn5.gim.roll = 0; Object.assign(P, { lift: 0, px: 0, yaw: 0, rz: 0 }); mn5.act = null; syncMn5Chips(); }
+    }
+  }
+  if (mn5ApplyPose(dt)) dirty = true;
+  if (dirty) S.shadowDirty = S.csDirty = S.aoDirty = true;
+}
+
+// ---------- 起動 ----------
+function initMn5() {
+  for (const b of $$('#mn5Chips [data-mn5]')) b.addEventListener('click', () => mn5Action(b.dataset.mn5));
+  mn5.person = buildPerson(); mn5.person.position.set(0.30, -0.158, 0.22); mn5.person.visible = false; scene.add(mn5.person);
+  mn5.ghost = pd6bQuadGhost(); mn5.ghost.position.set(-0.50, -0.158 + 0.156, -0.16); mn5.ghost.visible = false; scene.add(mn5.ghost);
+  mn5RestInit(); mn5.rest.w = 1; mn5ApplyPose(0);
+  setMn5Power(true);
+  syncMn5Chips();
+  focusOn([D.root], { pull: false, margin: 1.3 });   /* 550クラスよりずっと小さいので、最初の画を寄せる */
+  const q = new URLSearchParams(location.search);
+  if (!SHARE_KEYS.some(k => q.has(k))) setTimeout(() => { if (!$('#noteCard').dataset.kind) { renderMn5About(); mn5FrameDrone(null, 1.05); } }, 900);
+}
+
 // ===== 機種の切り替えと、機種ごとの動きへの振り分け =====
 // ---------- 機種の切り替え（どの機種でも使う） ----------
 function setModel(m) {
@@ -11943,7 +12771,7 @@ function setModel(m) {
   setTimeout(() => { try { location.assign(u.toString()); } catch (e) { location.reload(); } }, 30);
 }
 function initModelUI() {
-  document.body.classList.toggle('alt', IS_ALT); document.body.classList.toggle('pd6b', IS_PD6B); document.body.classList.toggle('mavic4', IS_MAVIC); document.body.classList.toggle('matrice4', IS_M4);
+  document.body.classList.toggle('alt', IS_ALT); document.body.classList.toggle('pd6b', IS_PD6B); document.body.classList.toggle('mavic4', IS_MAVIC); document.body.classList.toggle('matrice4', IS_M4); document.body.classList.toggle('mini5', IS_MINI5);
   $('#modelName').textContent = MODEL_NAME[MODEL];
   for (const b of $$('#modelPop [data-model]')) { const on = b.dataset.model === MODEL; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(on)); }
   const btn = $('#modelBtn'), pop = $('#modelPop');
@@ -11956,27 +12784,28 @@ function initModelUI() {
 
 // ---------- 機種ごとの動きへの振り分け（ui.js・live.js・engine.js・app.js から呼ばれる） ----------
 // 一覧・部品の約束ごとは機種のデータが持つ
-const ALT_DEF = IS_PD6B ? { list: PD6B_LIST_ORDER, sub: PD6B_SUB, perMotor: PD6B_PER_MOTOR } : IS_MAVIC ? { list: MAVIC_LIST_ORDER, sub: MAVIC_SUB, perMotor: MAVIC_PER_MOTOR } : IS_M4 ? { list: M4_LIST_ORDER, sub: M4_SUB, perMotor: M4_PER_MOTOR } : null;
-const altUI = () => IS_PD6B ? 'pd6b' : IS_MAVIC ? 'mavic' : IS_M4 ? 'm4' : null;
-function altBusy() { return IS_PD6B ? pd6bBusy() : IS_MAVIC ? mavicBusy() : IS_M4 ? m4Busy() : false; }              // 生きている機体（ホバー）を止めたいとき
-function altActing() { return IS_PD6B ? !!pd6b.act : IS_MAVIC ? !!mav.act : IS_M4 ? !!m4.act : false; }             // 台本の動きの最中（%表示・自動回転を止める）
-function altBodyOwned() { return IS_PD6B ? !!(pd6b.act && pd6b.act.body) : IS_MAVIC ? !!(mav.act && mav.act.body) : IS_M4 ? !!(m4.act && m4.act.body) : false; }   // 機体の位置を動きが持つ
-function altWide() { return IS_PD6B ? (!!pd6b.act || pd6b.sizeOn || pd6b.chuteTo > 0) : IS_MAVIC ? mavicWide() : IS_M4 ? m4Wide() : false; }   // 引いた画を保つ
-function altShadowExtra() { return IS_PD6B ? pd6bShadowExtra() : IS_MAVIC ? mavicShadowExtra() : IS_M4 ? m4ShadowExtra() : 0; }
-function altBlockPower() { return IS_PD6B ? pd6bBlockPower() : IS_MAVIC ? mavicBlockPower() : IS_M4 ? m4BlockPower() : false; }
-function altOnTab(tab) { if (IS_PD6B) pd6bOnTab(tab); else if (IS_MAVIC) mavicOnTab(tab); else if (IS_M4) m4OnTab(tab); }
-function altStop() { if (IS_PD6B) pd6bStop(); else if (IS_MAVIC) mavicStop(); else if (IS_M4) m4Stop(); }
-function altAction(id) { if (IS_PD6B) pd6bAction(id); else if (IS_MAVIC) mavicAction(id); else if (IS_M4) m4Action(id); }
+const ALT_DEF = IS_PD6B ? { list: PD6B_LIST_ORDER, sub: PD6B_SUB, perMotor: PD6B_PER_MOTOR } : IS_MAVIC ? { list: MAVIC_LIST_ORDER, sub: MAVIC_SUB, perMotor: MAVIC_PER_MOTOR } : IS_M4 ? { list: M4_LIST_ORDER, sub: M4_SUB, perMotor: M4_PER_MOTOR } : IS_MINI5 ? { list: MN5_LIST_ORDER, sub: MN5_SUB, perMotor: MN5_PER_MOTOR } : null;
+const altUI = () => IS_PD6B ? 'pd6b' : IS_MAVIC ? 'mavic' : IS_M4 ? 'm4' : IS_MINI5 ? 'mn5' : null;
+function altBusy() { return IS_PD6B ? pd6bBusy() : IS_MAVIC ? mavicBusy() : IS_M4 ? m4Busy() : IS_MINI5 ? mn5Busy() : false; }              // 生きている機体（ホバー）を止めたいとき
+function altActing() { return IS_PD6B ? !!pd6b.act : IS_MAVIC ? !!mav.act : IS_M4 ? !!m4.act : IS_MINI5 ? !!mn5.act : false; }             // 台本の動きの最中（%表示・自動回転を止める）
+function altBodyOwned() { return IS_PD6B ? !!(pd6b.act && pd6b.act.body) : IS_MAVIC ? !!(mav.act && mav.act.body) : IS_M4 ? !!(m4.act && m4.act.body) : IS_MINI5 ? !!(mn5.act && mn5.act.body) : false; }   // 機体の位置を動きが持つ
+function altWide() { return IS_PD6B ? (!!pd6b.act || pd6b.sizeOn || pd6b.chuteTo > 0) : IS_MAVIC ? mavicWide() : IS_M4 ? m4Wide() : IS_MINI5 ? mn5Wide() : false; }   // 引いた画を保つ
+function altShadowExtra() { return IS_PD6B ? pd6bShadowExtra() : IS_MAVIC ? mavicShadowExtra() : IS_M4 ? m4ShadowExtra() : IS_MINI5 ? mn5ShadowExtra() : 0; }
+function altBlockPower() { return IS_PD6B ? pd6bBlockPower() : IS_MAVIC ? mavicBlockPower() : IS_M4 ? m4BlockPower() : IS_MINI5 ? mn5BlockPower() : false; }
+function altOnTab(tab) { if (IS_PD6B) pd6bOnTab(tab); else if (IS_MAVIC) mavicOnTab(tab); else if (IS_M4) m4OnTab(tab); else if (IS_MINI5) mn5OnTab(tab); }
+function altStop() { if (IS_PD6B) pd6bStop(); else if (IS_MAVIC) mavicStop(); else if (IS_M4) m4Stop(); else if (IS_MINI5) mn5Stop(); }
+function altAction(id) { if (IS_PD6B) pd6bAction(id); else if (IS_MAVIC) mavicAction(id); else if (IS_M4) m4Action(id); else if (IS_MINI5) mn5Action(id); }
 function altVariant() { return IS_PD6B ? pd6b.variant : null; }
 // 部品が今の組み合わせに含まれるか（PD6Bは腰下ユニット、Matrice 4 は 4T/4E とアクセサリー）
-function altHasVariant(v) { return IS_PD6B ? pd6b.variant === v : IS_M4 ? m4HasVariant(v) : false; }
-function stepAlt(dt) { if (IS_PD6B) stepPd6b(dt); else if (IS_MAVIC) stepMavic(dt); else if (IS_M4) stepM4(dt); }
+function altHasVariant(v) { return IS_PD6B ? pd6b.variant === v : IS_M4 ? m4HasVariant(v) : IS_MINI5 ? mn5HasVariant(v) : false; }
+function stepAlt(dt) { if (IS_PD6B) stepPd6b(dt); else if (IS_MAVIC) stepMavic(dt); else if (IS_M4) stepM4(dt); else if (IS_MINI5) stepMn5(dt); }
 // 「眼」に入る直前（fpv.js が今の状態を控える前）。機種の重ね絵と台本の動きを閉じる
 function altFpvEnter() {
   if (IS_MAVIC) { if (mav.act) mavicStop(); if (mav.fovOn || mav.senseOn || mav.sizeOn) mvOverlays(null, true); mav._sup = false; S.labelsSuppressed = false; }
-  else if (IS_M4) { if (m4.act) m4Stop(); if (m4Wide()) m4Overlays(null, true); m4._sup = false; S.labelsSuppressed = false; }   /* ジンバルの台本が抑えたラベルも戻す（眼が控える値を正しくする） */
+  else if (IS_M4) { if (m4.act) m4Stop(); if (m4Wide()) m4Overlays(null, true); m4._sup = false; S.labelsSuppressed = false; }
+  else if (IS_MINI5) { if (mn5.act) mn5Stop(); if (mn5Wide()) mn5Overlays(null, true); mn5._sup = false; S.labelsSuppressed = false; }   /* ジンバルの台本が抑えたラベルも戻す（眼が控える値を正しくする） */
 }
-function altFpvExit() { if (IS_MAVIC) mav.pendingPower = false; else if (IS_M4) m4.pendingPower = false; else if (IS_PD6B) pd6b.pendingPower = false; }   /* 眼に入るときに保留した電源を、出たあとで回さない */
+function altFpvExit() { if (IS_MAVIC) mav.pendingPower = false; else if (IS_M4) m4.pendingPower = false; else if (IS_PD6B) pd6b.pendingPower = false; else if (IS_MINI5) { mn5.pendingPower = false; mn5.gim.zoom = 1; } }   /* 眼に入るときに保留した電源を、出たあとで回さない */
 // 部品を選ぶ前に、その部品が見える組み合わせにする（Matrice 4 の 4T/4E・アクセサリー、PD6B の腰下ユニット）
 function altShowPart(k) { const v = PARTS[k] && PARTS[k].variant; if (!v) return;
   if (IS_M4) { if ((v === 't' || v === 'e') && m4.variant !== v) m4SetVariant(v, false); else if ((v === 'spot' && !m4.acc.spot) || (v === 'spk' && !m4.acc.spk)) m4SetAcc(m4.acc.spot || v === 'spot', m4.acc.spk || v === 'spk'); }
@@ -11988,7 +12817,7 @@ function altLowest(root, stride = 3) { root.updateMatrixWorld(true); let low = I
     for (let k = 0; k < p.count; k += stride) { _altLv.fromBufferAttribute(p, k).applyMatrix4(c.matrixWorld); if (_altLv.y < low) low = _altLv.y; } });
   return low; }
 function altLiftAboveFloor(sg) { const low = altLowest(sg); if (low < ALT_FLOOR - 0.0005) sg.position.y += ALT_FLOOR - low; }   /* 手で持って傾ける場面など: 床より下に出た分だけ持ち上げる */
-function initAlt() { if (IS_PD6B) initPd6b(); else if (IS_MAVIC) initMavic(); else if (IS_M4) initM4(); }
+function initAlt() { if (IS_PD6B) initPd6b(); else if (IS_MAVIC) initMavic(); else if (IS_M4) initM4(); else if (IS_MINI5) initMn5(); }
 
 // ===== UI: タブ・扉・解説・ラベル・スティック・入力 =====
 const LIST_ORDER = ALT_DEF ? ALT_DEF.list.slice() : ['frameTop', 'frameBottom', 'regMark', 'arm', 'armClamp', 'motorMount', 'standoff', 'screws', 'motor', 'bell', 'stator', 'winding', 'magnet', 'shaft', 'motorBase', 'prop', 'propNut', 'propAdapter', 'esc', 'fc', 'pdb', 'capacitor', 'buzzer', 'battery', 'cells', 'batteryTray', 'xt60', 'balance', 'strap', 'wiring', 'gps', 'remoteId', 'rx', 'vtx', 'telemetry', 'led', 'gimbal', 'camera', 'damper', 'landingGear'];
@@ -12677,7 +13506,7 @@ function tick(now) {
 }
 // 検証用に最小限だけグローバルへ出す(モジュールスコープのままだとコンソールから触れないため)
 window.LIST_ORDER = LIST_ORDER; window.PARTS = PARTS; window.WHATIF = WHATIF; window.WEAR = WEAR; window.MISHAPS = MISHAPS; window.USES = USES; window.FLIGHT = FLIGHT; window.EXPERT_MODES = EXPERT_MODES;
-window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: scale, __codex: codex, __whatif: whatif, __alive: alive, __lesson: lesson, __expert: expert, get pd6b() { return typeof pd6b === 'object' ? pd6b : null; }, get mav() { return typeof mav === 'object' ? mav : null; }, get m4() { return typeof m4 === 'object' ? m4 : null; }, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
+window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: scale, __codex: codex, __whatif: whatif, __alive: alive, __lesson: lesson, __expert: expert, get pd6b() { return typeof pd6b === 'object' ? pd6b : null; }, get mav() { return typeof mav === 'object' ? mav : null; }, get m4() { return typeof m4 === 'object' ? m4 : null; }, get mn5() { return typeof mn5 === 'object' ? mn5 : null; }, get altLowest() { return altLowest; }, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
 // ---------- 起動 ----------
 (async () => {
   $('#loadMsg').textContent = '照明と材質を準備しています…';

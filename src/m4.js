@@ -19,7 +19,7 @@ function m4Materials(M) {
   const propCanvas = (mark) => pd6bCanvas(256, 1024, (g, w, h) => {
     g.fillStyle = '#1a1a1a'; g.fillRect(0, 0, w, h);   /* 黒い羽根の先の約2割がオレンジ（公式写真） */
     g.fillStyle = 'rgba(255,255,255,0.04)'; for (let y = 0; y < h; y += 6) g.fillRect(0, y, w, 1);
-    g.fillStyle = '#e06e2c'; g.fillRect(0, h * 0.905, w, h * 0.095);
+    g.fillStyle = '#e06e2c'; g.fillRect(0, 0, w, h * 0.095);   /* キャンバスの上端＝羽根の先（CanvasTexture は上下が反転して v=1 が上端） */
   });
   const propMat = () => Object.assign(phy({ map: canvasTex(propCanvas(), { wrap: false }), roughness: 0.55, metalness: 0, clearcoat: 0.3, clearcoatRoughness: 0.4, side: THREE.DoubleSide }), { userData: { flatTint: true } });
   const regLabel = pd6bCanvas(512, 96, (g, w, h) => { g.fillStyle = '#f4f4f2'; g.fillRect(0, 0, w, h); g.fillStyle = '#17181b'; g.font = 'bold 60px "SF Mono", Menlo, monospace'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('JU 1234 5678', w / 2, h / 2 + 2); });

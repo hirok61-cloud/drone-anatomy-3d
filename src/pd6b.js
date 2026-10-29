@@ -11,7 +11,7 @@ function pd6bMaterials(M) {
   const propCanvas = (dir) => pd6bCanvas(512, 1024, (g, w, h) => {
     g.fillStyle = '#121316'; g.fillRect(0, 0, w, h);
     g.strokeStyle = 'rgba(255,255,255,0.045)'; g.lineWidth = 5; for (let x = -h; x < w + h; x += 22) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x + h * 0.35, h); g.stroke(); }
-    g.fillStyle = dir > 0 ? '#14b8a6' : '#3b7df7'; g.fillRect(0, h * 0.965, w, h * 0.035);
+    g.fillStyle = dir > 0 ? '#14b8a6' : '#3b7df7'; g.fillRect(0, 0, w, h * 0.035);   /* キャンバスの上端＝羽根の先 */
     g.save(); g.translate(w * 0.30, h * 0.30); g.rotate(Math.PI / 2); g.fillStyle = '#8d9097'; g.font = `bold 34px ${sans}`; g.fillText(`30"  ${dir > 0 ? 'CCW' : 'CW'}`, 0, 0); g.restore();
   });
   const propMat = (dir) => Object.assign(phy({ map: canvasTex(propCanvas(dir), { wrap: false }), roughness: 0.32, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.08, specularIntensity: 0.7, side: THREE.DoubleSide }), { userData: { flatTint: true } });

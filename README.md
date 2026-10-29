@@ -17,10 +17,15 @@
 | （なし） | 550クラス クアッドコプター | 全機能 | `src/drone.js` `src/data.js` |
 | `pd6b` | PD6B-CAT3（プロドローン） | たたむ・電池交換・荷物・パラシュート・付け替え・大きさ | `src/pd6b*.js` |
 | `mavic4` | DJI Mavic 4 Pro | たたむ・電池交換・ジンバル・3眼カメラ・検知範囲・大きさ | `src/mavic*.js` |
-| `matrice4` | DJI Matrice 4 シリーズ（4T／4E。`&v=e` で 4E） | 4T⇄4E・たたむ・電池交換・ジンバル・カメラ（サーマル）・レーザー測距・検知範囲・アクセサリー・大きさ | `src/m4*.js` |
+| `matrice4` | DJI Matrice 4 シリーズ（4T／4E。`&m4v=e` で 4E） | 4T⇄4E・たたむ・電池交換・ジンバル・カメラ（サーマル）・レーザー測距・検知範囲・アクセサリー・大きさ | `src/m4*.js` |
+| `mini5` | DJI Mini 5 Pro | たたむ（後方右アームで電源オン）・電池交換・ジンバル（縦向き・ロール225°）・画角（24mm／48mm）・検知範囲・大きさ | `src/mini5*.js` |
 
 Matrice 4 の寸法は DJI 公式の3Dモデル（STEP）を実測した値です。CADのデータそのものは使わず、コードで組み直しています。
 調べた一次情報は `docs/reference/2026-10-23-matrice4-facts.md`（仕様・取説）と `-shape.md`（写真から読んだ形）。
+
+Mini 5 Pro は公式の3Dデータや寸法図が公開されていないため、形は公式の製品写真と取説の図から寸法を読み取って起こしています（高さ方向は推定を含む）。
+調べた一次情報は `docs/reference/2026-10-29-mini5pro-facts.md`（仕様・取説）と `-shape.md`（写真から読んだ形）。
+置くと前脚と電池の後ろの足で立ち、機首が約15°上がります（浮く・畳む・分解すると水平に戻る）。
 
 ## できること
 
@@ -112,6 +117,7 @@ python3 -m http.server 8941 --directory .
 | `pJ-pd6b.js` | PD6B-CAT3（`?model=pd6b`） |
 | `pK-mavic.js` | Mavic 4 Pro（`?model=mavic4`） |
 | `pL-m4.js` | Matrice 4 シリーズ（`?model=matrice4`） |
+| `pM-mini5.js` | Mini 5 Pro（`?model=mini5`） |
 
 ### 設計メモ
 

@@ -8,7 +8,7 @@ import pathlib
 ROOT = pathlib.Path(__file__).parent
 SRC = ROOT / 'src'
 URL = 'https://drone-anatomy-3d.hiro-k61.workers.dev/'
-DESC = ('ドローン（550クラスのクアッドコプター／プロドローンPD6B-CAT3／DJI Mavic 4 Pro／DJI Matrice 4シリーズ）を部品ごとに分解・透視・断面表示できる3D教材。'
+DESC = ('ドローン（550クラスのクアッドコプター／プロドローンPD6B-CAT3／DJI Mavic 4 Pro／DJI Matrice 4シリーズ／DJI Mini 5 Pro）を部品ごとに分解・透視・断面表示できる3D教材。'
         '40種の部品それぞれに役割・構造・仕様例・点検ポイントの解説と、飛行の原理のアニメーションがついています。')
 
 tpl = (SRC / 'index.html').read_text(encoding='utf-8')
@@ -25,7 +25,7 @@ while True:
     if css[_a:_b].count(chr(10)) > 2:
         raise SystemExit('style.css: コメントが %d 行にまたがっています (行 %d) — 閉じ忘れの疑い' % (css[_a:_b].count(chr(10)) + 1, css[:_a].count(chr(10)) + 1))
     _i = _b + 2
-SOURCES = ['model.js', 'data.js', 'pd6b-data.js', 'mavic-data.js', 'm4-data.js', 'materials.js', 'drone.js', 'pd6b.js', 'mavic.js', 'm4.js', 'engine.js', 'showdrone.js', 'physics.js', 'airflow.js', 'theater.js', 'whatif.js', 'scale.js', 'codex.js', 'live.js', 'lesson.js', 'expert.js', 'reg.js', 'preflight.js', 'descent.js', 'fpv.js', 'weather.js', 'dshow.js', 'dsys.js', 'dshowui.js', 'audio.js', 'share.js', 'pd6bui.js', 'mavicui.js', 'm4ui.js', 'modelui.js', 'ui.js', 'app.js']
+SOURCES = ['model.js', 'data.js', 'pd6b-data.js', 'mavic-data.js', 'm4-data.js', 'mini5-data.js', 'materials.js', 'drone.js', 'pd6b.js', 'mavic.js', 'm4.js', 'mini5.js', 'engine.js', 'showdrone.js', 'physics.js', 'airflow.js', 'theater.js', 'whatif.js', 'scale.js', 'codex.js', 'live.js', 'lesson.js', 'expert.js', 'reg.js', 'preflight.js', 'descent.js', 'fpv.js', 'weather.js', 'dshow.js', 'dsys.js', 'dshowui.js', 'audio.js', 'share.js', 'pd6bui.js', 'mavicui.js', 'm4ui.js', 'mini5ui.js', 'modelui.js', 'ui.js', 'app.js']
 js = '\n'.join((SRC / f).read_text(encoding='utf-8') for f in SOURCES if (SRC / f).exists())
 # 行の途中に足した // コメントが、同じ行の後ろの文を飲み込んでいないか検査する（3回やった失敗）
 import re as _re

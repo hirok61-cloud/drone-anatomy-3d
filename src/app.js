@@ -58,7 +58,7 @@ function tick(now) {
 }
 // 検証用に最小限だけグローバルへ出す(モジュールスコープのままだとコンソールから触れないため)
 window.LIST_ORDER = LIST_ORDER; window.PARTS = PARTS; window.WHATIF = WHATIF; window.WEAR = WEAR; window.MISHAPS = MISHAPS; window.USES = USES; window.FLIGHT = FLIGHT; window.EXPERT_MODES = EXPERT_MODES;
-window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: scale, __codex: codex, __whatif: whatif, __alive: alive, __lesson: lesson, __expert: expert, get pd6b() { return typeof pd6b === 'object' ? pd6b : null; }, get mav() { return typeof mav === 'object' ? mav : null; }, get m4() { return typeof m4 === 'object' ? m4 : null; }, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
+window.__d = { S, body, D, theater, air, perf, cam, flyTo, focusOn, __scale: scale, __codex: codex, __whatif: whatif, __alive: alive, __lesson: lesson, __expert: expert, get pd6b() { return typeof pd6b === 'object' ? pd6b : null; }, get mav() { return typeof mav === 'object' ? mav : null; }, get m4() { return typeof m4 === 'object' ? m4 : null; }, get mn5() { return typeof mn5 === 'object' ? mn5 : null; }, get altLowest() { return altLowest; }, get camera() { return camera; }, get controls() { return controls; }, step(sec, fps = 60) { for (let i = 0; i < sec * fps; i++) tick(last + 1000 / fps); } };
 // ---------- 起動 ----------
 (async () => {
   $('#loadMsg').textContent = '照明と材質を準備しています…';

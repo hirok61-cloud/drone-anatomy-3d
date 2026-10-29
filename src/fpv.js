@@ -9,7 +9,7 @@ const FPV_PAN = THREE.MathUtils.degToRad(95);
 const FPV_TILT_UP = THREE.MathUtils.degToRad(22), FPV_TILT_DOWN = THREE.MathUtils.degToRad(-88);
 let _fpvCam = null;
 // 実機のジンバルとレンズを持つ機種（Mavic・Matrice 4）は、その機種の窓口(GC)を通す。550クラスは null
-const fpvGC = () => IS_MAVIC ? MV_GC : IS_M4 ? M4_GC : null;
+const fpvGC = () => IS_MAVIC ? MV_GC : IS_M4 ? M4_GC : IS_MINI5 ? MN5_GC : null;
 const fpvCamObj = () => { if (fpvGC()) return D.gimbalParts.head; if (!_fpvCam) { const p = partsOf('camera')[0]; _fpvCam = p && p.obj; } return _fpvCam; };
 const fpvTall = () => innerWidth / Math.max(1, innerHeight) < 1.05;   // 縦長の画面は横の画角が狭い
 

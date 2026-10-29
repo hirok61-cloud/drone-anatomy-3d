@@ -10,7 +10,7 @@ function mavicMaterials(M) {
   const propCanvas = (dir) => pd6bCanvas(256, 1024, (g, w, h) => {
     g.fillStyle = '#18191c'; g.fillRect(0, 0, w, h);   /* 黒い羽根の先がオレンジ（公式写真） */
     g.fillStyle = 'rgba(255,255,255,0.04)'; for (let y = 0; y < h; y += 6) g.fillRect(0, y, w, 1);
-    g.fillStyle = '#f0821e'; g.fillRect(0, h * 0.962, w, h * 0.038);
+    g.fillStyle = '#f0821e'; g.fillRect(0, 0, w, h * 0.038);   /* キャンバスの上端＝羽根の先（CanvasTexture は上下が反転して v=1 が上端） */
     g.fillStyle = dir > 0 ? '#9aa0a8' : '#18191c'; g.beginPath(); g.arc(w * 0.5, h * 0.12, w * 0.10, 0, Math.PI * 2); g.fill();   /* 根元の印（取付の組み合わせ・図の例） */
   });
   const propMat = (dir) => Object.assign(phy({ map: canvasTex(propCanvas(dir), { wrap: false }), roughness: 0.55, metalness: 0, clearcoat: 0.3, clearcoatRoughness: 0.4, side: THREE.DoubleSide }), { userData: { flatTint: true } });
