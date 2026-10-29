@@ -48,4 +48,11 @@ function altFpvExit() { if (IS_MAVIC) mav.pendingPower = false; else if (IS_M4) 
 function altShowPart(k) { const v = PARTS[k] && PARTS[k].variant; if (!v) return;
   if (IS_M4) { if ((v === 't' || v === 'e') && m4.variant !== v) m4SetVariant(v, false); else if ((v === 'spot' && !m4.acc.spot) || (v === 'spk' && !m4.acc.spk)) m4SetAcc(m4.acc.spot || v === 'spot', m4.acc.spk || v === 'spk'); }
   else if (IS_PD6B && pd6b.variant !== v) pd6bSetVariant(v); }
+// 床（y=−0.158）を突き抜けないための共通の道具。機体のいちばん低い点を、部品のメッシュの頂点から測る（重ね絵・回転円盤など部品でないものは数えない）
+const ALT_FLOOR = -0.158, _altLv = new THREE.Vector3();
+function altLowest(root, stride = 3) { root.updateMatrixWorld(true); let low = Infinity;
+  root.traverseVisible(c => { if (!c.isMesh || c.userData.noPart) return; const p = c.geometry.attributes.position; if (!p) return;
+    for (let k = 0; k < p.count; k += stride) { _altLv.fromBufferAttribute(p, k).applyMatrix4(c.matrixWorld); if (_altLv.y < low) low = _altLv.y; } });
+  return low; }
+function altLiftAboveFloor(sg) { const low = altLowest(sg); if (low < ALT_FLOOR - 0.0005) sg.position.y += ALT_FLOOR - low; }   /* 手で持って傾ける場面など: 床より下に出た分だけ持ち上げる */
 function initAlt() { if (IS_PD6B) initPd6b(); else if (IS_MAVIC) initMavic(); else if (IS_M4) initM4(); }

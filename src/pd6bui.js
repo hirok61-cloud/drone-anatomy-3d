@@ -224,7 +224,9 @@ function stepPd6b(dt) {
       let py = 0;
       if (t > 2.0 && t < 4.0) py = 0.22 * pdEase((t - 2.0) / 2.0); else if (t >= 4.0 && t < 5.6) py = 0.22; else if (t >= 5.6 && t < 7.6) py = 0.22 * (1 - pdEase((t - 5.6) / 2.0));
       body.py = py; body.vyF = 0; body.px = body.pz = 0; body.tx = body.tz = 0;
-      bp.anim.pos.set(0, -0.035 * fall - py / PD6B_K, 0);   /* 箱は床に残す: 機体が上がったぶんだけ下げる */
+      if (a.fallD == null) { const ws = bp.obj.parent.getWorldScale(new THREE.Vector3()).y; a.fallD = Math.max(0, altLowest(bp.obj) - D.root.position.y - ALT_FLOOR) / ws; }   /* 箱の下端から床までの距離（決め打ちだと床に7mm沈んでいた） */
+      bp.anim.pos.set(0, -a.fallD * fall - py / PD6B_K, 0);   /* 箱は床に残す: 機体が上がったぶんだけ下げる */
+      bp.obj.position.copy(bp.home).add(bp.anim.pos);   /* その場で当てる（部品の動きは次のコマの最初に当たるので、1コマ遅れて床から浮き沈みしていた） */
       for (const mo of D.motors) { mo.rpmTarget = t > 1.0 && t < 7.4 ? HOVER_RPM * 0.9 : 0; mo.rpmRate = 2.5; }
       const st = $('#pdDropState'); if (st) st.textContent = t < 0.6 ? '爪を開いています…' : t < 1.2 ? '箱が床に降りました' : t < 2.0 ? 'プロペラを回します' : t < 5.6 ? '箱を置いて上昇・ホバリング' : t < 7.6 ? 'もどって着陸します' : '爪で箱をつかみ直しました';
       if (t > 9.2) { for (const th of D.arrows.thrust) th.userData.forceHide = false; bp.anim = null; bp.animReset = true; for (const mo of D.motors) { mo.rpmTarget = null; mo.rpmRate = null; } pd6b.act = null; syncBodyMode(); syncPdChips(); }

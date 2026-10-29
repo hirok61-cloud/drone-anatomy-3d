@@ -216,7 +216,7 @@ const MV_GC = {
   },
 };
 // 手で持って傾ける（ジンバルの打ち消しを見せる）。胴を床から浮かせてから回す
-function mvSway(lift, px, yaw, rz) { const sg = D.sg; if (sg.userData.y0 == null) sg.userData.y0 = sg.position.y; sg.position.y = sg.userData.y0 + lift; sg.rotation.set(px, yaw, rz, 'YXZ'); }
+function mvSway(lift, px, yaw, rz) { const sg = D.sg; if (sg.userData.y0 == null) sg.userData.y0 = sg.position.y; sg.position.y = sg.userData.y0 + lift; sg.rotation.set(px, yaw, rz, 'YXZ'); altLiftAboveFloor(sg); }
 
 // ---------- 毎フレーム ----------
 const mvEase = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
@@ -248,6 +248,7 @@ function stepMavic(dt) {
     if (mav.foldTo === 0 && !mav.powered && rr < 0.02 && !mav.act) setMvPower(true, '後方右アームを開いて電源オン');
     if (mav.foldTo === 1 && f >= 1 && mav.powered) { setMvPower(false, '電源ボタンで電源を切りました'); mvFrameBox([-0.09, -0.16, -0.16], [0.09, -0.04, 0.14], [0.62, 0.42, -0.66], 1.15); }   /* 畳み終えたら畳んだ大きさに寄せ直す */
     if (f === 0 && mav.foldTo === 0 && mav.pendingPower) { mav.pendingPower = false; setPower(0.5); }
+    { const sg = D.sg; if (sg.userData.y0 == null) sg.userData.y0 = sg.position.y; sg.position.y = sg.userData.y0; if (f > 0.0005) sg.position.y += ALT_FLOOR - altLowest(sg); }   /* 前アームを振り下ろすあいだ床を突き抜けない。畳んだ姿はいちばん低い所で床に置く */
     mav._last = f; dirty = true;
   }
   // --- 動き ---

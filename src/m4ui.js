@@ -71,7 +71,7 @@ function m4Action(id) {
 function m4Stop() {
   if (!IS_M4 || !m4.act) return;
   const a = m4.act; m4.act = null;
-  if (a.id === 'battery' && a.p) { a.p.anim = null; a.p.animReset = true; if (!m4.powered) setM4Power(true); }
+  if (a.id === 'battery' && a.p) { a.p.anim = null; a.p.animReset = true; D.bay.visible = false; if (!m4.powered) setM4Power(true); }
   if (a.id === 'gimbal') { m4.gim.tilt = 0; m4Sway(0, 0, 0, 0); }
   syncBodyMode(); syncM4Chips();
   if ($('#noteCard').dataset.kind === 'm4-' + a.id) renderNote(null);
@@ -259,7 +259,7 @@ function m4GimbalApply() {
   if (m4.fold > 0.02 || m4.foldTo > 0) { gp.tilt.rotation.x = 0; gp.roll.rotation.z = 0; gp.pan.rotation.y = 0; }
 }
 // 手で持って傾ける（打ち消しを見せる）。胴を床から浮かせてから回す
-function m4Sway(lift, px, yaw, rz) { const sg = D.sg; if (sg.userData.y0 == null) sg.userData.y0 = sg.position.y; sg.position.y = sg.userData.y0 + lift; sg.rotation.set(px, yaw, rz, 'YXZ'); }
+function m4Sway(lift, px, yaw, rz) { const sg = D.sg; if (sg.userData.y0 == null) sg.userData.y0 = sg.position.y; sg.position.y = sg.userData.y0 + lift; sg.rotation.set(px, yaw, rz, 'YXZ'); altLiftAboveFloor(sg); }
 
 // ---------- レーザー距離計: 目標を置いて測る ----------
 // 目標（人）は機体の前 2〜3m。機体を 0.8m 浮かせて向きを変え、胸の高さにレーザーを当てる
@@ -380,6 +380,7 @@ function stepM4(dt) {
       for (const h of mo.hinges) { h.g.rotation.y = h.s * fb * (Math.PI / 2 + 0.16); h.g.position.x = h.s * 0.011 * (1 - 0.7 * fb); h.g.position.y = (h.s > 0 ? 0.0016 : 0) * fb; }   /* 羽根は根元で折れてアームに沿う。2枚を寄せて重ね、アームの線にそろえる */
     });
     D.protector.visible = f > 0.92;
+    m4FoldLift(f);   /* 後アームを振り下ろすあいだ床を突き抜けないよう、いちばん低い所が床に来る高さへ胴ごと上げ下げする */
     if (m4.foldTo === 1 && f >= 1) m4FrameFolded();
     if (f === 0 && m4.foldTo === 0 && m4._last > 0) { if (!m4.powered) setM4Power(true, '電源ボタンを1回押し、続けて長押しして電源を入れました'); if (m4.pendingPower) { m4.pendingPower = false; setPower(0.5); } }
     m4._last = f; dirty = true;
@@ -395,10 +396,10 @@ function stepM4(dt) {
         if (t > 0.3 && m4.powered) setM4Power(false);
         let back = 0; const B = 0.15;
         if (t > 0.8 && t < 2.0) back = m4Ease((t - 0.8) / 1.2) * B; else if (t >= 2.0 && t < 2.8) back = B; else if (t >= 2.8 && t < 4.0) back = B * (1 - m4Ease((t - 2.8) / 1.2));
-        p.anim.pos.set(0, 0, back);
+        p.anim.pos.set(0, 0, back); D.bay.visible = back > 0.012;   /* 抜いている間は胴の後ろの差し込み口が見える */
         const st = $('#m4BatState'), msg = t < 0.8 ? '電源を切りました' : t < 2.0 ? '左右のバックルを押して後ろへ引き抜きます' : t < 2.8 ? '充電済みのバッテリーに持ち替え' : t < 4.0 ? 'カチッと音がするまで差し込みます' : '電源ボタンを1回押してから長押しして起動しました'; if (st && st.textContent !== msg) st.textContent = msg;
         if (t > 4.2 && !m4.powered) setM4Power(true);
-        if (t > 4.6) { p.anim = null; p.animReset = true; m4.act = null; syncM4Chips(); }
+        if (t > 4.6) { p.anim = null; p.animReset = true; m4.act = null; D.bay.visible = false; syncM4Chips(); }
       }
     }
     if (a.id === 'gimbal' && (m4.fold > 0.02 || m4.foldTo > 0)) { a.t = 0; const st = $('#m4GimState'); if (st && st.textContent !== 'アームを開いています…') st.textContent = 'アームを開いています…'; }   /* アームが開くまで待つ（開く前はジンバルを動かさない） */
@@ -423,6 +424,20 @@ function stepM4(dt) {
   }
   if (m4LaserStep(dt)) dirty = true;
   if (dirty) S.shadowDirty = S.csDirty = S.aoDirty = true;
+}
+// 畳む途中・畳んだ姿の高さ: 胴を基準の高さに置いて、脚・モーター・羽根・プロテクターのいちばん低い点を測り、床（y=−0.158）に合わせる
+const M4_FLOOR = -0.158, _m4lv = new THREE.Vector3();
+function m4FoldLift(f) {
+  const sg = D.sg; if (sg.userData.y0 == null) sg.userData.y0 = sg.position.y;
+  sg.position.y = sg.userData.y0; if (f <= 0.0005) return;
+  sg.updateMatrixWorld(true); let low = Infinity;
+  const scan = (o) => o.traverseVisible(c => { if (!c.isMesh || c.userData.noPart && c !== D.protector.children[0]) return; const pos = c.geometry.attributes.position; if (!pos) return;
+    for (let k = 0; k < pos.count; k += 2) { _m4lv.fromBufferAttribute(pos, k).applyMatrix4(c.matrixWorld); if (_m4lv.y < low) low = _m4lv.y; } });
+  for (const mo of D.motors) { scan(mo.group); }
+  for (const L of D.legs) scan(L.group);
+  if (D.protector.visible) scan(D.protector);
+  scan(D.gimbalParts.head);
+  if (low < Infinity) sg.position.y = sg.userData.y0 + (M4_FLOOR - low);   /* 畳み終えると、逆さの後モーターと持ち上がった前脚・プロテクターで床に置かれる */
 }
 function m4FrameFolded() { if (m4._framedFold) return; m4._framedFold = true; frameBox([-0.065, -0.16, -0.17], [0.065, -0.03, 0.12], [0.62, 0.42, -0.66], 1.15); setTimeout(() => { m4._framedFold = false; }, 50); }
 

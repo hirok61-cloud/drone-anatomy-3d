@@ -152,6 +152,8 @@ function buildM4(M) {
   const bat = new THREE.Group();
   const cellsBox = mesh(rboxGeo(mm(50), mm(38), mm(106), mm(4)), M.cell); atP(cellsBox, 0, 20, 33); bat.add(cellsBox);
   const shell = new THREE.Group(); bat.add(shell);
+  shell.add(box(52.5, 40.5, 110, 4, X.shell, 0, 20, 33));   // 電池のケース（胴と同じグレー）。中のセルは「すけて見る」で見える
+  for (const s of [-1, 1]) shell.add(box(18, 0.8, 30, 2, X.dark, s * 12, 40.4, 30));   // 上面の暗いパッド2枚（写真）
   shell.add(box(48, 44, 10, 12, X.shell, 0, 21, 92.5));   // 後端（胴と同じ色で面一・上の後ろ角が丸い・CAD）
   shell.add(box(44, 40, 2, 10, X.shell, 0, 21, 97.4));
   const bled = new THREE.Group();   // 電源ボタン（左寄り）と残量LED 4つ（右・CAD）
@@ -164,6 +166,8 @@ function buildM4(M) {
   sg.add(bat);
   reg(cellsBox, 'cells', V3(0, 0, 0)); reg(bled, 'batteryLed', V3(0, 0, 0.02)); reg(buckle, 'batteryBuckle', V3(0, 0, 0));
   const batPart = reg(bat, 'battery', V3(0, 0.02, 0.16), { coarse: true, label: P(20, 45, 96) }); batPart.shell = shell;
+  // 電池を抜いたときに見える差し込み口（部品には数えない。電池交換の間だけ出す）
+  const bay = new THREE.Group(); bay.add(box(47, 41, 1, 5, X.dark, 0, 20.5, 97.3)); bay.add(box(43, 37, 1, 4, M.lensBack || X.dark, 0, 20.5, 96.6)); bay.visible = false; sg.add(noPart(bay));
   const ports = new THREE.Group(); ports.add(box(24, 15, 1.6, 3, X.dark, 0, -13, 94.4)); ports.children[0].rotation.x = 0.35;
   ports.add(atP(mesh(rboxGeo(mm(9), mm(3.2), mm(1), mm(1.2)), M.chip), 0, -10, 95.6)); ports.add(atP(mesh(rboxGeo(mm(12), mm(1.6), mm(1), mm(0.6)), M.chip), 0, -16, 94.2));
   sg.add(ports); reg(ports, 'ports', V3(0, -0.02, 0.05), { label: P(0, -13, 95) });
@@ -323,7 +327,7 @@ function buildM4(M) {
     const mp = reg(mg, 'motor', V3(0.04, 0.06, 0), { coarse: true, label: k === 0 ? V3(0, 0.02, 0) : null });
     // 脚（アンテナ内蔵）: ポッドの下から先細りの板が地面へ。前脚は内側へ約14°傾く（CAD）
     const lg = new THREE.Group(); wg.add(lg);
-    { const top = mm(-8), tipY = LEG_Y - m.y + mm(0.5), H = top - tipY;
+    { const top = mm(-8), tipY = LEG_Y - m.y + mm(2.8), H = top - tipY;
       const sh = polyShape([[mm(-9), 0], [mm(9), 0], [mm(3), -H], [mm(-2.5), -H]]);
       const lgeo = new THREE.ExtrudeGeometry(sh, { depth: mm(6.4), bevelEnabled: true, bevelThickness: mm(1.4), bevelSize: mm(1.4), bevelSegments: 2, curveSegments: 4 });
       lgeo.translate(0, 0, -mm(3.2)); lgeo.rotateY(-Math.PI / 2);   // 形は z(前後)×y、厚みは x
@@ -409,6 +413,6 @@ function buildM4(M) {
   const cgMarker = new THREE.Group(); cgMarker.visible = false; root.add(cgMarker);
 
   return { root, sg, halfSpan: 0.33, focusMin: 0.27, parts, pick, wires, motors, legs, arrows, batPart, G, cgMarker, personGroup: null, folds,
-    gimbalParts: { pan, roll, tilt, head, yoke, lens: L, faceT, faceE }, fovG, senseG, acc, laserBeam, protector,
+    gimbalParts: { pan, roll, tilt, head, yoke, lens: L, faceT, faceE }, fovG, senseG, acc, laserBeam, protector, bay,
     rotor: { R: mm(R_PROP) * K, y0: mm(25.5) }, moveR: 0.27, moveY: 0.05, rpmScale: 1.05 };
 }
