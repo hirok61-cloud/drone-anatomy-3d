@@ -30,8 +30,8 @@ function codexOnSelect(p) { codex.pending = p && PARTS[p.key] && !codex.seen.has
 const codexSeenN = () => { let n = 0; for (const k of codex.seen) if (!(PARTS[k] && PARTS[k].variant)) n++; return n; };
 function renderCodexCount(pulse) {
   const el = $('#codexCount'); if (!el) return;
-  el.textContent = `見た ${codexSeenN()}/${codex.total}`;
-  el.title = `見た部品 ${codexSeenN()} / ${codex.total}`; el.setAttribute('aria-label', `見た部品 ${codexSeenN()} / ${codex.total}`);
+  el.textContent = `${lx('seen')} ${codexSeenN()}/${codex.total}`;
+  el.title = `${lx('seenTitle')} ${codexSeenN()} / ${codex.total}`; el.setAttribute('aria-label', `${lx('seenTitle')} ${codexSeenN()} / ${codex.total}`);
   if (pulse && !reduceMotion) { el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
 }
 

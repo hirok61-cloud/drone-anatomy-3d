@@ -65,10 +65,10 @@ function pd6bSetVariant(v) {
 }
 function syncPdChips() {
   const set = (id, on, label) => { const b = $(`#pdChips [data-pd="${id}"]`); if (!b) return; b.classList.toggle('on', !!on); if (b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', String(!!on)); if (label) b.textContent = label; };
-  set('fold', pd6b.foldTo > 0, pd6b.foldTo > 0 ? 'ひろげる' : 'たたむ');
+  set('fold', pd6b.foldTo > 0, pd6b.foldTo > 0 ? '広げる' : 'たたむ');
   set('chute', pd6b.chuteTo > 0); set('size', pd6b.sizeOn);
   set('swap', pd6b.act && pd6b.act.id === 'swap'); set('drop', pd6b.act && pd6b.act.id === 'drop');
-  set('unit', false, pd6b.variant === 'cargo' ? '測量用に付け替え' : '物流用に付け替え');
+  set('unit', false, pd6b.variant === 'cargo' ? '測量用に付け替える' : '物流用に付け替える');
 }
 
 // ---------- 説明カード ----------
@@ -97,7 +97,7 @@ function renderPdNote(id) {
     drop: () => ({ title: '荷物を置いて離陸する', html: `<p id="pdDropState" class="pd-state">爪を開いています…</p><p>着陸したら四隅の爪を開いて物流ボックスを離し、機体だけが上昇します。受け取る人が機体に近づかなくても、荷物を置いていけます（リリース型の腰下ユニット）。</p><p class="caveat">飛行中に物を落とす「物件投下」は承認が要る特定飛行です。この図は着陸してから箱を離す例。爪の形と動きは例です。</p>`,
       actions: [{ label: 'もう一度', fn: () => pd6bAction('drop') }] }),
     unit: () => ({ title: '腰下ユニットを付け替える', html: `<p>機体の下半分（腰下ユニット）は、<b>ピン4か所の差し替え</b>で交換できます（一部例外あり・公式）。標準は「測量用」「物流ボックス リリース型」「物流ボックス 引き出し型」の3種類。</p><p>上半分（飛ぶ部分）はそのままに、用途に合わせて下半分だけを替える設計です。</p><p class="caveat">測量ユニットの形は例です。</p>`,
-      actions: [{ label: pd6b.variant === 'cargo' ? '測量用にする' : '物流用にもどす', fn: () => pd6bAction('unit') }] }),
+      actions: [{ label: pd6b.variant === 'cargo' ? '測量用に付け替える' : '物流用に付け替える', fn: () => pd6bAction('unit') }] }),
     chute: () => ({ title: 'パラシュートを開く', html: `<p>機体が飛べなくなったとき、筒から傘を押し出して開き、落ちる速さを下げます。展示機には日本化薬の「PARASAFE」が載っていました。PARASAFEは火薬の力で傘を押し出すので、低い高度でも素早く開きます。</p><p>仮に<b>45kgの機体を6m/sまで落とせたとすると</b>（25kg級用製品の理論値を当てはめた計算）、運動エネルギーは約0.8kJ。50mから落ちた場合（約31m/s・空気抵抗なし）の約22kJの、およそ27分の1です。</p><p class="caveat">傘の大きさ・色・ひもの本数は例です（この機体用の型式は非公表）。参考: 25kg級用 PS CA12-01 は傘の面積11m²・降下速度6m/s（理論値）・最低展開高度30m（同社発表）。</p>`,
       actions: [{ label: 'たたむ', fn: () => setChute(false) }], onClose: () => setChute(false) }),
     size: () => ({ title: '大きさをくらべる', html: `<p>同じ縮尺で、<b>身長170cmの人</b>と、青い半透明の<b>550クラスのクアッド</b>（対角550mm・約2.4kg）を並べています。</p><p>ベース機 PD6B-Type3 の公式値で展開時 2,181 × 2,398 mm（CAT3は国交省の発表で約2.2 × 2.4 m）。両手を広げた大人より大きく、最大離陸重量は550クラスの約19倍の約45kgです。</p>`,

@@ -95,7 +95,7 @@ function setMvPower(on, msg) {
 }
 function syncMvChips() {
   const set = (id, on, label) => { const b = $(`#mvChips [data-mv="${id}"]`); if (!b) return; b.classList.toggle('on', !!on); if (b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', String(!!on)); if (label) b.textContent = label; };
-  set('fold', mav.foldTo > 0, mav.foldTo > 0 ? 'ひろげる' : 'たたむ');
+  set('fold', mav.foldTo > 0, mav.foldTo > 0 ? '広げる' : 'たたむ');
   set('battery', mav.act && mav.act.id === 'battery'); set('gimbal', mav.act && mav.act.id === 'gimbal');
   set('fov', mav.fovOn); set('sense', mav.senseOn); set('size', mav.sizeOn);
 }
@@ -119,7 +119,7 @@ function renderMvAbout() {
     <ul class="pd-diff"><li><b>折りたたみ</b>：前アームは下から後ろへ、後アームは上の段で前へ畳み、約5分の1の体積に。後方右アームを開くと電源が入る</li><li><b>高さの違う前後のモーター</b>：後ろのモーターは胴より高く、前は長い脚で立つ</li><li><b>カメラが3つ</b>：28・70・168mm相当を持ち替える。ジンバルが縦向き撮影にも回る。「眼」ボタンでカメラの映像を見られる</li><li><b>周りを見る</b>：魚眼センサーとLiDARで、ぶつかる前に止まる・避ける</li><li><b>部品が一体</b>：フレーム・ESC・受信機が胴の中にまとまり、配線や基板は外から見えない</li></ul>
     <p class="caveat">この3Dモデルは、公式の仕様・取扱説明書と写真から起こした教材用の再現です。形は公式の真上・正面・斜めの製品写真と取説の図から寸法を読み取って起こしました。胴の断面の細かな形・センサーの一部の配置・ジンバルの軸の順番・内部の配置は推定を含みます（解説の「推定」「例」）。</p>
     <details class="pd-src"><summary>出典（${MAVIC_DATE}）</summary><ul>${['specs', 'product', 'manual', 'prop', 'review'].map(k => `<li>${MV_SRC_LINK(k)}</li>`).join('')}</ul></details>`;
-  renderNote({ kind: 'mavic-about', title: 'DJI Mavic 4 Pro', html, actions: [{ label: 'たたんでみる', fn: () => mavicAction('fold') }, { label: '3眼のカメラを見る', fn: () => { renderNote(null); mavicAction('fov'); } }] });
+  renderNote({ kind: 'mavic-about', title: 'DJI Mavic 4 Pro', html, actions: [{ label: 'たたんでみる', fn: () => mavicAction('fold') }, { label: '画角を見る', fn: () => { renderNote(null); mavicAction('fov'); } }] });
 }
 function renderMvNote(id) {
   const N = {

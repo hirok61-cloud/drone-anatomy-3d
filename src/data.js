@@ -650,6 +650,14 @@ const WHATIF = [
 ];
 
 // ===== 言語 (パッケージ⑧): やさしい日本語 / English。段階1 = タブ・主要ボタン・8部品・12質問 =====
+// 部品一覧の見出し・件数・グループ名（言語切替で変える。無い言語は日本語にもどる）
+const I18N_X = {
+  ja: { parts: '部品', nParts: '部品', seen: '見た', seenTitle: '見た部品', grp: { frame: '機体構造', prop: '推進系', elec: '電装', nav: '航法・通信', payload: 'ペイロード', gear: '降着装置', safety: '登録・表示' } },
+  easy: { parts: 'ぶひん', nParts: 'ぶひん', seen: 'みた', seenTitle: 'みた ぶひん', grp: { frame: 'ほね', prop: 'うごかす ところ', elec: 'でんき', nav: 'みちびく・つなぐ', payload: 'のせる もの', gear: 'あし', safety: 'とうろく・ひょうじ' } },
+  en: { parts: 'Parts', nParts: 'parts', seen: 'Seen', seenTitle: 'Parts seen', grp: { frame: 'Airframe', prop: 'Propulsion', elec: 'Electronics', nav: 'Navigation & comms', payload: 'Payload', gear: 'Landing gear', safety: 'Registration & marking' } },
+};
+const lx = (k) => { const L = I18N_X[S.lang] || I18N_X.ja; return L[k] != null ? L[k] : I18N_X.ja[k]; };
+const grpName = (g) => { const L = I18N_X[S.lang] || I18N_X.ja; return (L.grp && L.grp[g.id]) || g.name; };
 const I18N = {
   ja: { find: { ph: '部品を探す' }, tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも', expert: '専門' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを回す', stop: '■ 止める', views: { iso: '斜', front: '前', top: '上', side: '横', inside: '内', labels: '名' }, big: '大', speak: '読み上げ',
     ui: { parts: '部品一覧', script: '台本', focus: '注目', more: 'くわしく見る', explode: '分解', look: '見え方', normal: 'ふつう', xray: 'すけて見る', wire: '線だけ', cut: '切って見る' }, sec: { structure: '構造', trivia: '豆知識', role: '役割', analogy: 'たとえるなら' }, parts: {}, questions: {} },

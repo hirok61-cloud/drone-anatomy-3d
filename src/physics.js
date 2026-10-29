@@ -93,6 +93,7 @@ function stepDemo(dt) {
   }
   if (S.flight !== 'yaw') { body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); body.yaw = dl(body.yaw, 0, dt, 3); }
   const r = 5; body.tx = dl(body.tx, tx, dt, r); body.tz = dl(body.tz, tz, dt, r);
+  py = Math.max(py, (D.halfSpan || 0.25) * 0.6 * (Math.abs(body.tx) + Math.abs(body.tz)));   /* 接地したまま傾く（前進・横移動）と、低い側の脚やプロペラが床に入る。傾きに応じて少し浮かせる */
   if (typeof fpv === 'object' && fpv.on) py += 1.05;   // カメラから見るときは浮かせる(床の上だと印しか映らない)
   const ox = body.px, oy = body.py, oz = body.pz;
   body.px = dl(body.px, px, dt, r); body.py = dl(body.py, py, dt, r); body.pz = dl(body.pz, pz, dt, r);

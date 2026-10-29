@@ -32,6 +32,9 @@ A(V.fold === 1 && !V.powered && d.D.protector.visible, 'folded', V.fold, V.power
   A(d.D.motors.every(m => { const u = new d.camera.up.constructor(0, 1, 0).applyQuaternion(m.group.getWorldQuaternion(d.camera.quaternion.clone())); return m.front ? u.y < -0.9 : u.y > 0.9; }), 'front motors upside down');
   const xs = ps.map(p => Math.abs(p.x)); A(Math.max(...xs) < 0.050, 'folded width', xs.map(x => x.toFixed(3)).join(','));
   A(Math.abs(d.altLowest(d.D.sg) + 0.158) < 0.0008, 'folded on floor', d.altLowest(d.D.sg)); }
+{ d.D.sg.updateMatrixWorld(true); d.D.motors.forEach(m => m.prop.visible = false); const v = d.camera.position.clone(); let mnx = 1e9, mxx = -1e9;   /* 畳んだ幅（プロペラなし）は公式の95mmに近い */
+  d.D.sg.traverseVisible(c => { if (!c.isMesh || c.userData.noPart) return; const p = c.geometry.attributes.position; if (!p) return; for (let k = 0; k < p.count; k += 2) { v.fromBufferAttribute(p, k).applyMatrix4(c.matrixWorld); mnx = Math.min(mnx, v.x); mxx = Math.max(mxx, v.x); } });
+  d.D.motors.forEach(m => m.prop.visible = true); A(Math.abs((mxx - mnx) * 1000 - 95) < 4, 'folded width ~95mm', ((mxx - mnx) * 1000).toFixed(1)); }
 q('#mn5Chips [data-mn5=fold]').click(); d.step(4, 30);
 A(V.fold === 0 && V.powered, 'unfold → power on', V.fold, V.powered);
 // 電池交換: 畳んだ状態からでも、まず開く。手に持って浮かせ、後ろへ抜くと差し込み口が見える

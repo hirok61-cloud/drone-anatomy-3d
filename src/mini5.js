@@ -210,10 +210,10 @@ function buildMini5(M) {
   const PG = { bCCW: propGeometry(1, [0]).scale(pScale, 0.7, pScale), bCW: propGeometry(-1, [0]).scale(pScale, 0.7, pScale), fCCW: propGeometry(1).scale(pScale, 0.7, pScale), fCW: propGeometry(-1).scale(pScale, 0.7, pScale) };
   // 並びは M1前右 M2後右 M3後左 M4前左。A（オレンジの印）= 右前・左後（取説の図）。回転方向は公式に記載がないので一般的な例
   const ARMS = [
-    { id: 'M1', front: true, sx: 1, hinge: [37.5, -22, -22], motor: [116, -20, -59.6], dir: 1, mark: 'A' },
+    { id: 'M1', front: true, sx: 1, hinge: [37.5, -22, -27], motor: [116, -20, -59.6], dir: 1, mark: 'A' },
     { id: 'M2', front: false, sx: 1, hinge: [36, 0, 54], motor: [88.5, 3, 90.3], dir: -1, mark: 'B' },
     { id: 'M3', front: false, sx: -1, hinge: [-36, 0, 54], motor: [-88.5, 3, 90.3], dir: 1, mark: 'A' },
-    { id: 'M4', front: true, sx: -1, hinge: [-37.5, -22, -22], motor: [-116, -20, -59.6], dir: -1, mark: 'B' },
+    { id: 'M4', front: true, sx: -1, hinge: [-37.5, -22, -27], motor: [-116, -20, -59.6], dir: -1, mark: 'B' },
   ];
   const folds = [];
   ARMS.forEach((A, k) => {
@@ -258,8 +258,8 @@ function buildMini5(M) {
       const sh = polyShape([[mm(-7), 0], [mm(7), 0], [mm(6), -H + mm(3)], [mm(3), -H], [mm(-6), -H]]);
       const lgeo = new THREE.ExtrudeGeometry(sh, { depth: mm(6), bevelEnabled: true, bevelThickness: mm(1), bevelSize: mm(1), bevelSegments: 2, curveSegments: 4 });
       lgeo.translate(0, 0, -mm(3)); lgeo.rotateY(-Math.PI / 2);   // 形は z(前後)×y、厚みは x
-      const st = new THREE.Group(); at(st, A.sx * mm(9), top, mm(1.5)); lg.add(st); st.add(mesh(lgeo, X.shell));
-      lg.add(at(mesh(rboxGeo(mm(12), mm(7), mm(14), mm(2)), X.shell), A.sx * mm(4), top + mm(2), mm(1.5)));   // ポッドから脚の上端への張り出し
+      const st = new THREE.Group(); at(st, A.sx * mm(5), top, mm(1.5)); lg.add(st); st.add(mesh(lgeo, X.shell));
+      lg.add(at(mesh(rboxGeo(mm(10), mm(7), mm(14), mm(2)), X.shell), A.sx * mm(2), top + mm(2), mm(1.5)));   // ポッドから脚の上端への張り出し
       reg(lg, 'landingGear', V3(0, -0.02, 0), { label: k === 0 ? V3(0, -0.03, 0) : null }); legs.push({ group: lg, sx: A.sx, pivots: [] });
     } else {   // 機体ステータスインジケーター: 後ろポッドの下の外・下向きの窓（取説の図）
       const st = new THREE.Group(); at(st, A.sx * mm(8), mm(-11.6), mm(4)); st.rotation.z = A.sx * 0.8; wg.add(st);
@@ -273,7 +273,7 @@ function buildMini5(M) {
     const mo = { group: mg, prop: propG, propMesh: blades[0], blades, hinges, ghosts, disc, bell, mags, shaft, adapter: hubCap, dir: A.dir, arm: ag, id: A.id, u: V3(m.x, 0, m.z), part: mp, arrowAnchor: ua, front: A.front, sx: A.sx, fold: fg, yaw };
     // たたみ方（取説の図・写真）: 前アームは「今の向き＋畳んだ向き」の二等分の水平軸で180°（モーターが下・脚が上）。後アームはほぼ垂直な軸で前へ約145°
     let flip = null;
-    if (A.front) { const d0 = V3(d.x, 0, d.z).normalize(), dT = V3(A.sx * 0.012, 0, 1).normalize(), ax = d0.clone().add(dT).normalize().applyAxisAngle(UP, -yaw);
+    if (A.front) { const d0 = V3(d.x, 0, d.z).normalize(), dT = V3(-A.sx * 0.023, 0, 1).normalize(), ax = d0.clone().add(dT).normalize().applyAxisAngle(UP, -yaw);
       const test = V3(1, 0, 0).applyAxisAngle(ax, Math.PI / 2); flip = { axis: ax, sign: test.y < 0 ? 1 : -1 }; }
     motors.push(mo); folds.push({ fg, front: A.front, sx: A.sx, yaw, len, rise, flip });
   });

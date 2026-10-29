@@ -21,7 +21,7 @@ q('#inspBack').click(); d.step(0.2, 30);
 q('#pdChips [data-pd=fold]').click(); d.step(6, 30);
 A(P.fold === 1, 'folded', P.fold); A(Math.abs(d.D.pivots[0].rotation.z - THREE_DEG(78)) < 0.01, 'pivot angle');
 A(d.D.motors.every(mo => Math.abs(((mo.angle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI) - Math.PI / 2) < 0.01), 'props aligned');
-A(q('#pdChips [data-pd=fold]').textContent === 'ひろげる', 'chip label');
+A(q('#pdChips [data-pd=fold]').textContent === '広げる', 'chip label');
 // 畳んだままプロペラを回そうとすると、先に広げる
 q('#tabs [data-tab=fly]').click(); d.step(3.5, 30); A(P.fold === 0, 'unfold on fly tab', P.fold);
 q('#tabs [data-tab=see]').click(); d.step(0.5, 30);
@@ -56,6 +56,9 @@ A(d.body.mult.length === 6, 'mult 6');
 A(/model=pd6b/.test(shareUrlForTest()), 'share keeps model');
 q('#tabs [data-tab=see]').click(); d.step(0.5, 30);
 d.noRender = false;
+// 6発機: 「もしも」の場面のあとも body.mult が6要素のまま（4固定だと後ろ2基の回転数が NaN になる）
+{ q('#tabs [data-tab=mishap]').click(); d.step(0.2, 30); const b = q('#whatifCards button[data-w=signal], #whatifSiteCards button[data-w=signal]'); if (b) { b.click(); d.step(0.5, 30); const quit = document.getElementById('thQuit'); if (quit) { quit.click(); d.step(0.5, 30); } }
+  q('#tabs [data-tab=see]').click(); d.step(0.3, 30); A(d.body.mult.length === 6 && d.body.mult.every(Number.isFinite), 'pd6b mult 6 after whatif', d.body.mult.join(',')); }
 function THREE_DEG(x) { return x * Math.PI / 180; }
 function THREE_V3() { return d.camera.position.clone().set(0, 0, 0); }
 function shareUrlForTest() { const u = new URL(location.href); return u.toString(); }

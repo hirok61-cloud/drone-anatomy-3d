@@ -93,7 +93,7 @@ function setMn5Power(on, msg) {
 }
 function syncMn5Chips() {
   const set = (id, on, label) => { const b = $(`#mn5Chips [data-mn5="${id}"]`); if (!b) return; b.classList.toggle('on', !!on); if (b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', String(!!on)); if (label) b.textContent = label; };
-  set('fold', mn5.foldTo > 0, mn5.foldTo > 0 ? 'ひろげる' : 'たたむ');
+  set('fold', mn5.foldTo > 0, mn5.foldTo > 0 ? '広げる' : 'たたむ');
   set('battery', mn5.act && mn5.act.id === 'battery'); set('gimbal', mn5.act && mn5.act.id === 'gimbal');
   set('fov', mn5.fovOn); set('sense', mn5.senseOn); set('size', mn5.sizeOn);
 }
@@ -259,7 +259,7 @@ function stepMn5(dt) {
     D.motors.forEach((mo, i) => {
       const F = D.folds[i];
       if (F.front) F.fg.quaternion.setFromAxisAngle(F.flip.axis, F.flip.sign * Math.PI * ff);   /* 下へ振り下ろして後ろへ。畳むと上下が逆さになる */
-      else { const fr = F.sx > 0 ? frR : frL, yawT = Math.atan2(1, F.sx * 0.03); F.fg.rotation.set(0, mn5Norm(yawT - F.yaw) * fr, 0); }   /* ほぼ垂直な軸で前へ回して胴の上の段に沿わせる */
+      else { const fr = F.sx > 0 ? frR : frL, yawT = Math.atan2(1, 0); F.fg.rotation.set(0, mn5Norm(yawT - F.yaw) * fr, 0); }   /* ほぼ垂直な軸で前へ回して胴の上の段に沿わせる */
       for (const h of mo.hinges) h.g.rotation.y = h.s * fb * Math.PI / 2;
     });
     D.protector.visible = f > 0.95;

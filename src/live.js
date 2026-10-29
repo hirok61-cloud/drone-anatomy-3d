@@ -68,7 +68,7 @@ function applyLang() {
   for (const el of $$('[data-i18n]')) setLastText(el, t(el.dataset.i18n));
   segSet($('#langSeg'), 'lang', S.lang);
   const pb = $('#powerBtn'); if (pb) pb.textContent = S.power > 0 ? t('stop') : t('power');
-  buildList(); buildLabels(); buildAsk(); renderDetail(); updateBigBand();
+  buildList(); buildLabels(); buildAsk(); renderDetail(); updateBigBand(); if (typeof renderCodexCount === 'function' && typeof codex === 'object' && codex.total) renderCodexCount(false); const it = $('#inspTitle'); if (it && $('#inspBack').hidden) it.textContent = lx('parts');
   buildUseChips(); buildMishapCards(); buildWhatifCards();   // 言語を変えたら、いま開いていない画面も作り直しておく
   if (S.scale && typeof renderMassBar === 'function') renderMassBar(S.selected && S.selected.key);
   if (S.expert && typeof renderExpertPanel === 'function') { renderExpertPanel(); renderExpertSel(); }

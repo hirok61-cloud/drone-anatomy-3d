@@ -48,8 +48,10 @@ function computeCG() {
 function computeShare() {
   const dz = (scale.cg.z - scale.cg0.z) / SCALE_L, dx = (scale.cg.x - scale.cg0.x) / SCALE_L;
   const ratio = scale.total / Math.max(1, scale.base);
-  const sz = [-1, 1, 1, -1], sx = [1, 1, -1, -1];
-  for (let i = 0; i < 4; i++) scale.share[i] = ratio * Math.max(0.15, (1 + sz[i] * dz) * (1 + sx[i] * dx));
+  // 前後・左右の配分は、各モーターの位置(−z が前)から決める。4発機は ±1、6発機(PD6B)は左右中央の2基が前後ゼロになる
+  const U = D.motors.map(m => m.u), mz = Math.max(1e-6, ...U.map(u => Math.abs(u.z))), mx = Math.max(1e-6, ...U.map(u => Math.abs(u.x)));
+  scale.share.length = U.length;
+  for (let i = 0; i < U.length; i++) { const sz = clamp(U[i].z / mz, -1, 1), sx = clamp(U[i].x / mx, -1, 1); scale.share[i] = ratio * Math.max(0.15, (1 + sz * dz) * (1 + sx * dx)); }
   scale.over = Math.max(...scale.share) > SCALE_OVER;
 }
 
@@ -123,7 +125,7 @@ function stepScale() {
 }
 
 function scaleOverText() {   // 原因 → 結果 の順で1文に
-  const sh = scale.share, rear = sh[1] + sh[2], front = sh[0] + sh[3], ratio = scale.total / Math.max(1, scale.base);
+  const sh = scale.share, U = D.motors.map(m => m.u); let rear = 0, front = 0; sh.forEach((v, i) => { if (U[i].z > 1e-6) rear += v; else if (U[i].z < -1e-6) front += v; }); const ratio = scale.total / Math.max(1, scale.base);
   const tail = '前に進む・風に逆らう力が残りません';
   if (Math.abs(rear - front) < 0.12) return (ratio > 1.2 ? '荷物が重く、' : '') + 'モーターに余裕がありません。' + tail;
   return rear > front ? `重心が後ろに寄り、後ろのモーターに余裕がありません。${tail}` : `重心が前に寄り、前のモーターに余裕がありません。${tail}`;

@@ -797,9 +797,9 @@ body.m4-ir #gl { filter: grayscale(1) contrast(1.35) brightness(.82); }
   <div id="ctx" class="ctx">
     <div class="ctx-row" data-tab="see">
       <div class="dock-group pd6b-only"><label>PD6B-CAT3</label><div class="chips" id="pdChips" role="group" aria-label="PD6B-CAT3の動き"><button data-pd="about">ⓘ この機体</button><button data-pd="fold" aria-pressed="false">たたむ</button><button data-pd="swap">電池交換</button><button data-pd="drop">荷物を置く</button><button data-pd="chute" aria-pressed="false">パラシュート</button><button data-pd="unit">測量用に付け替え</button><button data-pd="size" aria-pressed="false">大きさ</button></div></div>
-      <div class="dock-group m4-only"><label>Matrice 4</label><div class="chips" id="m4Chips" role="group" aria-label="Matrice 4の動き"><button data-m4="about">ⓘ この機体</button><button data-m4="variant">4E にする</button><button data-m4="fold" aria-pressed="false">たたむ</button><button data-m4="battery" aria-pressed="false">電池交換</button><button data-m4="gimbal" aria-pressed="false">ジンバル</button><button data-m4="cams" aria-pressed="false">カメラ</button><button data-m4="laser" aria-pressed="false">測距</button><button data-m4="sense" aria-pressed="false">検知範囲</button><button data-m4="acc" aria-pressed="false">アクセサリー</button><button data-m4="size" aria-pressed="false">大きさ</button></div></div>
+      <div class="dock-group m4-only"><label>Matrice 4</label><div class="chips" id="m4Chips" role="group" aria-label="Matrice 4の動き"><button data-m4="about">ⓘ この機体</button><button data-m4="variant">4E にする</button><button data-m4="fold" aria-pressed="false">たたむ</button><button data-m4="battery" aria-pressed="false">電池交換</button><button data-m4="gimbal" aria-pressed="false">ジンバル</button><button data-m4="cams" aria-pressed="false">画角</button><button data-m4="laser" aria-pressed="false">距離計</button><button data-m4="sense" aria-pressed="false">検知範囲</button><button data-m4="acc" aria-pressed="false">アクセサリー</button><button data-m4="size" aria-pressed="false">大きさ</button></div></div>
       <div class="dock-group mn5-only"><label>Mini 5 Pro</label><div class="chips" id="mn5Chips" role="group" aria-label="Mini 5 Proの動き"><button data-mn5="about">ⓘ この機体</button><button data-mn5="fold" aria-pressed="false">たたむ</button><button data-mn5="battery" aria-pressed="false">電池交換</button><button data-mn5="gimbal" aria-pressed="false">ジンバル</button><button data-mn5="fov" aria-pressed="false">画角</button><button data-mn5="sense" aria-pressed="false">検知範囲</button><button data-mn5="size" aria-pressed="false">大きさ</button></div></div>
-      <div class="dock-group mavic-only"><label>Mavic 4 Pro</label><div class="chips" id="mvChips" role="group" aria-label="Mavic 4 Proの動き"><button data-mv="about">ⓘ この機体</button><button data-mv="fold" aria-pressed="false">たたむ</button><button data-mv="battery" aria-pressed="false">電池交換</button><button data-mv="gimbal" aria-pressed="false">ジンバル</button><button data-mv="fov" aria-pressed="false">3眼カメラ</button><button data-mv="sense" aria-pressed="false">検知範囲</button><button data-mv="size" aria-pressed="false">大きさ</button></div></div>
+      <div class="dock-group mavic-only"><label>Mavic 4 Pro</label><div class="chips" id="mvChips" role="group" aria-label="Mavic 4 Proの動き"><button data-mv="about">ⓘ この機体</button><button data-mv="fold" aria-pressed="false">たたむ</button><button data-mv="battery" aria-pressed="false">電池交換</button><button data-mv="gimbal" aria-pressed="false">ジンバル</button><button data-mv="fov" aria-pressed="false">画角</button><button data-mv="sense" aria-pressed="false">検知範囲</button><button data-mv="size" aria-pressed="false">大きさ</button></div></div>
       <div class="see-main">
       <button id="inspToggle" class="pill-btn compact-only" data-i18n="ui.parts">部品一覧</button>
       <div class="dock-group grow"><label for="explode"><span data-i18n="ui.explode">分解</span> <span id="explodeVal" class="mono">0%</span></label><input type="range" id="explode" min="0" max="100" value="0"></div>
@@ -903,7 +903,7 @@ body.m4-ir #gl { filter: grayscale(1) contrast(1.35) brightness(.82); }
   <div class="model-list" role="radiogroup" aria-label="機体">
     <button data-model="q550" role="radio" aria-checked="true"><b>550クラス クアッドコプター</b><span>空撮などに使う一般的な産業用（約2.4kg・プロペラ4枚）。とばす・つかう・もしも・専門まで全部の機能</span></button>
     <button data-model="pd6b" role="radio" aria-checked="false"><b>PD6B-CAT3（プロドローン）</b><span>第一種型式認証をめざす物流用の大型機（最大離陸重量約45kg・プロペラ6枚）。みる・とばすと、たたむ・電池交換・荷物・パラシュート・付け替えなどの固有の動き</span></button>
-    <button data-model="mavic4" role="radio" aria-checked="false"><b>DJI Mavic 4 Pro</b><span>3つのカメラと360°回るジンバルを積んだ折りたたみ式の空撮機（約1063g・プロペラ4枚）。みる・とばすと、たたむ・ジンバル・3眼カメラなどの固有の動き</span></button>
+    <button data-model="mavic4" role="radio" aria-checked="false"><b>DJI Mavic 4 Pro</b><span>3つのカメラと360°回るジンバルを積んだ折りたたみ式の空撮機（約1063g・プロペラ4枚）。みる・とばすと、たたむ・ジンバル・画角などの固有の動き</span></button>
     <button data-model="matrice4" role="radio" aria-checked="false"><b>DJI Matrice 4 シリーズ（4T／4E）</b><span>望遠とレーザー距離計（4Tはサーマルも）を積んだ折りたたみ式の産業用機（離陸重量1219g・プロペラ4枚）。みる・とばすと、4T⇄4E・たたむ・測距・アクセサリーなどの固有の動き</span></button>
     <button data-model="mini5" role="radio" aria-checked="false"><b>DJI Mini 5 Pro</b><span>1インチカメラと縦にも回るジンバルを積んだ、手のひらサイズの折りたたみ機（249.9g・プロペラ4枚）。みる・とばすと、たたむ・電池交換・ジンバル・画角などの固有の動き</span></button>
   </div>
@@ -1691,6 +1691,14 @@ const WHATIF = [
 ];
 
 // ===== 言語 (パッケージ⑧): やさしい日本語 / English。段階1 = タブ・主要ボタン・8部品・12質問 =====
+// 部品一覧の見出し・件数・グループ名（言語切替で変える。無い言語は日本語にもどる）
+const I18N_X = {
+  ja: { parts: '部品', nParts: '部品', seen: '見た', seenTitle: '見た部品', grp: { frame: '機体構造', prop: '推進系', elec: '電装', nav: '航法・通信', payload: 'ペイロード', gear: '降着装置', safety: '登録・表示' } },
+  easy: { parts: 'ぶひん', nParts: 'ぶひん', seen: 'みた', seenTitle: 'みた ぶひん', grp: { frame: 'ほね', prop: 'うごかす ところ', elec: 'でんき', nav: 'みちびく・つなぐ', payload: 'のせる もの', gear: 'あし', safety: 'とうろく・ひょうじ' } },
+  en: { parts: 'Parts', nParts: 'parts', seen: 'Seen', seenTitle: 'Parts seen', grp: { frame: 'Airframe', prop: 'Propulsion', elec: 'Electronics', nav: 'Navigation & comms', payload: 'Payload', gear: 'Landing gear', safety: 'Registration & marking' } },
+};
+const lx = (k) => { const L = I18N_X[S.lang] || I18N_X.ja; return L[k] != null ? L[k] : I18N_X.ja[k]; };
+const grpName = (g) => { const L = I18N_X[S.lang] || I18N_X.ja; return (L.grp && L.grp[g.id]) || g.name; };
 const I18N = {
   ja: { find: { ph: '部品を探す' }, tabs: { see: 'みる', fly: 'とばす', use: 'つかう', mishap: 'もしも', expert: '専門' }, depth: { simple: 'はじめて', full: 'くわしく' }, ask: 'きく', power: '▶ プロペラを回す', stop: '■ 止める', views: { iso: '斜', front: '前', top: '上', side: '横', inside: '内', labels: '名' }, big: '大', speak: '読み上げ',
     ui: { parts: '部品一覧', script: '台本', focus: '注目', more: 'くわしく見る', explode: '分解', look: '見え方', normal: 'ふつう', xray: 'すけて見る', wire: '線だけ', cut: '切って見る' }, sec: { structure: '構造', trivia: '豆知識', role: '役割', analogy: 'たとえるなら' }, parts: {}, questions: {} },
@@ -2636,7 +2644,7 @@ const MAVIC_PARTS = {
     name: 'クイックリリースプロペラ', en: 'Quick-release propeller', group: 'prop', count: 4,
     role: '工具なしで付け外しできる2枚羽根のプロペラ。モーターに押し込んで回すとロックされる。羽根は根元で折れるので、アームと一緒に畳める。',
     structure: ['プロペラとモーターのカラーマークを合わせて取り付ける（取説）', '押し込んで回してロック', '羽根は根元のヒンジで折れる'],
-    spec: [['直径 × ピッチ', '10.5 × 5.8 インチ（約26.7 × 14.7 cm・販売店）'], ['重さ', '約 11.8 g / 枚（販売店）']],
+    spec: [['直径 × ピッチ', '10.5 × 5.8 インチ（公式の仕様に記載なし・販売店の表記。cm は換算で約26.7 × 14.7）'], ['重さ', '約 11.8 g / 枚（販売店）']],
     check: ['欠け・ひび・変形（古いものは使わない・取説）', 'カラーマークの組み合わせ', 'ロックがかかっているか'],
     tip: '取説は「DJI公式のプロペラのみを使い、複数の種類を混ぜない」としている。羽根の形が違うと、4基の推力のつり合いが崩れる。',
   },
@@ -5400,10 +5408,10 @@ function buildMini5(M) {
   const PG = { bCCW: propGeometry(1, [0]).scale(pScale, 0.7, pScale), bCW: propGeometry(-1, [0]).scale(pScale, 0.7, pScale), fCCW: propGeometry(1).scale(pScale, 0.7, pScale), fCW: propGeometry(-1).scale(pScale, 0.7, pScale) };
   // 並びは M1前右 M2後右 M3後左 M4前左。A（オレンジの印）= 右前・左後（取説の図）。回転方向は公式に記載がないので一般的な例
   const ARMS = [
-    { id: 'M1', front: true, sx: 1, hinge: [37.5, -22, -22], motor: [116, -20, -59.6], dir: 1, mark: 'A' },
+    { id: 'M1', front: true, sx: 1, hinge: [37.5, -22, -27], motor: [116, -20, -59.6], dir: 1, mark: 'A' },
     { id: 'M2', front: false, sx: 1, hinge: [36, 0, 54], motor: [88.5, 3, 90.3], dir: -1, mark: 'B' },
     { id: 'M3', front: false, sx: -1, hinge: [-36, 0, 54], motor: [-88.5, 3, 90.3], dir: 1, mark: 'A' },
-    { id: 'M4', front: true, sx: -1, hinge: [-37.5, -22, -22], motor: [-116, -20, -59.6], dir: -1, mark: 'B' },
+    { id: 'M4', front: true, sx: -1, hinge: [-37.5, -22, -27], motor: [-116, -20, -59.6], dir: -1, mark: 'B' },
   ];
   const folds = [];
   ARMS.forEach((A, k) => {
@@ -5448,8 +5456,8 @@ function buildMini5(M) {
       const sh = polyShape([[mm(-7), 0], [mm(7), 0], [mm(6), -H + mm(3)], [mm(3), -H], [mm(-6), -H]]);
       const lgeo = new THREE.ExtrudeGeometry(sh, { depth: mm(6), bevelEnabled: true, bevelThickness: mm(1), bevelSize: mm(1), bevelSegments: 2, curveSegments: 4 });
       lgeo.translate(0, 0, -mm(3)); lgeo.rotateY(-Math.PI / 2);   // 形は z(前後)×y、厚みは x
-      const st = new THREE.Group(); at(st, A.sx * mm(9), top, mm(1.5)); lg.add(st); st.add(mesh(lgeo, X.shell));
-      lg.add(at(mesh(rboxGeo(mm(12), mm(7), mm(14), mm(2)), X.shell), A.sx * mm(4), top + mm(2), mm(1.5)));   // ポッドから脚の上端への張り出し
+      const st = new THREE.Group(); at(st, A.sx * mm(5), top, mm(1.5)); lg.add(st); st.add(mesh(lgeo, X.shell));
+      lg.add(at(mesh(rboxGeo(mm(10), mm(7), mm(14), mm(2)), X.shell), A.sx * mm(2), top + mm(2), mm(1.5)));   // ポッドから脚の上端への張り出し
       reg(lg, 'landingGear', V3(0, -0.02, 0), { label: k === 0 ? V3(0, -0.03, 0) : null }); legs.push({ group: lg, sx: A.sx, pivots: [] });
     } else {   // 機体ステータスインジケーター: 後ろポッドの下の外・下向きの窓（取説の図）
       const st = new THREE.Group(); at(st, A.sx * mm(8), mm(-11.6), mm(4)); st.rotation.z = A.sx * 0.8; wg.add(st);
@@ -5463,7 +5471,7 @@ function buildMini5(M) {
     const mo = { group: mg, prop: propG, propMesh: blades[0], blades, hinges, ghosts, disc, bell, mags, shaft, adapter: hubCap, dir: A.dir, arm: ag, id: A.id, u: V3(m.x, 0, m.z), part: mp, arrowAnchor: ua, front: A.front, sx: A.sx, fold: fg, yaw };
     // たたみ方（取説の図・写真）: 前アームは「今の向き＋畳んだ向き」の二等分の水平軸で180°（モーターが下・脚が上）。後アームはほぼ垂直な軸で前へ約145°
     let flip = null;
-    if (A.front) { const d0 = V3(d.x, 0, d.z).normalize(), dT = V3(A.sx * 0.012, 0, 1).normalize(), ax = d0.clone().add(dT).normalize().applyAxisAngle(UP, -yaw);
+    if (A.front) { const d0 = V3(d.x, 0, d.z).normalize(), dT = V3(-A.sx * 0.023, 0, 1).normalize(), ax = d0.clone().add(dT).normalize().applyAxisAngle(UP, -yaw);
       const test = V3(1, 0, 0).applyAxisAngle(ax, Math.PI / 2); flip = { axis: ax, sign: test.y < 0 ? 1 : -1 }; }
     motors.push(mo); folds.push({ fg, front: A.front, sx: A.sx, yaw, len, rise, flip });
   });
@@ -6264,6 +6272,7 @@ function stepDemo(dt) {
   }
   if (S.flight !== 'yaw') { body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); body.yaw = dl(body.yaw, 0, dt, 3); }
   const r = 5; body.tx = dl(body.tx, tx, dt, r); body.tz = dl(body.tz, tz, dt, r);
+  py = Math.max(py, (D.halfSpan || 0.25) * 0.6 * (Math.abs(body.tx) + Math.abs(body.tz)));   /* 接地したまま傾く（前進・横移動）と、低い側の脚やプロペラが床に入る。傾きに応じて少し浮かせる */
   if (typeof fpv === 'object' && fpv.on) py += 1.05;   // カメラから見るときは浮かせる(床の上だと印しか映らない)
   const ox = body.px, oy = body.py, oz = body.pz;
   body.px = dl(body.px, px, dt, r); body.py = dl(body.py, py, dt, r); body.pz = dl(body.pz, pz, dt, r);
@@ -6962,8 +6971,10 @@ function computeCG() {
 function computeShare() {
   const dz = (scale.cg.z - scale.cg0.z) / SCALE_L, dx = (scale.cg.x - scale.cg0.x) / SCALE_L;
   const ratio = scale.total / Math.max(1, scale.base);
-  const sz = [-1, 1, 1, -1], sx = [1, 1, -1, -1];
-  for (let i = 0; i < 4; i++) scale.share[i] = ratio * Math.max(0.15, (1 + sz[i] * dz) * (1 + sx[i] * dx));
+  // 前後・左右の配分は、各モーターの位置(−z が前)から決める。4発機は ±1、6発機(PD6B)は左右中央の2基が前後ゼロになる
+  const U = D.motors.map(m => m.u), mz = Math.max(1e-6, ...U.map(u => Math.abs(u.z))), mx = Math.max(1e-6, ...U.map(u => Math.abs(u.x)));
+  scale.share.length = U.length;
+  for (let i = 0; i < U.length; i++) { const sz = clamp(U[i].z / mz, -1, 1), sx = clamp(U[i].x / mx, -1, 1); scale.share[i] = ratio * Math.max(0.15, (1 + sz * dz) * (1 + sx * dx)); }
   scale.over = Math.max(...scale.share) > SCALE_OVER;
 }
 
@@ -7037,7 +7048,7 @@ function stepScale() {
 }
 
 function scaleOverText() {   // 原因 → 結果 の順で1文に
-  const sh = scale.share, rear = sh[1] + sh[2], front = sh[0] + sh[3], ratio = scale.total / Math.max(1, scale.base);
+  const sh = scale.share, U = D.motors.map(m => m.u); let rear = 0, front = 0; sh.forEach((v, i) => { if (U[i].z > 1e-6) rear += v; else if (U[i].z < -1e-6) front += v; }); const ratio = scale.total / Math.max(1, scale.base);
   const tail = '前に進む・風に逆らう力が残りません';
   if (Math.abs(rear - front) < 0.12) return (ratio > 1.2 ? '荷物が重く、' : '') + 'モーターに余裕がありません。' + tail;
   return rear > front ? `重心が後ろに寄り、後ろのモーターに余裕がありません。${tail}` : `重心が前に寄り、前のモーターに余裕がありません。${tail}`;
@@ -7158,8 +7169,8 @@ function codexOnSelect(p) { codex.pending = p && PARTS[p.key] && !codex.seen.has
 const codexSeenN = () => { let n = 0; for (const k of codex.seen) if (!(PARTS[k] && PARTS[k].variant)) n++; return n; };
 function renderCodexCount(pulse) {
   const el = $('#codexCount'); if (!el) return;
-  el.textContent = `見た ${codexSeenN()}/${codex.total}`;
-  el.title = `見た部品 ${codexSeenN()} / ${codex.total}`; el.setAttribute('aria-label', `見た部品 ${codexSeenN()} / ${codex.total}`);
+  el.textContent = `${lx('seen')} ${codexSeenN()}/${codex.total}`;
+  el.title = `${lx('seenTitle')} ${codexSeenN()} / ${codex.total}`; el.setAttribute('aria-label', `${lx('seenTitle')} ${codexSeenN()} / ${codex.total}`);
   if (pulse && !reduceMotion) { el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
 }
 
@@ -7335,7 +7346,7 @@ function applyLang() {
   for (const el of $$('[data-i18n]')) setLastText(el, t(el.dataset.i18n));
   segSet($('#langSeg'), 'lang', S.lang);
   const pb = $('#powerBtn'); if (pb) pb.textContent = S.power > 0 ? t('stop') : t('power');
-  buildList(); buildLabels(); buildAsk(); renderDetail(); updateBigBand();
+  buildList(); buildLabels(); buildAsk(); renderDetail(); updateBigBand(); if (typeof renderCodexCount === 'function' && typeof codex === 'object' && codex.total) renderCodexCount(false); const it = $('#inspTitle'); if (it && $('#inspBack').hidden) it.textContent = lx('parts');
   buildUseChips(); buildMishapCards(); buildWhatifCards();   // 言語を変えたら、いま開いていない画面も作り直しておく
   if (S.scale && typeof renderMassBar === 'function') renderMassBar(S.selected && S.selected.key);
   if (S.expert && typeof renderExpertPanel === 'function') { renderExpertPanel(); renderExpertSel(); }
@@ -11470,10 +11481,10 @@ function pd6bSetVariant(v) {
 }
 function syncPdChips() {
   const set = (id, on, label) => { const b = $(`#pdChips [data-pd="${id}"]`); if (!b) return; b.classList.toggle('on', !!on); if (b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', String(!!on)); if (label) b.textContent = label; };
-  set('fold', pd6b.foldTo > 0, pd6b.foldTo > 0 ? 'ひろげる' : 'たたむ');
+  set('fold', pd6b.foldTo > 0, pd6b.foldTo > 0 ? '広げる' : 'たたむ');
   set('chute', pd6b.chuteTo > 0); set('size', pd6b.sizeOn);
   set('swap', pd6b.act && pd6b.act.id === 'swap'); set('drop', pd6b.act && pd6b.act.id === 'drop');
-  set('unit', false, pd6b.variant === 'cargo' ? '測量用に付け替え' : '物流用に付け替え');
+  set('unit', false, pd6b.variant === 'cargo' ? '測量用に付け替える' : '物流用に付け替える');
 }
 
 // ---------- 説明カード ----------
@@ -11502,7 +11513,7 @@ function renderPdNote(id) {
     drop: () => ({ title: '荷物を置いて離陸する', html: `<p id="pdDropState" class="pd-state">爪を開いています…</p><p>着陸したら四隅の爪を開いて物流ボックスを離し、機体だけが上昇します。受け取る人が機体に近づかなくても、荷物を置いていけます（リリース型の腰下ユニット）。</p><p class="caveat">飛行中に物を落とす「物件投下」は承認が要る特定飛行です。この図は着陸してから箱を離す例。爪の形と動きは例です。</p>`,
       actions: [{ label: 'もう一度', fn: () => pd6bAction('drop') }] }),
     unit: () => ({ title: '腰下ユニットを付け替える', html: `<p>機体の下半分（腰下ユニット）は、<b>ピン4か所の差し替え</b>で交換できます（一部例外あり・公式）。標準は「測量用」「物流ボックス リリース型」「物流ボックス 引き出し型」の3種類。</p><p>上半分（飛ぶ部分）はそのままに、用途に合わせて下半分だけを替える設計です。</p><p class="caveat">測量ユニットの形は例です。</p>`,
-      actions: [{ label: pd6b.variant === 'cargo' ? '測量用にする' : '物流用にもどす', fn: () => pd6bAction('unit') }] }),
+      actions: [{ label: pd6b.variant === 'cargo' ? '測量用に付け替える' : '物流用に付け替える', fn: () => pd6bAction('unit') }] }),
     chute: () => ({ title: 'パラシュートを開く', html: `<p>機体が飛べなくなったとき、筒から傘を押し出して開き、落ちる速さを下げます。展示機には日本化薬の「PARASAFE」が載っていました。PARASAFEは火薬の力で傘を押し出すので、低い高度でも素早く開きます。</p><p>仮に<b>45kgの機体を6m/sまで落とせたとすると</b>（25kg級用製品の理論値を当てはめた計算）、運動エネルギーは約0.8kJ。50mから落ちた場合（約31m/s・空気抵抗なし）の約22kJの、およそ27分の1です。</p><p class="caveat">傘の大きさ・色・ひもの本数は例です（この機体用の型式は非公表）。参考: 25kg級用 PS CA12-01 は傘の面積11m²・降下速度6m/s（理論値）・最低展開高度30m（同社発表）。</p>`,
       actions: [{ label: 'たたむ', fn: () => setChute(false) }], onClose: () => setChute(false) }),
     size: () => ({ title: '大きさをくらべる', html: `<p>同じ縮尺で、<b>身長170cmの人</b>と、青い半透明の<b>550クラスのクアッド</b>（対角550mm・約2.4kg）を並べています。</p><p>ベース機 PD6B-Type3 の公式値で展開時 2,181 × 2,398 mm（CAT3は国交省の発表で約2.2 × 2.4 m）。両手を広げた大人より大きく、最大離陸重量は550クラスの約19倍の約45kgです。</p>`,
@@ -11764,7 +11775,7 @@ function setMvPower(on, msg) {
 }
 function syncMvChips() {
   const set = (id, on, label) => { const b = $(`#mvChips [data-mv="${id}"]`); if (!b) return; b.classList.toggle('on', !!on); if (b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', String(!!on)); if (label) b.textContent = label; };
-  set('fold', mav.foldTo > 0, mav.foldTo > 0 ? 'ひろげる' : 'たたむ');
+  set('fold', mav.foldTo > 0, mav.foldTo > 0 ? '広げる' : 'たたむ');
   set('battery', mav.act && mav.act.id === 'battery'); set('gimbal', mav.act && mav.act.id === 'gimbal');
   set('fov', mav.fovOn); set('sense', mav.senseOn); set('size', mav.sizeOn);
 }
@@ -11788,7 +11799,7 @@ function renderMvAbout() {
     <ul class="pd-diff"><li><b>折りたたみ</b>：前アームは下から後ろへ、後アームは上の段で前へ畳み、約5分の1の体積に。後方右アームを開くと電源が入る</li><li><b>高さの違う前後のモーター</b>：後ろのモーターは胴より高く、前は長い脚で立つ</li><li><b>カメラが3つ</b>：28・70・168mm相当を持ち替える。ジンバルが縦向き撮影にも回る。「眼」ボタンでカメラの映像を見られる</li><li><b>周りを見る</b>：魚眼センサーとLiDARで、ぶつかる前に止まる・避ける</li><li><b>部品が一体</b>：フレーム・ESC・受信機が胴の中にまとまり、配線や基板は外から見えない</li></ul>
     <p class="caveat">この3Dモデルは、公式の仕様・取扱説明書と写真から起こした教材用の再現です。形は公式の真上・正面・斜めの製品写真と取説の図から寸法を読み取って起こしました。胴の断面の細かな形・センサーの一部の配置・ジンバルの軸の順番・内部の配置は推定を含みます（解説の「推定」「例」）。</p>
     <details class="pd-src"><summary>出典（${MAVIC_DATE}）</summary><ul>${['specs', 'product', 'manual', 'prop', 'review'].map(k => `<li>${MV_SRC_LINK(k)}</li>`).join('')}</ul></details>`;
-  renderNote({ kind: 'mavic-about', title: 'DJI Mavic 4 Pro', html, actions: [{ label: 'たたんでみる', fn: () => mavicAction('fold') }, { label: '3眼のカメラを見る', fn: () => { renderNote(null); mavicAction('fov'); } }] });
+  renderNote({ kind: 'mavic-about', title: 'DJI Mavic 4 Pro', html, actions: [{ label: 'たたんでみる', fn: () => mavicAction('fold') }, { label: '画角を見る', fn: () => { renderNote(null); mavicAction('fov'); } }] });
 }
 function renderMvNote(id) {
   const N = {
@@ -12132,7 +12143,7 @@ function m4SetAcc(spot, spk) {
 function syncM4Chips() {
   const set = (id, on, label) => { const b = $(`#m4Chips [data-m4="${id}"]`); if (!b) return; b.classList.toggle('on', !!on); if (b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', String(!!on)); if (label) b.textContent = label; };
   set('variant', false, m4.variant === 't' ? '4E にする' : '4T にする');
-  set('fold', m4.foldTo > 0, m4.foldTo > 0 ? 'ひろげる' : 'たたむ');
+  set('fold', m4.foldTo > 0, m4.foldTo > 0 ? '広げる' : 'たたむ');
   set('battery', m4.act && m4.act.id === 'battery'); set('gimbal', m4.act && m4.act.id === 'gimbal');
   set('cams', m4.camsOn); set('laser', m4.laserOn); set('sense', m4.senseOn); set('size', m4.sizeOn); set('acc', m4.acc.spot || m4.acc.spk);
 }
@@ -12153,7 +12164,7 @@ function renderM4About() {
     <ul class="pd-diff"><li><b>カメラ頭が四角い</b>：鼻先の下にぶら下がり、窓の数は4Tで6つ（サーマル・NIR補助ライト・レーザー距離計を含む）、4Eで4つ</li><li><b>天面の円筒</b>：RTK内蔵のGNSSアンテナ。後ろにビーコン、前にアクセサリー用のE-Port</li><li><b>4本脚で立つ</b>：脚にアンテナが入る（取説）。前のモーターが後ろより約9mm高い（公式3Dモデルの実測）</li><li><b>たたみ方</b>：前アームは水平に後ろへ、後アームは下へ回して前へ（モーターが逆さになる）</li><li><b>アクセサリー</b>：スポットライトとスピーカーを重ねて付けられる</li></ul>
     <p class="caveat">この3Dモデルは、DJI公式の3Dモデル（STEP）から寸法を測り、取扱説明書の図と公式写真で確かめて、教材用に組み直した再現です。CADの形そのものは使っていません。4Eの前面の窓の位置、ジンバルのヨークの形、内部の配置、モーターの回転方向は推定を含みます（解説の「推定」「例」）。</p>
     <details class="pd-src"><summary>出典（${M4_DATE}）</summary><ul>${['product', 'specs', 'faq', 'manual', 'maint', 'acc', 'prop', 'cad'].map(k => `<li>${M4_SRC_LINK(k)}</li>`).join('')}</ul></details>`;
-  renderNote({ kind: 'm4-about', title: m4.variant === 't' ? 'DJI Matrice 4T' : 'DJI Matrice 4E', html, actions: [{ label: m4.variant === 't' ? '4E にしてみる' : '4T にしてみる', fn: () => m4Action('variant') }, { label: 'たたんでみる', fn: () => m4Action('fold') }, { label: 'カメラを見る', fn: () => { renderNote(null); m4Action('cams'); } }] });
+  renderNote({ kind: 'm4-about', title: m4.variant === 't' ? 'DJI Matrice 4T' : 'DJI Matrice 4E', html, actions: [{ label: m4.variant === 't' ? '4E にしてみる' : '4T にしてみる', fn: () => m4Action('variant') }, { label: 'たたんでみる', fn: () => m4Action('fold') }, { label: '画角を見る', fn: () => { renderNote(null); m4Action('cams'); } }] });
 }
 function renderM4Note(id) {
   const tr = M4_TILT[m4.variant];
@@ -12161,7 +12172,7 @@ function renderM4Note(id) {
     variant: () => ({ title: m4.variant === 't' ? 'Matrice 4T のジンバル' : 'Matrice 4E のジンバル', html: m4.variant === 't'
       ? `<p>前面に6つの窓（取説の図）。<b>サーマルカメラ</b>（640×512）と、夜の望遠撮影を助ける<b>NIR補助ライト</b>があるのが4Tだけの装備。広角は1/1.3インチ・f/1.7。</p><p>ジンバルは上へ <b>70°</b> まで向けられる（4Eは35°・公式）。</p>`
       : `<p>前面に4つの窓（取説の図）。広角が<b>4/3型・2000万画素でメカシャッター付き</b>になる（公式）。メカシャッターは移動しながらの撮影で像がゆがみにくい（一般的な知識）。サーマルとNIR補助ライトはない。</p><p>ジンバルは上へ <b>35°</b> まで（4Tは70°・公式）。</p><p class="caveat">4Eの窓の位置は取説の図と公式写真から読んだ推定です。</p>`,
-      actions: [{ label: m4.variant === 't' ? '4E にする' : '4T にする', primary: true, fn: () => m4Action('variant') }, { label: 'カメラを見る', fn: () => { renderNote(null); m4Action('cams'); } }] }),
+      actions: [{ label: m4.variant === 't' ? '4E にする' : '4T にする', primary: true, fn: () => m4Action('variant') }, { label: '画角を見る', fn: () => { renderNote(null); m4Action('cams'); } }] }),
     fold: () => ({ title: m4.foldTo > 0 ? 'アームをたたむ' : 'アームを広げる', html: m4.foldTo > 0
       ? `<p>電源を切り、羽根を寄せてから、<b>後アームを下へ振り下ろして前へ</b>回し、胴の下の脇に収めます（モーターが逆さ・脚が上）。続いて<b>前アームを水平に後ろへ</b>回して胴の上の脇に沿わせ、最後にカメラへ<b>ジンバルプロテクター</b>をかぶせます。たたむと約 260.6 × 113.7 × 138.4 mm（公式）。</p><p class="caveat">取説には展開の順番（前アーム → 後アーム）だけが書かれていて、たたむ順番は書かれていません。この図は展開の逆にしています。回す軸の向きは取説の図からの推定です。この図の畳んだ大きさは約 267 × 126 × 142 mm で、実機より幅が1cmほど大きくなります。</p>`
       : `<p>取説の準備の順番どおりに、<b>①ジンバルプロテクターを外す → ②前アームを開く → ③後アームを開く</b>。このあとバッテリーを入れ、プロペラを付けます。</p><p><b>アームを開ききってから電源を入れます</b>。開かないまま電源を入れると、ジンバルがアームに当たってセルフチェックを終えられません（公式FAQ）。電源は、電源ボタンを1回押してから長押し（取説）。</p>`,
@@ -12544,7 +12555,7 @@ function setMn5Power(on, msg) {
 }
 function syncMn5Chips() {
   const set = (id, on, label) => { const b = $(`#mn5Chips [data-mn5="${id}"]`); if (!b) return; b.classList.toggle('on', !!on); if (b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', String(!!on)); if (label) b.textContent = label; };
-  set('fold', mn5.foldTo > 0, mn5.foldTo > 0 ? 'ひろげる' : 'たたむ');
+  set('fold', mn5.foldTo > 0, mn5.foldTo > 0 ? '広げる' : 'たたむ');
   set('battery', mn5.act && mn5.act.id === 'battery'); set('gimbal', mn5.act && mn5.act.id === 'gimbal');
   set('fov', mn5.fovOn); set('sense', mn5.senseOn); set('size', mn5.sizeOn);
 }
@@ -12710,7 +12721,7 @@ function stepMn5(dt) {
     D.motors.forEach((mo, i) => {
       const F = D.folds[i];
       if (F.front) F.fg.quaternion.setFromAxisAngle(F.flip.axis, F.flip.sign * Math.PI * ff);   /* 下へ振り下ろして後ろへ。畳むと上下が逆さになる */
-      else { const fr = F.sx > 0 ? frR : frL, yawT = Math.atan2(1, F.sx * 0.03); F.fg.rotation.set(0, mn5Norm(yawT - F.yaw) * fr, 0); }   /* ほぼ垂直な軸で前へ回して胴の上の段に沿わせる */
+      else { const fr = F.sx > 0 ? frR : frL, yawT = Math.atan2(1, 0); F.fg.rotation.set(0, mn5Norm(yawT - F.yaw) * fr, 0); }   /* ほぼ垂直な軸で前へ回して胴の上の段に沿わせる */
       for (const h of mo.hinges) h.g.rotation.y = h.s * fb * Math.PI / 2;
     });
     D.protector.visible = f > 0.95;
@@ -13019,7 +13030,7 @@ function applyFind() {
   for (const g of $$('#partList .grp')) { let n = 0; for (let e = g.nextElementSibling; e && e.classList.contains('row'); e = e.nextElementSibling) if (!e.hidden) n++; g.hidden = !n; }
   const note = $('#findNote');
   if (note) { note.hidden = !q; note.textContent = !q ? '' : hit.size ? (deep ? `名前では見つかりません。説明文から ${hit.size} 件` : `${hit.size} 件`) : '見つかりません。ちがう言い方で試してください'; }
-  $('#partCount').textContent = q ? `${hit.size} / ${listKeys().length}` : `${listKeys().length} 部品`;
+  $('#partCount').textContent = q ? `${hit.size} / ${listKeys().length}` : `${listKeys().length} ${lx('nParts')}`;
 }
 // Enter で開く1件。名前が前方一致するものを一覧の順より優先する（「モーター」でモーターマウントが先に来ないように）
 function findBest() {
@@ -13040,9 +13051,9 @@ function buildList() {
   if (S.depth === 'simple') { for (const k of SIMPLE_KEYS.filter(k => listKeys().includes(k))) html += `<div class="row" data-key="${k}" tabindex="0" role="button"><span class="nm">${partName(k)}</span><span class="cnt"></span><span></span></div>`; $('#partCount').textContent = `${SIMPLE_KEYS.filter(k => listKeys().includes(k)).length} 部品`; }
   else {
     html += `<div class="p-find"><input id="partFind" type="search" autocomplete="off" spellcheck="false" placeholder="${t('find.ph')}" aria-label="${t('find.ph')}" aria-controls="partList"><p id="findNote" class="find-note" hidden></p></div>`;
-    for (const g of GROUPS) { const keys = listKeys().filter(k => PARTS[k].group === g.id); if (!keys.length) continue; html += `<div class="grp" style="--c:${g.color}"><i></i>${g.name}</div>`;
+    for (const g of GROUPS) { const keys = listKeys().filter(k => PARTS[k].group === g.id); if (!keys.length) continue; html += `<div class="grp" style="--c:${g.color}"><i></i>${grpName(g)}</div>`;
       for (const k of keys) { const d = PARTS[k]; const hid = partsOf(k).some(p => p.hidden); html += `<div class="row${SUB[k] ? ' sub' : ''}${hid ? ' off' : ''}" data-key="${k}" tabindex="0" role="button"><span class="nm">${partName(k)}</span><span class="cnt">${d.count > 1 ? '×' + d.count : ''}</span><button class="eye" aria-label="${d.name}の表示切替">${hid ? ICON.eyeOff : ICON.eye}</button></div>`; } }
-    $('#partCount').textContent = `${listKeys().length} 部品`;
+    $('#partCount').textContent = `${listKeys().length} ${lx('nParts')}`;
   }
   list.innerHTML = html;
   for (const row of $$('#partList .row')) row.classList.toggle('on', !!S.selected && row.dataset.key === S.selected.key);
@@ -13074,11 +13085,11 @@ function select(p, all = false, opts = {}) {
 }
 function renderDetail() {
   const box = $('#detail'), p = S.selected, body_ = $('#inspBody');
-  if (!p) { box.hidden = true; box.innerHTML = ''; body_.classList.remove('detail'); $('#inspBack').hidden = true; $('#inspTitle').textContent = '部品'; return; }
+  if (!p) { box.hidden = true; box.innerHTML = ''; body_.classList.remove('detail'); $('#inspBack').hidden = true; $('#inspTitle').textContent = lx('parts'); return; }
   const d = PARTS[p.key], g = GROUPS.find(x => x.id === d.group), simple = S.depth === 'simple', sd = SIMPLE[p.key];
   const inst = PER_MOTOR.has(p.key) && !S.selAll ? ` · ${MOTOR_INFO[p.idx].id}（${MOTOR_INFO[p.idx].pos}・${MOTOR_INFO[p.idx].dir === 'CW' ? '↻' : '↺'}${MOTOR_INFO[p.idx].dir}）` : '';
   const hidden = partsOf(p.key).some(x => x.hidden);
-  let h = `<div class="d-group" style="--c:${g.color}"><i></i>${g.name}${partKyChip(p.key)}</div><div class="d-title"><h3>${partName(p)}</h3>${hasSpeech ? '<button id="detailSpeak" class="icon-btn sm speak" aria-label="読み上げ" title="読み上げ">🔊</button>' : ''}</div><p class="d-en">${S.lang === 'en' ? d.name : d.en}${d.count > 1 ? ` · ×${d.count}` : ''}${inst}</p>`;
+  let h = `<div class="d-group" style="--c:${g.color}"><i></i>${grpName(g)}${partKyChip(p.key)}</div><div class="d-title"><h3>${partName(p)}</h3>${hasSpeech ? '<button id="detailSpeak" class="icon-btn sm speak" aria-label="読み上げ" title="読み上げ">🔊</button>' : ''}</div><p class="d-en">${S.lang === 'en' ? d.name : d.en}${d.count > 1 ? ` · ×${d.count}` : ''}${inst}</p>`;
   h += codexHead(p.key);
   h += `<div class="d-actions"><button id="dFocus" class="primary">${t('ui.focus')}</button>${p.key === 'buzzer' ? '<button id="dBeep">🔊 鳴らしてみる</button>' : ''}${simple ? '' : `<button id="dIsolate">${S.isolated === p.key ? '単独表示を解除' : '単独表示'}</button><button id="dHide">${hidden ? '表示する' : '非表示'}</button>`}</div>`;
   h += `<section><h4>${t('sec.role')}</h4><p>${simple && sd ? partRole(p.key) : d.role}</p></section>`;

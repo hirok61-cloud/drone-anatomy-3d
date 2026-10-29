@@ -172,7 +172,7 @@ function applyFind() {
   for (const g of $$('#partList .grp')) { let n = 0; for (let e = g.nextElementSibling; e && e.classList.contains('row'); e = e.nextElementSibling) if (!e.hidden) n++; g.hidden = !n; }
   const note = $('#findNote');
   if (note) { note.hidden = !q; note.textContent = !q ? '' : hit.size ? (deep ? `名前では見つかりません。説明文から ${hit.size} 件` : `${hit.size} 件`) : '見つかりません。ちがう言い方で試してください'; }
-  $('#partCount').textContent = q ? `${hit.size} / ${listKeys().length}` : `${listKeys().length} 部品`;
+  $('#partCount').textContent = q ? `${hit.size} / ${listKeys().length}` : `${listKeys().length} ${lx('nParts')}`;
 }
 // Enter で開く1件。名前が前方一致するものを一覧の順より優先する（「モーター」でモーターマウントが先に来ないように）
 function findBest() {
@@ -193,9 +193,9 @@ function buildList() {
   if (S.depth === 'simple') { for (const k of SIMPLE_KEYS.filter(k => listKeys().includes(k))) html += `<div class="row" data-key="${k}" tabindex="0" role="button"><span class="nm">${partName(k)}</span><span class="cnt"></span><span></span></div>`; $('#partCount').textContent = `${SIMPLE_KEYS.filter(k => listKeys().includes(k)).length} 部品`; }
   else {
     html += `<div class="p-find"><input id="partFind" type="search" autocomplete="off" spellcheck="false" placeholder="${t('find.ph')}" aria-label="${t('find.ph')}" aria-controls="partList"><p id="findNote" class="find-note" hidden></p></div>`;
-    for (const g of GROUPS) { const keys = listKeys().filter(k => PARTS[k].group === g.id); if (!keys.length) continue; html += `<div class="grp" style="--c:${g.color}"><i></i>${g.name}</div>`;
+    for (const g of GROUPS) { const keys = listKeys().filter(k => PARTS[k].group === g.id); if (!keys.length) continue; html += `<div class="grp" style="--c:${g.color}"><i></i>${grpName(g)}</div>`;
       for (const k of keys) { const d = PARTS[k]; const hid = partsOf(k).some(p => p.hidden); html += `<div class="row${SUB[k] ? ' sub' : ''}${hid ? ' off' : ''}" data-key="${k}" tabindex="0" role="button"><span class="nm">${partName(k)}</span><span class="cnt">${d.count > 1 ? '×' + d.count : ''}</span><button class="eye" aria-label="${d.name}の表示切替">${hid ? ICON.eyeOff : ICON.eye}</button></div>`; } }
-    $('#partCount').textContent = `${listKeys().length} 部品`;
+    $('#partCount').textContent = `${listKeys().length} ${lx('nParts')}`;
   }
   list.innerHTML = html;
   for (const row of $$('#partList .row')) row.classList.toggle('on', !!S.selected && row.dataset.key === S.selected.key);
@@ -227,11 +227,11 @@ function select(p, all = false, opts = {}) {
 }
 function renderDetail() {
   const box = $('#detail'), p = S.selected, body_ = $('#inspBody');
-  if (!p) { box.hidden = true; box.innerHTML = ''; body_.classList.remove('detail'); $('#inspBack').hidden = true; $('#inspTitle').textContent = '部品'; return; }
+  if (!p) { box.hidden = true; box.innerHTML = ''; body_.classList.remove('detail'); $('#inspBack').hidden = true; $('#inspTitle').textContent = lx('parts'); return; }
   const d = PARTS[p.key], g = GROUPS.find(x => x.id === d.group), simple = S.depth === 'simple', sd = SIMPLE[p.key];
   const inst = PER_MOTOR.has(p.key) && !S.selAll ? ` · ${MOTOR_INFO[p.idx].id}（${MOTOR_INFO[p.idx].pos}・${MOTOR_INFO[p.idx].dir === 'CW' ? '↻' : '↺'}${MOTOR_INFO[p.idx].dir}）` : '';
   const hidden = partsOf(p.key).some(x => x.hidden);
-  let h = `<div class="d-group" style="--c:${g.color}"><i></i>${g.name}${partKyChip(p.key)}</div><div class="d-title"><h3>${partName(p)}</h3>${hasSpeech ? '<button id="detailSpeak" class="icon-btn sm speak" aria-label="読み上げ" title="読み上げ">🔊</button>' : ''}</div><p class="d-en">${S.lang === 'en' ? d.name : d.en}${d.count > 1 ? ` · ×${d.count}` : ''}${inst}</p>`;
+  let h = `<div class="d-group" style="--c:${g.color}"><i></i>${grpName(g)}${partKyChip(p.key)}</div><div class="d-title"><h3>${partName(p)}</h3>${hasSpeech ? '<button id="detailSpeak" class="icon-btn sm speak" aria-label="読み上げ" title="読み上げ">🔊</button>' : ''}</div><p class="d-en">${S.lang === 'en' ? d.name : d.en}${d.count > 1 ? ` · ×${d.count}` : ''}${inst}</p>`;
   h += codexHead(p.key);
   h += `<div class="d-actions"><button id="dFocus" class="primary">${t('ui.focus')}</button>${p.key === 'buzzer' ? '<button id="dBeep">🔊 鳴らしてみる</button>' : ''}${simple ? '' : `<button id="dIsolate">${S.isolated === p.key ? '単独表示を解除' : '単独表示'}</button><button id="dHide">${hidden ? '表示する' : '非表示'}</button>`}</div>`;
   h += `<section><h4>${t('sec.role')}</h4><p>${simple && sd ? partRole(p.key) : d.role}</p></section>`;

@@ -142,7 +142,7 @@ function m4SetAcc(spot, spk) {
 function syncM4Chips() {
   const set = (id, on, label) => { const b = $(`#m4Chips [data-m4="${id}"]`); if (!b) return; b.classList.toggle('on', !!on); if (b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', String(!!on)); if (label) b.textContent = label; };
   set('variant', false, m4.variant === 't' ? '4E にする' : '4T にする');
-  set('fold', m4.foldTo > 0, m4.foldTo > 0 ? 'ひろげる' : 'たたむ');
+  set('fold', m4.foldTo > 0, m4.foldTo > 0 ? '広げる' : 'たたむ');
   set('battery', m4.act && m4.act.id === 'battery'); set('gimbal', m4.act && m4.act.id === 'gimbal');
   set('cams', m4.camsOn); set('laser', m4.laserOn); set('sense', m4.senseOn); set('size', m4.sizeOn); set('acc', m4.acc.spot || m4.acc.spk);
 }
@@ -163,7 +163,7 @@ function renderM4About() {
     <ul class="pd-diff"><li><b>カメラ頭が四角い</b>：鼻先の下にぶら下がり、窓の数は4Tで6つ（サーマル・NIR補助ライト・レーザー距離計を含む）、4Eで4つ</li><li><b>天面の円筒</b>：RTK内蔵のGNSSアンテナ。後ろにビーコン、前にアクセサリー用のE-Port</li><li><b>4本脚で立つ</b>：脚にアンテナが入る（取説）。前のモーターが後ろより約9mm高い（公式3Dモデルの実測）</li><li><b>たたみ方</b>：前アームは水平に後ろへ、後アームは下へ回して前へ（モーターが逆さになる）</li><li><b>アクセサリー</b>：スポットライトとスピーカーを重ねて付けられる</li></ul>
     <p class="caveat">この3Dモデルは、DJI公式の3Dモデル（STEP）から寸法を測り、取扱説明書の図と公式写真で確かめて、教材用に組み直した再現です。CADの形そのものは使っていません。4Eの前面の窓の位置、ジンバルのヨークの形、内部の配置、モーターの回転方向は推定を含みます（解説の「推定」「例」）。</p>
     <details class="pd-src"><summary>出典（${M4_DATE}）</summary><ul>${['product', 'specs', 'faq', 'manual', 'maint', 'acc', 'prop', 'cad'].map(k => `<li>${M4_SRC_LINK(k)}</li>`).join('')}</ul></details>`;
-  renderNote({ kind: 'm4-about', title: m4.variant === 't' ? 'DJI Matrice 4T' : 'DJI Matrice 4E', html, actions: [{ label: m4.variant === 't' ? '4E にしてみる' : '4T にしてみる', fn: () => m4Action('variant') }, { label: 'たたんでみる', fn: () => m4Action('fold') }, { label: 'カメラを見る', fn: () => { renderNote(null); m4Action('cams'); } }] });
+  renderNote({ kind: 'm4-about', title: m4.variant === 't' ? 'DJI Matrice 4T' : 'DJI Matrice 4E', html, actions: [{ label: m4.variant === 't' ? '4E にしてみる' : '4T にしてみる', fn: () => m4Action('variant') }, { label: 'たたんでみる', fn: () => m4Action('fold') }, { label: '画角を見る', fn: () => { renderNote(null); m4Action('cams'); } }] });
 }
 function renderM4Note(id) {
   const tr = M4_TILT[m4.variant];
@@ -171,7 +171,7 @@ function renderM4Note(id) {
     variant: () => ({ title: m4.variant === 't' ? 'Matrice 4T のジンバル' : 'Matrice 4E のジンバル', html: m4.variant === 't'
       ? `<p>前面に6つの窓（取説の図）。<b>サーマルカメラ</b>（640×512）と、夜の望遠撮影を助ける<b>NIR補助ライト</b>があるのが4Tだけの装備。広角は1/1.3インチ・f/1.7。</p><p>ジンバルは上へ <b>70°</b> まで向けられる（4Eは35°・公式）。</p>`
       : `<p>前面に4つの窓（取説の図）。広角が<b>4/3型・2000万画素でメカシャッター付き</b>になる（公式）。メカシャッターは移動しながらの撮影で像がゆがみにくい（一般的な知識）。サーマルとNIR補助ライトはない。</p><p>ジンバルは上へ <b>35°</b> まで（4Tは70°・公式）。</p><p class="caveat">4Eの窓の位置は取説の図と公式写真から読んだ推定です。</p>`,
-      actions: [{ label: m4.variant === 't' ? '4E にする' : '4T にする', primary: true, fn: () => m4Action('variant') }, { label: 'カメラを見る', fn: () => { renderNote(null); m4Action('cams'); } }] }),
+      actions: [{ label: m4.variant === 't' ? '4E にする' : '4T にする', primary: true, fn: () => m4Action('variant') }, { label: '画角を見る', fn: () => { renderNote(null); m4Action('cams'); } }] }),
     fold: () => ({ title: m4.foldTo > 0 ? 'アームをたたむ' : 'アームを広げる', html: m4.foldTo > 0
       ? `<p>電源を切り、羽根を寄せてから、<b>後アームを下へ振り下ろして前へ</b>回し、胴の下の脇に収めます（モーターが逆さ・脚が上）。続いて<b>前アームを水平に後ろへ</b>回して胴の上の脇に沿わせ、最後にカメラへ<b>ジンバルプロテクター</b>をかぶせます。たたむと約 260.6 × 113.7 × 138.4 mm（公式）。</p><p class="caveat">取説には展開の順番（前アーム → 後アーム）だけが書かれていて、たたむ順番は書かれていません。この図は展開の逆にしています。回す軸の向きは取説の図からの推定です。この図の畳んだ大きさは約 267 × 126 × 142 mm で、実機より幅が1cmほど大きくなります。</p>`
       : `<p>取説の準備の順番どおりに、<b>①ジンバルプロテクターを外す → ②前アームを開く → ③後アームを開く</b>。このあとバッテリーを入れ、プロペラを付けます。</p><p><b>アームを開ききってから電源を入れます</b>。開かないまま電源を入れると、ジンバルがアームに当たってセルフチェックを終えられません（公式FAQ）。電源は、電源ボタンを1回押してから長押し（取説）。</p>`,
