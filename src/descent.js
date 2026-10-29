@@ -51,7 +51,7 @@ function startDescent(mode) {
   S.descent = descent;
   setBodyMode('theater'); setPower(0.5, true); setBodyMode('theater');   /* setPower→syncBodyMode が idle に戻すので、もう一度 theater に置く */
   body.px = mode === 'slide' ? -0.85 : 0; body.pz = 0; body.py = descTop();
-  body.tx = body.tz = body.wx = body.wz = 0; body.yaw = 0; body.mult = [1, 1, 1, 1];
+  body.tx = body.tz = body.wx = body.wz = 0; body.yaw = 0; body.mult = D.motors.map(() => 1);
   D.motors.forEach(mo => { mo.rpmTarget = null; mo.rpmRate = 3.5; });
   setSticks(false); if (S.selected) select(null);
   descent.saved.air = S.air; S.air = true; for (const x of $$('.tgl[data-t=air]')) x.classList.add('on');   /* 吹きおろしが見えないと、この2つは分からない */

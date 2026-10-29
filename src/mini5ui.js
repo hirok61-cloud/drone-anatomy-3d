@@ -22,7 +22,7 @@ function mn5BlockPower() {
 function mn5OnTab(tab) {
   if (!IS_MINI5) return;
   if (tab !== 'fly') mn5.pendingPower = false;   /* 「とばす」で押した電源を、ほかのタブで広げ終えたときに回さない */
-  if (tab !== 'see') { const had = !!mn5.act || mn5Wide(); mn5Stop(); mn5Overlays(null, true); if ($('#noteCard').dataset.kind === 'mn5-fold') renderNote(null); if (had) focusOn([D.root], { pull: true }); }
+  if (tab !== 'see') { const had = !!mn5.act || mn5Wide(); mn5Stop(); mn5Overlays(null, true); if (($('#noteCard').dataset.kind || '').startsWith('mn5-')) renderNote(null); if (had) focusOn([D.root], { pull: true }); }
   if (tab === 'fly' && (mn5.foldTo > 0 || mn5.fold > 0.001)) { mn5.foldTo = 0; syncMn5Chips(); showToast('アームを開きました'); mn5FrameWide(); }
 }
 
@@ -225,7 +225,7 @@ function mn5Lowest() {
 }
 function mn5ApplyPose(dt) {
   const sg = D.sg, R = mn5.rest, P = mn5.pose;
-  const want = (mn5.fold > 0.0005 || mn5.foldTo > 0 || !!mn5.act || body.py > 0.003 || S.explode > 0.02 || mn5.senseOn) ? 0 : 1;   /* 検知範囲の図は水平で見せる */
+  const want = (mn5.fold > 0.0005 || mn5.foldTo > 0 || !!mn5.act || body.py > 0.003 || body.mode !== 'idle' || S.explode > 0.02 || mn5.senseOn) ? 0 : 1;   /* 電源が入って飛行デモ・操縦・場面で動いている間は水平（接地したままのホバリングでも機首を上げない） */   /* 検知範囲の図は水平で見せる */
   R.w += (want - R.w) * (1 - Math.exp(-dt / (body.py > 0.003 ? 0.25 : 0.35))); if (Math.abs(R.w - want) < 0.002) R.w = want;
   const ex = S.explode > 0.02, key = `${R.w.toFixed(4)},${P.lift.toFixed(4)},${P.px.toFixed(4)},${P.yaw.toFixed(4)},${P.rz.toFixed(4)},${mn5.fold.toFixed(4)},${ex}`;
   if (key === mn5._poseKey) return false; mn5._poseKey = key;
@@ -240,6 +240,7 @@ function mn5ApplyPose(dt) {
 const mn5Ease = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
 function stepMn5(dt) {
   let dirty = false;
+  if (S.explode > 0.02 && mn5.act) mn5Stop();   /* 動きの途中で分解したら動きを止める */
   if (S.explode > 0.02 && mn5.foldTo > 0) { mn5.foldTo = 0; syncMn5Chips(); if ($('#noteCard').dataset.kind === 'mn5-fold') renderNote(null); }   /* 畳んだ姿勢のまま部品を散らさない */
   { const sup = mn5.sizeOn || mn5.fovOn || mn5.senseOn || !!(mn5.act && mn5.act.id === 'gimbal'); if (sup !== mn5._sup) { mn5._sup = sup; S.labelsSuppressed = sup; } }
   // --- たたむ / 広げる ---

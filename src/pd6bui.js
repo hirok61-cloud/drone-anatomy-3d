@@ -13,7 +13,7 @@ function pd6bBlockPower() {
 }
 function pd6bOnTab(tab) {
   if (!IS_PD6B) return;
-  if (tab !== 'see') { pd6bStop(); if (pd6b.chuteTo > 0) setChute(false, true); if (pd6b.sizeOn) setSize(false, true); if ($('#noteCard').dataset.kind === 'pd6b-fold') renderNote(null); }   /* 「みる」の重ね絵・カードを「とばす」へ持ち込まない */
+  if (tab !== 'see') { pd6bStop(); if (pd6b.chuteTo > 0) setChute(false, true); if (pd6b.sizeOn) setSize(false, true); if (($('#noteCard').dataset.kind || '').startsWith('pd6b-')) renderNote(null); }   /* 「みる」の重ね絵・カードを「とばす」へ持ち込まない */
   if (tab === 'fly' && (pd6b.foldTo > 0 || pd6b.fold > 0.001)) { pd6b.foldTo = 0; syncPdChips(); showToast('アームを広げました'); }
 }
 
@@ -77,7 +77,7 @@ function renderPdAbout() {
   const row = (k, v, src) => `<tr><th>${k}</th><td>${v}${src ? `<small>${src}</small>` : ''}</td></tr>`;
   const html = `<p><b>第一種型式認証をめざす、物流用の大型ヘキサコプター（6発機）。</b>2023年11月10日に国土交通省が第一種型式認証の申請を受理（国内3件目）。2026年10月のジャパンモビリティショーで展示され、同社は「取得を目指す」としています。</p>
     <table class="pd-spec">
-      ${row('最大離陸重量', '約 45 kg', '国交省')}${row('最大積載重量', '約 20 kg', '国交省・申請時／2025年の報道では18kg')}
+      ${row('最大離陸重量', '約 45 kg', '国交省')}${row('最大積載重量', '約 20 kg', '国交省・申請時／2025年の報道では18kg（記事は現在閲覧できない）')}
       ${row('機体寸法', '約 2.2 × 2.4 × 0.7 m', '国交省')}${row('最大飛行速度', '約 12 m/s（約43km/h）', '国交省')}${row('最大飛行時間', '約 30 分', '国交省')}
       ${row('機体重量', '20.0 kg（バッテリー4本込み）', '公式・PD6B-Type3')}${row('モーター軸間', '1,623 mm', '公式')}${row('プロペラ', '30 インチ × 6', '公式')}
       ${row('折りたたみ時', 'φ945 mm の円柱内', '公式')}${row('防水・防塵', 'IP44', '公式')}
@@ -85,7 +85,7 @@ function renderPdAbout() {
     <h4>550クラスとのちがい</h4>
     <ul class="pd-diff"><li><b>4発 → 6発</b>：1基の推力が落ちても残りで補う余地を設計で持たせやすい</li><li><b>2.4kg → 45kg</b>：25kg以上なので登録記号の文字は25mm以上、カテゴリーⅡでも許可・承認が要る</li><li><b>12 → 30インチ</b>：大きな羽根をゆっくり回して効率を上げる</li><li><b>腰下ユニット</b>：箱・測量機器を付け替える</li><li><b>パラシュート</b>：落ちる速さを下げる安全装置</li></ul>
     <p class="caveat">「公式」と書いた数値は、CAT3のベース機 PD6B-Type3 の公式ページの値です。この3Dモデルは、公表資料と展示機の写真から起こした教材用の再現です。内部の配置・脚や箱の寸法・アンテナの用途・畳む向きは推定を含みます（解説の「写真から推定」）。</p>
-    <details class="pd-src"><summary>出典（${PD6B_DATE}）</summary><ul>${['mlit', 'official', 'news', 'logi', 'parasafe'].map(k => `<li>${PD_SRC_LINK(k)}</li>`).join('')}</ul></details>`;
+    <details class="pd-src"><summary>出典（${PD6B_DATE}）</summary><ul>${['mlit', 'official', 'news', 'parasafe'].map(k => `<li>${PD_SRC_LINK(k)}</li>`).join('')}</ul></details>`;
   renderNote({ kind: 'pd6b-about', title: 'PD6B-CAT3（プロドローン）', html, actions: [{ label: 'たたんでみる', fn: () => pd6bAction('fold') }, { label: '大きさをくらべる', fn: () => { renderNote(null); setSize(true); } }] });
 }
 function renderPdNote(id) {

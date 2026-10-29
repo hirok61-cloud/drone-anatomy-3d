@@ -427,7 +427,8 @@ function focusOn(objs, opts = {}) {
   const dir = opts.dir ? opts.dir.clone() : camera.position.clone().sub(controls.target); if (dir.lengthSq() < 1e-6) dir.set(0.6, 0.4, -0.6); dir.normalize();
   // 箱の8隅を視野に収める距離(球ではなく実際の投影で決める)
   const fwd = dir.clone().negate(), right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize(), up = new THREE.Vector3().crossVectors(right, fwd).normalize();
-  const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / bandK(), tanH = tanV * bandK() * Math.max(IS_ALT ? 0.4 : 0.6, camera.aspect);   /* 翼幅の広い機種は、縦長の画面の本当の横幅で収める */ let need = 0.05; const rel = new THREE.Vector3();   /* 縦はシートに隠れない帯の高さで見る */
+  const dtAlt = IS_ALT && !narrow();   /* パソコン幅の機種ものは、ドックの高さぶん縦を、右の視点ボタン列とラベルの分だけ横を狭めて収める */
+  const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / bandK() * (dtAlt ? clamp((H - bottomCover() - topCover()) / H, 0.5, 1) : 1), tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * Math.max(IS_ALT ? 0.4 : 0.6, camera.aspect) * (dtAlt ? 0.86 : 1);   /* 翼幅の広い機種は、縦長の画面の本当の横幅で収める */ let need = 0.05; const rel = new THREE.Vector3();   /* 縦はシートに隠れない帯の高さで見る */
   for (const q of pts) { rel.copy(q).sub(sph.center); const t = rel.dot(dir); need = Math.max(need, Math.abs(rel.dot(right)) / tanH + t, Math.abs(rel.dot(up)) / tanV + t); }
   const dist = clamp((need * (opts.margin || 1.18) + 0.02) * viewScale(), (opts.min != null ? opts.min : (D.focusMin || 0.12)) * viewScale(), (opts.max || 3.2) * viewScale() * bandK());
   const dur = 600 + 500 * clamp((camera.position.distanceTo(sph.center.clone().addScaledVector(dir, dist)) + controls.target.distanceTo(sph.center)) / 0.6, 0, 1);
@@ -496,7 +497,7 @@ function resize() {
   renderer.setSize(W, H, false); composer.setSize(W, H);
   if (typeof fpv === 'object' && fpv.on) { camera.aspect = W / H; camera.clearViewOffset(); camera.updateProjectionMatrix(); S.bandFrac = 1; onResizedFpv(); if (typeof onResized === 'function') onResized(); S.aoDirty = true; return; }   /* カメラの映像は画面いっぱい。帯のずらしはしない */
   camera.aspect = narrow() ? W / H : (W - 384) / H;
-  if (!narrow()) camera.setViewOffset(W - 384, H, 0, 0, W, H);   /* 右パネルの分だけ左に寄せる */
+  if (!narrow()) { const sh = IS_ALT ? (bottomCover() - topCover()) * 0.5 : 0; camera.setViewOffset(W - 384, H, 0, Math.abs(sh) > 12 ? sh : 0, W, H); }   /* 右パネルの分だけ左に寄せる。機種固有のボタン列でドックが高い機種は、上のバーと下のドックの間に機体が来るよう縦にもずらす */
   else { const bc = bottomCover(), tc = topCover(), sh = (bc - tc) * 0.5; if (Math.abs(sh) > 12) camera.setViewOffset(W, H, 0, sh, W, H); else camera.clearViewOffset(); applyBand(clamp((H - bc - tc) / H, 0.3, 1)); }   /* 上のバーと下のシートの間の帯に機体が来るようずらし、帯の狭さぶん引く */
   if (!narrow()) S.bandFrac = 1;
   camera.updateProjectionMatrix();

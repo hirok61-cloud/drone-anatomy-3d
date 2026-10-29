@@ -38,10 +38,16 @@ function renderNote(o) {
   $('#noteBody').innerHTML = o.html || ''; renderNoteActions(o.actions);
   card.hidden = false; if (card.dataset.kind !== (o.kind || '')) card.scrollTop = 0;   /* 同じ種類のカードを描き直すときは読んでいた位置を保つ */
   card.dataset.kind = o.kind || '';
+  card._origMini = !!o.mini;   /* 画面の向きが変わったとき、もともと畳めるカード（ショー）かどうかを見分ける */
   { const alt = !o.mini && altNoteCompact(o.kind); card.classList.toggle('altc', alt); if (alt) o = Object.assign({}, o, { mini: true, miniOn: store.get('altNoteOpen') !== '1' });
     const mb = $('#noteMini'); mb.hidden = !o.mini; if (o.mini) setNoteMini(o.miniOn); else card.classList.remove('mini'); }
   if (o.onClose) card._onClose = o.onClose; else card._onClose = null;
 }
+// 画面を回したとき: 機種のカードの畳みを、いまの向きに合わせ直す（描き直さない）
+matchMedia('(max-width: 760px) and (min-height: 481px)').addEventListener('change', () => {
+  const card = $('#noteCard'); if (card.hidden || card._origMini || !ALT_NOTE_RE.test(card.dataset.kind || '')) return;
+  const alt = altNoteCompact(card.dataset.kind); card.classList.toggle('altc', alt); $('#noteMini').hidden = !alt; setNoteMini(alt ? store.get('altNoteOpen') !== '1' : false);
+});
 $('#noteClose').addEventListener('click', () => { const c = $('#noteCard'); if (c._onClose) c._onClose(); c.hidden = true; });
 $('#noteMini').addEventListener('click', () => { const c = $('#noteCard'), on = !c.classList.contains('mini'); setNoteMini(on); if (c.classList.contains('altc')) store.set('altNoteOpen', on ? '0' : '1'); });
 
@@ -233,7 +239,7 @@ function renderDetail() {
   h += regSection(p.key);
   h += codexTriviaRow(p.key);
   if (simple && sd) h += `<div class="analogy"><b>${t('sec.analogy')}</b>${partAnalogy(p.key)}</div>`;
-  if (!simple && (p.key === 'motor' || p.key === 'prop' || p.key === 'esc')) h += `<section><h4>配置と回転方向（上から見て）</h4><div class="mtab">${MOTOR_INFO.map(m => `<div class="${m.dir.toLowerCase()}"><b>${m.id} ${m.dir === 'CW' ? '↻' : '↺'}${m.dir}</b>${m.pos}</div>`).join('')}</div></section>`;
+  if (!simple && (p.key === 'motor' || p.key === 'prop' || p.key === 'esc')) h += `<section><h4>配置と回転方向（上から見て${IS_ALT ? '・図の例。公式資料に記載なし' : ''}）</h4><div class="mtab">${MOTOR_INFO.map(m => `<div class="${m.dir.toLowerCase()}"><b>${m.id} ${m.dir === 'CW' ? '↻' : '↺'}${m.dir}</b>${m.pos}</div>`).join('')}</div></section>`;
   if (d.structure && S.lang === 'en' && simple && langEntry(p.key)) h += langNote();
   if (d.structure) h += `<section><h4>${t('sec.structure')}</h4><ul>${d.structure.slice(0, simple ? 3 : 9).map(s => `<li>${s}</li>`).join('')}</ul></section>`;
   if (!simple && d.spec) h += `<details><summary>仕様例</summary><dl class="spec">${d.spec.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl></details>`;
@@ -597,7 +603,7 @@ function bindSheet(el) {
 }
 bindSheet($('#inspector'));
 $('#previewClose').addEventListener('click', closePreview);
-function syncDockH() { document.documentElement.style.setProperty('--dock-h', $('#dock').offsetHeight + 'px'); }
+function syncDockH() { const h = $('#dock').offsetHeight; if (document.documentElement.style.getPropertyValue('--dock-h') === h + 'px') return; document.documentElement.style.setProperty('--dock-h', h + 'px'); if (IS_ALT && !narrow() && typeof resize === 'function' && typeof canvas !== 'undefined') resize(); }   /* パソコン幅の機種ものは、ドックの高さが変わったら機体の縦のずらしも測り直す */
 new ResizeObserver(syncDockH).observe($('#dock'));
 
 function onThemeChanged(dark) { airflowTheme(dark); fpvStageTheme();

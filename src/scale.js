@@ -78,7 +78,7 @@ function setScale(on) {
     if (D.cgMarker) D.cgMarker.visible = false;
     if (D.personGroup) { D.personGroup.visible = false; if (D.personGroup.userData.setGhost) D.personGroup.userData.setGhost(false); }
     regGhosts(false); camHome();
-    for (let i = 0; i < 4; i++) body.mult[i] = 1;
+    for (let i = 0; i < body.mult.length; i++) body.mult[i] = 1;
     for (const B of badgeEls) B.el.classList.remove('over');
     if (S.power > 0) setPower(0, true);
     S.shadowDirty = S.csDirty = S.aoDirty = true;
@@ -119,7 +119,7 @@ function stepScale() {
     if (n) { n.textContent = scale.over ? scaleOverText() : ''; n.hidden = !scale.over; }
   }
   if (D.cgMarker) { D.cgMarker.position.copy(scale.cg); D.cgMarker.visible = true; const pl = D.cgMarker.userData.plumb; if (pl) { const len = Math.max(0.001, scale.cg.y + 0.158 + body.py); pl.scale.y = len; pl.position.y = -len / 2; } }
-  for (let i = 0; i < 4; i++) body.mult[i] = scale.share[i];
+  for (let i = 0; i < body.mult.length; i++) body.mult[i] = scale.share[i] ?? 1;
 }
 
 function scaleOverText() {   // 原因 → 結果 の順で1文に

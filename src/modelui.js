@@ -44,7 +44,7 @@ function altFpvEnter() {
   else if (IS_M4) { if (m4.act) m4Stop(); if (m4Wide()) m4Overlays(null, true); m4._sup = false; S.labelsSuppressed = false; }
   else if (IS_MINI5) { if (mn5.act) mn5Stop(); if (mn5Wide()) mn5Overlays(null, true); mn5._sup = false; S.labelsSuppressed = false; }   /* ジンバルの台本が抑えたラベルも戻す（眼が控える値を正しくする） */
 }
-function altFpvExit() { if (IS_MAVIC) mav.pendingPower = false; else if (IS_M4) m4.pendingPower = false; else if (IS_PD6B) pd6b.pendingPower = false; else if (IS_MINI5) { mn5.pendingPower = false; mn5.gim.zoom = 1; } }   /* 眼に入るときに保留した電源を、出たあとで回さない */
+function altFpvExit() { if (IS_MAVIC) { mav.pendingPower = false; mav.gim.zoom = 1; mvSyncLens(); } else if (IS_M4) { m4.pendingPower = false; m4.gim.zoom = 1; m4.gim.ir = false; m4SyncLens(); } else if (IS_PD6B) pd6b.pendingPower = false; else if (IS_MINI5) { mn5.pendingPower = false; mn5.gim.zoom = 1; } }   /* 眼に入るときに保留した電源を、出たあとで回さない */
 // 部品を選ぶ前に、その部品が見える組み合わせにする（Matrice 4 の 4T/4E・アクセサリー、PD6B の腰下ユニット）
 function altShowPart(k) { const v = PARTS[k] && PARTS[k].variant; if (!v) return;
   if (IS_M4) { if ((v === 't' || v === 'e') && m4.variant !== v) m4SetVariant(v, false); else if ((v === 'spot' && !m4.acc.spot) || (v === 'spk' && !m4.acc.spk)) m4SetAcc(m4.acc.spot || v === 'spot', m4.acc.spk || v === 'spk'); }

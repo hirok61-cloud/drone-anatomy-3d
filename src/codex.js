@@ -23,14 +23,15 @@ function codexToday() {
 function codexMark(key) {
   if (!key || !PARTS[key] || codex.seen.has(key)) return;
   codex.seen.add(key); codexSave(); renderCodexCount(true);
-  if (codex.seen.size >= codex.total && !codex.done) codexUnlock();
+  if (codexSeenN() >= codex.total && !codex.done) codexUnlock();
 }
 function codexOnSelect(p) { codex.pending = p && PARTS[p.key] && !codex.seen.has(p.key) ? { key: p.key, at: performance.now() } : null; }
 
+const codexSeenN = () => { let n = 0; for (const k of codex.seen) if (!(PARTS[k] && PARTS[k].variant)) n++; return n; };
 function renderCodexCount(pulse) {
   const el = $('#codexCount'); if (!el) return;
-  el.textContent = `見た ${codex.seen.size}/${codex.total}`;
-  el.title = `見た部品 ${codex.seen.size} / ${codex.total}`; el.setAttribute('aria-label', `見た部品 ${codex.seen.size} / ${codex.total}`);
+  el.textContent = `見た ${codexSeenN()}/${codex.total}`;
+  el.title = `見た部品 ${codexSeenN()} / ${codex.total}`; el.setAttribute('aria-label', `見た部品 ${codexSeenN()} / ${codex.total}`);
   if (pulse && !reduceMotion) { el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
 }
 
@@ -107,7 +108,7 @@ async function codexPoster() {
   g.fillStyle = bp ? '#ffffff' : '#ef6a2d'; g.font = `700 34px ${F}`; g.textAlign = 'center'; g.fillText(name, 800, rowY);
   const n = new Date(), ds = `${n.getFullYear()}.${String(n.getMonth() + 1).padStart(2, '0')}.${String(n.getDate()).padStart(2, '0')}`;
   g.fillStyle = bp ? '#9db3d8' : (dark ? '#8791a3' : '#7b8290'); g.font = `500 26px ${F}`; g.textAlign = 'right';
-  g.fillText(`${ds}　見た部品 ${codex.seen.size}/${codex.total}`, 1556, rowY);
+  g.fillText(`${ds}　見た部品 ${codexSeenN()}/${codex.total}`, 1556, rowY);
   if (triv) { g.fillStyle = bp ? '#b9c8e6' : (dark ? '#b3bccb' : '#4b5260'); g.font = `500 24px ${F}`; g.textAlign = 'center'; g.fillText(triv, 800, 1162, 1500); }
   return cv;
 }
@@ -126,8 +127,8 @@ async function photoShare() {
 }
 
 function initCodex() {
-  codex.total = LIST_ORDER.length; codexLoad(); codex.today = codexToday(); renderCodexCount(false);
-  if (codex.seen.size >= codex.total && !codex.done) { codex.done = true; store.set(CODEX_DONE, '1'); }   // 既に全部見ている状態で開いた場合は静かに解放
+  codex.total = LIST_ORDER.filter(k => !(PARTS[k] && PARTS[k].variant)).length;   /* 4T/4E・アクセサリー・ユニットなど組み合わせで見えない部品は数えない */ codexLoad(); codex.today = codexToday(); renderCodexCount(false);
+  if (codexSeenN() >= codex.total && !codex.done) { codex.done = true; store.set(CODEX_DONE, '1'); }   // 既に全部見ている状態で開いた場合は静かに解放
   const b = $('#modeSeg [data-mode=blueprint]'); if (b) b.hidden = !codex.done;
   window.codexPoster = codexPoster;   // 検証用
   $('#photoBtn').addEventListener('click', photoShare);

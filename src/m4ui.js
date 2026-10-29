@@ -31,7 +31,7 @@ function m4BlockPower() {
 function m4OnTab(tab) {
   if (!IS_M4) return;
   if (tab !== 'fly') m4.pendingPower = false;   /* 「とばす」で押した電源を、ほかのタブで広げ終えたときに回さない */
-  if (tab !== 'see') { const had = !!m4.act || m4Wide(); m4Stop(); m4Overlays(null, true); if ($('#noteCard').dataset.kind === 'm4-fold' || $('#noteCard').dataset.kind === 'm4-acc') renderNote(null); if (had) focusOn([D.root], { pull: true }); }   /* 引いた画・浮いた機体のまま「とばす」へ行かない */
+  if (tab !== 'see') { const had = !!m4.act || m4Wide(); m4Stop(); m4Overlays(null, true); if (($('#noteCard').dataset.kind || '').startsWith('m4-')) renderNote(null); if (had) focusOn([D.root], { pull: true }); }   /* 引いた画・浮いた機体のまま「とばす」へ行かない */
   if (tab === 'fly' && (m4.foldTo > 0 || m4.fold > 0.001)) { m4.foldTo = 0; syncM4Chips(); showToast('アームを開きました'); m4FrameWide(); }
 }
 const m4FrameWide = () => frameBox([-0.36, -0.17, -0.42], [0.36, 0.06, 0.40], [0.62, 0.42, -0.66], 1.12);
@@ -356,6 +356,7 @@ const m4Ease = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
 function stepM4(dt) {
   let dirty = false;
   if (m4.laserOn && (S.explode > 0.02 || S.mode === 'cut')) m4Overlays(null);   /* 浮いた機体と人を残したまま分解・断面にしない */
+  if (S.explode > 0.02 && m4.act) m4Stop();   /* 動きの途中で分解したら動きを止める */
   if (S.explode > 0.02 && m4.foldTo > 0) { m4.foldTo = 0; syncM4Chips(); if ($('#noteCard').dataset.kind === 'm4-fold') renderNote(null); }
   { const sup = m4.sizeOn || m4.camsOn || m4.senseOn || m4.laserOn || !!(m4.act && m4.act.id === 'gimbal'); if (sup !== m4._sup) { m4._sup = sup; S.labelsSuppressed = sup; } }
   if (!fpv.on && m4._irLook) m4ThermalLook();

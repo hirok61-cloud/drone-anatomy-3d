@@ -469,6 +469,9 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
 #noteCard.altc.mini #noteBody > :not(:first-child) { display: none; }
 #noteCard.altc.mini #noteBody > p:first-child:not(.pd-state) { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 0; }
 #noteCard.altc.mini #noteBody > .pd-state:first-child { margin-bottom: 0; }
+#noteCard.altc.mini #noteBody > .m4-read:first-child { max-height: 4.4em; overflow: hidden; }   /* 測距の読み値（3〜4行）は先頭の数行だけ */
+/* 画角・検知範囲・大きさ・カメラは「図の断り書き」が大事なので、畳んでも最初の説明と断り書きを2行ずつ残す */
+#noteCard.altc.mini[data-kind$="-fov"] #noteBody > p:first-of-type, #noteCard.altc.mini[data-kind$="-cams"] #noteBody > p:first-of-type, #noteCard.altc.mini[data-kind$="-sense"] #noteBody > p.caveat, #noteCard.altc.mini[data-kind$="-size"] #noteBody > p:first-child, #noteCard.altc.mini[data-kind$="-fov"] #noteBody > p.caveat, #noteCard.altc.mini[data-kind$="-cams"] #noteBody > p.caveat { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin: 4px 0 0; }
 #noteMini { font-size: 15px; line-height: 1; }
 /* 好きな文字を描く */
 .ds-text { display: flex; gap: 6px; margin: 8px 0 2px; }
@@ -813,7 +816,7 @@ body.m4-ir #gl { filter: grayscale(1) contrast(1.35) brightness(.82); }
       <div class="dock-group pd6b-only"><label>PD6B-CAT3</label><div class="chips" id="pdChips" role="group" aria-label="PD6B-CAT3の動き"><button data-pd="about">ⓘ この機体</button><button data-pd="fold" aria-pressed="false">たたむ</button><button data-pd="swap">電池交換</button><button data-pd="drop">荷物を置く</button><button data-pd="chute" aria-pressed="false">パラシュート</button><button data-pd="unit">測量用に付け替え</button><button data-pd="size" aria-pressed="false">大きさ</button></div></div>
       <div class="dock-group m4-only"><label>Matrice 4</label><div class="chips" id="m4Chips" role="group" aria-label="Matrice 4の動き"><button data-m4="about">ⓘ この機体</button><button data-m4="variant">4E にする</button><button data-m4="fold" aria-pressed="false">たたむ</button><button data-m4="battery" aria-pressed="false">電池交換</button><button data-m4="gimbal" aria-pressed="false">ジンバル</button><button data-m4="cams" aria-pressed="false">カメラ</button><button data-m4="laser" aria-pressed="false">測距</button><button data-m4="sense" aria-pressed="false">検知範囲</button><button data-m4="acc" aria-pressed="false">アクセサリー</button><button data-m4="size" aria-pressed="false">大きさ</button></div></div>
       <div class="dock-group mn5-only"><label>Mini 5 Pro</label><div class="chips" id="mn5Chips" role="group" aria-label="Mini 5 Proの動き"><button data-mn5="about">ⓘ この機体</button><button data-mn5="fold" aria-pressed="false">たたむ</button><button data-mn5="battery" aria-pressed="false">電池交換</button><button data-mn5="gimbal" aria-pressed="false">ジンバル</button><button data-mn5="fov" aria-pressed="false">画角</button><button data-mn5="sense" aria-pressed="false">検知範囲</button><button data-mn5="size" aria-pressed="false">大きさ</button></div></div>
-      <div class="dock-group mavic-only"><label>Mavic 4 Pro</label><div class="chips" id="mvChips" role="group" aria-label="Mavic 4 Proの動き"><button data-mv="about">ⓘ この機体</button><button data-mv="fold" aria-pressed="false">たたむ</button><button data-mv="battery">電池交換</button><button data-mv="gimbal">ジンバル</button><button data-mv="fov" aria-pressed="false">3眼カメラ</button><button data-mv="sense" aria-pressed="false">検知範囲</button><button data-mv="size" aria-pressed="false">大きさ</button></div></div>
+      <div class="dock-group mavic-only"><label>Mavic 4 Pro</label><div class="chips" id="mvChips" role="group" aria-label="Mavic 4 Proの動き"><button data-mv="about">ⓘ この機体</button><button data-mv="fold" aria-pressed="false">たたむ</button><button data-mv="battery" aria-pressed="false">電池交換</button><button data-mv="gimbal" aria-pressed="false">ジンバル</button><button data-mv="fov" aria-pressed="false">3眼カメラ</button><button data-mv="sense" aria-pressed="false">検知範囲</button><button data-mv="size" aria-pressed="false">大きさ</button></div></div>
       <div class="see-main">
       <button id="inspToggle" class="pill-btn compact-only" data-i18n="ui.parts">部品一覧</button>
       <div class="dock-group grow"><label for="explode"><span data-i18n="ui.explode">分解</span> <span id="explodeVal" class="mono">0%</span></label><input type="range" id="explode" min="0" max="100" value="0"></div>
@@ -916,8 +919,8 @@ body.m4-ir #gl { filter: grayscale(1) contrast(1.35) brightness(.82); }
   <h3>機体をえらぶ</h3>
   <div class="model-list" role="radiogroup" aria-label="機体">
     <button data-model="q550" role="radio" aria-checked="true"><b>550クラス クアッドコプター</b><span>空撮などに使う一般的な産業用（約2.4kg・プロペラ4枚）。とばす・つかう・もしも・専門まで全部の機能</span></button>
-    <button data-model="pd6b" role="radio" aria-checked="false"><b>PD6B-CAT3（プロドローン）</b><span>第一種型式認証をめざす物流用の大型機（最大離陸重量約45kg・プロペラ6枚）。みる・とばすと、たたむ・電池交換などの固有の動き</span></button>
-    <button data-model="mavic4" role="radio" aria-checked="false"><b>DJI Mavic 4 Pro</b><span>3つのカメラと360°回るジンバルを積んだ折りたたみ式の空撮機（約1063g・プロペラ4枚）。みる・とばすと、たたむ・ジンバル・画角などの固有の動き</span></button>
+    <button data-model="pd6b" role="radio" aria-checked="false"><b>PD6B-CAT3（プロドローン）</b><span>第一種型式認証をめざす物流用の大型機（最大離陸重量約45kg・プロペラ6枚）。みる・とばすと、たたむ・電池交換・荷物・パラシュート・付け替えなどの固有の動き</span></button>
+    <button data-model="mavic4" role="radio" aria-checked="false"><b>DJI Mavic 4 Pro</b><span>3つのカメラと360°回るジンバルを積んだ折りたたみ式の空撮機（約1063g・プロペラ4枚）。みる・とばすと、たたむ・ジンバル・3眼カメラなどの固有の動き</span></button>
     <button data-model="matrice4" role="radio" aria-checked="false"><b>DJI Matrice 4 シリーズ（4T／4E）</b><span>望遠とレーザー距離計（4Tはサーマルも）を積んだ折りたたみ式の産業用機（離陸重量1219g・プロペラ4枚）。みる・とばすと、4T⇄4E・たたむ・測距・アクセサリーなどの固有の動き</span></button>
     <button data-model="mini5" role="radio" aria-checked="false"><b>DJI Mini 5 Pro</b><span>1インチカメラと縦にも回るジンバルを積んだ、手のひらサイズの折りたたみ機（249.9g・プロペラ4枚）。みる・とばすと、たたむ・電池交換・ジンバル・画角などの固有の動き</span></button>
   </div>
@@ -1827,7 +1830,7 @@ const WEAR = {
 
 
 // ===== 制度レイヤー（行政利用向け追加案 A。教則は第5版、制度の記述は REG_DATE 時点。判定はせず、根拠と確認先を示す） =====
-const REG_DATE = '2026年9月時点';
+const REG_DATE = '2026年10月時点';
 const KYOSOKU = {
   ver: '第5版', note: '公布 令和8年7月7日、適用 令和8年7月14日', url: 'https://www.mlit.go.jp/common/002010809.pdf',
   // 章・節の名称は第5版の目次どおり（1〜6章）。目次に番号があるのは節（3.1 等）まで
@@ -2258,7 +2261,6 @@ const PD6B_SRC = {
   mlit: { name: '国土交通省 報道発表「無人航空機の第一種型式認証の申請を受け付けました」(2023年11月10日)', url: 'https://www.mlit.go.jp/report/press/kouku11_hh_000115.html' },
   official: { name: 'Prodrone 製品ページ PD6B-Type3（CAT3のベース機）', url: 'https://www.prodrone.com/products/pd6b-type3' },
   news: { name: 'Prodrone ニュース「JMS2026のSTATION Aiブースに出展」(2026年10月12日)', url: 'https://www.prodrone.com/news/20261013' },
-  logi: { name: 'LOGISTICS TODAY「プロドローン、型式認証目指す大型機を公開」(2025年6月5日)', url: 'https://www.logi-today.com/787585' },
   parasafe: { name: '日本化薬 PARASAFE（ドローン用パラシュート）', url: 'https://www.parasafe.jp/' },
   license: { name: '国土交通省 無人航空機操縦者技能証明（限定変更）', url: 'https://www.mlit.go.jp/koku/level4/license/' },
   portal: { name: '国土交通省 飛行許可・承認申請ポータル（カテゴリーⅡ）', url: 'https://www.mlit.go.jp/koku/permitapproval/' },
@@ -2309,7 +2311,7 @@ const PD6B_PARTS = {
     name: 'ブラシレスモーター（大型）', en: 'Brushless motor', group: 'prop', count: 6,
     role: 'プロペラを直接回す大型のアウターローター式モーター。6基のうち3基が時計回り、3基が反時計回りで、回転の反動（反トルク）を打ち消し合う。',
     structure: ['外側の缶（ベル）ごと回るアウターローター', '直径30インチのプロペラを直接駆動する（減速ギアなし）', '図の歯と磁石の数は550クラスと同じ12N14Pで簡略化（実機の大型モーターはもっと多い）'],
-    spec: [['方式', 'アウターローター・ブラシレスDC'], ['型番・出力', '非公表'], ['回転方向', '3基ずつ逆回転（並びは一般的なヘキサXの例）']],
+    spec: [['方式', 'アウターローター・ブラシレスDC'], ['型番・出力', '公式資料に記載なし'], ['回転方向', '3基ずつ逆回転（並びは一般的なヘキサXの例）']],
     check: ['手で回して異音・引っかかりがないか', '飛行後の温度の偏り', 'ベアリングのガタ', '固定ネジのゆるみ'],
     tip: '同じ推力なら、大きなプロペラをゆっくり回すほうが電力が少なくて済む。だから大型機は「大径プロペラ＋低回転・高トルクのモーター」を使う。',
   },
@@ -2372,14 +2374,14 @@ const PD6B_PARTS = {
     name: 'インテリジェントバッテリー', en: 'Smart battery', group: 'elec', count: 4,
     role: '残量・温度・セルの電圧を自分で監視して機体へ伝えるバッテリー。4本を天面から差し込む。電源を入れたまま交換できる「ホットスワップ」に対応（公式）。',
     structure: ['天面の取っ手で上へ抜き差しする', '電池の管理回路（BMS）を内蔵', '4本とも機体重量20.0kgに含まれる（公式）'],
-    spec: [['本数', '4本（公式）'], ['交換', 'ホットスワップ対応（公式）'], ['容量・電圧', '非公表']],
+    spec: [['本数', '4本（公式）'], ['交換', 'ホットスワップ対応（公式）'], ['容量・電圧', '公式資料に記載なし']],
     check: ['膨らみ・傷・端子の焦げ', '4本の残量と温度がそろっているか', '差し込みのロック'],
     tip: 'ホットスワップは一般に「全部を一度に抜かない」ことで電源を切らずに交換する仕組み。頭脳が再起動しないので、起動と初期化を待たずに次の飛行へ移れる（具体的な手順は取扱説明書で確認）。',
   },
   cells: {
     name: 'セル（電池の素子）', en: 'Cells', group: 'elec', count: 4,
     role: 'バッテリーの中身。小さな電池（セル）を直列・並列につないで、必要な電圧と容量を作る。',
-    structure: ['セルの種類と構成は非公表'],
+    structure: ['セルの種類と構成は公式資料に記載なし'],
     check: ['（分解しない）外装の膨らみで異常を見つける'],
   },
   powerConn: {
@@ -2452,7 +2454,7 @@ const PD6B_PARTS = {
     name: 'パラシュート', en: 'Parachute (PARASAFE)', group: 'safety', count: 1,
     role: '機体が飛べなくなったときに傘を開き、落ちる速さを下げて、地上の人や物への衝撃を小さくする安全装置。展示機には日本化薬の「PARASAFE」が載っていた。',
     structure: ['筒の中に傘を畳んで収める', '火薬の力で傘を押し出し、低い高度でも素早く開く（PARASAFEの方式）', '天面の後方右（展示機）'],
-    spec: [['製品', '日本化薬 PARASAFE（展示機）'], ['この機体用の型式', '非公表'], ['参考', '25kg級用 PS CA12-01：傘の面積11m²・降下速度6m/s（理論値）・最低展開高度30m（同社発表）']],
+    spec: [['製品', '日本化薬 PARASAFE（展示機）'], ['この機体用の型式', '公式資料に記載なし'], ['参考', '25kg級用 PS CA12-01：傘の面積11m²・降下速度6m/s（理論値）・最低展開高度30m（同社発表）']],
     check: ['筒の固定', '使用期限・点検時期', '電気の接続'],
     tip: '仮に45kgの機体を6m/sまで落とせたとすると（25kg級用製品の理論値を当てはめた計算）、運動エネルギーは約0.8kJ。50mから落ちた場合（約31m/s・空気抵抗なし）の約22kJの、およそ27分の1になる。この機体用の傘での降下速度は非公表。',
   },
@@ -2473,8 +2475,8 @@ const PD6B_PARTS = {
   cargoBox: {
     name: '物流ボックス', en: 'Cargo box', group: 'payload', count: 1, variant: 'cargo',
     role: '荷物を入れる箱。機体の真下、重心の下に荷物が来るので、積んでも傾きにくい。最大積載重量は約20kg（国交省・申請時）。',
-    structure: ['白い箱を腰下ユニットが抱える', 'リリース型は、着陸したあと箱を切り離して置いていける', '2025年の一般公開時の報道では最大積載重量18kg'],
-    spec: [['最大積載重量', '約 20 kg（国交省・申請時）／18 kg（2025年6月の報道）'], ['箱の大きさ', '約 400 × 360 × 400 mm（写真から推定）']],
+    structure: ['白い箱を腰下ユニットが抱える', 'リリース型は、着陸したあと箱を切り離して置いていける', '2025年の一般公開時の報道では最大積載重量18kg（出典の記事は現在閲覧できない）'],
+    spec: [['最大積載重量', '約 20 kg（国交省・申請時）／18 kg（2025年6月の報道・記事は現在閲覧できない）'], ['箱の大きさ', '約 400 × 360 × 400 mm（写真から推定）']],
     check: ['荷物の固定と重心（偏ると傾く）', '箱の割れ', 'ふたの閉まり'],
   },
   boxLatch: {
@@ -2597,7 +2599,9 @@ const MAVIC_SRC = {
   product: { name: 'DJI 公式 Mavic 4 Pro 製品ページ', url: 'https://www.dji.com/jp/mavic-4-pro' },
   manual: { name: 'DJI Mavic 4 Pro ユーザーマニュアル v1.2（2025年9月25日）', url: 'https://dl.djicdn.com/downloads/mavic-4-pro/20250925/DJI_Mavic_4_Pro_User_Manual_v1.2_ja.pdf' },
   prop: { name: 'フジヤカメラ「DJI Mavic 4 Pro プロペラ」（直径・ピッチ・重さの表記）', url: 'https://www.fujiya-camera.co.jp/shop/g/gC6937224109988/' },
-  review: { name: 'TechRadar「DJI Mavic 4 Pro review」（魚眼センサー6基）', url: 'https://www.techradar.com/cameras/drones/dji-mavic-pro-4-review' },
+  review: { name: 'DJI 公式 Mavic 4 Pro 製品ページ（6つの低照度対応の魚眼センサー）', url: 'https://www.dji.com/jp/mavic-4-pro' },
+  ridList: { name: '国土交通省「適合しているとして届出があったリモートID機器等の一覧」（令和8年7月8日更新）', url: 'https://www.mlit.go.jp/koku/content/001484158.pdf' },
+  certList: { name: '国土交通省「型式認証を取得している無人航空機一覧」（令和8年6月19日現在）', url: 'https://www.mlit.go.jp/koku/content/002008366.pdf' },
   portal: { name: '国土交通省 飛行許可・承認申請ポータル（カテゴリーⅡ）', url: 'https://www.mlit.go.jp/koku/permitapproval/' },
 };
 // 「公式」=DJIの仕様ページ、「取説」=ユーザーマニュアル、「販売店」=販売店の表記、「推定」=写真・寸法からの推定
@@ -2635,7 +2639,7 @@ const MAVIC_PARTS = {
     name: 'ブラシレスモーター', en: 'Brushless motor', group: 'prop', count: 4,
     role: 'プロペラを回すアウターローター式のモーター。対角の2基が同じ向きに回り、隣どうしは逆向きに回って回転の反動を打ち消す。',
     structure: ['外側の缶（ベル）ごと回るアウターローター', '図の歯と磁石の数は550クラスと同じ12N14Pで簡略化'],
-    spec: [['型番・出力', '非公表'], ['回転方向', '隣どうしが逆（並びは一般的な例）']],
+    spec: [['型番・出力', '公式資料に記載なし'], ['回転方向', '隣どうしが逆（並びは一般的な例）']],
     check: ['手で回して引っかかりがないか', '異音', '飛行後の温度'],
     tip: '飛行後は、前方モーターの温度が後方より高くなるのが正常（取説）。理由は取説には書かれていない。',
   },
@@ -2697,7 +2701,7 @@ const MAVIC_PARTS = {
   vision: {
     name: '全方向ビジョンシステム', en: 'Omnidirectional vision', group: 'nav', count: 6,
     role: '魚眼のカメラで周りの障害物との距離を測り、ぶつかる前に止まったり避けたりする。GNSSが弱いときは位置の保持にも使う。',
-    structure: ['低照度対応の魚眼センサー6基（レビュー記事）', '上面の前2基と中央、下面の前2基と中央（製品写真から。下面中央は推定）', 'スポーツモードでは無効になる（取説）'],
+    structure: ['低照度対応の魚眼センサー6基（公式）', '上面の前2基と中央、下面の前2基と中央（製品写真から。下面中央は推定）', 'スポーツモードでは無効になる（取説）'],
     spec: [['測定範囲', '前 0.5〜24 m・後 0.5〜22 m・横 0.5〜21 m・上 0.5〜18 m・下 0.5〜17 m（公式）']],
     check: ['窓の汚れ', '模様のない床・水面・電線は苦手（取説）'],
     tip: '取説は、送電線や吊り橋のようなケーブル構造、枝や電線のような細い物は正しく見分けられないとしている。ビジョンがあっても操縦者の確認は欠かせない。',
@@ -2711,7 +2715,7 @@ const MAVIC_PARTS = {
     check: ['点灯するか'],
   },
   statusLed: { view: [0.55, -0.45, -0.6], name: '機体ステータスインジケーター', en: 'Status indicator', group: 'nav', count: 1, role: '機体の状態を色と点滅で知らせる。緑のゆっくり点滅＝GNSS有効、黄のすばやい点滅＝送信機の信号喪失、赤の点灯＝重大なエラー、など（取説）。', structure: ['右後ろアームの先の下（取説の各部名称。図の形は例）'], check: ['離陸前に色を見る'] },
-  remoteId: { name: 'リモートID', en: 'Remote ID', group: 'nav', count: 1, role: '登録記号・位置・高度などを電波で発信する。登録した機体は原則として備えることが求められる。', structure: ['内蔵かどうかは販売国の仕様で確認（この図の位置は例）'], check: ['飛行前に作動状況を確かめる（法定の点検項目）'] },
+  remoteId: { name: 'リモートID', en: 'Remote ID', group: 'nav', count: 1, role: '登録記号・位置・高度などを電波で発信する。登録した機体は原則として備えることが求められる。', structure: ['機体に内蔵と届け出られている（国土交通省の一覧・2025/4/15。この図の位置は例）'], check: ['飛行前に作動状況を確かめる（法定の点検項目）'] },
   gimbal: {
     name: 'インフィニティジンバル', en: 'Infinity gimbal', group: 'payload', count: 1,
     role: 'カメラの揺れを打ち消す3軸のジンバル。ロールの軸が大きく回るので、機体を傾けずに縦向きの撮影ができ、上向き70°まで向けられる。',
@@ -2751,7 +2755,7 @@ const MAVIC_SIMPLE = {
   prop:     { role: '回って空気を下に押します。工具なしで付け外しできます。', analogy: '扇風機の羽根を下に向けて、自分が浮くようなもの' },
   motor:    { role: 'プロペラを回す力の元。隣どうしが逆向きに回ります。', analogy: 'ミニ四駆のモーターを、もっと強く静かにしたもの' },
   frontArm: { role: 'モーターを支える腕。たたむと本くらいの大きさになります。', analogy: '折りたたみ傘の骨' },
-  battery:  { role: '電気のもと。上から差し込み、最大51分飛べます。', analogy: 'スマホの電池を、もっと大きく強くしたもの' },
+  battery:  { role: '電気のもと。後ろから差し込み、最大51分飛べます。', analogy: 'スマホの電池を、もっと大きく強くしたもの' },
   fc:       { role: '機体の頭脳。傾きと位置を測って、4つのモーターの速さを決めます。', analogy: '自転車に乗るときの「小脳」' },
   gimbal:   { role: 'カメラの揺れを打ち消す首。カメラを縦にも回せます。', analogy: '走りながらでもコップの水をこぼさない手首' },
   camMain:  { role: '3つあるカメラの主役。暗い所でもきれいに撮れます。', analogy: '空飛ぶ一眼カメラ' },
@@ -2771,9 +2775,10 @@ const MAVIC_TRIVIA = {
 };
 const MAVIC_TRIVIA_ACT = { rearArm: { alt: 'fold' }, frontArm: { alt: 'fold' }, gimbal: { alt: 'gimbal' }, camMain: { alt: 'fov' }, camMid: { alt: 'fov' }, camTele: { alt: 'fov' }, vision: { alt: 'sense' }, lidar: { alt: 'sense' }, battery: { alt: 'battery' } };
 const MAVIC_REG = {
+  remoteId: [{ text: 'Mavic 4 Pro はリモートIDを機体に内蔵していると届け出られている（国土交通省の一覧・2025/4/15）。', ky: '3.1', src: 'mavicRid' }],
   body: [
     { text: '最大離陸重量が25kg未満の機体。技能証明を受けた人が機体認証を受けた機体を飛ばすときは、カテゴリーⅡのうち人口集中地区・夜間・目視外・人や物件から30m未満の飛行で、立入管理措置と飛行マニュアルの作成などを条件に、許可・承認を不要にできる。', ky: '3.1', src: 'mavicPortal' },
-    { text: 'この機体の型式認証は、2026年10月時点の検索では確認できなかった。型式認証がない機体も、検査を受けて機体認証を取る道がある（確認先で要件を確かめる）。', ky: '3.1', src: 'cert' },
+    { text: 'Mavic 4 Pro は、令和8年6月19日現在の型式認証の一覧に載っていない。型式認証がない機体も、検査を受けて機体認証を取る道がある（確認先で要件を確かめる）。', ky: '3.1', src: 'mavicCert' },
   ],
   led: [
     { text: '撮影中にフロントLEDを自動で消す設定がある（取説）。夜間に飛ばすときは、機体の姿勢と方向がわかる灯火が求められるので、設定を確かめる。', ky: '4.2', src: 'permit' },
@@ -2790,9 +2795,9 @@ if (IS_MAVIC) {
   swap(SIMPLE_NAME, MAVIC_SIMPLE_NAME);
   swap(TRIVIA, MAVIC_TRIVIA); swap(TRIVIA_ACT, MAVIC_TRIVIA_ACT);
   // モーターの並び(M1前右・M2後右・M3後左・M4前左)と飛行の原理は550クラスと同じ4発機の考え方なのでそのまま使う
-  { const keep = {}; for (const k of ['regMark', 'remoteId', 'led']) if (REG[k]) keep[k] = REG[k]; const reg = Object.assign(keep, MAVIC_REG); reg.led = [...(REG.led || []), ...MAVIC_REG.led]; swap(REG, reg); }
+  { const keep = {}; for (const k of ['regMark', 'remoteId', 'led']) if (REG[k]) keep[k] = REG[k]; const reg = Object.assign(keep, MAVIC_REG); reg.led = [...(REG.led || []), ...MAVIC_REG.led]; reg.remoteId = [...(REG.remoteId || []), ...MAVIC_REG.remoteId]; swap(REG, reg); }
   swap(KY_PART, MAVIC_KY_PART);
-  REG_SOURCES.mavicPortal = MAVIC_SRC.portal;
+  REG_SOURCES.mavicPortal = MAVIC_SRC.portal; REG_SOURCES.mavicCert = MAVIC_SRC.certList; REG_SOURCES.mavicRid = MAVIC_SRC.ridList;
   for (const L of Object.values(I18N)) if (L && L.parts) for (const k of Object.keys(L.parts)) delete L.parts[k];
   Object.assign(FIND_ALIAS, { body: '胴体 ボディ 本体', frontArm: 'アーム 腕 たたむ', rearArm: 'アーム 腕 電源', landingGear: '脚 アンテナ', prop: '羽 はね ペラ', battery: '電池 バッテリ', gimbal: 'ジンバル 首 縦撮り', camMain: 'カメラ ハッセル 主カメラ', camMid: 'カメラ 望遠 70mm', camTele: 'カメラ 望遠 168mm', vision: 'センサー 魚眼 障害物', lidar: 'ライダー レーザー 障害物', ir3d: '赤外線 距離', led: 'ライト 灯火 LED', fc: '頭脳 FC' });
 }
@@ -5944,7 +5949,8 @@ function focusOn(objs, opts = {}) {
   const dir = opts.dir ? opts.dir.clone() : camera.position.clone().sub(controls.target); if (dir.lengthSq() < 1e-6) dir.set(0.6, 0.4, -0.6); dir.normalize();
   // 箱の8隅を視野に収める距離(球ではなく実際の投影で決める)
   const fwd = dir.clone().negate(), right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize(), up = new THREE.Vector3().crossVectors(right, fwd).normalize();
-  const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / bandK(), tanH = tanV * bandK() * Math.max(IS_ALT ? 0.4 : 0.6, camera.aspect);   /* 翼幅の広い機種は、縦長の画面の本当の横幅で収める */ let need = 0.05; const rel = new THREE.Vector3();   /* 縦はシートに隠れない帯の高さで見る */
+  const dtAlt = IS_ALT && !narrow();   /* パソコン幅の機種ものは、ドックの高さぶん縦を、右の視点ボタン列とラベルの分だけ横を狭めて収める */
+  const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / bandK() * (dtAlt ? clamp((H - bottomCover() - topCover()) / H, 0.5, 1) : 1), tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * Math.max(IS_ALT ? 0.4 : 0.6, camera.aspect) * (dtAlt ? 0.86 : 1);   /* 翼幅の広い機種は、縦長の画面の本当の横幅で収める */ let need = 0.05; const rel = new THREE.Vector3();   /* 縦はシートに隠れない帯の高さで見る */
   for (const q of pts) { rel.copy(q).sub(sph.center); const t = rel.dot(dir); need = Math.max(need, Math.abs(rel.dot(right)) / tanH + t, Math.abs(rel.dot(up)) / tanV + t); }
   const dist = clamp((need * (opts.margin || 1.18) + 0.02) * viewScale(), (opts.min != null ? opts.min : (D.focusMin || 0.12)) * viewScale(), (opts.max || 3.2) * viewScale() * bandK());
   const dur = 600 + 500 * clamp((camera.position.distanceTo(sph.center.clone().addScaledVector(dir, dist)) + controls.target.distanceTo(sph.center)) / 0.6, 0, 1);
@@ -6013,7 +6019,7 @@ function resize() {
   renderer.setSize(W, H, false); composer.setSize(W, H);
   if (typeof fpv === 'object' && fpv.on) { camera.aspect = W / H; camera.clearViewOffset(); camera.updateProjectionMatrix(); S.bandFrac = 1; onResizedFpv(); if (typeof onResized === 'function') onResized(); S.aoDirty = true; return; }   /* カメラの映像は画面いっぱい。帯のずらしはしない */
   camera.aspect = narrow() ? W / H : (W - 384) / H;
-  if (!narrow()) camera.setViewOffset(W - 384, H, 0, 0, W, H);   /* 右パネルの分だけ左に寄せる */
+  if (!narrow()) { const sh = IS_ALT ? (bottomCover() - topCover()) * 0.5 : 0; camera.setViewOffset(W - 384, H, 0, Math.abs(sh) > 12 ? sh : 0, W, H); }   /* 右パネルの分だけ左に寄せる。機種固有のボタン列でドックが高い機種は、上のバーと下のドックの間に機体が来るよう縦にもずらす */
   else { const bc = bottomCover(), tc = topCover(), sh = (bc - tc) * 0.5; if (Math.abs(sh) > 12) camera.setViewOffset(W, H, 0, sh, W, H); else camera.clearViewOffset(); applyBand(clamp((H - bc - tc) / H, 0.3, 1)); }   /* 上のバーと下のシートの間の帯に機体が来るようずらし、帯の狭さぶん引く */
   if (!narrow()) S.bandFrac = 1;
   camera.updateProjectionMatrix();
@@ -6462,7 +6468,7 @@ function startTheater(id) {
   stopTheater(true);
   theater.active = true; theater.def = def; theater.phase = 'setup'; theater.t = 0; theater.ev = 0; theater.broken = false; theater.red = []; theater.flagged = []; theater.debris = []; theater.step = 0; theater.waiting = true; theater.done = false; theater.cam = true; theater.legBend = [0, 0, 0, 0]; theater.legPerm = [0, 0, 0, 0]; theater.shook = false; theater.shake = 0; theater.orbit = 0; theater.fix = [];
   S.theater = theater; setBodyMode('theater');
-  body.px = body.py = body.pz = 0; body.tx = body.tz = body.wx = body.wz = 0; body.yaw = 0; body.mult = [1, 1, 1, 1];
+  body.px = body.py = body.pz = 0; body.tx = body.tz = body.wx = body.wz = 0; body.yaw = 0; body.mult = D.motors.map(() => 1);
   S.power = 0; M_UPTO(0); D.motors.forEach(mo => { mo.rpmRate = 2.5; });
   for (const k of def.flag) for (const p of partsFor(k, def.flagIdx)) { setTint(p, RED, 0.22); theater.flagged.push(p); }
   applyMode();
@@ -6642,7 +6648,7 @@ function startWhatif(id) {
   theater.cam = true;   // 劇場で視点をドラッグすると false のままになるので、場面の頭で必ず戻す
   whatif.active = true; whatif.def = def; whatif.phase = 0; whatif.t = 0; whatif.litIdx = -1; whatif.blink = 0; whatif.seq = [];
   S.whatif = whatif; setBodyMode('theater');
-  body.px = body.pz = 0; body.py = free.hoverY; body.tx = body.tz = body.wx = body.wz = 0; body.yaw = 0; body.mult = [1, 1, 1, 1];
+  body.px = body.pz = 0; body.py = free.hoverY; body.tx = body.tz = body.wx = body.wz = 0; body.yaw = 0; body.mult = D.motors.map(() => 1);
   D.motors.forEach(mo => { mo.rpmTarget = null; mo.rpmRate = 3.5; });
   S.power = 0.5;
   whatif.saved.air = S.air; S.labelsSuppressed = true; S.labelOnly = null;
@@ -6674,7 +6680,7 @@ function stopWhatif(silent) {
   for (const p of partsOf('led')) { setTint(p, RED, 0); const h = p.obj.userData.halo; if (h && h.userData.baseColor) { h.material.color.copy(h.userData.baseColor); h.material.opacity = THEME[themeDark ? 'dark' : 'light'].halo; } }
   if (whatif.ring) whatif.ring.visible = false;
   D.motors.forEach(mo => { mo.rpmTarget = null; mo.rpmRate = null; });
-  for (let i = 0; i < 4; i++) body.mult[i] = 1;
+  for (let i = 0; i < body.mult.length; i++) body.mult[i] = 1;
   air.windOverride = null; S.air = whatif.saved.air; for (const x of $$('.tgl[data-t=air]')) x.classList.toggle('on', S.air);
   if (D.personGroup) { if (whatif.saved.personPos) D.personGroup.position.copy(whatif.saved.personPos); D.personGroup.visible = whatif.saved.personVis; if (D.personGroup.userData.rest) D.personGroup.userData.rest(); if (D.personGroup.userData.face) D.personGroup.userData.face(0, 0); }
   if (whatif.people) for (const g of whatif.people) { g.visible = false; if (g.userData.foot) g.userData.foot.visible = false; }
@@ -7003,7 +7009,7 @@ function setScale(on) {
     if (D.cgMarker) D.cgMarker.visible = false;
     if (D.personGroup) { D.personGroup.visible = false; if (D.personGroup.userData.setGhost) D.personGroup.userData.setGhost(false); }
     regGhosts(false); camHome();
-    for (let i = 0; i < 4; i++) body.mult[i] = 1;
+    for (let i = 0; i < body.mult.length; i++) body.mult[i] = 1;
     for (const B of badgeEls) B.el.classList.remove('over');
     if (S.power > 0) setPower(0, true);
     S.shadowDirty = S.csDirty = S.aoDirty = true;
@@ -7044,7 +7050,7 @@ function stepScale() {
     if (n) { n.textContent = scale.over ? scaleOverText() : ''; n.hidden = !scale.over; }
   }
   if (D.cgMarker) { D.cgMarker.position.copy(scale.cg); D.cgMarker.visible = true; const pl = D.cgMarker.userData.plumb; if (pl) { const len = Math.max(0.001, scale.cg.y + 0.158 + body.py); pl.scale.y = len; pl.position.y = -len / 2; } }
-  for (let i = 0; i < 4; i++) body.mult[i] = scale.share[i];
+  for (let i = 0; i < body.mult.length; i++) body.mult[i] = scale.share[i] ?? 1;
 }
 
 function scaleOverText() {   // 原因 → 結果 の順で1文に
@@ -7162,14 +7168,15 @@ function codexToday() {
 function codexMark(key) {
   if (!key || !PARTS[key] || codex.seen.has(key)) return;
   codex.seen.add(key); codexSave(); renderCodexCount(true);
-  if (codex.seen.size >= codex.total && !codex.done) codexUnlock();
+  if (codexSeenN() >= codex.total && !codex.done) codexUnlock();
 }
 function codexOnSelect(p) { codex.pending = p && PARTS[p.key] && !codex.seen.has(p.key) ? { key: p.key, at: performance.now() } : null; }
 
+const codexSeenN = () => { let n = 0; for (const k of codex.seen) if (!(PARTS[k] && PARTS[k].variant)) n++; return n; };
 function renderCodexCount(pulse) {
   const el = $('#codexCount'); if (!el) return;
-  el.textContent = `見た ${codex.seen.size}/${codex.total}`;
-  el.title = `見た部品 ${codex.seen.size} / ${codex.total}`; el.setAttribute('aria-label', `見た部品 ${codex.seen.size} / ${codex.total}`);
+  el.textContent = `見た ${codexSeenN()}/${codex.total}`;
+  el.title = `見た部品 ${codexSeenN()} / ${codex.total}`; el.setAttribute('aria-label', `見た部品 ${codexSeenN()} / ${codex.total}`);
   if (pulse && !reduceMotion) { el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
 }
 
@@ -7246,7 +7253,7 @@ async function codexPoster() {
   g.fillStyle = bp ? '#ffffff' : '#ef6a2d'; g.font = `700 34px ${F}`; g.textAlign = 'center'; g.fillText(name, 800, rowY);
   const n = new Date(), ds = `${n.getFullYear()}.${String(n.getMonth() + 1).padStart(2, '0')}.${String(n.getDate()).padStart(2, '0')}`;
   g.fillStyle = bp ? '#9db3d8' : (dark ? '#8791a3' : '#7b8290'); g.font = `500 26px ${F}`; g.textAlign = 'right';
-  g.fillText(`${ds}　見た部品 ${codex.seen.size}/${codex.total}`, 1556, rowY);
+  g.fillText(`${ds}　見た部品 ${codexSeenN()}/${codex.total}`, 1556, rowY);
   if (triv) { g.fillStyle = bp ? '#b9c8e6' : (dark ? '#b3bccb' : '#4b5260'); g.font = `500 24px ${F}`; g.textAlign = 'center'; g.fillText(triv, 800, 1162, 1500); }
   return cv;
 }
@@ -7265,8 +7272,8 @@ async function photoShare() {
 }
 
 function initCodex() {
-  codex.total = LIST_ORDER.length; codexLoad(); codex.today = codexToday(); renderCodexCount(false);
-  if (codex.seen.size >= codex.total && !codex.done) { codex.done = true; store.set(CODEX_DONE, '1'); }   // 既に全部見ている状態で開いた場合は静かに解放
+  codex.total = LIST_ORDER.filter(k => !(PARTS[k] && PARTS[k].variant)).length;   /* 4T/4E・アクセサリー・ユニットなど組み合わせで見えない部品は数えない */ codexLoad(); codex.today = codexToday(); renderCodexCount(false);
+  if (codexSeenN() >= codex.total && !codex.done) { codex.done = true; store.set(CODEX_DONE, '1'); }   // 既に全部見ている状態で開いた場合は静かに解放
   const b = $('#modeSeg [data-mode=blueprint]'); if (b) b.hidden = !codex.done;
   window.codexPoster = codexPoster;   // 検証用
   $('#photoBtn').addEventListener('click', photoShare);
@@ -8434,7 +8441,7 @@ function startDescent(mode) {
   S.descent = descent;
   setBodyMode('theater'); setPower(0.5, true); setBodyMode('theater');   /* setPower→syncBodyMode が idle に戻すので、もう一度 theater に置く */
   body.px = mode === 'slide' ? -0.85 : 0; body.pz = 0; body.py = descTop();
-  body.tx = body.tz = body.wx = body.wz = 0; body.yaw = 0; body.mult = [1, 1, 1, 1];
+  body.tx = body.tz = body.wx = body.wz = 0; body.yaw = 0; body.mult = D.motors.map(() => 1);
   D.motors.forEach(mo => { mo.rpmTarget = null; mo.rpmRate = 3.5; });
   setSticks(false); if (S.selected) select(null);
   descent.saved.air = S.air; S.air = true; for (const x of $$('.tgl[data-t=air]')) x.classList.add('on');   /* 吹きおろしが見えないと、この2つは分からない */
@@ -10193,7 +10200,7 @@ function dshowOn(on) {
     setBodyMode('theater'); showDroneOn(true);
     dshowFrame(1100);
     const bp = dshow.bodyPos;
-    body.px = bp[0]; body.py = bp[1]; body.pz = bp[2]; body.tx = body.tz = body.wx = body.wz = 0; body.yaw = dshow.bodyYaw; body.mult = [1, 1, 1, 1];
+    body.px = bp[0]; body.py = bp[1]; body.pz = bp[2]; body.tx = body.tz = body.wx = body.wz = 0; body.yaw = dshow.bodyYaw; body.mult = D.motors.map(() => 1);
     dshowSky();
     renderDshow();
     { const b = (narrow() ? $('#dsRead') : null) || $('#noteCard .note-actions button'); if (b) b.focus({ preventScroll: true }); }   /* 押したボタンは畳まれて消えるので、行き先を渡す */
@@ -11305,6 +11312,8 @@ function shareUrl() {
   if (S.view && S.view !== 'iso') q.set('v', S.view);
   if (!whatif.active && !theater.active) q.set('c', camParam());   /* 視点そのもの。画面の縦横比が違っても同じ画になるよう、引きは相対値で持つ */
   if (S.selected) q.set('p', S.selected.key);
+  { let ss = null; try { ss = sessionStorage.getItem('drone3d.model'); } catch (e) {}   /* 機種は URL を最優先に、無ければタブの記憶で決まる。共有リンクには機種を必ず載せる */
+    if (IS_ALT || (ss && ss !== 'q550')) q.set('model', MODEL); else q.delete('model'); }
   if (!IS_M4) { q.delete('m4v'); q.delete('m4acc'); }   /* 他機種の URL に残っていても共有には載せない */
   if (IS_M4) { q.set('m4v', m4.variant); q.delete('m4acc'); const acc = [m4.acc.spot && 'spot', m4.acc.spk && 'spk'].filter(Boolean); if (acc.length) q.set('m4acc', acc.join(',')); }   /* Matrice 4 は 4T/4E と付けたアクセサリーも載せる（部品が見える組み合わせで開くため） */
   if (S.isolated) q.set('iso', S.isolated);
@@ -11426,7 +11435,7 @@ function pd6bBlockPower() {
 }
 function pd6bOnTab(tab) {
   if (!IS_PD6B) return;
-  if (tab !== 'see') { pd6bStop(); if (pd6b.chuteTo > 0) setChute(false, true); if (pd6b.sizeOn) setSize(false, true); if ($('#noteCard').dataset.kind === 'pd6b-fold') renderNote(null); }   /* 「みる」の重ね絵・カードを「とばす」へ持ち込まない */
+  if (tab !== 'see') { pd6bStop(); if (pd6b.chuteTo > 0) setChute(false, true); if (pd6b.sizeOn) setSize(false, true); if (($('#noteCard').dataset.kind || '').startsWith('pd6b-')) renderNote(null); }   /* 「みる」の重ね絵・カードを「とばす」へ持ち込まない */
   if (tab === 'fly' && (pd6b.foldTo > 0 || pd6b.fold > 0.001)) { pd6b.foldTo = 0; syncPdChips(); showToast('アームを広げました'); }
 }
 
@@ -11490,7 +11499,7 @@ function renderPdAbout() {
   const row = (k, v, src) => `<tr><th>${k}</th><td>${v}${src ? `<small>${src}</small>` : ''}</td></tr>`;
   const html = `<p><b>第一種型式認証をめざす、物流用の大型ヘキサコプター（6発機）。</b>2023年11月10日に国土交通省が第一種型式認証の申請を受理（国内3件目）。2026年10月のジャパンモビリティショーで展示され、同社は「取得を目指す」としています。</p>
     <table class="pd-spec">
-      ${row('最大離陸重量', '約 45 kg', '国交省')}${row('最大積載重量', '約 20 kg', '国交省・申請時／2025年の報道では18kg')}
+      ${row('最大離陸重量', '約 45 kg', '国交省')}${row('最大積載重量', '約 20 kg', '国交省・申請時／2025年の報道では18kg（記事は現在閲覧できない）')}
       ${row('機体寸法', '約 2.2 × 2.4 × 0.7 m', '国交省')}${row('最大飛行速度', '約 12 m/s（約43km/h）', '国交省')}${row('最大飛行時間', '約 30 分', '国交省')}
       ${row('機体重量', '20.0 kg（バッテリー4本込み）', '公式・PD6B-Type3')}${row('モーター軸間', '1,623 mm', '公式')}${row('プロペラ', '30 インチ × 6', '公式')}
       ${row('折りたたみ時', 'φ945 mm の円柱内', '公式')}${row('防水・防塵', 'IP44', '公式')}
@@ -11498,7 +11507,7 @@ function renderPdAbout() {
     <h4>550クラスとのちがい</h4>
     <ul class="pd-diff"><li><b>4発 → 6発</b>：1基の推力が落ちても残りで補う余地を設計で持たせやすい</li><li><b>2.4kg → 45kg</b>：25kg以上なので登録記号の文字は25mm以上、カテゴリーⅡでも許可・承認が要る</li><li><b>12 → 30インチ</b>：大きな羽根をゆっくり回して効率を上げる</li><li><b>腰下ユニット</b>：箱・測量機器を付け替える</li><li><b>パラシュート</b>：落ちる速さを下げる安全装置</li></ul>
     <p class="caveat">「公式」と書いた数値は、CAT3のベース機 PD6B-Type3 の公式ページの値です。この3Dモデルは、公表資料と展示機の写真から起こした教材用の再現です。内部の配置・脚や箱の寸法・アンテナの用途・畳む向きは推定を含みます（解説の「写真から推定」）。</p>
-    <details class="pd-src"><summary>出典（${PD6B_DATE}）</summary><ul>${['mlit', 'official', 'news', 'logi', 'parasafe'].map(k => `<li>${PD_SRC_LINK(k)}</li>`).join('')}</ul></details>`;
+    <details class="pd-src"><summary>出典（${PD6B_DATE}）</summary><ul>${['mlit', 'official', 'news', 'parasafe'].map(k => `<li>${PD_SRC_LINK(k)}</li>`).join('')}</ul></details>`;
   renderNote({ kind: 'pd6b-about', title: 'PD6B-CAT3（プロドローン）', html, actions: [{ label: 'たたんでみる', fn: () => pd6bAction('fold') }, { label: '大きさをくらべる', fn: () => { renderNote(null); setSize(true); } }] });
 }
 function renderPdNote(id) {
@@ -11701,7 +11710,7 @@ function mavicBlockPower() {
 function mavicOnTab(tab) {
   if (!IS_MAVIC) return;
   if (tab !== 'fly') mav.pendingPower = false;   /* 「とばす」で押した電源を、ほかのタブで広げ終えたときに回さない */
-  if (tab !== 'see') { const had = !!mav.act; mavicStop(); mvOverlays(null, true); if ($('#noteCard').dataset.kind === 'mavic-fold') renderNote(null); if (had) focusOn([D.root], { pull: true }); }   /* 寄った画のまま「とばす」へ行かない */
+  if (tab !== 'see') { const had = !!mav.act; mavicStop(); mvOverlays(null, true); if (($('#noteCard').dataset.kind || '').startsWith('mavic-')) renderNote(null); if (had) focusOn([D.root], { pull: true }); }   /* 寄った画のまま「とばす」へ行かない */
   if (tab === 'fly' && (mav.foldTo > 0 || mav.fold > 0.001)) { mav.foldTo = 0; syncMvChips(); showToast('アームを広げました'); frameBox([-0.32, -0.16, -0.26], [0.32, 0.03, 0.27], [0.62, 0.42, -0.66], 1.12); }   /* 畳んだ大きさに寄った画のまま広げない */
 }
 
@@ -11849,16 +11858,26 @@ function mvSyncLens() {
 }
 // 毎フレーム（本体の姿勢を当てた後）。電源が入っていれば、機体の傾きを3軸で打ち消して、望みの向きを保つ。
 // 機体の傾きを親(付け根)の世界姿勢から読み、チルトとロールから引く。ヨーは機首に追随し、揺れの分だけパン(±22°)で消す
-const _mq = new THREE.Quaternion(), _me = new THREE.Euler(), _me2 = new THREE.Euler();
+const _mq = new THREE.Quaternion(), _mq2 = new THREE.Quaternion(), _me = new THREE.Euler(), _me2 = new THREE.Euler(), _mvv = new THREE.Vector3(), _mvax = new THREE.Vector3();
 function mvGimbalApply() {
   const gp = D.gimbalParts; if (!gp) return;
-  let tl = mav.gim.tilt, rl = mav.gim.roll, pn = 0;
+  let tl = mav.gim.tilt, rz = -mav.gim.roll, pn = 0;   /* rz はロール軸(Z)の回転。望みのロール(＋で縦向き側)と逆向きに回す */
   if (mav.powered && !(fpv.on && !fpv.stabilized)) {
-    gp.pan.parent.updateWorldMatrix(true, false); gp.pan.parent.getWorldQuaternion(_mq); _me.setFromQuaternion(_mq, 'YXZ');
-    D.root.getWorldQuaternion(_mq); _me2.setFromQuaternion(_mq, 'YXZ');
-    tl -= _me.x; rl += _me.z; pn = clamp(mvNorm(_me2.y - _me.y), -MV_R(22), MV_R(22));
+    // 望みの世界姿勢（機首の方位・指定のチルト・指定のロール）を付け根の世界姿勢で割って局所の回転にする。
+    // オイラー分解はチルト ±90°（真下）が特異点なので使わず、パンは光軸の水平成分、続いてチルト、ロールの順に取り出す（mini5ui.js と同じ）
+    gp.pan.parent.updateWorldMatrix(true, false); gp.pan.parent.getWorldQuaternion(_mq);
+    D.root.getWorldQuaternion(_mq2); _me2.setFromQuaternion(_mq2, 'YXZ');
+    _mq2.setFromEuler(_me.set(mav.gim.tilt, _me2.y, -mav.gim.roll, 'YXZ'));
+    _mq.invert().multiply(_mq2);
+    const f = _mvv.set(0, 0, 1).applyQuaternion(_mq), h = Math.hypot(f.x, f.z);
+    let p = h < 1e-6 ? 0 : Math.atan2(f.x, f.z); if (Math.abs(p) > Math.PI / 2) p = mvNorm(p - Math.PI);
+    pn = clamp(p * Math.min(1, h / 0.1), -MV_R(22), MV_R(22));
+    _mq.premultiply(_mq2.setFromAxisAngle(_mvax.set(0, 1, 0), -pn));
+    const z = _mvv.set(0, 0, 1).applyQuaternion(_mq); tl = Math.atan2(-z.y, z.z);
+    const x = _mvv.set(1, 0, 0).applyQuaternion(_mq).applyAxisAngle(_mvax.set(1, 0, 0), -tl);
+    rz = -mav.gim.roll + mvNorm(Math.atan2(x.y, x.x) + mav.gim.roll);   /* ロールは ±180° を越えるので、望みの角度の近くへ巻き直す */
   }
-  gp.tilt.rotation.x = clamp(tl, MV_R(-164), MV_R(160)); gp.roll.rotation.z = -clamp(rl, MV_R(-90), MV_R(450)); gp.pan.rotation.y = pn;
+  gp.tilt.rotation.x = clamp(tl, MV_R(-164), MV_R(160)); gp.roll.rotation.z = -clamp(-rz, MV_R(-90), MV_R(450)); gp.pan.rotation.y = pn;
 }
 // 機体のカメラの映像（fpv.js）の表示をMavicの中身にする
 function mvFpvSync() {
@@ -11900,6 +11919,7 @@ const mvEase = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
 const mvNorm = (a) => Math.atan2(Math.sin(a), Math.cos(a));
 function stepMavic(dt) {
   let dirty = false;
+  if (S.explode > 0.02 && mav.act) mavicStop();   /* 動きの途中で分解したら動きを止める（胴が浮いたまま揺れが続かない） */
   if (S.explode > 0.02 && mav.foldTo > 0) { mav.foldTo = 0; syncMvChips(); if ($('#noteCard').dataset.kind === 'mavic-fold') renderNote(null); }   /* 畳んだ姿勢のまま部品を散らさない */
   { const sup = mav.sizeOn || mav.fovOn || mav.senseOn || !!(mav.act && mav.act.id === 'gimbal'); if (sup !== mav._sup) { mav._sup = sup; S.labelsSuppressed = sup; } }
   // --- たたむ / 広げる ---
@@ -12018,7 +12038,7 @@ function m4BlockPower() {
 function m4OnTab(tab) {
   if (!IS_M4) return;
   if (tab !== 'fly') m4.pendingPower = false;   /* 「とばす」で押した電源を、ほかのタブで広げ終えたときに回さない */
-  if (tab !== 'see') { const had = !!m4.act || m4Wide(); m4Stop(); m4Overlays(null, true); if ($('#noteCard').dataset.kind === 'm4-fold' || $('#noteCard').dataset.kind === 'm4-acc') renderNote(null); if (had) focusOn([D.root], { pull: true }); }   /* 引いた画・浮いた機体のまま「とばす」へ行かない */
+  if (tab !== 'see') { const had = !!m4.act || m4Wide(); m4Stop(); m4Overlays(null, true); if (($('#noteCard').dataset.kind || '').startsWith('m4-')) renderNote(null); if (had) focusOn([D.root], { pull: true }); }   /* 引いた画・浮いた機体のまま「とばす」へ行かない */
   if (tab === 'fly' && (m4.foldTo > 0 || m4.fold > 0.001)) { m4.foldTo = 0; syncM4Chips(); showToast('アームを開きました'); m4FrameWide(); }
 }
 const m4FrameWide = () => frameBox([-0.36, -0.17, -0.42], [0.36, 0.06, 0.40], [0.62, 0.42, -0.66], 1.12);
@@ -12343,6 +12363,7 @@ const m4Ease = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
 function stepM4(dt) {
   let dirty = false;
   if (m4.laserOn && (S.explode > 0.02 || S.mode === 'cut')) m4Overlays(null);   /* 浮いた機体と人を残したまま分解・断面にしない */
+  if (S.explode > 0.02 && m4.act) m4Stop();   /* 動きの途中で分解したら動きを止める */
   if (S.explode > 0.02 && m4.foldTo > 0) { m4.foldTo = 0; syncM4Chips(); if ($('#noteCard').dataset.kind === 'm4-fold') renderNote(null); }
   { const sup = m4.sizeOn || m4.camsOn || m4.senseOn || m4.laserOn || !!(m4.act && m4.act.id === 'gimbal'); if (sup !== m4._sup) { m4._sup = sup; S.labelsSuppressed = sup; } }
   if (!fpv.on && m4._irLook) m4ThermalLook();
@@ -12469,7 +12490,7 @@ function mn5BlockPower() {
 function mn5OnTab(tab) {
   if (!IS_MINI5) return;
   if (tab !== 'fly') mn5.pendingPower = false;   /* 「とばす」で押した電源を、ほかのタブで広げ終えたときに回さない */
-  if (tab !== 'see') { const had = !!mn5.act || mn5Wide(); mn5Stop(); mn5Overlays(null, true); if ($('#noteCard').dataset.kind === 'mn5-fold') renderNote(null); if (had) focusOn([D.root], { pull: true }); }
+  if (tab !== 'see') { const had = !!mn5.act || mn5Wide(); mn5Stop(); mn5Overlays(null, true); if (($('#noteCard').dataset.kind || '').startsWith('mn5-')) renderNote(null); if (had) focusOn([D.root], { pull: true }); }
   if (tab === 'fly' && (mn5.foldTo > 0 || mn5.fold > 0.001)) { mn5.foldTo = 0; syncMn5Chips(); showToast('アームを開きました'); mn5FrameWide(); }
 }
 
@@ -12672,7 +12693,7 @@ function mn5Lowest() {
 }
 function mn5ApplyPose(dt) {
   const sg = D.sg, R = mn5.rest, P = mn5.pose;
-  const want = (mn5.fold > 0.0005 || mn5.foldTo > 0 || !!mn5.act || body.py > 0.003 || S.explode > 0.02 || mn5.senseOn) ? 0 : 1;   /* 検知範囲の図は水平で見せる */
+  const want = (mn5.fold > 0.0005 || mn5.foldTo > 0 || !!mn5.act || body.py > 0.003 || body.mode !== 'idle' || S.explode > 0.02 || mn5.senseOn) ? 0 : 1;   /* 電源が入って飛行デモ・操縦・場面で動いている間は水平（接地したままのホバリングでも機首を上げない） */   /* 検知範囲の図は水平で見せる */
   R.w += (want - R.w) * (1 - Math.exp(-dt / (body.py > 0.003 ? 0.25 : 0.35))); if (Math.abs(R.w - want) < 0.002) R.w = want;
   const ex = S.explode > 0.02, key = `${R.w.toFixed(4)},${P.lift.toFixed(4)},${P.px.toFixed(4)},${P.yaw.toFixed(4)},${P.rz.toFixed(4)},${mn5.fold.toFixed(4)},${ex}`;
   if (key === mn5._poseKey) return false; mn5._poseKey = key;
@@ -12687,6 +12708,7 @@ function mn5ApplyPose(dt) {
 const mn5Ease = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
 function stepMn5(dt) {
   let dirty = false;
+  if (S.explode > 0.02 && mn5.act) mn5Stop();   /* 動きの途中で分解したら動きを止める */
   if (S.explode > 0.02 && mn5.foldTo > 0) { mn5.foldTo = 0; syncMn5Chips(); if ($('#noteCard').dataset.kind === 'mn5-fold') renderNote(null); }   /* 畳んだ姿勢のまま部品を散らさない */
   { const sup = mn5.sizeOn || mn5.fovOn || mn5.senseOn || !!(mn5.act && mn5.act.id === 'gimbal'); if (sup !== mn5._sup) { mn5._sup = sup; S.labelsSuppressed = sup; } }
   // --- たたむ / 広げる ---
@@ -12826,7 +12848,7 @@ function altFpvEnter() {
   else if (IS_M4) { if (m4.act) m4Stop(); if (m4Wide()) m4Overlays(null, true); m4._sup = false; S.labelsSuppressed = false; }
   else if (IS_MINI5) { if (mn5.act) mn5Stop(); if (mn5Wide()) mn5Overlays(null, true); mn5._sup = false; S.labelsSuppressed = false; }   /* ジンバルの台本が抑えたラベルも戻す（眼が控える値を正しくする） */
 }
-function altFpvExit() { if (IS_MAVIC) mav.pendingPower = false; else if (IS_M4) m4.pendingPower = false; else if (IS_PD6B) pd6b.pendingPower = false; else if (IS_MINI5) { mn5.pendingPower = false; mn5.gim.zoom = 1; } }   /* 眼に入るときに保留した電源を、出たあとで回さない */
+function altFpvExit() { if (IS_MAVIC) { mav.pendingPower = false; mav.gim.zoom = 1; mvSyncLens(); } else if (IS_M4) { m4.pendingPower = false; m4.gim.zoom = 1; m4.gim.ir = false; m4SyncLens(); } else if (IS_PD6B) pd6b.pendingPower = false; else if (IS_MINI5) { mn5.pendingPower = false; mn5.gim.zoom = 1; } }   /* 眼に入るときに保留した電源を、出たあとで回さない */
 // 部品を選ぶ前に、その部品が見える組み合わせにする（Matrice 4 の 4T/4E・アクセサリー、PD6B の腰下ユニット）
 function altShowPart(k) { const v = PARTS[k] && PARTS[k].variant; if (!v) return;
   if (IS_M4) { if ((v === 't' || v === 'e') && m4.variant !== v) m4SetVariant(v, false); else if ((v === 'spot' && !m4.acc.spot) || (v === 'spk' && !m4.acc.spk)) m4SetAcc(m4.acc.spot || v === 'spot', m4.acc.spk || v === 'spk'); }
@@ -12880,10 +12902,16 @@ function renderNote(o) {
   $('#noteBody').innerHTML = o.html || ''; renderNoteActions(o.actions);
   card.hidden = false; if (card.dataset.kind !== (o.kind || '')) card.scrollTop = 0;   /* 同じ種類のカードを描き直すときは読んでいた位置を保つ */
   card.dataset.kind = o.kind || '';
+  card._origMini = !!o.mini;   /* 画面の向きが変わったとき、もともと畳めるカード（ショー）かどうかを見分ける */
   { const alt = !o.mini && altNoteCompact(o.kind); card.classList.toggle('altc', alt); if (alt) o = Object.assign({}, o, { mini: true, miniOn: store.get('altNoteOpen') !== '1' });
     const mb = $('#noteMini'); mb.hidden = !o.mini; if (o.mini) setNoteMini(o.miniOn); else card.classList.remove('mini'); }
   if (o.onClose) card._onClose = o.onClose; else card._onClose = null;
 }
+// 画面を回したとき: 機種のカードの畳みを、いまの向きに合わせ直す（描き直さない）
+matchMedia('(max-width: 760px) and (min-height: 481px)').addEventListener('change', () => {
+  const card = $('#noteCard'); if (card.hidden || card._origMini || !ALT_NOTE_RE.test(card.dataset.kind || '')) return;
+  const alt = altNoteCompact(card.dataset.kind); card.classList.toggle('altc', alt); $('#noteMini').hidden = !alt; setNoteMini(alt ? store.get('altNoteOpen') !== '1' : false);
+});
 $('#noteClose').addEventListener('click', () => { const c = $('#noteCard'); if (c._onClose) c._onClose(); c.hidden = true; });
 $('#noteMini').addEventListener('click', () => { const c = $('#noteCard'), on = !c.classList.contains('mini'); setNoteMini(on); if (c.classList.contains('altc')) store.set('altNoteOpen', on ? '0' : '1'); });
 
@@ -13075,7 +13103,7 @@ function renderDetail() {
   h += regSection(p.key);
   h += codexTriviaRow(p.key);
   if (simple && sd) h += `<div class="analogy"><b>${t('sec.analogy')}</b>${partAnalogy(p.key)}</div>`;
-  if (!simple && (p.key === 'motor' || p.key === 'prop' || p.key === 'esc')) h += `<section><h4>配置と回転方向（上から見て）</h4><div class="mtab">${MOTOR_INFO.map(m => `<div class="${m.dir.toLowerCase()}"><b>${m.id} ${m.dir === 'CW' ? '↻' : '↺'}${m.dir}</b>${m.pos}</div>`).join('')}</div></section>`;
+  if (!simple && (p.key === 'motor' || p.key === 'prop' || p.key === 'esc')) h += `<section><h4>配置と回転方向（上から見て${IS_ALT ? '・図の例。公式資料に記載なし' : ''}）</h4><div class="mtab">${MOTOR_INFO.map(m => `<div class="${m.dir.toLowerCase()}"><b>${m.id} ${m.dir === 'CW' ? '↻' : '↺'}${m.dir}</b>${m.pos}</div>`).join('')}</div></section>`;
   if (d.structure && S.lang === 'en' && simple && langEntry(p.key)) h += langNote();
   if (d.structure) h += `<section><h4>${t('sec.structure')}</h4><ul>${d.structure.slice(0, simple ? 3 : 9).map(s => `<li>${s}</li>`).join('')}</ul></section>`;
   if (!simple && d.spec) h += `<details><summary>仕様例</summary><dl class="spec">${d.spec.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl></details>`;
@@ -13439,7 +13467,7 @@ function bindSheet(el) {
 }
 bindSheet($('#inspector'));
 $('#previewClose').addEventListener('click', closePreview);
-function syncDockH() { document.documentElement.style.setProperty('--dock-h', $('#dock').offsetHeight + 'px'); }
+function syncDockH() { const h = $('#dock').offsetHeight; if (document.documentElement.style.getPropertyValue('--dock-h') === h + 'px') return; document.documentElement.style.setProperty('--dock-h', h + 'px'); if (IS_ALT && !narrow() && typeof resize === 'function' && typeof canvas !== 'undefined') resize(); }   /* パソコン幅の機種ものは、ドックの高さが変わったら機体の縦のずらしも測り直す */
 new ResizeObserver(syncDockH).observe($('#dock'));
 
 function onThemeChanged(dark) { airflowTheme(dark); fpvStageTheme();

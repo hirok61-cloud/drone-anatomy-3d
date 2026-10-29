@@ -13,7 +13,7 @@ function startTheater(id) {
   stopTheater(true);
   theater.active = true; theater.def = def; theater.phase = 'setup'; theater.t = 0; theater.ev = 0; theater.broken = false; theater.red = []; theater.flagged = []; theater.debris = []; theater.step = 0; theater.waiting = true; theater.done = false; theater.cam = true; theater.legBend = [0, 0, 0, 0]; theater.legPerm = [0, 0, 0, 0]; theater.shook = false; theater.shake = 0; theater.orbit = 0; theater.fix = [];
   S.theater = theater; setBodyMode('theater');
-  body.px = body.py = body.pz = 0; body.tx = body.tz = body.wx = body.wz = 0; body.yaw = 0; body.mult = [1, 1, 1, 1];
+  body.px = body.py = body.pz = 0; body.tx = body.tz = body.wx = body.wz = 0; body.yaw = 0; body.mult = D.motors.map(() => 1);
   S.power = 0; M_UPTO(0); D.motors.forEach(mo => { mo.rpmRate = 2.5; });
   for (const k of def.flag) for (const p of partsFor(k, def.flagIdx)) { setTint(p, RED, 0.22); theater.flagged.push(p); }
   applyMode();

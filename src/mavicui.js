@@ -24,7 +24,7 @@ function mavicBlockPower() {
 function mavicOnTab(tab) {
   if (!IS_MAVIC) return;
   if (tab !== 'fly') mav.pendingPower = false;   /* 「とばす」で押した電源を、ほかのタブで広げ終えたときに回さない */
-  if (tab !== 'see') { const had = !!mav.act; mavicStop(); mvOverlays(null, true); if ($('#noteCard').dataset.kind === 'mavic-fold') renderNote(null); if (had) focusOn([D.root], { pull: true }); }   /* 寄った画のまま「とばす」へ行かない */
+  if (tab !== 'see') { const had = !!mav.act; mavicStop(); mvOverlays(null, true); if (($('#noteCard').dataset.kind || '').startsWith('mavic-')) renderNote(null); if (had) focusOn([D.root], { pull: true }); }   /* 寄った画のまま「とばす」へ行かない */
   if (tab === 'fly' && (mav.foldTo > 0 || mav.fold > 0.001)) { mav.foldTo = 0; syncMvChips(); showToast('アームを広げました'); frameBox([-0.32, -0.16, -0.26], [0.32, 0.03, 0.27], [0.62, 0.42, -0.66], 1.12); }   /* 畳んだ大きさに寄った画のまま広げない */
 }
 
@@ -172,16 +172,26 @@ function mvSyncLens() {
 }
 // 毎フレーム（本体の姿勢を当てた後）。電源が入っていれば、機体の傾きを3軸で打ち消して、望みの向きを保つ。
 // 機体の傾きを親(付け根)の世界姿勢から読み、チルトとロールから引く。ヨーは機首に追随し、揺れの分だけパン(±22°)で消す
-const _mq = new THREE.Quaternion(), _me = new THREE.Euler(), _me2 = new THREE.Euler();
+const _mq = new THREE.Quaternion(), _mq2 = new THREE.Quaternion(), _me = new THREE.Euler(), _me2 = new THREE.Euler(), _mvv = new THREE.Vector3(), _mvax = new THREE.Vector3();
 function mvGimbalApply() {
   const gp = D.gimbalParts; if (!gp) return;
-  let tl = mav.gim.tilt, rl = mav.gim.roll, pn = 0;
+  let tl = mav.gim.tilt, rz = -mav.gim.roll, pn = 0;   /* rz はロール軸(Z)の回転。望みのロール(＋で縦向き側)と逆向きに回す */
   if (mav.powered && !(fpv.on && !fpv.stabilized)) {
-    gp.pan.parent.updateWorldMatrix(true, false); gp.pan.parent.getWorldQuaternion(_mq); _me.setFromQuaternion(_mq, 'YXZ');
-    D.root.getWorldQuaternion(_mq); _me2.setFromQuaternion(_mq, 'YXZ');
-    tl -= _me.x; rl += _me.z; pn = clamp(mvNorm(_me2.y - _me.y), -MV_R(22), MV_R(22));
+    // 望みの世界姿勢（機首の方位・指定のチルト・指定のロール）を付け根の世界姿勢で割って局所の回転にする。
+    // オイラー分解はチルト ±90°（真下）が特異点なので使わず、パンは光軸の水平成分、続いてチルト、ロールの順に取り出す（mini5ui.js と同じ）
+    gp.pan.parent.updateWorldMatrix(true, false); gp.pan.parent.getWorldQuaternion(_mq);
+    D.root.getWorldQuaternion(_mq2); _me2.setFromQuaternion(_mq2, 'YXZ');
+    _mq2.setFromEuler(_me.set(mav.gim.tilt, _me2.y, -mav.gim.roll, 'YXZ'));
+    _mq.invert().multiply(_mq2);
+    const f = _mvv.set(0, 0, 1).applyQuaternion(_mq), h = Math.hypot(f.x, f.z);
+    let p = h < 1e-6 ? 0 : Math.atan2(f.x, f.z); if (Math.abs(p) > Math.PI / 2) p = mvNorm(p - Math.PI);
+    pn = clamp(p * Math.min(1, h / 0.1), -MV_R(22), MV_R(22));
+    _mq.premultiply(_mq2.setFromAxisAngle(_mvax.set(0, 1, 0), -pn));
+    const z = _mvv.set(0, 0, 1).applyQuaternion(_mq); tl = Math.atan2(-z.y, z.z);
+    const x = _mvv.set(1, 0, 0).applyQuaternion(_mq).applyAxisAngle(_mvax.set(1, 0, 0), -tl);
+    rz = -mav.gim.roll + mvNorm(Math.atan2(x.y, x.x) + mav.gim.roll);   /* ロールは ±180° を越えるので、望みの角度の近くへ巻き直す */
   }
-  gp.tilt.rotation.x = clamp(tl, MV_R(-164), MV_R(160)); gp.roll.rotation.z = -clamp(rl, MV_R(-90), MV_R(450)); gp.pan.rotation.y = pn;
+  gp.tilt.rotation.x = clamp(tl, MV_R(-164), MV_R(160)); gp.roll.rotation.z = -clamp(-rz, MV_R(-90), MV_R(450)); gp.pan.rotation.y = pn;
 }
 // 機体のカメラの映像（fpv.js）の表示をMavicの中身にする
 function mvFpvSync() {
@@ -223,6 +233,7 @@ const mvEase = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
 const mvNorm = (a) => Math.atan2(Math.sin(a), Math.cos(a));
 function stepMavic(dt) {
   let dirty = false;
+  if (S.explode > 0.02 && mav.act) mavicStop();   /* 動きの途中で分解したら動きを止める（胴が浮いたまま揺れが続かない） */
   if (S.explode > 0.02 && mav.foldTo > 0) { mav.foldTo = 0; syncMvChips(); if ($('#noteCard').dataset.kind === 'mavic-fold') renderNote(null); }   /* 畳んだ姿勢のまま部品を散らさない */
   { const sup = mav.sizeOn || mav.fovOn || mav.senseOn || !!(mav.act && mav.act.id === 'gimbal'); if (sup !== mav._sup) { mav._sup = sup; S.labelsSuppressed = sup; } }
   // --- たたむ / 広げる ---

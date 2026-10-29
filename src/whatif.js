@@ -14,7 +14,7 @@ function startWhatif(id) {
   theater.cam = true;   // 劇場で視点をドラッグすると false のままになるので、場面の頭で必ず戻す
   whatif.active = true; whatif.def = def; whatif.phase = 0; whatif.t = 0; whatif.litIdx = -1; whatif.blink = 0; whatif.seq = [];
   S.whatif = whatif; setBodyMode('theater');
-  body.px = body.pz = 0; body.py = free.hoverY; body.tx = body.tz = body.wx = body.wz = 0; body.yaw = 0; body.mult = [1, 1, 1, 1];
+  body.px = body.pz = 0; body.py = free.hoverY; body.tx = body.tz = body.wx = body.wz = 0; body.yaw = 0; body.mult = D.motors.map(() => 1);
   D.motors.forEach(mo => { mo.rpmTarget = null; mo.rpmRate = 3.5; });
   S.power = 0.5;
   whatif.saved.air = S.air; S.labelsSuppressed = true; S.labelOnly = null;
@@ -46,7 +46,7 @@ function stopWhatif(silent) {
   for (const p of partsOf('led')) { setTint(p, RED, 0); const h = p.obj.userData.halo; if (h && h.userData.baseColor) { h.material.color.copy(h.userData.baseColor); h.material.opacity = THEME[themeDark ? 'dark' : 'light'].halo; } }
   if (whatif.ring) whatif.ring.visible = false;
   D.motors.forEach(mo => { mo.rpmTarget = null; mo.rpmRate = null; });
-  for (let i = 0; i < 4; i++) body.mult[i] = 1;
+  for (let i = 0; i < body.mult.length; i++) body.mult[i] = 1;
   air.windOverride = null; S.air = whatif.saved.air; for (const x of $$('.tgl[data-t=air]')) x.classList.toggle('on', S.air);
   if (D.personGroup) { if (whatif.saved.personPos) D.personGroup.position.copy(whatif.saved.personPos); D.personGroup.visible = whatif.saved.personVis; if (D.personGroup.userData.rest) D.personGroup.userData.rest(); if (D.personGroup.userData.face) D.personGroup.userData.face(0, 0); }
   if (whatif.people) for (const g of whatif.people) { g.visible = false; if (g.userData.foot) g.userData.foot.visible = false; }

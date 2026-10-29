@@ -523,7 +523,7 @@ function dshowOn(on) {
     setBodyMode('theater'); showDroneOn(true);
     dshowFrame(1100);
     const bp = dshow.bodyPos;
-    body.px = bp[0]; body.py = bp[1]; body.pz = bp[2]; body.tx = body.tz = body.wx = body.wz = 0; body.yaw = dshow.bodyYaw; body.mult = [1, 1, 1, 1];
+    body.px = bp[0]; body.py = bp[1]; body.pz = bp[2]; body.tx = body.tz = body.wx = body.wz = 0; body.yaw = dshow.bodyYaw; body.mult = D.motors.map(() => 1);
     dshowSky();
     renderDshow();
     { const b = (narrow() ? $('#dsRead') : null) || $('#noteCard .note-actions button'); if (b) b.focus({ preventScroll: true }); }   /* 押したボタンは畳まれて消えるので、行き先を渡す */

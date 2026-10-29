@@ -7,7 +7,9 @@ const MAVIC_SRC = {
   product: { name: 'DJI 公式 Mavic 4 Pro 製品ページ', url: 'https://www.dji.com/jp/mavic-4-pro' },
   manual: { name: 'DJI Mavic 4 Pro ユーザーマニュアル v1.2（2025年9月25日）', url: 'https://dl.djicdn.com/downloads/mavic-4-pro/20250925/DJI_Mavic_4_Pro_User_Manual_v1.2_ja.pdf' },
   prop: { name: 'フジヤカメラ「DJI Mavic 4 Pro プロペラ」（直径・ピッチ・重さの表記）', url: 'https://www.fujiya-camera.co.jp/shop/g/gC6937224109988/' },
-  review: { name: 'TechRadar「DJI Mavic 4 Pro review」（魚眼センサー6基）', url: 'https://www.techradar.com/cameras/drones/dji-mavic-pro-4-review' },
+  review: { name: 'DJI 公式 Mavic 4 Pro 製品ページ（6つの低照度対応の魚眼センサー）', url: 'https://www.dji.com/jp/mavic-4-pro' },
+  ridList: { name: '国土交通省「適合しているとして届出があったリモートID機器等の一覧」（令和8年7月8日更新）', url: 'https://www.mlit.go.jp/koku/content/001484158.pdf' },
+  certList: { name: '国土交通省「型式認証を取得している無人航空機一覧」（令和8年6月19日現在）', url: 'https://www.mlit.go.jp/koku/content/002008366.pdf' },
   portal: { name: '国土交通省 飛行許可・承認申請ポータル（カテゴリーⅡ）', url: 'https://www.mlit.go.jp/koku/permitapproval/' },
 };
 // 「公式」=DJIの仕様ページ、「取説」=ユーザーマニュアル、「販売店」=販売店の表記、「推定」=写真・寸法からの推定
@@ -45,7 +47,7 @@ const MAVIC_PARTS = {
     name: 'ブラシレスモーター', en: 'Brushless motor', group: 'prop', count: 4,
     role: 'プロペラを回すアウターローター式のモーター。対角の2基が同じ向きに回り、隣どうしは逆向きに回って回転の反動を打ち消す。',
     structure: ['外側の缶（ベル）ごと回るアウターローター', '図の歯と磁石の数は550クラスと同じ12N14Pで簡略化'],
-    spec: [['型番・出力', '非公表'], ['回転方向', '隣どうしが逆（並びは一般的な例）']],
+    spec: [['型番・出力', '公式資料に記載なし'], ['回転方向', '隣どうしが逆（並びは一般的な例）']],
     check: ['手で回して引っかかりがないか', '異音', '飛行後の温度'],
     tip: '飛行後は、前方モーターの温度が後方より高くなるのが正常（取説）。理由は取説には書かれていない。',
   },
@@ -107,7 +109,7 @@ const MAVIC_PARTS = {
   vision: {
     name: '全方向ビジョンシステム', en: 'Omnidirectional vision', group: 'nav', count: 6,
     role: '魚眼のカメラで周りの障害物との距離を測り、ぶつかる前に止まったり避けたりする。GNSSが弱いときは位置の保持にも使う。',
-    structure: ['低照度対応の魚眼センサー6基（レビュー記事）', '上面の前2基と中央、下面の前2基と中央（製品写真から。下面中央は推定）', 'スポーツモードでは無効になる（取説）'],
+    structure: ['低照度対応の魚眼センサー6基（公式）', '上面の前2基と中央、下面の前2基と中央（製品写真から。下面中央は推定）', 'スポーツモードでは無効になる（取説）'],
     spec: [['測定範囲', '前 0.5〜24 m・後 0.5〜22 m・横 0.5〜21 m・上 0.5〜18 m・下 0.5〜17 m（公式）']],
     check: ['窓の汚れ', '模様のない床・水面・電線は苦手（取説）'],
     tip: '取説は、送電線や吊り橋のようなケーブル構造、枝や電線のような細い物は正しく見分けられないとしている。ビジョンがあっても操縦者の確認は欠かせない。',
@@ -121,7 +123,7 @@ const MAVIC_PARTS = {
     check: ['点灯するか'],
   },
   statusLed: { view: [0.55, -0.45, -0.6], name: '機体ステータスインジケーター', en: 'Status indicator', group: 'nav', count: 1, role: '機体の状態を色と点滅で知らせる。緑のゆっくり点滅＝GNSS有効、黄のすばやい点滅＝送信機の信号喪失、赤の点灯＝重大なエラー、など（取説）。', structure: ['右後ろアームの先の下（取説の各部名称。図の形は例）'], check: ['離陸前に色を見る'] },
-  remoteId: { name: 'リモートID', en: 'Remote ID', group: 'nav', count: 1, role: '登録記号・位置・高度などを電波で発信する。登録した機体は原則として備えることが求められる。', structure: ['内蔵かどうかは販売国の仕様で確認（この図の位置は例）'], check: ['飛行前に作動状況を確かめる（法定の点検項目）'] },
+  remoteId: { name: 'リモートID', en: 'Remote ID', group: 'nav', count: 1, role: '登録記号・位置・高度などを電波で発信する。登録した機体は原則として備えることが求められる。', structure: ['機体に内蔵と届け出られている（国土交通省の一覧・2025/4/15。この図の位置は例）'], check: ['飛行前に作動状況を確かめる（法定の点検項目）'] },
   gimbal: {
     name: 'インフィニティジンバル', en: 'Infinity gimbal', group: 'payload', count: 1,
     role: 'カメラの揺れを打ち消す3軸のジンバル。ロールの軸が大きく回るので、機体を傾けずに縦向きの撮影ができ、上向き70°まで向けられる。',
@@ -161,7 +163,7 @@ const MAVIC_SIMPLE = {
   prop:     { role: '回って空気を下に押します。工具なしで付け外しできます。', analogy: '扇風機の羽根を下に向けて、自分が浮くようなもの' },
   motor:    { role: 'プロペラを回す力の元。隣どうしが逆向きに回ります。', analogy: 'ミニ四駆のモーターを、もっと強く静かにしたもの' },
   frontArm: { role: 'モーターを支える腕。たたむと本くらいの大きさになります。', analogy: '折りたたみ傘の骨' },
-  battery:  { role: '電気のもと。上から差し込み、最大51分飛べます。', analogy: 'スマホの電池を、もっと大きく強くしたもの' },
+  battery:  { role: '電気のもと。後ろから差し込み、最大51分飛べます。', analogy: 'スマホの電池を、もっと大きく強くしたもの' },
   fc:       { role: '機体の頭脳。傾きと位置を測って、4つのモーターの速さを決めます。', analogy: '自転車に乗るときの「小脳」' },
   gimbal:   { role: 'カメラの揺れを打ち消す首。カメラを縦にも回せます。', analogy: '走りながらでもコップの水をこぼさない手首' },
   camMain:  { role: '3つあるカメラの主役。暗い所でもきれいに撮れます。', analogy: '空飛ぶ一眼カメラ' },
@@ -181,9 +183,10 @@ const MAVIC_TRIVIA = {
 };
 const MAVIC_TRIVIA_ACT = { rearArm: { alt: 'fold' }, frontArm: { alt: 'fold' }, gimbal: { alt: 'gimbal' }, camMain: { alt: 'fov' }, camMid: { alt: 'fov' }, camTele: { alt: 'fov' }, vision: { alt: 'sense' }, lidar: { alt: 'sense' }, battery: { alt: 'battery' } };
 const MAVIC_REG = {
+  remoteId: [{ text: 'Mavic 4 Pro はリモートIDを機体に内蔵していると届け出られている（国土交通省の一覧・2025/4/15）。', ky: '3.1', src: 'mavicRid' }],
   body: [
     { text: '最大離陸重量が25kg未満の機体。技能証明を受けた人が機体認証を受けた機体を飛ばすときは、カテゴリーⅡのうち人口集中地区・夜間・目視外・人や物件から30m未満の飛行で、立入管理措置と飛行マニュアルの作成などを条件に、許可・承認を不要にできる。', ky: '3.1', src: 'mavicPortal' },
-    { text: 'この機体の型式認証は、2026年10月時点の検索では確認できなかった。型式認証がない機体も、検査を受けて機体認証を取る道がある（確認先で要件を確かめる）。', ky: '3.1', src: 'cert' },
+    { text: 'Mavic 4 Pro は、令和8年6月19日現在の型式認証の一覧に載っていない。型式認証がない機体も、検査を受けて機体認証を取る道がある（確認先で要件を確かめる）。', ky: '3.1', src: 'mavicCert' },
   ],
   led: [
     { text: '撮影中にフロントLEDを自動で消す設定がある（取説）。夜間に飛ばすときは、機体の姿勢と方向がわかる灯火が求められるので、設定を確かめる。', ky: '4.2', src: 'permit' },
@@ -200,9 +203,9 @@ if (IS_MAVIC) {
   swap(SIMPLE_NAME, MAVIC_SIMPLE_NAME);
   swap(TRIVIA, MAVIC_TRIVIA); swap(TRIVIA_ACT, MAVIC_TRIVIA_ACT);
   // モーターの並び(M1前右・M2後右・M3後左・M4前左)と飛行の原理は550クラスと同じ4発機の考え方なのでそのまま使う
-  { const keep = {}; for (const k of ['regMark', 'remoteId', 'led']) if (REG[k]) keep[k] = REG[k]; const reg = Object.assign(keep, MAVIC_REG); reg.led = [...(REG.led || []), ...MAVIC_REG.led]; swap(REG, reg); }
+  { const keep = {}; for (const k of ['regMark', 'remoteId', 'led']) if (REG[k]) keep[k] = REG[k]; const reg = Object.assign(keep, MAVIC_REG); reg.led = [...(REG.led || []), ...MAVIC_REG.led]; reg.remoteId = [...(REG.remoteId || []), ...MAVIC_REG.remoteId]; swap(REG, reg); }
   swap(KY_PART, MAVIC_KY_PART);
-  REG_SOURCES.mavicPortal = MAVIC_SRC.portal;
+  REG_SOURCES.mavicPortal = MAVIC_SRC.portal; REG_SOURCES.mavicCert = MAVIC_SRC.certList; REG_SOURCES.mavicRid = MAVIC_SRC.ridList;
   for (const L of Object.values(I18N)) if (L && L.parts) for (const k of Object.keys(L.parts)) delete L.parts[k];
   Object.assign(FIND_ALIAS, { body: '胴体 ボディ 本体', frontArm: 'アーム 腕 たたむ', rearArm: 'アーム 腕 電源', landingGear: '脚 アンテナ', prop: '羽 はね ペラ', battery: '電池 バッテリ', gimbal: 'ジンバル 首 縦撮り', camMain: 'カメラ ハッセル 主カメラ', camMid: 'カメラ 望遠 70mm', camTele: 'カメラ 望遠 168mm', vision: 'センサー 魚眼 障害物', lidar: 'ライダー レーザー 障害物', ir3d: '赤外線 距離', led: 'ライト 灯火 LED', fc: '頭脳 FC' });
 }

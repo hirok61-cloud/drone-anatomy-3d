@@ -446,6 +446,9 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
 #noteCard.altc.mini #noteBody > :not(:first-child) { display: none; }
 #noteCard.altc.mini #noteBody > p:first-child:not(.pd-state) { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 0; }
 #noteCard.altc.mini #noteBody > .pd-state:first-child { margin-bottom: 0; }
+#noteCard.altc.mini #noteBody > .m4-read:first-child { max-height: 4.4em; overflow: hidden; }   /* 測距の読み値（3〜4行）は先頭の数行だけ */
+/* 画角・検知範囲・大きさ・カメラは「図の断り書き」が大事なので、畳んでも最初の説明と断り書きを2行ずつ残す */
+#noteCard.altc.mini[data-kind$="-fov"] #noteBody > p:first-of-type, #noteCard.altc.mini[data-kind$="-cams"] #noteBody > p:first-of-type, #noteCard.altc.mini[data-kind$="-sense"] #noteBody > p.caveat, #noteCard.altc.mini[data-kind$="-size"] #noteBody > p:first-child, #noteCard.altc.mini[data-kind$="-fov"] #noteBody > p.caveat, #noteCard.altc.mini[data-kind$="-cams"] #noteBody > p.caveat { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin: 4px 0 0; }
 #noteMini { font-size: 15px; line-height: 1; }
 /* 好きな文字を描く */
 .ds-text { display: flex; gap: 6px; margin: 8px 0 2px; }
