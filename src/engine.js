@@ -408,7 +408,7 @@ function topCover() {
 const bandK = () => narrow() ? 1 / (S.bandFrac || 1) : 1;
 function applyBand(bf) {
   const old = S.bandFrac; S.bandFrac = bf; if (old == null || Math.abs(bf - old) < 0.02) return;
-  if ((typeof theater !== 'undefined' && theater.active) || (typeof whatif !== 'undefined' && whatif.active) || (typeof descent !== 'undefined' && descent.active) || (typeof dshow !== 'undefined' && dshow.on)) return;   /* 台本が組んだ画には触らない */
+  if ((typeof theater !== 'undefined' && theater.active) || (typeof whatif !== 'undefined' && whatif.active) || (typeof descent !== 'undefined' && descent.active) || (typeof dshow !== 'undefined' && dshow.on) || altBodyOwned()) return;   /* 台本が組んだ画には触らない（機種の場面も。カードが出て帯が狭まるたびに引くと、スマホでは機体が点になる） */
   const k = old / bf;
   // 帯の高さに比例して寄せると、横に広い機体(PD6B等)は横幅が画面からはみ出す。機体全体を見ていたときは、横幅が収まる距離より寄らない
   const fitK = (d0) => { if (!D.halfSpan || k >= 1) return k; const dmin = D.halfSpan * 1.32 / (Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * Math.max(0.3, camera.aspect)); return d0 >= dmin * 0.98 ? Math.max(k, dmin / d0) : k; };

@@ -22,6 +22,9 @@ function wtCardShift(out) {
   return out.copy(right).multiplyScalar(-(px / cw) * 2 * d * tanH);
 }
 
+// 機体を動かす場面（離陸〜着陸・パラシュート）の間だけ、スマホではドックの「分解・見え方」の段を畳んで、機体の見える帯を広げる
+function wtSceneClass() { document.body.classList.toggle('alt-scene', !!(wt.act && wt.act.body)); }
+
 // ---------- 状態の問い合わせ ----------
 function wtBusy() { return IS_WT && (!!wt.act || wt.sizeOn || wt.fovOn || wt.radarOn || wt.lv.to > 0 || wt.lv.w > 0.001); }
 function wtWide() { return wt.sizeOn || wt.fovOn || wt.radarOn || !!(wt.act && wt.act.wide); }
@@ -60,10 +63,10 @@ function wtAction(id) {
   const a = wt.act = { id, t: 0, tab: S.tab, el: null };
   if (id === 'flight') { a.body = true; a.pose = true; a.wide = true; wtFlightStart(a); }
   else if (id === 'chute') { a.body = true; a.pose = true; a.wide = true; wtChuteStart(a); }
-  else if (id === 'elevon') { a.wide = false; wt.lv.to = 1; wt.lv.y = 0.30; frameBox([-0.34, 0.10, -0.24], [0.34, 0.46, 0.26], [0.42, 0.58, 0.70], 1.22); }
+  else if (id === 'elevon') { a.wide = false; wt.lv.to = 1; wt.lv.y = 0.30; if (wtPortrait()) frameBox([-0.27, 0.16, -0.18], [0.27, 0.42, 0.22], [0.42, 0.58, 0.70], 1.0); else frameBox([-0.34, 0.10, -0.24], [0.34, 0.46, 0.26], [0.42, 0.58, 0.70], 1.22); }   /* 縦のスマホは舵が見える大きさまで寄せる */
   else if (id === 'battery') frameBox([-0.16, -0.02, -0.08], [0.30, 0.32, 0.08], [0.40, 0.55, 0.73], 1.15);   /* 背中の側のやや上から: 機首から引き抜く電池と、横へ置くノーズコーンが見える */
   else if (id === 'payload') frameBox([-0.20, -0.16, -0.20], [0.20, 0.22, 0.10], [0.36, 0.22, -0.91], 1.12);
-  syncBodyMode(); renderWtNote(id); syncWtChips();
+  syncBodyMode(); renderWtNote(id); syncWtChips(); wtSceneClass();
 }
 function wtStop(quiet) {
   if (!IS_WT || !wt.act) return;
@@ -81,7 +84,7 @@ function wtStop(quiet) {
   if (!wt.powered) setWtPower(true);
   syncBodyMode(); syncWtChips();
   if ($('#noteCard').dataset.kind === 'wt-' + a.id) renderNote(null);
-  wtSyncRoot();
+  wtSceneClass(); wtSyncRoot();
   if (!quiet) focusOn([D.root], { pull: true });
 }
 // 撮影範囲・レーダー・大きさは「重ね絵」。同時には1つだけ。撮影範囲とレーダーは、その場で巡航の姿勢に寝かせて見せる
@@ -112,6 +115,7 @@ function syncWtChips() {
   for (const b of $$('[data-wt]')) { const id = b.dataset.wt; const on = id === 'fov' ? wt.fovOn : id === 'radar' ? wt.radarOn : id === 'size' ? wt.sizeOn : !!(wt.act && wt.act.id === id);
     b.classList.toggle('on', on); if (b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', String(on)); }
 }
+const wtPortrait = () => narrow() && innerWidth < innerHeight;
 const wtFrameDrone = (dir, margin) => pdFrame([D.root], { pull: true, margin: (margin || 1.18) * (narrow() ? 0.82 : 1), dir: new THREE.Vector3(...(dir || [0.52, 0.30, 0.80])).normalize() });
 
 // ---------- 説明カード ----------
@@ -202,7 +206,7 @@ function wtFlightStart(a) {
   { const pts = [], H = F.H1 + F.DH; for (let y = 0; y <= F.H1; y += 0.1) pts.push(new THREE.Vector3(0, y, 0));
     for (let s = 0; s <= a.Lc + Str + Sb + 1e-6; s += 0.05) { const p = wtPathAt(a, s); pts.push(new THREE.Vector3(p.x, H, p.z)); } for (let y = H; y >= 0; y -= 0.1) pts.push(new THREE.Vector3(0, y, 0));
     wt.fx.path.geometry.dispose(); wt.fx.path.geometry = new THREE.BufferGeometry().setFromPoints(pts.map(p => p.add(_wtV.set(0, wt.rest.dy0, 0)))); wt.fx.path.computeLineDistances(); }
-  const dir = new THREE.Vector3(-0.80, 0.36, 0.48).normalize(), aim = new THREE.Vector3(0, 0.42, 0), dist = 2.5 * (narrow() ? (innerWidth < innerHeight ? 1.9 : 1.25) : 1);
+  const dir = new THREE.Vector3(-0.80, 0.36, 0.48).normalize(), aim = new THREE.Vector3(0, wtPortrait() ? 0.12 : 0.42, 0), dist = wtPortrait() ? 3.4 : 2.5 * (narrow() ? 1.25 : 1);   /* 縦のスマホは翼幅が画面の幅の半分ほどに見える距離 */
   controls.maxDistance = Math.max(controls.maxDistance, dist * 1.4); flyTo(aim.clone().addScaledVector(dir, dist), aim, 900, false);
 }
 function wtPathAt(a, s) {
@@ -267,7 +271,7 @@ function stepWtFlight(a, dt) {
       wtSetText('#wtHudShare', `プロペラ ${pw}%・主翼 ${100 - pw}%`); wtSetText('#wtHudWing', `主翼 ${100 - pw}%`); wtSetText('#wtFlState', msg); a.lastPh = ph; }
   }
   // カメラ: 注視点は機体を追い、視点は半分だけついていく（地面に対する動きが見える）
-  if (!S.camSpring) { const tgt = _wtV.set(a.x, y + wt.rest.dy0 * 0.5, a.z).add(wtCardShift(_wtS1)); const prev = _wtV2.copy(controls.target); controls.target.lerp(tgt, 1 - Math.exp(-dt * 2.4)); camera.position.addScaledVector(prev.sub(controls.target).negate(), 0.5); if (camera.position.y < 0.05) camera.position.y = 0.05; }
+  if (!S.camSpring) { const tgt = _wtV.set(a.x, y + wt.rest.dy0 * 0.5, a.z).add(wtCardShift(_wtS1)); const prev = _wtV2.copy(controls.target); controls.target.lerp(tgt, 1 - Math.exp(-dt * (wtPortrait() ? 8 : 2.4)));   /* 縦のスマホは横幅が狭く、追いかけが遅れると旋回で画面からはみ出す */ camera.position.addScaledVector(prev.sub(controls.target).negate(), wtPortrait() ? 0.85 : 0.5);   /* 縦のスマホは画面が狭いので、ほぼ一緒について行き、機体の大きさを保つ */ if (camera.position.y < 0.05) camera.position.y = 0.05; }
   if (ph === 'end') { const t = a.t; a.endT = a.endT || t; if (t - a.endT > 0.6) { wt.act = null; wtFlightEnd(a); } }
   return true;
 }
@@ -277,7 +281,7 @@ function wtFlightEnd(a) {
   wtFx(false);
   if (a.airWas != null) { S.air = a.airWas; for (const x of $$('.tgl[data-t=air]')) { x.classList.toggle('on', S.air); x.setAttribute('aria-pressed', String(S.air)); } }
   body.px = body.py = body.pz = 0; body.v.set(0, 0, 0); wt._poseKey = '';
-  syncBodyMode(); syncWtChips(); wtSetText('#wtFlState', '尾で着陸しました（もう一度で最初から）');
+  syncBodyMode(); syncWtChips(); wtSceneClass(); wtSetText('#wtFlState', '尾で着陸しました（もう一度で最初から）');
   focusOn([D.root], { pull: true });
 }
 
@@ -287,7 +291,7 @@ function wtChuteStart(a) {
   a.y = 0; a.vy = 0; a.q = new THREE.Quaternion().setFromAxisAngle(_wtX, Math.PI / 2);
   // 吊られたとき: 腹の後ろの取り付け点（0, −76, 270 mm）が重心の真上に来る向き（機首が下・背中が外）
   const v = new THREE.Vector3(0, -76, 270).normalize(); a.qHang = new THREE.Quaternion().setFromAxisAngle(_wtX, Math.atan2(v.y, v.z) - Math.PI / 2);
-  const dir = new THREE.Vector3(0.78, 0.30, -0.55).normalize(), aim = new THREE.Vector3(0, 0.75, 0), dist = 3.0 * (narrow() ? (innerWidth < innerHeight ? 1.7 : 1.25) : 1);
+  const dir = new THREE.Vector3(0.78, 0.30, -0.55).normalize(), aim = new THREE.Vector3(0, 0.75, 0), dist = wtPortrait() ? 4.6 : 3.0 * (narrow() ? 1.25 : 1);
   controls.maxDistance = Math.max(controls.maxDistance, dist * 1.4); flyTo(aim.clone().addScaledVector(dir, dist), aim, 900, false);
 }
 function stepWtChute(a, dt) {
@@ -323,9 +327,9 @@ function stepWtChute(a, dt) {
     D.canopy.position.set(att.x + col * 0.35, att.y + 0.55 * open - col * 0.45, att.z);
     D.canopy.scale.set(0.15 + 0.85 * open, (0.15 + 0.85 * open) * (1 - 0.8 * col), 0.15 + 0.85 * open);
     if (a.landT && t - a.landT > 2.2) { wt.act = null; D.canopy.visible = false; if (cp.anim) { cp.anim = null; cp.animReset = true; } cp.obj.visible = true; body.py = 0; wt._poseKey = '';
-      for (const mo of D.motors) { mo.rpmTarget = null; mo.rpmRate = null; } syncBodyMode(); syncWtChips(); focusOn([D.root], { pull: true }); return; }
+      for (const mo of D.motors) { mo.rpmTarget = null; mo.rpmRate = null; } syncBodyMode(); syncWtChips(); wtSceneClass(); focusOn([D.root], { pull: true }); return; }
   }
-  if (!S.camSpring) { const prev = _wtV2.copy(controls.target); controls.target.lerp(_wtV.set(0, Math.max(0.15, body.py + 0.30), 0).add(wtCardShift(_wtS1)), 1 - Math.exp(-dt * 2)); camera.position.addScaledVector(prev.sub(controls.target).negate(), 0.6); }   /* 傘の上まで入るよう少し上を見る */
+  if (!S.camSpring) { const prev = _wtV2.copy(controls.target); controls.target.lerp(_wtV.set(0, Math.max(0.15, body.py + 0.30), 0).add(wtCardShift(_wtS1)), 1 - Math.exp(-dt * (wtPortrait() ? 5 : 2))); camera.position.addScaledVector(prev.sub(controls.target).negate(), 0.6); }   /* 傘の上まで入るよう少し上を見る */
   wtSetText('#wtChState', msg);
 }
 
