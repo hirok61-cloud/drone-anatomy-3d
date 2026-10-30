@@ -632,6 +632,9 @@ body.pd6b .mtab { grid-template-columns: repeat(3, 1fr); }   /* 6基は3列×2�
 .wt-hud .wt-share { grid-column: 1 / -1; }
 .wt-hud small { font-size: calc(11.5px * var(--fs, 1)); font-variant-numeric: tabular-nums; }
 .wt-hud .wt-share > b { display: none; }
+#noteCard .note-actions button.wt-ready { animation: wtReady 1s ease-in-out 3; }   /* 遷移できるようになったボタンを3回だけ明滅（横スクロールの枠で切れないよう、影ではなく明るさで） */
+@keyframes wtReady { 50% { filter: brightness(1.4); } }
+@media (prefers-reduced-motion: reduce) { #noteCard .note-actions button.wt-ready { animation: none; } }
 @media (max-height: 480px) { body #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-top .pd-state { -webkit-line-clamp: 1; }   /* 下の「スマホ」の2行の決まりより強く */
   /* 横向きのスマホで VTOL を操縦するとき: カードは状態・計器・ボタンだけ、スティックは左右の下の角へ（一人称の画面と同じ置き方） */
   #noteCard[data-kind=wt-pilot] #noteBody > :not(.wt-top) { display: none; }
@@ -650,6 +653,7 @@ body.pd6b .mtab { grid-template-columns: repeat(3, 1fr); }   /* 6基は3列×2�
   body.alt-scene #noteCard:is([data-kind=wt-pilot], [data-kind=wt-flight], [data-kind=wt-chute]) .note-actions button { white-space: nowrap; }
   body.wt-pilot #sticks { left: calc(8px + var(--sal)); right: calc(8px + var(--sar)); transform: none; width: auto; justify-content: space-between; gap: 0; bottom: calc(var(--dock-h) + 8px); }
   body.wt-pilot .stick { width: 100px; height: 100px; }
+  body.wt-pilot #toast { top: auto; bottom: calc(var(--dock-h) + 122px); width: max-content; }   /* 操縦中の知らせは、カードのボタンに重ねずスティックのすぐ上へ */
   body.alt-scene #noteCard:is([data-kind=wt-pilot], [data-kind=wt-flight], [data-kind=wt-chute]) { padding: 8px 10px 8px 12px; }   /* カードを低く: 余白・文字・ボタンを詰める */
   body.alt-scene #noteCard:is([data-kind=wt-pilot], [data-kind=wt-flight], [data-kind=wt-chute]) .note-head { margin-bottom: 0; } body.alt-scene #noteCard:is([data-kind=wt-pilot], [data-kind=wt-flight], [data-kind=wt-chute]) #noteTitle { font-size: 13px; }
   body.alt-scene #noteCard:is([data-kind=wt-pilot], [data-kind=wt-flight], [data-kind=wt-chute]) .wt-top { margin: -8px -10px 0 -12px; padding: 6px 10px 0 12px; }

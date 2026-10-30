@@ -18,7 +18,7 @@ function openPreview() { document.body.classList.add('print-preview'); $('#print
 function closePreview() { if (!document.body.classList.contains('print-preview')) return false; document.body.classList.remove('print-preview'); $('#printSheet').setAttribute('aria-hidden', 'true'); $('#previewClose').hidden = true; return true; }
 function renderNoteActions(list) {
   const acts = $('#noteActions'); acts.innerHTML = '';
-  for (const a of (list || [])) { const btn = document.createElement('button'); btn.textContent = a.label; if (a.primary) btn.classList.add('primary'); btn.onclick = a.fn; acts.appendChild(btn); }
+  for (const a of (list || [])) { const btn = document.createElement('button'); btn.textContent = a.label; if (a.primary) btn.classList.add('primary'); if (a.cls) btn.classList.add(a.cls); btn.onclick = a.fn; acts.appendChild(btn); }
   acts.hidden = !(list && list.length);
 }
 // 説明を畳む（ショーと、縦向きのスマホでの機種ごとの動きのカード）。スマホでは説明カードが画面の半分を占めて、夜空や機体がほとんど残らない

@@ -80,11 +80,15 @@ q('#tabs [data-tab=see]').click(); d.step(0.5, 30); A(!V.act, 'flight stops when
 { const st = d.body.stick, stick = (o) => { Object.assign(st, { x: 0, y: 0, yaw: 0, thr: 0 }, o); st.active = Object.values(o).some(v => v); }, act = () => V.act, btn = (re) => [...document.querySelectorAll('#noteActions button')].find(b => re.test(b.textContent));
   q('#tabs [data-tab=fly]').click(); q('.ctx-row[data-tab=fly] [data-wt=pilot]').click(); d.step(1, 30);
   A(act() && act().id === 'pilot' && act().m === 'ground' && d.S.sticks, 'pilot starts on the ground with sticks');
-  A(!btn(/遷移/), 'no transition button on the ground');
+  A(btn(/遷移/) && !btn(/遷移/).classList.contains('primary'), 'transition button shown (not primary) on the ground');
+  btn(/遷移/).click(); d.step(0.3, 30); A(act().m === 'ground' && /20 m/.test(q('#toast') ? q('#toast').textContent : ''), 'pressing it on the ground only tells how', q('#toast') && q('#toast').textContent);
   stick({ thr: 1 }); d.step(5, 30); stick({}); A(act().m === 'hover' && act().y > 0.84, 'hover climb above 20 m', act().m, act().y.toFixed(2));
+  A(btn(/遷移（飛行機へ）/) && btn(/遷移（飛行機へ）/).classList.contains('primary') && btn(/遷移/).classList.contains('wt-ready'), 'transition button becomes primary above 20 m');
   A(d.altLowest(d.D.sg, 4) > FLOOR, 'airborne');
   btn(/遷移/).click(); d.step(4.6, 30); A(act().m === 'fw' && Math.abs(act().v - 1.3) < 0.05 && q('#stickL .lbl.t').textContent + q('#stickR .lbl.t').textContent !== '前上', 'airplane mode + stick labels', act().m, act().v);
   const psi0 = act().psi; stick({ x: 1 }); d.step(2.5, 30); stick({}); A(act().psi < psi0 - 0.6 && act().phi < -0.3, 'bank right turns right', (act().psi - psi0).toFixed(2), act().phi.toFixed(2));
+  window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyT', key: 't' })); d.step(4.6, 30); A(act().m === 'hover', 'T key: back transition to hover', act().m);
+  window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyT', key: 't' })); d.step(4.6, 30); A(act().m === 'fw', 'T key: transition again', act().m);
   btn(/帰還/).click(); for (let i = 0; i < 60 && act() && act().m !== 'ground'; i++) d.step(1, 30);
   A(act() && act().m === 'ground' && Math.hypot(act().x, act().z) < 0.05 && Math.abs(d.altLowest(d.D.sg, 2) - FLOOR) < 0.003, 'rth lands at home', act() && act().m);
   A(q('#stickL .lbl.t').textContent + q('#stickR .lbl.t').textContent !== '' && /前|上/.test(q('#stickL .lbl.t').textContent), 'hover stick labels back');
