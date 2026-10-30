@@ -630,7 +630,7 @@ body.pd6b .mtab { grid-template-columns: repeat(3, 1fr); }   /* 6基は3列×2�
 .mv-row-label { margin: 8px 0 0; font-size: calc(12px * var(--fs, 1)); color: var(--ink2); }
 @media (pointer: coarse) { .mv-seg { min-height: 40px; } }
 .pd-state { margin-top: 6px; padding: 6px 10px; border-radius: 8px; background: var(--hair); font-size: calc(12.5px * var(--fs, 1)); }
-#noteCard[data-kind=wt-flight] .wt-top { position: sticky; top: -12px; z-index: 1; margin: -12px -14px 0 -16px; padding: 12px 14px 2px 16px; background: var(--glass-strong); box-shadow: 0 6px 8px -8px var(--hair2); }   /* 横向きのスマホでも、状態と計器を先頭に留める */
+#noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-top { position: sticky; top: -12px; z-index: 1; margin: -12px -14px 0 -16px; padding: 12px 14px 2px 16px; background: var(--glass-strong); box-shadow: 0 6px 8px -8px var(--hair2); }   /* 横向きのスマホでも、状態と計器を先頭に留める */
 .wt-hud { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0 4px; }
 .wt-hud > div { background: var(--hair); border-radius: 8px; padding: 5px 8px; display: flex; flex-direction: column; min-width: 0; }
 .wt-hud span { font-size: calc(11px * var(--fs, 1)); opacity: .72; }
@@ -638,17 +638,25 @@ body.pd6b .mtab { grid-template-columns: repeat(3, 1fr); }   /* 6基は3列×2�
 .wt-hud .wt-share { grid-column: 1 / -1; }
 .wt-hud small { font-size: calc(11.5px * var(--fs, 1)); font-variant-numeric: tabular-nums; }
 .wt-hud .wt-share > b { display: none; }
-@media (max-height: 480px) { #noteCard[data-kind=wt-flight] .wt-top .pd-state { -webkit-line-clamp: 1; } }
+@media (max-height: 480px) { body #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-top .pd-state { -webkit-line-clamp: 1; }   /* 下の「スマホ」の2行の決まりより強く */
+  /* 横向きのスマホで VTOL を操縦するとき: カードは状態・計器・ボタンだけ、スティックは左右の下の角へ（一人称の画面と同じ置き方） */
+  #noteCard[data-kind=wt-pilot] #noteBody > :not(.wt-top) { display: none; }
+  #noteCard[data-kind=wt-pilot] { width: min(340px, 44vw); max-height: none; }
+  #noteCard[data-kind=wt-pilot] .note-actions { margin-top: 4px; padding-top: 4px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  #noteCard[data-kind=wt-pilot] .note-actions button { padding: 4px 9px; min-height: 26px; font-size: 11.5px; white-space: nowrap; }
+  body.wt-pilot #sticks { left: calc(min(340px, 44vw) + 30px + var(--sal)); right: calc(10px + var(--sar)); bottom: calc(var(--dock-h) + 8px + var(--sab)); transform: none; width: auto; justify-content: space-between; gap: 0; }
+  body.wt-pilot #sticks .stick-mid { display: none; }
+  body.wt-pilot .stick { width: 88px; height: 88px; } }
 @media (max-width: 760px) { body.alt-scene .ctx-row[data-tab=see] .see-main { display: none !important; } }   /* 機種の場面の間は、ドックの「部品一覧・分解・見え方」を畳む */
 @media (max-height: 480px), (max-width: 760px) {   /* スマホ: 状態は短く、計器は4つ横並びの1行にして、機体の見える帯を広げる（横向きはボタンの帯に隠れない高さに） */
-  #noteCard[data-kind=wt-flight] .wt-top .pd-state { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; padding: 4px 8px; margin-top: 0; }
-  #noteCard[data-kind=wt-flight] .wt-hud { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin: 4px 0 2px; }
-  #noteCard[data-kind=wt-flight] .wt-hud > div { padding: 3px 6px; }
-  #noteCard[data-kind=wt-flight] .wt-hud .wt-share { grid-column: auto; }
-  #noteCard[data-kind=wt-flight] .wt-hud .wt-share > span, #noteCard[data-kind=wt-flight] .wt-hud small { display: none; }
-  #noteCard[data-kind=wt-flight] .wt-hud .wt-share > b { display: block; }
-  #noteCard[data-kind=wt-flight] .wt-hud b { font-size: 12px; }
-  #noteCard[data-kind=wt-flight] .wt-bar { height: 5px; margin: 2px 0 0; }
+  #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-top .pd-state { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; padding: 4px 8px; margin-top: 0; }
+  #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-hud { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin: 4px 0 2px; }
+  #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-hud > div { padding: 3px 6px; }
+  #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-hud .wt-share { grid-column: auto; }
+  #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-hud .wt-share > span, #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-hud small { display: none; }
+  #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-hud .wt-share > b { display: block; }
+  #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-hud b { font-size: 12px; }
+  #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-bar { height: 5px; margin: 2px 0 0; }
 }
 .wt-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin: 4px 0 2px; }
 .wt-bar i { display: block; height: 100%; }
@@ -847,7 +855,7 @@ body.m4-ir #gl { filter: grayscale(1) contrast(1.35) brightness(.82); }
         <button class="tgl" data-t="tilt" id="tiltBtn" hidden aria-pressed="false"><i></i>かたむき</button>
       </div>
       <div class="dock-group q550-only"><span class="dg-label">降ろし方</span><div class="chips" id="descChips" role="group" aria-label="降ろし方"><button data-dz="straight" aria-pressed="false">まっすぐ降ろす</button><button data-dz="slide" aria-pressed="false">横に流しながら</button></div></div>
-      <div class="dock-group wt-only"><span class="dg-label">VTOL</span><div class="chips"><button data-wt="flight" aria-pressed="false">離陸→遷移→巡航→着陸</button></div></div>
+      <div class="dock-group wt-only"><span class="dg-label">VTOL</span><div class="chips"><button data-wt="pilot" aria-pressed="false">VTOLで操縦</button><button data-wt="flight" aria-pressed="false">離陸→遷移→巡航→着陸</button></div></div>
       <div class="dock-group"><label>飛行の原理</label><div class="chips" id="flightChips"><button data-f="hover">ホバリング</button><button data-f="climb" data-full>上昇</button><button data-f="pitch">前進</button><button data-f="roll" data-full>右へ移動</button><button data-f="yaw">右旋回</button></div></div>
     </div>
     <div class="ctx-row" data-tab="use" hidden>
@@ -13458,7 +13466,7 @@ function wtCardShift(out) {
 }
 
 // 機体を動かす場面（離陸〜着陸・パラシュート）の間だけ、スマホではドックの「分解・見え方」の段を畳んで、機体の見える帯を広げる
-function wtSceneClass() { document.body.classList.toggle('alt-scene', !!(wt.act && wt.act.body)); }
+function wtSceneClass() { document.body.classList.toggle('alt-scene', !!(wt.act && wt.act.body)); document.body.classList.toggle('wt-pilot', !!(wt.act && wt.act.id === 'pilot')); }
 
 // ---------- 状態の問い合わせ ----------
 function wtBusy() { return IS_WT && (!!wt.act || wt.sizeOn || wt.fovOn || wt.radarOn || wt.lv.to > 0 || wt.lv.w > 0.001); }
@@ -13484,7 +13492,7 @@ function wtOnTab(tab) {
 // ---------- 動きの入口 ----------
 function wtAction(id) {
   if (!IS_WT) return;
-  if (!(id === 'flight' && S.tab === 'fly') && S.tab !== 'see') setTab('see');
+  if (id === 'pilot') { if (S.tab !== 'fly') setTab('fly'); } else if (!(id === 'flight' && S.tab === 'fly') && S.tab !== 'see') setTab('see');
   if (id === 'about') { if (wt.act) wtStop(true); wtOverlays(null, true); renderWtAbout(); wtFrameDrone(); return; }
   if (id === 'fov' || id === 'radar' || id === 'size') { if (wt.act) wtStop(true); const was = { fov: wt.fovOn, radar: wt.radarOn, size: wt.sizeOn }[id]; wtOverlays(was ? null : id); return; }
   wtOverlays(null, true);
@@ -13498,10 +13506,11 @@ function wtAction(id) {
   const a = wt.act = { id, t: 0, tab: S.tab, el: null };
   if (id === 'flight') { a.body = true; a.pose = true; a.wide = true; wtFlightStart(a); }
   else if (id === 'chute') { a.body = true; a.pose = true; a.wide = true; wtChuteStart(a); }
+  else if (id === 'pilot') { a.body = true; a.pose = true; a.wide = true; wtPilotStart(a); }
   else if (id === 'elevon') { a.wide = false; wt.lv.to = 1; wt.lv.y = 0.30; if (wtPortrait()) frameBox([-0.27, 0.16, -0.18], [0.27, 0.42, 0.22], [0.42, 0.58, 0.70], 1.0); else frameBox([-0.34, 0.10, -0.24], [0.34, 0.46, 0.26], [0.42, 0.58, 0.70], 1.22); }   /* 縦のスマホは舵が見える大きさまで寄せる */
   else if (id === 'battery') frameBox([-0.16, -0.02, -0.08], [0.30, 0.32, 0.08], [0.40, 0.55, 0.73], 1.15);   /* 背中の側のやや上から: 機首から引き抜く電池と、横へ置くノーズコーンが見える */
   else if (id === 'payload') frameBox([-0.20, -0.16, -0.20], [0.20, 0.22, 0.10], [0.36, 0.22, -0.91], 1.12);
-  syncBodyMode(); renderWtNote(id); syncWtChips(); wtSceneClass();
+  syncBodyMode(); if (id === 'pilot') wtPilotCard(a); else renderWtNote(id); syncWtChips(); wtSceneClass();
 }
 function wtStop(quiet) {
   if (!IS_WT || !wt.act) return;
@@ -13513,6 +13522,7 @@ function wtStop(quiet) {
   D.payPart.obj.visible = true; D.chutePart.obj.visible = true;
   if (D.canopy) D.canopy.visible = false;
   wtFx(false); if (wt.force) for (const ar of wt.force) ar.visible = false;
+  if (a.id === 'pilot') { wtStickLabels('hover'); for (const k of Object.keys(wtKeys)) delete wtKeys[k]; }
   if (a.airWas != null) { S.air = a.airWas; for (const x of $$('.tgl[data-t=air]')) { x.classList.toggle('on', S.air); x.setAttribute('aria-pressed', String(S.air)); } }
   if (a.body) { body.px = body.py = body.pz = 0; body.tx = body.tz = body.wx = body.wz = 0; body.vx = body.vz = body.vyF = 0; body.yaw = 0; body.v.set(0, 0, 0); }
   wt.lv.to = 0; wt.lv.pitch = wt.lv.roll = 0; wt._poseKey = '';
@@ -13576,8 +13586,8 @@ function renderWtNote(id) {
       <div class="wt-hud"><div><span>機首</span><b id="wtHudPitch">真上 90°</b></div><div><span>速さ</span><b id="wtHudSpd">0 m/s</b></div><div><span>高さ</span><b id="wtHudAlt">0 m</b></div>
         <div class="wt-share"><span>重さを支えているもの</span><b id="wtHudWing">主翼 0%</b><div class="wt-bar"><i id="wtBarProp" style="width:100%"></i><i id="wtBarWing" style="width:0%"></i></div><small id="wtHudShare">プロペラ 100%・主翼 0%</small></div></div></div>
       <p>垂直に上がり、<b>遷移</b>で機首を前へ倒して加速すると、速さの2乗で翼の揚力が増え、重さを支える役がプロペラから翼へ移ります。巡航中のプロペラは空気の抵抗のぶんだけ推力を出せばよく、ホバー中の電池の減りは巡航の6〜7倍速いとされます（ナレッジベース。前の機種のアプリ向けの記事）。戻るときは機首を起こして減速し（戻りの遷移）、尾を下にしたまま降ります。</p>
-      <table class="pd-spec"><tr><th>ホバー</th><td>上昇 最大 6 m/s・下降 最大 2.5 m/s<small>公式</small></td></tr><tr><th>巡航</th><td>16〜22 m/s・上昇／下降 8 / 8 m/s<small>公式</small></td></tr><tr><th>遷移の高さ</th><td>離陸と着陸で同じ。障害物より20 m以上上に設定（取説・ナレッジベース）<small>仕様書の飛行時間は 25 m の条件。前の機種のアプリ向けの記事では既定 50 m・20〜120 m</small></td></tr></table>
-      <p class="caveat">距離と高さは画に収まるよう大きく縮め、時間も縮めています（表示の高さは遷移の高さを25 mとしたときの例）。実際は遷移のあと旋回しながら撮影の高さ（例: 120 m）まで上がり、決めた線の上を往復して撮ります。遷移にかかる時間と機首の角度の変わり方、何%を翼が支えるかは公表されておらず、図は「揚力は速さの2乗」の考え方による目安です。</p>`,
+      <table class="pd-spec"><tr><th>ホバー</th><td>上昇 最大 6 m/s・下降 最大 2.5 m/s<small>公式</small></td></tr><tr><th>巡航</th><td>16〜22 m/s・上昇／下降 8 / 8 m/s<small>公式</small></td></tr><tr><th>遷移の高さ</th><td>離陸と着陸で同じ。障害物より20 m以上上に設定（取説・ナレッジベース）。この図では 25 m<small>仕様書の飛行時間は 25 m の条件。前の機種のアプリ向けの記事では既定 50 m・20〜120 m</small></td></tr></table>
+      <p class="caveat">高さは遷移の高さを25 mとした比率で表示し、撮影の高さは低く（約50 m）描いています。距離は縮め、巡航の時間も縮めています。実際は遷移のあと旋回しながら撮影の高さ（例: 120 m）まで上がり、決めた線の上を往復して撮ります。遷移にかかる時間と機首の角度の変わり方、何%を翼が支えるかは公表されておらず、図は「揚力は速さの2乗」の考え方による目安です。</p>`,
       actions: [again(), { label: 'とばすで操縦', fn: () => { wtStop(); setTab('fly'); } }], onClose: () => wtStop() }),
     chute: () => ({ title: 'パラシュート（オプション）', html: `<p id="wtChState" class="pd-state">ホバーで上がります…</p><p>電源の喪失・推進の故障・急な落下などを検知すると、<b>飛行終了のしくみが機体の電源を切り、同時に腹の後ろのふたと傘をバネで押し出します</b>（取説）。手動のトリガー装置やタブレットからも開けます。</p>
       <table class="pd-spec"><tr><th>最低展開高度</th><td>45 m<small>公式。パラシュート付きでは計画の最低の高さも45 m</small></td></tr><tr><th>降下速度</th><td>平均 4 m/s<small>公式</small></td></tr><tr><th>重さ</th><td>250 g・外形は変わらない<small>取説</small></td></tr></table>
@@ -13623,67 +13633,92 @@ function wtFx(on) {
 }
 
 // ---------- 場面: 離陸→遷移→巡航→戻りの遷移→着地 ----------
-// 図の中の大きさ（m）。遷移の高さ H1、巡航の速さ VC、旋回の半径 RT。経路は離陸地点から −Z へ遷移し、右旋回で折り返して戻る長円
-const WT_FL = { H1: 1.05, DH: 0.12, VC: 1.05, RT: 0.82, TT: 4.0, TB: 4.0, THC: WT_R(6), BANK: WT_R(-32) };
-const WT_PH = [['check', 1.7], ['spin', 0.9], ['climb', 4.0], ['trans', WT_FL.TT], ['cruise', 0], ['back', WT_FL.TB], ['hold', 0.9], ['desc', 5.2], ['stop', 1.6]];
+// 図の中の大きさ（m）。遷移の高さ H1、撮影の高さ H2、巡航の速さ VC（実機の 19 m/s とみなす）、旋回の半径 R。
+// 経路: 離陸地点から −Z（風上）へ遷移 → 右へ旋回しながら撮影の高さへ上昇 → 撮影の線をまっすぐ → 右へ旋回しながら降下 → 同じ線を風上へ向かって戻り、戻りの遷移。
+// 旋回は曲がる量（曲率）を0からなめらかに増やして減らす（入りと出の緩和曲線）。翼の傾きは曲率から決め、少し先に入れる（実機と同じく、傾けてから曲がる）
+const WT_FL = { H1: 1.05, DH: 0.12, H2: 2.0, VC: 1.3, R: 2.0, LC: 1.4, TT: 4.0, TB: 4.0, THC: WT_R(6), KB: Math.tan(WT_R(28)) * 2.0, DS: 0.01 };
+const WT_PH = [['check', 1.7], ['spin', 0.9], ['climb', 4.0], ['trans', WT_FL.TT], ['cruise', 0], ['back', WT_FL.TB], ['hold', 0.9], ['desc', 12], ['stop', 1.6]];   /* 上昇 0→25 m を4秒（6 m/s）、降下 28 m を12秒（2.5 m/s 前後） */
+const WT_MPS = 19 / WT_FL.VC;   // 図の速さ → 実機の m/s
+const wtAltM = (y) => 25 * y / WT_FL.H1;   // 図の高さ → 表示の高さ（図の遷移の高さを 25 m とする同じ比率。上昇・降下の速さも実機の値に合う）
+function wtBuildPath(a) {
+  const F = WT_FL, ds = F.DS, k0 = 1 / F.R, LA = Math.PI / k0 - F.LC, LT = 2 * F.LC + LA, Str = F.VC * F.TT / 2, Sb = F.VC * F.TB / 2;
+  const turn = (u) => -k0 * (u < F.LC ? WT_EASE(u / F.LC) : u > LT - F.LC ? WT_EASE((LT - u) / F.LC) : 1);   // 右旋回（曲率は負）。入りと出はなめらかに
+  const segs = [{ L: Str, k: () => 0 }, { L: LT, k: turn }, { L: Str + Sb, k: () => 0 }, { L: LT, k: turn }, { L: Sb, k: () => 0 }];
+  const X = [0], Z = [0], PS = [0], KK = [0]; let x = 0, z = 0, psi = 0; const segS = []; let acc = 0;
+  for (const g of segs) { const N = Math.round(g.L / ds); segS.push([acc, acc + N * ds]); acc += N * ds;
+    for (let i = 0; i < N; i++) { const kap = g.k((i + 0.5) * ds), pm = psi + kap * ds / 2; x += -Math.sin(pm) * ds; z += -Math.cos(pm) * ds; psi += kap * ds; X.push(x); Z.push(z); PS.push(psi); KK.push(g.k((i + 1) * ds)); } }
+  const N = X.length - 1, ex = X[N], ez = Z[N]; for (let i = 0; i <= N; i++) { X[i] -= ex * i / N; Z[i] -= ez * i / N; }   /* 刻みの誤差で終点がわずかにずれるので、長さに比例して配って離陸地点に戻す */
+  a.path = { X, Z, PS, KK, N }; a.segS = segS; a.Str = Str; a.Sb = Sb; a.Ltot = N * ds; a.Lc = a.Ltot - Str - Sb;
+}
+function wtPathAt(a, s) {
+  const P = a.path, f = clamp(s / WT_FL.DS, 0, P.N), i = Math.min(P.N - 1, Math.floor(f)), t = f - i, L = (A) => A[i] + (A[i + 1] - A[i]) * t;
+  return { x: L(P.X), z: L(P.Z), psi: L(P.PS), k: L(P.KK) };
+}
+function wtPathY(a, s) {   // 経路の高さ: 1つめの旋回で撮影の高さへ上がり、2つめの旋回で遷移の高さへ降りる
+  const F = WT_FL, S1 = a.segS[1], S3 = a.segS[3], lo = F.H1 + F.DH;
+  if (s <= S1[0]) return lo; if (s < S1[1]) return lo + (F.H2 - lo) * WT_EASE((s - S1[0]) / (S1[1] - S1[0]));
+  if (s <= S3[0]) return F.H2; if (s < S3[1]) return F.H2 + (lo - F.H2) * WT_EASE((s - S3[0]) / (S3[1] - S3[0])); return lo;
+}
 function wtFlightStart(a) {
-  const F = WT_FL, Str = F.VC * F.TT * 0.5, Sb = F.VC * F.TB * 0.5, R = F.RT;
-  // 経路（水平面）: [直線 遷移] → [右へ半周] → [直線] → [右へ半周] → [直線 戻りの遷移]
-  a.seg = [{ k: 'line', x0: 0, z0: 0, dx: 0, dz: -1, L: Str }, { k: 'arc', cx: R, cz: -Str, a0: Math.PI, sweep: -Math.PI, L: Math.PI * R }, { k: 'line', x0: 2 * R, z0: -Str, dx: 0, dz: 1, L: Str + Sb },
-    { k: 'arc', cx: R, cz: Sb, a0: 0, sweep: -Math.PI, L: Math.PI * R }, { k: 'line', x0: 0, z0: Sb, dx: 0, dz: -1, L: Sb }];
-  a.Str = Str; a.Sb = Sb; a.Lc = Math.PI * R * 2 + Str + Sb;
+  const F = WT_FL; wtBuildPath(a);
   a.T = WT_PH.map(([n, d]) => [n, n === 'cruise' ? a.Lc / F.VC : d]);
   wt.rest.w = 0; wt._poseKey = '';   /* 場面のあとは傾きなしの立ち姿から、ゆっくり置いた傾きへ */
   a.psi = 0; a.phi = 0; a.theta = Math.PI / 2; a.s = 0; a.x = 0; a.z = 0; a.y = 0; a.hudT = 0; a.lastPh = '';
   a.airWas = S.air; S.air = true; for (const x of $$('.tgl[data-t=air]')) { x.classList.add('on'); x.setAttribute('aria-pressed', 'true'); }   /* プロペラの風の向きの変化を見せる */
   for (const th of D.arrows.thrust) th.userData.forceHide = true;
-  wtFx(true);
-  { const pts = [], H = F.H1 + F.DH; for (let y = 0; y <= F.H1; y += 0.1) pts.push(new THREE.Vector3(0, y, 0));
-    for (let s = 0; s <= a.Lc + Str + Sb + 1e-6; s += 0.05) { const p = wtPathAt(a, s); pts.push(new THREE.Vector3(p.x, H, p.z)); } for (let y = H; y >= 0; y -= 0.1) pts.push(new THREE.Vector3(0, y, 0));
-    wt.fx.path.geometry.dispose(); wt.fx.path.geometry = new THREE.BufferGeometry().setFromPoints(pts.map(p => p.add(_wtV.set(0, wt.rest.dy0, 0)))); wt.fx.path.computeLineDistances(); }
-  const dir = new THREE.Vector3(-0.80, 0.36, 0.48).normalize(), aim = new THREE.Vector3(0, wtPortrait() ? 0.12 : 0.42, 0), dist = wtPortrait() ? 3.4 : 2.5 * (narrow() ? 1.25 : 1);   /* 縦のスマホは翼幅が画面の幅の半分ほどに見える距離 */
+  wtFx(true); wt.fx.path.visible = true;
+  { const pts = [], dy = wt.rest.dy0; for (let y = 0; y <= F.H1; y += 0.1) pts.push(new THREE.Vector3(0, y + dy, 0));
+    for (let s = 0; s <= a.Ltot + 1e-6; s += 0.05) { const p = wtPathAt(a, s); pts.push(new THREE.Vector3(p.x, (s < a.Str ? F.H1 + F.DH * WT_EASE(s / a.Str) : wtPathY(a, s)) + dy, p.z)); }
+    for (let y = F.H1 + F.DH; y >= 0; y -= 0.1) pts.push(new THREE.Vector3(0, y + dy, 0));
+    wt.fx.path.geometry.dispose(); wt.fx.path.geometry = new THREE.BufferGeometry().setFromPoints(pts); wt.fx.path.computeLineDistances(); }
+  const dir = new THREE.Vector3(-0.80, 0.36, 0.48).normalize(), aim = new THREE.Vector3(0, wtPortrait() ? 0.12 : 0.42, 0), dist = wtPortrait() ? 3.4 : 2.6 * (narrow() ? 1.25 : 1);   /* 縦のスマホは翼幅が画面の幅の半分ほどに見える距離 */
   controls.maxDistance = Math.max(controls.maxDistance, dist * 1.4); flyTo(aim.clone().addScaledVector(dir, dist), aim, 900, false);
 }
-function wtPathAt(a, s) {
-  let rest = Math.max(0, s);
-  for (const g of a.seg) {
-    if (rest <= g.L || g === a.seg[a.seg.length - 1]) { const u = Math.min(rest, g.L);
-      if (g.k === 'line') return { x: g.x0 + g.dx * u, z: g.z0 + g.dz * u, hx: g.dx, hz: g.dz, turn: false };
-      const ang = g.a0 + g.sweep * (u / g.L), R = WT_FL.RT; const tx = -Math.sin(ang) * Math.sign(g.sweep), tz = Math.cos(ang) * Math.sign(g.sweep);
-      return { x: g.cx + R * Math.cos(ang), z: g.cz + R * Math.sin(ang), hx: tx, hz: tz, turn: true }; }
-    rest -= g.L;
-  }
-  return { x: 0, z: 0, hx: 0, hz: -1, turn: false };
+// 矢印: 重さ（いつも下）・揚力（翼の割合 w）・推力（重さに対する割合の目安 thrustW）、高さの線。場面と操縦で共通
+function wtFxArrows(x, y, z, w, thrustW, showW) {
+  const fx = wt.fx; if (!fx) return; const rootY = y + wt.rest.dy0;
+  fx.weight.position.set(x, rootY - 0.02, z); fx.weight.visible = showW;
+  fx.drop.visible = y > 0.05; fx.drop.scale.y = Math.max(0.01, rootY + 0.158); fx.drop.position.set(x, (rootY - 0.158) / 2, z);
+  fx.thrust.forEach((ar, i) => { ar.visible = thrustW > 0.01 && D.motors[i].rpm > 300; ar.userData.setLength(0.02 + 0.09 * thrustW); });
+  D.arrows.lift.forEach(ar => { ar.visible = w > 0.03; ar.userData.setLength(0.02 + 0.13 * w); });
+}
+function wtHud(theta, v, y, w) {
+  const deg = Math.round(theta * 180 / Math.PI), pw = Math.round(100 * (1 - w));
+  wtSetText('#wtHudPitch', deg >= 85 ? `真上 ${deg}°` : `${deg}°`); wtSetText('#wtHudSpd', `${Math.round(WT_MPS * v)} m/s`); wtSetText('#wtHudAlt', `${Math.round(wtAltM(y))} m`);
+  const bp = $('#wtBarProp'), bw = $('#wtBarWing'); if (bp) bp.style.width = pw + '%'; if (bw) bw.style.width = (100 - pw) + '%';
+  wtSetText('#wtHudShare', `プロペラ ${pw}%・主翼 ${100 - pw}%`); wtSetText('#wtHudWing', `主翼 ${100 - pw}%`);
 }
 function stepWtFlight(a, dt) {
   const F = WT_FL, ds = dt * (S.ts || 1); a.t += ds;
   let k = 0, u = a.t; while (k < a.T.length && u > a.T[k][1]) { u -= a.T[k][1]; k++; }
   const ph = k < a.T.length ? a.T[k][0] : 'end', f = k < a.T.length ? clamp(u / a.T[k][1], 0, 1) : 1, E = WT_EASE;
-  const H = F.H1 + F.DH;
-  let y = 0, theta = Math.PI / 2, v = 0, s = a.s, rpm = 0, rate = 3, msg = '', el = 0, eld = 0;
+  const H = F.H1 + F.DH, idt = 1 / Math.max(ds, 1e-4);
+  let y = 0, theta = Math.PI / 2, v = 0, s = a.s, rpm = 0, rate = 3, msg = '', el = 0, phi = 0;
   if (ph === 'check') { const pulse = (t0) => u > t0 && u < t0 + 0.22; const on1 = pulse(0.2) || pulse(0.55), on2 = pulse(0.95) || pulse(1.3); D.motors[0].rpmTarget = on1 ? 1500 : 0; D.motors[1].rpmTarget = on2 ? 1500 : 0; D.motors.forEach(mo => mo.rpmRate = 16); msg = '離陸前の確認: 各モーターを短く2回ずつ回す（取説）'; rpm = -1; }
   else if (ph === 'spin') { rpm = HOVER_RPM * E(f); rate = 6; msg = 'プロペラをホバーの回転へ'; }
   else if (ph === 'climb') { y = F.H1 * E(f); rpm = HOVER_RPM * (1.06 + 0.06 * Math.sin(Math.PI * f)); el = 0.05 * Math.sin(a.t * 6.3); msg = '尾を下にしたまま真上へ上昇（ホバー・最大 6 m/s）'; }
   else if (ph === 'trans') { y = F.H1 + F.DH * E(f); theta = Math.PI / 2 - (Math.PI / 2 - F.THC) * E(Math.min(1, f * 1.3)); v = F.VC * (3 * f * f - 2 * f ** 3); s = F.VC * F.TT * (f ** 3 - f ** 4 / 2);
     el = f < 0.45 ? 0.32 * Math.sin(Math.PI * f / 0.45) : -0.06 * Math.sin(Math.PI * (f - 0.45) / 0.55); msg = '遷移: 機首を前へ倒して加速。速くなるほど翼が重さを支える（遷移はいつも自動・取説）'; }
-  else if (ph === 'cruise') { y = H; theta = F.THC; v = F.VC; s = a.Str + F.VC * u; msg = '巡航: 飛行機として飛ぶ（16〜22 m/s）。曲がるときは翼を傾ける'; }
+  else if (ph === 'cruise') { v = F.VC; s = a.Str + F.VC * u; y = wtPathY(a, s);
+    const gam = Math.atan2(wtPathY(a, s + 0.05) - wtPathY(a, s - 0.05), 0.1), kAhead = wtPathAt(a, s + 0.45).k;   /* 傾きは0.35秒ほど先の曲がり方に合わせて入れる */
+    phi = Math.atan(F.KB * kAhead); theta = F.THC + gam + (1 / Math.cos(phi) - 1) * WT_R(5);   /* 傾けて曲がるぶん、機首を少し上げて揚力を増やす */
+    el = clamp(-0.8 * gam, -0.2, 0.2) - 0.04 * (1 / Math.cos(phi) - 1) * 6;
+    const seg = s < a.segS[1][1] ? 1 : s < a.segS[2][1] ? 2 : s < a.segS[3][1] ? 3 : 4;
+    msg = seg === 1 ? '右へ旋回しながら撮影の高さへ上昇（図では約50 m。実際は例えば120 m）。曲がる側の翼を下げる' : seg === 2 ? '撮影の線の上をまっすぐ飛ぶ（写真を一定の間隔で撮る）' : seg === 3 ? '右へ旋回しながら遷移の高さへ降下' : '風上へ向かって、離陸地点へ戻る'; }
   else if (ph === 'back') { y = H + 0.10 * Math.sin(Math.PI * f); theta = F.THC + (WT_R(96) - F.THC) * E(Math.min(1, f * 1.35)) - WT_R(6) * E((f - 0.7) / 0.3); v = F.VC * (1 - (3 * f * f - 2 * f ** 3)); s = a.Str + a.Lc + F.VC * F.TB * (f - (f ** 3 - f ** 4 / 2));
-    el = f < 0.5 ? -0.34 * Math.sin(Math.PI * f / 0.5) : 0.05 * Math.sin(Math.PI * (f - 0.5) / 0.5); msg = '戻りの遷移: 機首を起こして減速し、ホバーへ'; }
-  else if (ph === 'hold') { y = H; s = a.Str + a.Lc + a.Sb; msg = '離陸地点の上でホバー'; }
-  else if (ph === 'desc') { y = H * (1 - E(f ** 0.85)); el = 0.04 * Math.sin(a.t * 5.1); msg = '尾を下にしたまま垂直に降下（最大 2.5 m/s）。尾の距離センサーで着地をなめらかに'; }
-  else if (ph === 'stop') { y = 0; rpm = HOVER_RPM * (1 - E(f / 0.6)); rate = 4; msg = '尾で着地。プロペラを止める'; }
-  else { msg = '着陸しました'; }
+    el = f < 0.5 ? -0.34 * Math.sin(Math.PI * f / 0.5) : 0.05 * Math.sin(Math.PI * (f - 0.5) / 0.5); msg = '戻りの遷移: 機首を起こして減速し、ホバーへ（風上へ向いて降りる）'; }
+  else if (ph === 'hold') { y = H; s = a.Ltot; msg = '離陸地点の上でホバー'; }
+  else if (ph === 'desc') { const a1 = 0.1, a2 = 0.15, vm = 1 / (1 - a1 / 2 - a2 / 2), g = f < a1 ? vm * f * f / (2 * a1) : f < 1 - a2 ? vm * (f - a1 / 2) : 1 - vm * (1 - f) ** 2 / (2 * a2); y = H * (1 - g); s = a.Ltot;   /* ほぼ一定の速さで降り、最後に減速 */ el = 0.04 * Math.sin(a.t * 5.1); msg = '尾を下にしたまま垂直に降下（最大 2.5 m/s）。尾の距離センサーで着地をなめらかに'; }
+  else if (ph === 'stop') { y = 0; s = a.Ltot; rpm = HOVER_RPM * (1 - E(f / 0.6)); rate = 4; msg = '尾で着地。プロペラを止める'; }
+  else { s = a.Ltot; msg = '着陸しました'; }
   if (ph === 'hold') rpm = HOVER_RPM; else if (ph === 'desc') rpm = HOVER_RPM * 0.96;
   const w = (ph === 'trans' || ph === 'cruise' || ph === 'back') ? clamp((v / F.VC) ** 2, 0, 1) : 0;   // 翼が支える割合（揚力は速さの2乗）
   if (ph === 'trans' || ph === 'cruise' || ph === 'back') rpm = HOVER_RPM * (0.80 + 0.22 * (1 - w) + (ph === 'trans' ? 0.08 * Math.sin(Math.PI * f) : 0));   /* 回転数はあまり下がらない（前から風が入るので、同じ推力でも速く回す）。推力そのものは大きく下がる */
   if (rpm >= 0) for (const mo of D.motors) { mo.rpmTarget = rpm; mo.rpmRate = rate; }
-  // 位置と向き（経路の接線）。旋回中は右へ傾ける
-  a.s = s; const p = wtPathAt(a, s);
-  const dx = p.x - a.x, dz = p.z - a.z, idt = 1 / Math.max(ds, 1e-4);
-  a.x = p.x; a.z = p.z;
-  if (v > 0.02) { let psi = Math.atan2(-p.hx, -p.hz); while (psi - a.psi > Math.PI) psi -= Math.PI * 2; while (psi - a.psi < -Math.PI) psi += Math.PI * 2; a.psi = psi; }
-  const phiT = ph === 'cruise' && p.turn ? F.BANK : 0, phiWas = a.phi; a.phi += (phiT - a.phi) * (1 - Math.exp(-ds * 2.6)); const dphi = (a.phi - phiWas) * idt;
-  eld = clamp(-0.55 * dphi, -0.35, 0.35) + (ph === 'cruise' && p.turn ? -0.03 : 0);
+  // 位置と向き（経路の接線）
+  a.s = s; const p = wtPathAt(a, s), dx = p.x - a.x, dz = p.z - a.z; a.x = p.x; a.z = p.z;
+  if (ph !== 'check' && ph !== 'spin' && ph !== 'climb') a.psi = p.psi;
+  const phiWas = a.phi; a.phi += (phi - a.phi) * (1 - Math.exp(-ds * 8)); const eld = clamp(-0.6 * (a.phi - phiWas) * idt, -0.35, 0.35);
   a.theta = theta; a.y = y;
   body.px = a.x; body.pz = a.z; body.py = y; body.tx = body.tz = 0; body.yaw = 0; body.vyF = 0;
   body.v.set(dx * idt, (y - (a.yWas == null ? y : a.yWas)) * idt, dz * idt); a.yWas = y;
@@ -13691,22 +13726,12 @@ function stepWtFlight(a, dt) {
   D.pose.quaternion.setFromEuler(_wtE.set(theta, a.psi, a.phi, 'YXZ'));
   D.pose.position.y = wt.rest.dy0;
   a.el = [clamp(el - eld, -0.5, 0.5), clamp(el + eld, -0.5, 0.5)];
-  // 矢印: 重さ（いつも下）・揚力（翼の割合）・推力（重さに対する割合の目安）
-  const fx = wt.fx; if (fx) {
-    const rootY = y + wt.rest.dy0;
-    fx.weight.position.set(a.x, rootY - 0.02, a.z); fx.weight.visible = ph !== 'end' && ph !== 'check' && ph !== 'spin' && ph !== 'stop';
-    fx.drop.visible = y > 0.05; fx.drop.scale.y = Math.max(0.01, rootY + 0.158); fx.drop.position.set(a.x, (rootY - 0.158) / 2, a.z);
-    const thrustW = ph === 'climb' || ph === 'hold' || ph === 'desc' ? 1 : (ph === 'trans' || ph === 'back' || ph === 'cruise') ? (1 - w) + 0.14 * w : 0;   /* 巡航の推力は重さの約1/7（揚抗比を7と置いた目安・推定） */
-    fx.thrust.forEach((ar, i) => { ar.visible = thrustW > 0.01 && D.motors[i].rpm > 300; ar.userData.setLength(0.02 + 0.09 * thrustW); });
-    D.arrows.lift.forEach(ar => { ar.visible = w > 0.03; ar.userData.setLength(0.02 + 0.13 * w); });
-    a.hudT -= dt; if (a.hudT <= 0 || ph !== a.lastPh) { a.hudT = 0.12;
-      const deg = Math.round(theta * 180 / Math.PI), alt = y <= F.H1 ? 25 * y / F.H1 : 25 + (y - F.H1) / F.DH * 3;
-      wtSetText('#wtHudPitch', deg >= 85 ? `真上 ${deg}°` : `${deg}°`); wtSetText('#wtHudSpd', `${Math.round(19 * v / F.VC)} m/s`); wtSetText('#wtHudAlt', `${Math.round(alt)} m`);
-      const pw = Math.round(100 * (1 - w)); const bp = $('#wtBarProp'), bw = $('#wtBarWing'); if (bp) bp.style.width = pw + '%'; if (bw) bw.style.width = (100 - pw) + '%';
-      wtSetText('#wtHudShare', `プロペラ ${pw}%・主翼 ${100 - pw}%`); wtSetText('#wtHudWing', `主翼 ${100 - pw}%`); wtSetText('#wtFlState', msg); a.lastPh = ph; }
-  }
-  // カメラ: 注視点は機体を追い、視点は半分だけついていく（地面に対する動きが見える）
-  if (!S.camSpring) { const tgt = _wtV.set(a.x, y + wt.rest.dy0 * 0.5, a.z).add(wtCardShift(_wtS1)); const prev = _wtV2.copy(controls.target); controls.target.lerp(tgt, 1 - Math.exp(-dt * (wtPortrait() ? 8 : 2.4)));   /* 縦のスマホは横幅が狭く、追いかけが遅れると旋回で画面からはみ出す */ camera.position.addScaledVector(prev.sub(controls.target).negate(), wtPortrait() ? 0.85 : 0.5);   /* 縦のスマホは画面が狭いので、ほぼ一緒について行き、機体の大きさを保つ */ if (camera.position.y < 0.05) camera.position.y = 0.05; }
+  const thrustW = ph === 'climb' || ph === 'hold' || ph === 'desc' ? 1 : (ph === 'trans' || ph === 'back' || ph === 'cruise') ? (1 - w) + 0.14 * w : 0;   /* 巡航の推力は重さの約1/7（揚抗比を7と置いた目安・推定） */
+  wtFxArrows(a.x, y, a.z, w, thrustW, ph !== 'end' && ph !== 'check' && ph !== 'spin' && ph !== 'stop');
+  a.hudT -= dt; if (a.hudT <= 0 || ph !== a.lastPh || msg !== a.lastMsg) { a.hudT = 0.12; wtHud(theta, v, y, w); wtSetText('#wtFlState', msg); a.lastPh = ph; a.lastMsg = msg; }
+  // カメラ: 注視点は機体を追い、視点もほぼ一緒について行く（旋回で画面からはみ出さず、地面に対する動きも見える）
+  if (!S.camSpring) { const tgt = _wtV.set(a.x, y + wt.rest.dy0 * 0.5, a.z).add(wtCardShift(_wtS1)); const prev = _wtV2.copy(controls.target); controls.target.lerp(tgt, 1 - Math.exp(-dt * (wtPortrait() ? 8 : 4)));
+    camera.position.addScaledVector(prev.sub(controls.target).negate(), wtPortrait() ? 0.85 : 0.72); if (camera.position.y < 0.05) camera.position.y = 0.05; }
   if (ph === 'end') { const t = a.t; a.endT = a.endT || t; if (t - a.endT > 0.6) { wt.act = null; wtFlightEnd(a); } }
   return true;
 }
@@ -13718,6 +13743,137 @@ function wtFlightEnd(a) {
   body.px = body.py = body.pz = 0; body.v.set(0, 0, 0); wt._poseKey = '';
   syncBodyMode(); syncWtChips(); wtSceneClass(); wtSetText('#wtFlState', '尾で着陸しました（もう一度で最初から）');
   focusOn([D.root], { pull: true });
+}
+
+// ---------- 操縦: VTOLで飛ぶ（「とばす」） ----------
+// ホバー（尾を下にして浮く）→「遷移」で飛行機の飛び方へ → 飛行機の操縦 →「戻りの遷移」でホバー → 着陸。帰還（RTH）と、遠くへ行きすぎたときの自動の帰還（ジオバリア）つき。
+// 実機の WingtraRAY は、巡航中にスティックで操縦する機能を持たない（タブレットで経路を決めて自動で飛ぶ。手で動かせるのはホバー中だけ・取説）。ここは飛び方を体験するための操縦。
+// 飛行機の操縦は「手を離すと高さと速さを保つ」補助つき: 上下の軸＝速さ（16〜22 m/s）、左右＝翼の傾き（傾けた側へ曲がる）、前後＝機首の上げ下げ（前へ倒すと降下・実機の飛行機と同じ）
+const WT_PI = { HMIN: 0.84, YMAX: 5.0, FENCE: 9, GS: 1.6, BANK: WT_R(45), GAM: WT_R(18), VMIN: 1.1, VMAX: 1.5, HV: 0.3, VUP: 0.25, VDN: 0.105 };   /* 高さ 20 m から遷移・120 m まで。ホバーの上昇 6 m/s・下降 2.5 m/s */
+const WT_AXIS = { hover: { pitch: ['前', '後'], yaw: ['←向き', '向き→'], thr: ['上', '下'], roll: ['←左', '右→'] }, fw: { pitch: ['機首↓', '機首↑'], yaw: ['—', '—'], thr: ['速く', '遅く'], roll: ['←傾く', '傾く→'] } };
+const wtKeys = {};
+function wtStickLabels(m) { const L = WT_AXIS[m]; for (const k of Object.keys(L)) { AXIS_LBL[k][0] = L[k][0]; AXIS_LBL[k][1] = L[k][1]; } labelSticks(); }
+function wtPilotInput() {   // スティック（モード1/2の設定どおり）・端末の傾き・キーボード（矢印＝前後左右、W/S＝上下、A/D＝向き）
+  const st = body.stick, ti = body.tilt, k = wtKeys;
+  let x = st.active ? st.x : 0, y = st.active ? st.y : 0, yaw = st.active ? st.yaw : 0, thr = st.active ? st.thr : 0;
+  if (S.tilt && ti.active) { if (!x) x = ti.x; if (!y) y = ti.y; }
+  if (k.ArrowRight) x = 1; if (k.ArrowLeft) x = -1; if (k.ArrowUp) y = 1; if (k.ArrowDown) y = -1; if (k.KeyW) thr = 1; if (k.KeyS) thr = -1; if (k.KeyD) yaw = 1; if (k.KeyA) yaw = -1;
+  return { x, y, yaw, thr };
+}
+function wtPilotStart(a) {
+  wt.rest.w = 0; wt._poseKey = '';
+  Object.assign(a, { m: 'ground', auto: null, x: 0, y: 0, z: 0, psi: 0, vx: 0, vz: 0, vy: 0, tx: 0, tz: 0, v: 0, phi: 0, gam: 0, theta: Math.PI / 2, yHold: 0, mt: 0, hudT: 0, gT: 0, inp: { x: 0, y: 0, yaw: 0, thr: 0 } });
+  for (const th of D.arrows.thrust) th.userData.forceHide = true;
+  wtFx(true); wt.fx.path.visible = false;
+  if (!S.sticks) { store.set('stickSeen', '1'); setSticks(true); }   /* スティックの一般向けの案内（モーターの速さの差）は出さず、操縦の案内を出す */
+  wtStickLabels('hover'); showToast(`「上」の軸（${stickMode === '1' ? '右' : '左'}スティック）を上へ倒すと離陸します`, 3200);
+  const c = wtChase(a); controls.maxDistance = Math.max(controls.maxDistance, 6); flyTo(c.pos, c.tgt, 900, false);
+}
+// 追いかける視点: 機体の向き（ホバーでは腹の向き＝進む向き）の後ろ上から。スティックの「前」が画面の奥になる
+function wtChase(a) { const D0 = wtPortrait() ? 3.0 : narrow() ? 2.3 : 2.1, fx = -Math.sin(a.psi), fz = -Math.cos(a.psi), y = a.y + wt.rest.dy0;
+  return { pos: new THREE.Vector3(a.x - fx * D0 * 0.93, y + D0 * 0.36, a.z - fz * D0 * 0.93), tgt: new THREE.Vector3(a.x + fx * 0.25, y + 0.04, a.z + fz * 0.25) }; }
+function wtPilotDo(cmd) {
+  const a = wt.act; if (!a || a.id !== 'pilot') return;
+  if (cmd === 'trans') { if (a.m !== 'hover') return; if (a.y < WT_PI.HMIN) { showToast(`遷移は高さ約20 m から（いま ${Math.round(wtAltM(a.y))} m）。上へ上がってから`, 2600); return; }
+    Object.assign(a, { m: 'toFw', mt: 0, sPrev: 0, y0: a.y, vx: 0, vz: 0, vy: 0, auto: null }); }
+  else if (cmd === 'back') { if (a.m !== 'fw') return; Object.assign(a, { m: 'toHover', mt: 0, sPrev: 0, v0: a.v, th0: a.theta, y0: a.y }); }
+  else if (cmd === 'rth') { if (a.m === 'ground') return; a.auto = 'rth'; showToast(a.m === 'fw' ? '離陸地点へ向かい、戻りの遷移をして着陸します' : '離陸地点の上へ移り、着陸します', 2600); }
+  else if (cmd === 'manual') a.auto = null;
+  wtPilotCard(a);
+}
+function wtPilotCard(a) {
+  const m = a.m, auto = !!a.auto;
+  const acts = m === 'hover' ? [{ label: '遷移（飛行機へ）', primary: true, fn: () => wtPilotDo('trans') }, { label: auto ? '自分で操縦' : '帰還・着陸', fn: () => wtPilotDo(auto ? 'manual' : 'rth') }]
+    : m === 'fw' ? [{ label: '戻りの遷移（ホバーへ）', primary: true, fn: () => wtPilotDo('back') }, { label: auto ? '自分で操縦' : '帰還（RTH）', fn: () => wtPilotDo(auto ? 'manual' : 'rth') }] : [];
+  acts.push({ label: 'やめる', fn: () => wtStop() });
+  const html = `<div class="wt-top"><p id="wtPiState" class="pd-state">…</p>
+      <div class="wt-hud"><div><span>機首</span><b id="wtHudPitch">真上 90°</b></div><div><span>速さ</span><b id="wtHudSpd">0 m/s</b></div><div><span>高さ</span><b id="wtHudAlt">0 m</b></div>
+        <div class="wt-share"><span>重さを支えているもの</span><b id="wtHudWing">主翼 0%</b><div class="wt-bar"><i id="wtBarProp" style="width:100%"></i><i id="wtBarWing" style="width:0%"></i></div><small id="wtHudShare">プロペラ 100%・主翼 0%</small></div></div></div>
+    ${m === 'fw' || m === 'toFw' ? `<p><b>飛行機の操縦</b>：上下の軸で速さ（16〜22 m/s）、左右の軸で翼を傾けると、傾けた側へ曲がります。前後の軸は機首の上げ下げで、<b>前へ倒すと降下・手前へ引くと上昇</b>（飛行機と同じ）。向きの軸は使いません（全翼機に方向舵は無い）。手を離すと高さと速さを保ちます。</p>`
+      : `<p><b>ホバーの操縦</b>：上下の軸で上昇・下降、前後左右で腹（カメラ）の向き・横へ動き、向きの軸で縦の軸のまわりに回ります。<b>高さ約20 m より上で「遷移」</b>を押すと、腹の向きへ機首を倒して飛行機の飛び方に切り替わります。</p>`}
+    <p>パソコンでは、矢印キーで前後左右、W/S で上下、A/D で向き。モード1/2はスティックの間で切り替えます。離陸地点から遠くへ行きすぎると、自動で戻ります（ジオバリア・取説）。</p>
+    <p class="caveat">実機の WingtraRAY には、巡航中にスティックで操縦する機能はありません。タブレットで経路を決めて自動で飛び、手で動かせるのはホバー中だけ（上下・前後左右・向き・取説）です。ここは飛び方を体験するための操縦で、距離・高さ・時間は縮めています。</p>`;
+  renderNote({ kind: 'wt-pilot', title: 'VTOLで操縦する（体験）', html, actions: acts, onClose: () => wtStop() });
+  wtStickLabels(m === 'fw' || m === 'toFw' ? 'fw' : 'hover'); a.hudT = 0;
+}
+function stepWtPilot(a, dt) {
+  const ds = dt * (S.ts || 1), E = WT_EASE, F = WT_FL, P = WT_PI; a.mt += ds; a.t += ds;
+  { const raw = wtPilotInput(), kf = 1 - Math.exp(-ds / 0.12); for (const k of ['x', 'y', 'yaw', 'thr']) a.inp[k] += (raw[k] - a.inp[k]) * kf; }
+  const inp = a.inp, fx = -Math.sin(a.psi), fz = -Math.cos(a.psi), rx = Math.cos(a.psi), rz = -Math.sin(a.psi), homeD = Math.hypot(a.x, a.z);
+  let theta = a.theta, rpm = 0, rate = 4, el = 0, eld = 0, w = 0, msg = '', lift = 0;
+  const xw = a.x, zw = a.z;
+  if (a.m === 'ground') {
+    const go = inp.thr > 0.15 || a.auto; rpm = go ? HOVER_RPM : 0; theta = Math.PI / 2; a.vx = a.vz = a.vy = 0; a.tx = a.tz = 0;
+    if (go && D.motors[0].rpm > HOVER_RPM * 0.85) { a.m = 'hover'; a.mt = 0; wtPilotCard(a); }
+    msg = '地上（尾で立っている）。上下の軸を上へ倒すとプロペラが回って離陸';
+  } else if (a.m === 'hover') {
+    let vxT, vzT, vyT, yawIn = inp.yaw;
+    if (a.auto) { const d = homeD, sp = Math.min(P.HV, d * 0.9); vxT = d > 1e-3 ? -a.x / d * sp : 0; vzT = d > 1e-3 ? -a.z / d * sp : 0; vyT = d < 0.15 ? -P.VDN : 0; yawIn = 0; }
+    else { vxT = (inp.y * fx + inp.x * rx) * P.HV; vzT = (inp.y * fz + inp.x * rz) * P.HV; vyT = inp.thr > 0 ? inp.thr * P.VUP : inp.thr * P.VDN; }   /* ホバーの上昇 最大 6 m/s・下降 最大 2.5 m/s */
+    if (homeD > P.FENCE && !a.auto) { vxT -= a.x / homeD * 0.3; vzT -= a.z / homeD * 0.3; }
+    a.vx += (vxT - a.vx) * (1 - Math.exp(-ds * 2)); a.vz += (vzT - a.vz) * (1 - Math.exp(-ds * 2)); a.vy += (vyT - a.vy) * (1 - Math.exp(-ds * 3));
+    a.x += a.vx * ds; a.z += a.vz * ds; a.y = clamp(a.y + a.vy * ds, 0, P.YMAX); if (a.y === 0 && a.vy < 0) a.vy = 0;
+    a.psi += -yawIn * 0.9 * ds;
+    const ax = vxT - a.vx, az = vzT - a.vz, gnd = a.y < 0.02 ? 0.3 : 1;
+    a.tx += (clamp(0.4 * a.vx + 0.15 * ax, -0.35, 0.35) * gnd - a.tx) * (1 - Math.exp(-ds * 6)); a.tz += (clamp(0.4 * a.vz + 0.15 * az, -0.35, 0.35) * gnd - a.tz) * (1 - Math.exp(-ds * 6));
+    rpm = HOVER_RPM * (1 + 0.14 * a.vy / P.VUP + 0.25 * (Math.abs(a.tx) + Math.abs(a.tz))); rate = 6; theta = Math.PI / 2;
+    el = clamp(0.3 * (a.auto ? 0 : inp.y), -0.35, 0.35); eld = clamp(0.35 * (a.auto ? 0 : inp.yaw), -0.35, 0.35);   /* 腹・背中の側へ傾けるのは2枚同じ向き、回るのは逆向き（推定） */
+    if (a.y <= 0.001 && (a.auto ? homeD < 0.15 : inp.thr <= 0.05)) { a.gT += ds; if (a.gT > 0.8) { const wasAuto = !!a.auto; a.m = 'ground'; a.mt = 0; a.auto = null; if (wasAuto) showToast('離陸地点に着陸しました', 2400); wtPilotCard(a); } } else a.gT = 0;
+    msg = a.auto ? (homeD > 0.15 ? 'ホバーで離陸地点の上へ移っています' : '尾を下にしたまま降下して着陸') : a.y < P.HMIN ? `ホバー。遷移は高さ約20 m から（いま ${Math.round(wtAltM(a.y))} m）` : 'ホバー。「遷移」で飛行機の飛び方へ（腹の向きへ進む）';
+  } else if (a.m === 'toFw') {
+    const f = clamp(a.mt / F.TT, 0, 1);
+    theta = Math.PI / 2 - (Math.PI / 2 - F.THC) * E(Math.min(1, f * 1.3)); a.v = F.VC * (3 * f * f - 2 * f ** 3);
+    const sN = F.VC * F.TT * (f ** 3 - f ** 4 / 2), d = sN - a.sPrev; a.sPrev = sN; a.x += fx * d; a.z += fz * d; a.y = a.y0 + F.DH * E(f);
+    a.tx *= Math.exp(-ds * 3); a.tz *= Math.exp(-ds * 3);
+    w = clamp((a.v / F.VC) ** 2, 0, 1); rpm = HOVER_RPM * (0.8 + 0.22 * (1 - w) + 0.08 * Math.sin(Math.PI * f));
+    el = f < 0.45 ? 0.32 * Math.sin(Math.PI * f / 0.45) : -0.06 * Math.sin(Math.PI * (f - 0.45) / 0.55);
+    msg = '遷移: 機首を倒して加速（自動）';
+    if (f >= 1) { Object.assign(a, { m: 'fw', mt: 0, gam: 0, phi: 0, yHold: a.y, v: F.VC }); theta = F.THC; wtPilotCard(a); }
+  } else if (a.m === 'fw') {
+    let phiC, gamC, vC = clamp(F.VC + 0.2 * inp.thr, P.VMIN, P.VMAX);
+    if (a.auto) {   // 帰還: 離陸地点へ向かい、戻りの遷移で止まる距離（約2.6）に来たら減速。近すぎて向きが合わないときは、いったん離れてから向き直る
+      const dBT = F.VC * F.TB / 2 + 0.25, toHome = Math.atan2(a.x, a.z), wrap = (q) => Math.atan2(Math.sin(q), Math.cos(q));
+      if (a.rthOut && homeD > dBT + 1.6) a.rthOut = false;
+      const errHome = wrap(toHome - a.psi); if (!a.rthOut && homeD < dBT && Math.abs(errHome) > 0.35) a.rthOut = true;
+      const err = a.rthOut ? wrap(toHome + Math.PI - a.psi) : errHome;
+      phiC = clamp(1.3 * err, -P.BANK * 0.75, P.BANK * 0.75); vC = F.VC; const yT = Math.max(a.yHold, F.H1 + F.DH); gamC = clamp(0.9 * (yT - a.y), -0.15, 0.15);
+      if (!a.rthOut && homeD < dBT && Math.abs(errHome) < 0.35) { Object.assign(a, { m: 'toHover', mt: 0, sPrev: 0, v0: a.v, th0: a.theta, y0: a.y, rthOut: false }); wtPilotCard(a); } }
+    else { phiC = -inp.x * P.BANK;
+      if (Math.abs(inp.y) > 0.05) { gamC = -inp.y * P.GAM; a.yHold = a.y; } else gamC = clamp(0.9 * (a.yHold - a.y), -0.12, 0.12);
+      if (homeD > P.FENCE) { a.auto = 'rth'; showToast('ジオバリア（飛行範囲の柵）を越えたので、自動で離陸地点へ戻ります（取説）', 3600); wtPilotCard(a); } }
+    if (a.y < 0.5) { gamC = Math.max(gamC, WT_R(10)); a.yHold = Math.max(a.yHold, 0.6); if (!a.lowT) { a.lowT = 1; showToast('低すぎるので上昇します', 2000); } } else if (a.y > 0.7) a.lowT = 0;
+    if (a.y > P.YMAX) gamC = Math.min(gamC, 0);
+    if (a.m === 'fw') {
+      a.v += (vC - a.v) * (1 - Math.exp(-ds * 0.8)); const phiW = a.phi, gamW = a.gam;
+      a.phi += (phiC - a.phi) * (1 - Math.exp(-ds * 2.5)); a.gam += (gamC - a.gam) * (1 - Math.exp(-ds * 2));
+      a.psi += P.GS * Math.tan(a.phi) / a.v * ds;   /* 傾けた側へ曲がる（速いほど大回り） */
+      a.x += fx * a.v * Math.cos(a.gam) * ds; a.z += fz * a.v * Math.cos(a.gam) * ds; a.y += a.v * Math.sin(a.gam) * ds;
+      theta = F.THC + a.gam + (1 / Math.cos(a.phi) - 1) * WT_R(5); w = 1;
+      rpm = HOVER_RPM * (0.78 + 0.25 * (a.v - P.VMIN) / (P.VMAX - P.VMIN) + 0.15 * Math.max(0, a.gam) / P.GAM);
+      el = clamp(-1.3 * (gamC - a.gam), -0.35, 0.35); eld = clamp(-0.9 * (phiC - a.phi), -0.35, 0.35);
+      msg = a.auto ? '帰還（RTH）: 離陸地点へ向かっています' : `飛行機（巡航）・傾き ${Math.round(-a.phi * 180 / Math.PI)}°`; }
+  } else if (a.m === 'toHover') {
+    const f = clamp(a.mt / F.TB, 0, 1);
+    theta = a.th0 + (WT_R(96) - a.th0) * E(Math.min(1, f * 1.35)) - WT_R(6) * E((f - 0.7) / 0.3); a.v = a.v0 * (1 - (3 * f * f - 2 * f ** 3));
+    const sN = a.v0 * F.TB * (f - (f ** 3 - f ** 4 / 2)), d = sN - a.sPrev; a.sPrev = sN; a.x += fx * d; a.z += fz * d; a.y = a.y0 + 0.08 * Math.sin(Math.PI * f);
+    a.phi *= Math.exp(-ds * 3); w = clamp((a.v / F.VC) ** 2, 0, 1); rpm = HOVER_RPM * (0.8 + 0.22 * (1 - w));
+    el = f < 0.5 ? -0.34 * Math.sin(Math.PI * f / 0.5) : 0.05 * Math.sin(Math.PI * (f - 0.5) / 0.5);
+    msg = '戻りの遷移: 機首を起こして減速（自動）';
+    if (f >= 1) { Object.assign(a, { m: 'hover', mt: 0, vx: 0, vz: 0, vy: 0, tx: 0, tz: 0, phi: 0 }); theta = Math.PI / 2; wtPilotCard(a); }
+  }
+  for (const mo of D.motors) { mo.rpmTarget = rpm; mo.rpmRate = rate; }
+  a.theta = theta;
+  const hover = a.m === 'ground' || a.m === 'hover', tiltK = Math.abs(a.tx) + Math.abs(a.tz);
+  lift = hover ? (D.halfSpan || 0.25) * (D.tiltLift || 0.6) * tiltK : 0;   /* 床の近くで傾いても脚が床に入らない */
+  const idt = 1 / Math.max(ds, 1e-4);
+  body.px = a.x; body.pz = a.z; body.py = a.y + lift; body.tx = hover ? a.tx : 0; body.tz = hover ? a.tz : 0; body.yaw = 0; body.vyF = 0;
+  body.v.set((a.x - xw) * idt, 0, (a.z - zw) * idt);
+  D.pose.quaternion.setFromEuler(_wtE.set(theta, a.psi, a.phi, 'YXZ')); D.pose.position.y = wt.rest.dy0;
+  a.el = [clamp(el - eld, -0.5, 0.5), clamp(el + eld, -0.5, 0.5)];
+  wtFxArrows(a.x, a.y, a.z, w, hover ? (a.m === 'hover' ? 1 : 0) : (1 - w) + 0.14 * w, a.m !== 'ground');
+  a.hudT -= dt; if (a.hudT <= 0) { a.hudT = 0.12; wtHud(theta, hover ? Math.hypot(a.vx, a.vz) : a.v, a.y, w); wtSetText('#wtPiState', msg); }
+  // カメラ: 機体の向きの後ろ上から追いかける
+  if (!S.camSpring) { const c = wtChase(a), sh = wtCardShift(_wtS1); controls.target.lerp(c.tgt.add(sh), 1 - Math.exp(-dt * 6)); camera.position.lerp(c.pos.add(sh), 1 - Math.exp(-dt * 2.2)); }
 }
 
 // ---------- 場面: パラシュート ----------
@@ -13861,7 +14017,7 @@ function wtElevons(dt) {
 function stepWt(dt) {
   let dirty = false;
   if (S.explode > 0.02 && wt.act) wtStop(true);
-  { const sup = wt.sizeOn || wt.fovOn || wt.radarOn || !!(wt.act && (wt.act.id === 'flight' || wt.act.id === 'chute' || wt.act.id === 'elevon')); if (sup !== wt._sup) { wt._sup = sup; S.labelsSuppressed = sup; } }
+  { const sup = wt.sizeOn || wt.fovOn || wt.radarOn || !!(wt.act && (wt.act.id === 'flight' || wt.act.id === 'chute' || wt.act.id === 'elevon' || wt.act.id === 'pilot')); if (sup !== wt._sup) { wt._sup = sup; S.labelsSuppressed = sup; } }
   const a = wt.act;
   if (a) {
     dirty = true;
@@ -13870,6 +14026,7 @@ function stepWt(dt) {
     else if (a.id === 'elevon') stepWtElevon(a, dt);
     else if (a.id === 'battery') stepWtBattery(a, dt);
     else if (a.id === 'payload') stepWtPayload(a, dt);
+    else if (a.id === 'pilot') stepWtPilot(a, dt);
   }
   if (!(wt.act && wt.act.pose)) { if (wtApplyPose(dt)) dirty = true; }
   if (body.mode === 'free' && Math.abs(body.tx) + Math.abs(body.tz) > 0.02) { D.root.rotation.set(body.tz, body.yaw, -body.tx, 'YXZ'); D.root.position.set(body.px, body.py, body.pz); D.root.updateMatrixWorld(true); const low = wtLow(wt._gear); if (low < ALT_FLOOR) { body.py += ALT_FLOOR - low; dirty = true; } }   /* いまの傾きで、脚・尾翼・ウイングレットだけを測る */
@@ -13881,6 +14038,10 @@ function stepWt(dt) {
 // ---------- 起動 ----------
 function initWt() {
   for (const b of $$('[data-wt]')) b.addEventListener('click', () => wtAction(b.dataset.wt));
+  { const KEYS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyS', 'KeyA', 'KeyD'];   // VTOLの操縦のキーボード（操縦中だけ）
+    window.addEventListener('keydown', e => { if (!(wt.act && wt.act.id === 'pilot') || !KEYS.includes(e.code) || (e.target.matches && e.target.matches('input, textarea, select'))) return; wtKeys[e.code] = true; e.preventDefault(); });
+    window.addEventListener('keyup', e => { delete wtKeys[e.code]; });
+    window.addEventListener('blur', () => { for (const k of Object.keys(wtKeys)) delete wtKeys[k]; }); }
   wt.person = buildPerson(); wt.person.scale.setScalar(WT_K); wt.person.position.set(0.42, -0.158, 0.30); wt.person.visible = false; scene.add(wt.person);
   wt.ghost = pd6bQuadGhost(); wt.ghost.scale.setScalar(WT_K); wt.ghost.position.set(-0.48, -0.158 + 0.156 * WT_K, -0.10); wt.ghost.visible = false; scene.add(wt.ghost);
   scene.add(D.canopy);
@@ -14414,7 +14575,7 @@ function onTheaterChanged() {
 const STICK_MAP = { 1: { L: { v: 'pitch', h: 'yaw' }, R: { v: 'thr', h: 'roll' } }, 2: { L: { v: 'thr', h: 'yaw' }, R: { v: 'pitch', h: 'roll' } } };
 const AXIS_LBL = { pitch: ['前', '後'], yaw: ['←向き', '向き→'], thr: ['上', '下'], roll: ['←左', '右→'] };
 let stickMode = ['1', '2'].includes(store.get('stickMode')) ? store.get('stickMode') : '1';
-function setSticks(on) { if (on) $('#coach').hidden = true; S.sticks = on; for (const x of $$('.tgl[data-t=sticks]')) x.classList.toggle('on', on); $('#sticks').hidden = !on; document.body.classList.toggle('sticks-on', !!on); if (typeof updateFpvHud === 'function') updateFpvHud(); if (on) { if (S.power === 0) setPower(0.5, true); if (!store.get('stickSeen')) { showToast(`スティックをたおすと、${D.motors.length}つのモーターがそれぞれ違う速さになります。`, 3600); store.set('stickSeen', '1'); } } else { body.stick.active = false; body.stick.x = body.stick.y = body.stick.yaw = body.stick.thr = 0; } labelSticks(); }
+function setSticks(on) { if (on) $('#coach').hidden = true; S.sticks = on; for (const x of $$('.tgl[data-t=sticks]')) x.classList.toggle('on', on); $('#sticks').hidden = !on; document.body.classList.toggle('sticks-on', !!on); if (typeof updateFpvHud === 'function') updateFpvHud(); if (on) { if (S.power === 0 && !altBodyOwned()) setPower(0.5, true); if (!store.get('stickSeen')) { showToast(`スティックをたおすと、${D.motors.length}つのモーターがそれぞれ違う速さになります。`, 3600); store.set('stickSeen', '1'); } } else { body.stick.active = false; body.stick.x = body.stick.y = body.stick.yaw = body.stick.thr = 0; } labelSticks(); }
 function labelSticks() { for (const side of ['L', 'R']) { const map = STICK_MAP[stickMode][side]; const el = $(side === 'L' ? '#stickL' : '#stickR'); el.querySelector('.lbl.t').textContent = AXIS_LBL[map.v][0]; el.querySelector('.lbl.b').textContent = AXIS_LBL[map.v][1]; el.querySelector('.lbl.l').textContent = AXIS_LBL[map.h][0]; el.querySelector('.lbl.r').textContent = AXIS_LBL[map.h][1]; } }
 $('#modeSeg2').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; stickMode = b.dataset.m; store.set('stickMode', stickMode); segSet($('#modeSeg2'), 'm', stickMode); labelSticks(); });
 for (const side of ['L', 'R']) {
@@ -14513,7 +14674,7 @@ document.addEventListener('keydown', e => {
   if (e.target.matches && e.target.matches('input, textarea, select')) return; const k = e.key.toLowerCase();
   if (S.lesson && lessonKey(e)) return;
   if (quiz.active && e.key === 'Escape') { quizStop(); return; }
-  if ((theater.active || whatif.active || descent.active || dshow.on) && k !== 'escape') return;   // 再生中は表示モード等のキーを受けない
+  if ((theater.active || whatif.active || descent.active || dshow.on || altBodyOwned()) && k !== 'escape') return;   // 再生中は表示モード等のキーを受けない（機種の場面・WingtraRAY の操縦中も。A・S・スペースで止まらないように）
   if ((S.scale || S.expert) && (k === 'e' || /^[1-4]$/.test(k))) return;
   if (k === 'escape' && (!$('#askPop').hidden || !$('#settings').hidden)) { $('#askPop').hidden = true; $('#settings').hidden = true; return; }
   if (e.key === '/' && $('#partFind')) { e.preventDefault(); $('#inspector').classList.add('open'); if (S.selected) select(null); $('#partFind').focus(); $('#partFind').select(); return; }
@@ -14526,7 +14687,7 @@ document.addEventListener('keydown', e => {
   else if (k === ' ') { e.preventDefault(); if (fpv.on) return; if (S.tab !== 'fly') setTab('fly'); setPower(S.power === 0 ? 0.5 : 0); }
   else if (k === 'r') { segSet($('#viewCol'), 'v', 'iso'); S.view = 'iso'; setView('iso'); }
   else if (k === 'f' && S.selected) focusOn(S.selAll ? partsOf(S.selected.key).map(x => x.obj) : [S.selected.obj]);
-  else if (k === 'escape') { if (fpv.on) fpvExit(); else if (dshow.on) dshowOn(false); else if (descent.active) stopDescent(); else if (theater.active) stopTheaterUI(); else if (S.question) { clearQuestion(); renderNote(null); } else if (S.flight) setFlight(null); else if (S.selected) select(null); else $('#inspector').classList.remove('open'); }
+  else if (k === 'escape') { if (altBodyOwned()) altStop(); else if (fpv.on) fpvExit(); else if (dshow.on) dshowOn(false); else if (descent.active) stopDescent(); else if (theater.active) stopTheaterUI(); else if (S.question) { clearQuestion(); renderNote(null); } else if (S.flight) setFlight(null); else if (S.selected) select(null); else $('#inspector').classList.remove('open'); }
 });
 
 // ---------- 設定 ----------

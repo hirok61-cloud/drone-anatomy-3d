@@ -34,7 +34,7 @@ A(V.act && V.act.id === 'flight' && d.body.mode === 'theater' && d.S.air, 'fligh
 d.step(4.5, 30); A(d.body.py > 0.5 && Math.abs(new d.camera.position.constructor(0, 0, -1).applyQuaternion(d.D.pose.quaternion).y - 1) < 0.02, 'vertical climb', d.body.py.toFixed(2));
 d.step(5.5, 30); { const nose = new d.camera.position.constructor(0, 0, -1).applyQuaternion(d.D.pose.quaternion); A(nose.y < 0.2 && d.D.arrows.lift.every(a => a.visible), 'cruise attitude + wing lift', nose.y.toFixed(2));
   A(/主翼 100%/.test(q('#wtHudShare').textContent), 'wing carries the weight', q('#wtHudShare').textContent); }
-let minY = 9; for (let i = 0; i < 50; i++) { d.step(0.5, 30); if (V.act) minY = Math.min(minY, low()); }
+let minY = 9; for (let i = 0; i < 90; i++) { d.step(0.5, 30); if (V.act) minY = Math.min(minY, low()); }
 A(!V.act && d.body.py === 0 && d.body.mode === 'idle', 'landed and finished', d.body.py, d.body.mode);
 A(minY > FLOOR - 0.002, 'no floor penetration in the scene', minY);
 d.step(2, 30); A(Math.abs(d.body.px) + Math.abs(d.body.pz) < 1e-6 && Math.abs(low() - FLOOR) < 0.002 && V.rest.w > 0.99, 'back on the pad, resting', low());
@@ -76,6 +76,19 @@ q('#flightChips [data-f=yaw]').click();
 // とばすの「離陸→遷移→巡航→着陸」もここから動く
 q('.ctx-row[data-tab=fly] [data-wt=flight]').click(); d.step(1, 30); A(V.act && V.act.id === 'flight' && d.S.tab === 'fly', 'flight from fly tab');
 q('#tabs [data-tab=see]').click(); d.step(0.5, 30); A(!V.act, 'flight stops when leaving the tab');
+// VTOLで操縦: ホバーで上がって遷移 → 飛行機で右旋回（傾けた側へ曲がる）→ 帰還（RTH）で離陸地点に戻って着陸
+{ const st = d.body.stick, stick = (o) => { Object.assign(st, { x: 0, y: 0, yaw: 0, thr: 0 }, o); st.active = Object.values(o).some(v => v); }, act = () => V.act, btn = (re) => [...document.querySelectorAll('#noteActions button')].find(b => re.test(b.textContent));
+  q('#tabs [data-tab=fly]').click(); q('.ctx-row[data-tab=fly] [data-wt=pilot]').click(); d.step(1, 30);
+  A(act() && act().id === 'pilot' && act().m === 'ground' && d.S.sticks, 'pilot starts on the ground with sticks');
+  A(!btn(/遷移/), 'no transition button on the ground');
+  stick({ thr: 1 }); d.step(5, 30); stick({}); A(act().m === 'hover' && act().y > 0.84, 'hover climb above 20 m', act().m, act().y.toFixed(2));
+  A(d.altLowest(d.D.sg, 4) > FLOOR, 'airborne');
+  btn(/遷移/).click(); d.step(4.6, 30); A(act().m === 'fw' && Math.abs(act().v - 1.3) < 0.05 && q('#stickL .lbl.t').textContent + q('#stickR .lbl.t').textContent !== '前上', 'airplane mode + stick labels', act().m, act().v);
+  const psi0 = act().psi; stick({ x: 1 }); d.step(2.5, 30); stick({}); A(act().psi < psi0 - 0.6 && act().phi < -0.3, 'bank right turns right', (act().psi - psi0).toFixed(2), act().phi.toFixed(2));
+  btn(/帰還/).click(); for (let i = 0; i < 60 && act() && act().m !== 'ground'; i++) d.step(1, 30);
+  A(act() && act().m === 'ground' && Math.hypot(act().x, act().z) < 0.05 && Math.abs(d.altLowest(d.D.sg, 2) - FLOOR) < 0.003, 'rth lands at home', act() && act().m);
+  A(q('#stickL .lbl.t').textContent + q('#stickR .lbl.t').textContent !== '' && /前|上/.test(q('#stickL .lbl.t').textContent), 'hover stick labels back');
+  btn(/やめる/).click(); d.step(1, 30); A(!V.act && d.body.mode !== 'theater', 'pilot stopped'); }
 q('#tabs [data-tab=fly]').click(); q('#powerBtn').click(); d.step(0.5, 30); if (d.S.power > 0) q('#powerBtn').click(); q('#tabs [data-tab=see]').click(); d.step(3, 30);
 A(V.rest.w > 0.99 && Math.abs(low() - FLOOR) < 0.002, 'rest again after landing', low());
 d.S.alive = aliveWas;

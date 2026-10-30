@@ -624,7 +624,7 @@ body.pd6b .mtab { grid-template-columns: repeat(3, 1fr); }   /* 6基は3列×2�
 .mv-row-label { margin: 8px 0 0; font-size: calc(12px * var(--fs, 1)); color: var(--ink2); }
 @media (pointer: coarse) { .mv-seg { min-height: 40px; } }
 .pd-state { margin-top: 6px; padding: 6px 10px; border-radius: 8px; background: var(--hair); font-size: calc(12.5px * var(--fs, 1)); }
-#noteCard[data-kind=wt-flight] .wt-top { position: sticky; top: -12px; z-index: 1; margin: -12px -14px 0 -16px; padding: 12px 14px 2px 16px; background: var(--glass-strong); box-shadow: 0 6px 8px -8px var(--hair2); }   /* 横向きのスマホでも、状態と計器を先頭に留める */
+#noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-top { position: sticky; top: -12px; z-index: 1; margin: -12px -14px 0 -16px; padding: 12px 14px 2px 16px; background: var(--glass-strong); box-shadow: 0 6px 8px -8px var(--hair2); }   /* 横向きのスマホでも、状態と計器を先頭に留める */
 .wt-hud { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0 4px; }
 .wt-hud > div { background: var(--hair); border-radius: 8px; padding: 5px 8px; display: flex; flex-direction: column; min-width: 0; }
 .wt-hud span { font-size: calc(11px * var(--fs, 1)); opacity: .72; }
@@ -632,17 +632,25 @@ body.pd6b .mtab { grid-template-columns: repeat(3, 1fr); }   /* 6基は3列×2�
 .wt-hud .wt-share { grid-column: 1 / -1; }
 .wt-hud small { font-size: calc(11.5px * var(--fs, 1)); font-variant-numeric: tabular-nums; }
 .wt-hud .wt-share > b { display: none; }
-@media (max-height: 480px) { #noteCard[data-kind=wt-flight] .wt-top .pd-state { -webkit-line-clamp: 1; } }
+@media (max-height: 480px) { body #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-top .pd-state { -webkit-line-clamp: 1; }   /* 下の「スマホ」の2行の決まりより強く */
+  /* 横向きのスマホで VTOL を操縦するとき: カードは状態・計器・ボタンだけ、スティックは左右の下の角へ（一人称の画面と同じ置き方） */
+  #noteCard[data-kind=wt-pilot] #noteBody > :not(.wt-top) { display: none; }
+  #noteCard[data-kind=wt-pilot] { width: min(340px, 44vw); max-height: none; }
+  #noteCard[data-kind=wt-pilot] .note-actions { margin-top: 4px; padding-top: 4px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  #noteCard[data-kind=wt-pilot] .note-actions button { padding: 4px 9px; min-height: 26px; font-size: 11.5px; white-space: nowrap; }
+  body.wt-pilot #sticks { left: calc(min(340px, 44vw) + 30px + var(--sal)); right: calc(10px + var(--sar)); bottom: calc(var(--dock-h) + 8px + var(--sab)); transform: none; width: auto; justify-content: space-between; gap: 0; }
+  body.wt-pilot #sticks .stick-mid { display: none; }
+  body.wt-pilot .stick { width: 88px; height: 88px; } }
 @media (max-width: 760px) { body.alt-scene .ctx-row[data-tab=see] .see-main { display: none !important; } }   /* 機種の場面の間は、ドックの「部品一覧・分解・見え方」を畳む */
 @media (max-height: 480px), (max-width: 760px) {   /* スマホ: 状態は短く、計器は4つ横並びの1行にして、機体の見える帯を広げる（横向きはボタンの帯に隠れない高さに） */
-  #noteCard[data-kind=wt-flight] .wt-top .pd-state { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; padding: 4px 8px; margin-top: 0; }
-  #noteCard[data-kind=wt-flight] .wt-hud { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin: 4px 0 2px; }
-  #noteCard[data-kind=wt-flight] .wt-hud > div { padding: 3px 6px; }
-  #noteCard[data-kind=wt-flight] .wt-hud .wt-share { grid-column: auto; }
-  #noteCard[data-kind=wt-flight] .wt-hud .wt-share > span, #noteCard[data-kind=wt-flight] .wt-hud small { display: none; }
-  #noteCard[data-kind=wt-flight] .wt-hud .wt-share > b { display: block; }
-  #noteCard[data-kind=wt-flight] .wt-hud b { font-size: 12px; }
-  #noteCard[data-kind=wt-flight] .wt-bar { height: 5px; margin: 2px 0 0; }
+  #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-top .pd-state { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; padding: 4px 8px; margin-top: 0; }
+  #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-hud { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin: 4px 0 2px; }
+  #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-hud > div { padding: 3px 6px; }
+  #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-hud .wt-share { grid-column: auto; }
+  #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-hud .wt-share > span, #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-hud small { display: none; }
+  #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-hud .wt-share > b { display: block; }
+  #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-hud b { font-size: 12px; }
+  #noteCard:is([data-kind=wt-flight], [data-kind=wt-pilot]) .wt-bar { height: 5px; margin: 2px 0 0; }
 }
 .wt-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin: 4px 0 2px; }
 .wt-bar i { display: block; height: 100%; }

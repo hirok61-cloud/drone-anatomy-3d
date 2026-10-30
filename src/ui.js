@@ -457,7 +457,7 @@ function onTheaterChanged() {
 const STICK_MAP = { 1: { L: { v: 'pitch', h: 'yaw' }, R: { v: 'thr', h: 'roll' } }, 2: { L: { v: 'thr', h: 'yaw' }, R: { v: 'pitch', h: 'roll' } } };
 const AXIS_LBL = { pitch: ['前', '後'], yaw: ['←向き', '向き→'], thr: ['上', '下'], roll: ['←左', '右→'] };
 let stickMode = ['1', '2'].includes(store.get('stickMode')) ? store.get('stickMode') : '1';
-function setSticks(on) { if (on) $('#coach').hidden = true; S.sticks = on; for (const x of $$('.tgl[data-t=sticks]')) x.classList.toggle('on', on); $('#sticks').hidden = !on; document.body.classList.toggle('sticks-on', !!on); if (typeof updateFpvHud === 'function') updateFpvHud(); if (on) { if (S.power === 0) setPower(0.5, true); if (!store.get('stickSeen')) { showToast(`スティックをたおすと、${D.motors.length}つのモーターがそれぞれ違う速さになります。`, 3600); store.set('stickSeen', '1'); } } else { body.stick.active = false; body.stick.x = body.stick.y = body.stick.yaw = body.stick.thr = 0; } labelSticks(); }
+function setSticks(on) { if (on) $('#coach').hidden = true; S.sticks = on; for (const x of $$('.tgl[data-t=sticks]')) x.classList.toggle('on', on); $('#sticks').hidden = !on; document.body.classList.toggle('sticks-on', !!on); if (typeof updateFpvHud === 'function') updateFpvHud(); if (on) { if (S.power === 0 && !altBodyOwned()) setPower(0.5, true); if (!store.get('stickSeen')) { showToast(`スティックをたおすと、${D.motors.length}つのモーターがそれぞれ違う速さになります。`, 3600); store.set('stickSeen', '1'); } } else { body.stick.active = false; body.stick.x = body.stick.y = body.stick.yaw = body.stick.thr = 0; } labelSticks(); }
 function labelSticks() { for (const side of ['L', 'R']) { const map = STICK_MAP[stickMode][side]; const el = $(side === 'L' ? '#stickL' : '#stickR'); el.querySelector('.lbl.t').textContent = AXIS_LBL[map.v][0]; el.querySelector('.lbl.b').textContent = AXIS_LBL[map.v][1]; el.querySelector('.lbl.l').textContent = AXIS_LBL[map.h][0]; el.querySelector('.lbl.r').textContent = AXIS_LBL[map.h][1]; } }
 $('#modeSeg2').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; stickMode = b.dataset.m; store.set('stickMode', stickMode); segSet($('#modeSeg2'), 'm', stickMode); labelSticks(); });
 for (const side of ['L', 'R']) {
@@ -556,7 +556,7 @@ document.addEventListener('keydown', e => {
   if (e.target.matches && e.target.matches('input, textarea, select')) return; const k = e.key.toLowerCase();
   if (S.lesson && lessonKey(e)) return;
   if (quiz.active && e.key === 'Escape') { quizStop(); return; }
-  if ((theater.active || whatif.active || descent.active || dshow.on) && k !== 'escape') return;   // 再生中は表示モード等のキーを受けない
+  if ((theater.active || whatif.active || descent.active || dshow.on || altBodyOwned()) && k !== 'escape') return;   // 再生中は表示モード等のキーを受けない（機種の場面・WingtraRAY の操縦中も。A・S・スペースで止まらないように）
   if ((S.scale || S.expert) && (k === 'e' || /^[1-4]$/.test(k))) return;
   if (k === 'escape' && (!$('#askPop').hidden || !$('#settings').hidden)) { $('#askPop').hidden = true; $('#settings').hidden = true; return; }
   if (e.key === '/' && $('#partFind')) { e.preventDefault(); $('#inspector').classList.add('open'); if (S.selected) select(null); $('#partFind').focus(); $('#partFind').select(); return; }
@@ -569,7 +569,7 @@ document.addEventListener('keydown', e => {
   else if (k === ' ') { e.preventDefault(); if (fpv.on) return; if (S.tab !== 'fly') setTab('fly'); setPower(S.power === 0 ? 0.5 : 0); }
   else if (k === 'r') { segSet($('#viewCol'), 'v', 'iso'); S.view = 'iso'; setView('iso'); }
   else if (k === 'f' && S.selected) focusOn(S.selAll ? partsOf(S.selected.key).map(x => x.obj) : [S.selected.obj]);
-  else if (k === 'escape') { if (fpv.on) fpvExit(); else if (dshow.on) dshowOn(false); else if (descent.active) stopDescent(); else if (theater.active) stopTheaterUI(); else if (S.question) { clearQuestion(); renderNote(null); } else if (S.flight) setFlight(null); else if (S.selected) select(null); else $('#inspector').classList.remove('open'); }
+  else if (k === 'escape') { if (altBodyOwned()) altStop(); else if (fpv.on) fpvExit(); else if (dshow.on) dshowOn(false); else if (descent.active) stopDescent(); else if (theater.active) stopTheaterUI(); else if (S.question) { clearQuestion(); renderNote(null); } else if (S.flight) setFlight(null); else if (S.selected) select(null); else $('#inspector').classList.remove('open'); }
 });
 
 // ---------- 設定 ----------
