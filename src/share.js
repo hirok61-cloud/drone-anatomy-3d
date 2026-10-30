@@ -29,7 +29,7 @@ function shareUrl() {
   if (S.mode !== 'normal') q.set('m', S.mode);
   if (S.explode > 0.005) q.set('e', String(Math.round(S.explode * 100)));
   if (S.view && S.view !== 'iso') q.set('v', S.view);
-  if (!whatif.active && !theater.active) q.set('c', camParam());   /* 視点そのもの。画面の縦横比が違っても同じ画になるよう、引きは相対値で持つ */
+  if (!whatif.active && !theater.active && !altBodyOwned()) q.set('c', camParam());   /* 機種の場面で遠くを飛んでいる機体の視点は、開いた人には意味がない */   /* 視点そのもの。画面の縦横比が違っても同じ画になるよう、引きは相対値で持つ */
   if (S.selected) q.set('p', S.selected.key);
   { let ss = null; try { ss = sessionStorage.getItem('drone3d.model'); } catch (e) {}   /* 機種は URL を最優先に、無ければタブの記憶で決まる。共有リンクには機種を必ず載せる */
     if (IS_ALT || (ss && ss !== 'q550')) q.set('model', MODEL); else q.delete('model'); }

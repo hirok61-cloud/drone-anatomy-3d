@@ -23,7 +23,7 @@ function renderNoteActions(list) {
 }
 // 説明を畳む（ショーと、縦向きのスマホでの機種ごとの動きのカード）。スマホでは説明カードが画面の半分を占めて、夜空や機体がほとんど残らない
 // 機種のカードは、縦向きのスマホでは要点（いまの状態・最初の段落の2行）とボタンだけで出す。⌄で全文を開くと、次のカードからも開いて出す
-const ALT_NOTE_RE = /^(mn5|mavic|m4|pd6b)-/;
+const ALT_NOTE_RE = /^(mn5|mavic|m4|pd6b|wt)-/;
 const altNoteCompact = (kind) => typeof IS_ALT !== 'undefined' && IS_ALT && ALT_NOTE_RE.test(kind || '') && matchMedia('(max-width: 760px) and (min-height: 481px)').matches;
 function setNoteMini(on) {
   const card = $('#noteCard'), b = $('#noteMini');
@@ -137,8 +137,8 @@ document.addEventListener('click', e => {
   for (const x of $$(`.tgl[data-t="${t}"]`)) { x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); }
   if (t === 'labels') { S.labels = on; S.labelsTouched = true; }
   else if (t === 'arrows') { S.arrows = on; if (on) showLegend(); }
-  else if (t === 'slow') { setTimeScale(on ? 1 / 50 : 1); if (on) { if (S.power === 0) setPower(0.5); showLegend(); } }
-  else if (t === 'air') { S.air = on; if (on) { if (S.power === 0) setPower(0.5); if (!store.get('airSeen')) { showToast('プロペラが空気を下に押しています。押した分だけ、機体は上に押し返されます。', 3600); store.set('airSeen', '1'); } } }
+  else if (t === 'slow') { setTimeScale(on ? 1 / 50 : 1); if (on) { if (S.power === 0 && !altBodyOwned()) setPower(0.5); showLegend(); } }   /* 機種の場面（WingtraRAY の離陸〜着陸など）が機体を動かしている間は、電源を入れて場面を止めない */
+  else if (t === 'air') { S.air = on; if (on) { if (S.power === 0 && !altBodyOwned()) setPower(0.5); if (!store.get('airSeen')) { showToast('プロペラが空気を下に押しています。押した分だけ、機体は上に押し返されます。', 3600); store.set('airSeen', '1'); } } }
   else if (t === 'sticks') setSticks(on);
   else if (t === 'sound') { sndOn(on); if (on && !store.get('soundSeen')) { showToast(`モーターの音は回転数そのものです（羽根2枚 × 毎秒の回転数）。${D.motors.length}基の回転差で、あのうなりが出ます。`, 4200); store.set('soundSeen', '1'); } }
   else if (t === 'tilt') setTilt(on);

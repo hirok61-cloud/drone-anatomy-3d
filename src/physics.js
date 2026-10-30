@@ -76,7 +76,7 @@ function stepFree(dt) {
     if (S.scale) break;   // 重さモードでは重心から決めた負担率を使う
     const u = MOTOR_U[i]; let d = free.kappa * (alz * u.x - alx * u.z);
     if (body.hold) d += 0.25 * (u.x * body.hold.x + u.z * body.hold.z) / Math.max(1e-6, body.hold.th) * (body.hold.th / free.holdMax);
-    d += 0.12 * (st.active ? st.yaw : 0) * D.motors[i].dir;   /* 反時計回り(dir=+1)を速くすると機首が右へ */
+    if (!D.tailsitter) d += 0.12 * (st.active ? st.yaw : 0) * D.motors[i].dir;   /* 反時計回り(dir=+1)を速くすると機首が右へ。テールシッター(2基)は回転差だと横に傾くので、向きはエレボンで変える */
     body.mult[i] = clamp(1 + collective + d, 0.55, 1.35);
   }
 }
@@ -93,7 +93,7 @@ function stepDemo(dt) {
   }
   if (S.flight !== 'yaw') { body.yaw = Math.atan2(Math.sin(body.yaw), Math.cos(body.yaw)); body.yaw = dl(body.yaw, 0, dt, 3); }
   const r = 5; body.tx = dl(body.tx, tx, dt, r); body.tz = dl(body.tz, tz, dt, r);
-  py = Math.max(py, (D.halfSpan || 0.25) * 0.6 * (Math.abs(body.tx) + Math.abs(body.tz)));   /* 接地したまま傾く（前進・横移動）と、低い側の脚やプロペラが床に入る。傾きに応じて少し浮かせる */
+  py = Math.max(py, (D.halfSpan || 0.25) * (D.tiltLift || 0.6) * (Math.abs(body.tx) + Math.abs(body.tz)));   /* テールシッターは重心から脚の先までが近く、傾くと脚が大きく下がるので多めに */   /* 接地したまま傾く（前進・横移動）と、低い側の脚やプロペラが床に入る。傾きに応じて少し浮かせる */
   if (typeof fpv === 'object' && fpv.on) py += 1.05;   // カメラから見るときは浮かせる(床の上だと印しか映らない)
   const ox = body.px, oy = body.py, oz = body.pz;
   body.px = dl(body.px, px, dt, r); body.py = dl(body.py, py, dt, r); body.pz = dl(body.pz, pz, dt, r);

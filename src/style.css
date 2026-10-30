@@ -447,6 +447,7 @@ body.print-preview #printSheet { display: block; position: fixed; inset: 0; over
 #noteCard.altc.mini #noteBody > p:first-child:not(.pd-state) { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 0; }
 #noteCard.altc.mini #noteBody > .pd-state:first-child { margin-bottom: 0; }
 #noteCard.altc.mini #noteBody > .m4-read:first-child { max-height: 4.4em; overflow: hidden; }   /* 測距の読み値（3〜4行）は先頭の数行だけ */
+#noteCard.altc.mini #noteBody > .wt-top:first-child .wt-hud { margin-bottom: 0; }   /* WingtraRAY の離陸〜着陸は、畳んでも状態と計器（何が重さを支えているか）を残す */
 /* 画角・検知範囲・大きさ・カメラは「図の断り書き」が大事なので、畳んでも最初の説明と断り書きを2行ずつ残す */
 #noteCard.altc.mini[data-kind$="-fov"] #noteBody > p:first-of-type, #noteCard.altc.mini[data-kind$="-cams"] #noteBody > p:first-of-type, #noteCard.altc.mini[data-kind$="-sense"] #noteBody > p.caveat, #noteCard.altc.mini[data-kind$="-size"] #noteBody > p:first-child, #noteCard.altc.mini[data-kind$="-fov"] #noteBody > p.caveat, #noteCard.altc.mini[data-kind$="-cams"] #noteBody > p.caveat { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin: 4px 0 0; }
 #noteMini { font-size: 15px; line-height: 1; }
@@ -593,7 +594,7 @@ table.ab { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--
   .tabs button { min-height: var(--tap); }
 }
 /* ===== 機種の切り替え / PD6B-CAT3 ===== */
-body.alt .q550-only, body:not(.pd6b) .pd6b-only, body:not(.mavic4) .mavic-only, body:not(.matrice4) .m4-only, body:not(.mini5) .mn5-only, body.pd6b .no-pd6b { display: none !important; }
+body.alt .q550-only, body:not(.pd6b) .pd6b-only, body:not(.mavic4) .mavic-only, body:not(.matrice4) .m4-only, body:not(.mini5) .mn5-only, body:not(.wingtra) .wt-only, body.pd6b .no-pd6b, body.wingtra .no-pd6b { display: none !important; }
 .model-btn { gap: 6px; padding: 5px 12px; min-height: 32px; font-weight: 500; }
 .model-btn .mb-k { color: var(--ink3); font-size: 12px; } .model-btn b { font-weight: 700; } .model-btn .mb-c { color: var(--ink3); font-size: 11px; }
 body.alt .model-btn { box-shadow: inset 0 0 0 1.5px var(--accent); }
@@ -623,6 +624,27 @@ body.pd6b .mtab { grid-template-columns: repeat(3, 1fr); }   /* 6基は3列×2�
 .mv-row-label { margin: 8px 0 0; font-size: calc(12px * var(--fs, 1)); color: var(--ink2); }
 @media (pointer: coarse) { .mv-seg { min-height: 40px; } }
 .pd-state { margin-top: 6px; padding: 6px 10px; border-radius: 8px; background: var(--hair); font-size: calc(12.5px * var(--fs, 1)); }
+#noteCard[data-kind=wt-flight] .wt-top { position: sticky; top: -12px; z-index: 1; margin: -12px -14px 0 -16px; padding: 12px 14px 2px 16px; background: var(--glass-strong); box-shadow: 0 6px 8px -8px var(--hair2); }   /* 横向きのスマホでも、状態と計器を先頭に留める */
+.wt-hud { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0 4px; }
+.wt-hud > div { background: var(--hair); border-radius: 8px; padding: 5px 8px; display: flex; flex-direction: column; min-width: 0; }
+.wt-hud span { font-size: calc(11px * var(--fs, 1)); opacity: .72; }
+.wt-hud b { font-variant-numeric: tabular-nums; font-size: calc(14px * var(--fs, 1)); }
+.wt-hud .wt-share { grid-column: 1 / -1; }
+.wt-hud small { font-size: calc(11.5px * var(--fs, 1)); font-variant-numeric: tabular-nums; }
+.wt-hud .wt-share > b { display: none; }
+@media (max-height: 480px) {   /* 横向きのスマホ: 状態は1行、計器は4つ横並びにして、ボタンの帯に隠れない高さに */
+  #noteCard[data-kind=wt-flight] .wt-top .pd-state { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; padding: 4px 8px; margin-top: 0; }
+  #noteCard[data-kind=wt-flight] .wt-hud { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; margin: 4px 0 2px; }
+  #noteCard[data-kind=wt-flight] .wt-hud > div { padding: 3px 6px; }
+  #noteCard[data-kind=wt-flight] .wt-hud .wt-share { grid-column: auto; }
+  #noteCard[data-kind=wt-flight] .wt-hud .wt-share > span, #noteCard[data-kind=wt-flight] .wt-hud small { display: none; }
+  #noteCard[data-kind=wt-flight] .wt-hud .wt-share > b { display: block; }
+  #noteCard[data-kind=wt-flight] .wt-hud b { font-size: 12px; }
+  #noteCard[data-kind=wt-flight] .wt-bar { height: 5px; margin: 2px 0 0; }
+}
+.wt-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin: 4px 0 2px; }
+.wt-bar i { display: block; height: 100%; }
+.wt-bar i:first-child { background: #9aa3ad; } .wt-bar i:last-child { background: #22c55e; }
 @media (max-width: 760px) {
   .model-btn { padding: 4px 8px; min-height: 30px; } .model-btn .mb-k { display: none; } .model-btn b { font-size: 11.5px; }
   .brand h1 { display: none; }   /* 狭い画面は機体ボタンが見出しを兼ねる（タイトル・機体・くわしさ・操作が1行に入らない） */

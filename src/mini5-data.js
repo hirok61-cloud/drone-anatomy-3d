@@ -154,7 +154,7 @@ const MN5_REG = {
   ],
   remoteId: [{ text: 'Mini 5 Pro はリモートIDを機体に内蔵していると届け出られている（国土交通省の一覧・2025/9/13）。', ky: '3.1', src: 'mn5Rid' }],
   landingGear: [{ text: '映像伝送（O4+）は、日本国内では2.4GHz帯のみ使用可能（安全ガイドラインの日本語の仕様欄）。技適を受けた機器なら免許のいらない小電力の無線局として使える（総務省）。', ky: '3.2', src: 'soumuDrone' }],
-  camMain: [{ text: '撮影するときは住宅などにカメラやズームを向けないこと、人の顔や表札などが写り込んだら削除やぼかしをすることが求められる（総務省のガイドライン）。', ky: '3.2', src: 'soumuPriv' }],
+  camMain: [{ text: '撮影した映像をインターネットで公開するときは、人の顔や表札、車のナンバーなどが写り込まないよう配慮することが求められる。写り込んだときはぼかしなどを入れる（総務省のガイドライン）。', ky: '3.2', src: 'soumuPriv' }],
 };
 const MN5_KY_PART = { body: '4.1', frontArm: '4.1', rearArm: '4.1', landingGear: '4.5', motor: '4.4', bell: '4.4', stator: '4.4', winding: '4.4', magnet: '4.4', shaft: '4.6', motorBase: '4.1', prop: '4.4', esc: '4.4',
   battery: '4.4', cells: '4.4', batteryBuckle: '4.6', batteryLed: '4.4', ports: '4.4', fc: '4.4', gnss: '4.5', lidar: '4.5', vision: '4.5', visionDown: '4.5', ir3d: '4.5', auxLight: '4.5', statusLed: '4.4', remoteId: '3.1', gimbal: '4.4', camMain: '4.4', regMark: '3.1' };

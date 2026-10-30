@@ -805,7 +805,7 @@ const REG_SOURCES = {
   log:     { name: '国土交通省 飛行計画の通報・飛行日誌', url: 'https://www.mlit.go.jp/koku/operation.html' },
   accident:{ name: '国土交通省 事故等の報告・負傷者救護義務', url: 'https://www.mlit.go.jp/koku/accident_report.html' },
   soumu:   { name: '総務省 電波利用ホームページ（ドローンの無線）', url: 'https://www.tele.soumu.go.jp/j/sys/others/drone/notes/' },
-  soumuPriv: { name: '総務省 ドローンによる撮影映像等の取扱いに係るガイドライン', url: 'https://www.soumu.go.jp/main_sosiki/joho_tsusin/d_syohi/ihoyugai_02.html' },
+  soumuPriv: { name: '総務省「「ドローン」による撮影映像等のインターネット上での取扱いに係るガイドライン」（平成27年9月）', url: 'https://www.soumu.go.jp/main_content/000376723.pdf' },
   jtsb:    { name: '運輸安全委員会', url: 'https://www.mlit.go.jp/jtsb/' },
 };
 // 部品 → 制度タグ。text は判定ではなく「求められている」「確認する」で止める

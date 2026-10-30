@@ -47,7 +47,7 @@ controls.addEventListener('change', () => { S.aoDirty = true; });
 
 mark('gl');
 const M = makeMaterials(renderer.capabilities.getMaxAnisotropy()); mark('mat');
-const D = IS_PD6B ? buildPD6B(M) : IS_MAVIC ? buildMavic(M) : IS_M4 ? buildM4(M) : IS_MINI5 ? buildMini5(M) : buildDrone(M); mark('geo');
+const D = IS_PD6B ? buildPD6B(M) : IS_MAVIC ? buildMavic(M) : IS_M4 ? buildM4(M) : IS_MINI5 ? buildMini5(M) : IS_WT ? buildWingtra(M) : buildDrone(M); mark('geo');
 scene.add(D.root);
 if (D.personGroup) scene.add(D.personGroup);
 
@@ -374,7 +374,7 @@ function stepCamera(dt) {
   const inScene2 = (typeof whatif === 'object' && whatif.active) || (typeof theater === 'object' && theater.active) || (typeof descent === 'object' && descent.active) || (typeof dshow === 'object' && dshow.on)
     || altWide();   /* PD6Bの大きさ・傘・投下などは広く引いた画を保つ */
   if (!S.camSpring && !S.camInertia && !inScene2 && controls.maxDistance > camMax()) controls.maxDistance = Math.max(camMax(), controls.maxDistance - (controls.maxDistance - camMax()) * (1 - Math.exp(-dt / 0.5)));   // 場面を抜けたら上限をゆっくり戻す(場面の最中に戻すと、引きが切られて画がじりじり寄る)
-  { const inScene = (typeof whatif === 'object' && whatif.active) || (typeof theater === 'object' && theater.active) || (typeof descent === 'object' && descent.active) || (typeof dshow === 'object' && dshow.on); const tmax = inScene ? 14 : 3; if (t.length() > tmax) t.clampLength(0, tmax); }   /* 場面では機体が原点から離れる(目視外は9m先)。固定3mだと注視点が引き戻されて画が壊れる */
+  { const inScene = (typeof whatif === 'object' && whatif.active) || (typeof theater === 'object' && theater.active) || (typeof descent === 'object' && descent.active) || (typeof dshow === 'object' && dshow.on); const tmax = inScene || altWide() ? 14 : 3; if (t.length() > tmax) t.clampLength(0, tmax); }   /* 場面では機体が原点から離れる(目視外は9m先)。固定3mだと注視点が引き戻されて画が壊れる */
   const lim = Math.max(4, controls.maxDistance); const off = tmpV.copy(p).sub(t); if (off.length() > lim) p.copy(t).addScaledVector(off.normalize(), lim);   // 上限は画面の縦横比と台本の引きに合わせる(固定4mだと縦画面で場面が枠に入らない)
 }
 function onCamInterrupt() { if (S.camSpring) { S.camSpring = null; S.camInertia = { v: cam.v.clone().clampLength(0, 2), t: 0.3 }; cam.v.set(0, 0, 0); cam.tv.set(0, 0, 0); } }
